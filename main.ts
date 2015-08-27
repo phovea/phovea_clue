@@ -31,6 +31,9 @@ databrowser.create(document.querySelector('#databrowser'));
 import selection = require('../caleydo_core/selectioninfo');
 selection.create(document.querySelector('#selectioninfo'));
 
+import provvis = require('./provvis');
+provvis.create(graph, document.querySelector('#clue'), {});
+
 var $main = d3.select('main');
 var $main_ref =  graph.addObject($main, 'Board', 'visual');
 
