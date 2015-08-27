@@ -1,0 +1,27 @@
+{
+  "name" : "clue",
+  "version": "0.0.1",
+  "license" : "SEE LICENSE IN LICENSE",
+  "repository": "Caleydo/clue",
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "caleydo_core": "*",
+    "caleydo_provenance": "*",
+    "caleydo_vis": "*",
+    "wrapper_bootstrap_fontawesome": "*"
+  },
+  "caleydo": {
+    "plugins": {
+      "web": [
+        {
+          "type": "application",
+          "name": "CLUE"
+        }
+      ]
+    }
+  },
+  "publishConfig": {
+    "registry": "http://registry.caleydo.org/"
+  }
+}
