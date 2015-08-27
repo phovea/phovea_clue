@@ -9,11 +9,21 @@ body, html {
   height: 100%;
 }
 
-#left, #right {
-  display: inline-block;
-  width: 15%;
+body > div {
+  display: flex;
 }
+
 main {
-  display: inline-block;
-  width: 69%;
+  position: relative;
+
+  div.block {
+    position: absolute;
+
+    .toolbar {
+      text-align: right;
+      i:hover {
+        font-weight: bold;
+      }
+    }
+  }
 }

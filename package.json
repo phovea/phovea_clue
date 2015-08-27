@@ -8,6 +8,7 @@
   "peerDependencies": {
     "caleydo_core": "*",
     "caleydo_provenance": "*",
+    "caleydo_window": "*",
     "caleydo_vis": "*",
     "wrapper_bootstrap_fontawesome": "*"
   },
