@@ -49,6 +49,7 @@ $select-color: orange;
 .provenance-simple-vis {
   line {
     stroke: black;
+    fill: none;
   }
 
   g.state {

@@ -80,13 +80,28 @@ function layout(states:provenance.StateNode[], space:number):(s:provenance.State
   return (s) => scale(String(s.id));
 }
 
-function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[]):INode[] {
+function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[], mode: EMode):INode[] {
   var s = layout(master, 500);
-  return master.map((m) => ({
+  var base = master.map((m) => ({
     x: 0,
     y: s(m),
     v: m
   }));
+  if (mode >= EMode.DL2_ALTERNATIVE) {
+    master.forEach((m,i) => {
+      var ns = m.nextStates;
+      if (ns.length > 1) {
+        var j = ns.indexOf(master[i+1]);
+        ns.splice(j, 1);
+        base.push.apply(base, ns.map((m, k) => ({
+          x: 8*(k-1),
+          y: base[i].y + 5,
+          v: m
+        })));
+      }
+    })
+  }
+  return base;
 }
 
 export enum EMode {
@@ -106,7 +121,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     };
   };
 
-  private _mode = EMode.DL1_LABEL;
+  private _mode = EMode.DL2_ALTERNATIVE;
+  private line = d3.svg.line().interpolate('step').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -227,7 +243,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     this.$node.attr('width', this.width);
 
-    var nodes = layoutGraph(graph, path);
+    var nodes = layoutGraph(graph, path, this._mode);
 
     var $states = this.$node.select('g.states').selectAll('g.state').data(nodes);
 
@@ -240,6 +256,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
         dx: 10,
         dy: 3
       });
+    } else {
+      $states.select('text').remove();
     }
 
     $states.attr({
@@ -263,17 +281,14 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       var s = a.previous;
       var t = a.resultsIn;
       return { s: m[s.id], t: m[t.id] , v : a};
-    }).filter((a) => a.s !== null && a.t !== null);
+    }).filter((a) => a.s != null && a.t != null);
 
-    var $lines = this.$node.select('g.actions').selectAll('line.action').data(actions);
-     $lines.enter().append('line').classed('action', true).attr({
+    var $lines = this.$node.select('g.actions').selectAll('path.action').data(actions);
+     $lines.enter().append('path').classed('action', true).attr({
      }).append('title');
      $lines.attr({
-     x1: (d) => d.s.x,
-     y1: (d) => d.s.y,
-     x2: (d) => d.t.x,
-     y2: (d) => d.t.y,
-     'class': (d) => 'action '+d.v.meta.category
+       d: (d) => this.line([d.s, d.t]),
+      'class': (d) => 'action '+d.v.meta.category
      }).select('title').text((d) => d.v.meta.name);
      $lines.exit().remove();
   }
