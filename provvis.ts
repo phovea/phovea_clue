@@ -1,6 +1,7 @@
 /**
  * Created by sam on 09.02.2015.
  */
+/// <reference path="../../tsd.d.ts" />
 
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
@@ -9,16 +10,54 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 function translate(x = 0, y = 0) {
-  return 'translate('+(x || 0)+','+(y || 0)+')';
+  return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
 }
+
+function findLatestPath(state:provenance.StateNode) {
+  var path = state.path.slice(),
+    n = null;
+  //compute the first path to the end
+  while ((n = state.nextState) != null) {
+    path.push(n);
+  }
+  return path;
+}
+
+import dagre = require('dagre');
+function toDagreGraph(graph:provenance.ProvenanceGraph) {
+  var g = new dagre.graphlib.Graph();
+
+  // Set an object for the graph label
+  g.setGraph({
+    rankdir: 'TB',
+    marginx: 10,
+    marginy: 10
+  });
+
+  // Default to assigning a new object as a label for each new edge.
+  g.setDefaultEdgeLabel(function () {
+    return {};
+  });
+
+  graph.states.forEach((d) => {
+    g.setNode('id'+d.id, {key: 'id'+d.id, v: d});
+  });
+  graph.states.forEach((d) => {
+    d.nextStates.forEach((out) => {
+      g.setEdge('id'+d.id, 'id'+out.id);
+    })
+  });
+  return g;
+}
+
 
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
-  private layouts : any = {};
+  private layouts:any = {};
   private add = (event, node) => {
     this.layouts[node.id] = {
-      _ : node
+      _: node
     };
   };
 
@@ -49,7 +88,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     this.data.off('switch_action', this.trigger);
   }
 
-  get rawSize() : [number, number] {
+  get rawSize():[number, number] {
     return [130, 800];
   }
 
@@ -103,7 +142,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     var $svg = $parent.append('svg').attr({
       width: size[0],
       height: size[1],
-      'class' : 'provenance-simple-vis'
+      'class': 'provenance-simple-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     //var $defs = $svg.append('defs');
@@ -112,52 +151,56 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     return $svg;
   }
 
-  private layout(states: provenance.StateNode[], space: number) : (s: provenance.StateNode) => number {
-    var scale = d3.scale.ordinal<provenance.StateNode, number>().domain(states.map((s) => s.id)),
+  private layout(states:provenance.StateNode[], space:number):(s:provenance.StateNode) => number {
+    var scale = d3.scale.ordinal<number>().domain(states.map((s) => String(s.id))),
       l = states.length,
       diff = 30;
-    if (l*diff < space) {
-      scale.range(d3.range(10,10+l*diff, diff));
+    if (l * diff < space) {
+      scale.range(d3.range(10, 10 + l * diff, diff));
     } else {
       //some linear stretching
     }
     //target
     //.rangeRoundPoints([0, space]);
-    return (s) => scale(s.id);
+    return (s) => scale(String(s.id));
   }
 
   private update() {
     var graph = this.data,
-      act = graph.act,
-      states = act.path, //just the active path to the root
-      actions = states.slice(1).map((s) => s.resultsFrom[0]);
+      path = findLatestPath(graph.act); //just the active path to the root
+    //actions = path.slice(1).map((s) => s.resultsFrom[0]);
 
     var $root = this.$node.select('g');
-    var $states = $root.selectAll('circle.state').data(states);
 
-    var scale = this.layout(states, 400);
+    var dgraph = toDagreGraph(graph);
+    dagre.layout(dgraph);
+    console.log(dgraph);
+
+    var nodes = dgraph.nodes().map((d) => dgraph.node(d));
+    var $states = $root.selectAll('circle.state').data(nodes);
 
     $states.enter().append('circle').classed('state', true).attr({
-      cx: 20,
       r: 5
     }).append('title');
     $states.attr({
-      cy : scale
-    }).classed('act',(d) => d === graph.act)
-      .select('title').text((d: provenance.StateNode) => d.name);
+      cx: (d) => d.x,
+      cy: (d) => d.y
+    }).classed('act', (d) => d.v === graph.act)
+      .select('title').text((d) => d.v.name);
     $states.exit().remove();
 
-    var $lines = $root.selectAll('line.action').data(actions);
-    $lines.enter().append('line').classed('action', true).attr({
-      x1 : 20,
-      x2 : 20
-    }).append('title');
-    $lines.attr({
-      y1 : (d: provenance.ActionNode) => scale(d.previous),
-      y2 : (d: provenance.ActionNode) => scale(d.resultsIn),
-      'class': (d: provenance.ActionNode) => 'action '+d.meta.category
-    }).select('title').text((d: provenance.ActionNode) => d.meta.name);
-    $lines.exit().remove();
+    /*var $lines = $root.selectAll('line.action').data(actions);
+     $lines.enter().append('line').classed('action', true).attr({
+     x1 : 20,
+     x2 : 20
+     }).append('title');
+     $lines.attr({
+     y1 : (d: provenance.ActionNode) => scale(d.previous),
+     y2 : (d: provenance.ActionNode) => scale(d.resultsIn),
+     'class': (d: provenance.ActionNode) => 'action '+d.meta.category
+     }).select('title').text((d: provenance.ActionNode) => d.meta.name);
+     $lines.exit().remove();
+     */
   }
 }
 

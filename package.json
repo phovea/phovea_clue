@@ -1,7 +1,7 @@
 {
-  "name" : "clue",
+  "name": "clue",
   "version": "0.0.1",
-  "license" : "SEE LICENSE IN LICENSE",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": "Caleydo/clue",
   "dependencies": {
   },
@@ -19,7 +19,40 @@
           "type": "application",
           "name": "CLUE"
         }
-      ]
+      ],
+      "dependencies": {
+        "web": {
+          "d3": "~3.5.5",
+          "graphlib": "~1.0.1",
+          "dagre": "~0.7.1",
+          "dagre-d3": "~0.4.3"
+        },
+        "tsd": {
+          "dagre": "04d87e"
+        }
+      },
+      "requirejs-config": {
+        "paths": {
+          "lodash": "${baseUrl}/lodash/dist/lodash",
+          "graphlib": "${baseUrl}/graphlib/dist/graphlib.core",
+          "dagre": "${baseUrl}/dagre/dist/dagre.core"
+        },
+        "shim": {
+          "graphlib": {
+            "deps": [
+              "lodash"
+            ],
+            "exports": "graphlib"
+          },
+          "dagre": {
+            "deps": [
+              "lodash",
+              "graphlib"
+            ],
+            "exports": "dagre"
+          }
+        }
+      }
     }
   },
   "publishConfig": {
