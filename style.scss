@@ -50,13 +50,52 @@ $select-color: orange;
   line {
     stroke: black;
   }
-  circle {
-    fill: steelblue;
+
+  g.state {
+    cursor: pointer;
+
+    &:hover {
+      circle {
+        fill: $select-color;
+      }
+      text {
+        color: $select-color;
+      }
+    }
+
+    circle {
+      fill: #9ba5ff;
+      opacity: 0.6;
+    }
 
     &.act {
-      fill: #00cfff;
+      opacity: 1;
+      circle {
+       fill: #00cfff;
+      }
+    }
+
+    &.past {
+      opacity: 1;
+      text {
+        color: darkgray;
+      }
+    }
+
+    &.future {
+      opacity: 0.8;
+      text {
+        font-style: italic;
+      }
+    }
+
+    text {
+      font-size: 8pt;
     }
   }
+
+
+
 
   .data {
     stroke: green;
