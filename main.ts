@@ -7,6 +7,7 @@
 import vis = require('../caleydo_core/vis');
 import datatypes = require('../caleydo_core/datatype');
 import prov = require('../caleydo_provenance/main');
+import player = require('./player');
 import d3 = require('d3');
 
 var a = 5;
@@ -32,7 +33,9 @@ import selection = require('../caleydo_core/selectioninfo');
 selection.create(document.querySelector('#selectioninfo'));
 
 import provvis = require('./provvis');
-provvis.create(graph, document.querySelector('#clue'), {});
+var story = provvis.create(graph, document.querySelector('#clue'), {});
+
+var p = new player.Player(graph, document.querySelector('#player_controls'));
 
 var $main = d3.select('main');
 var $main_ref =  graph.addObject($main, 'Board', 'visual');
@@ -50,9 +53,10 @@ function addElem(inputs, parameter) {
     graph.push(createRemoveCmd($div_ref));
   });
   var $body = $div.append('div').classed('body', true);
-  vis.list(data)[0].load().then((p) => {
+  /*vis.list(data)[0].load().then((p) => {
     p.factory(data, $body.node());
-  });
+  });*/
+  $body.text(data.desc.name);
   var $div_ref = prov.ref($div, 'Block '+data.desc.name, prov.cat.visual);
 
   return {

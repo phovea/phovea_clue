@@ -24,13 +24,12 @@
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
-                <li><a href="#">Page 1</a></li>
-                <li><a href="#">Page 2</a></li>
-                <li><a href="#">Page 3</a></li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="#"><i class="fa fa-play"></i> Sign Up</a></li>
-                <li><a href="#"><i class="fa fa-stop"></i> Login</a></li>
+            <ul class="nav navbar-nav navbar-right" id="player_controls">
+                <li><a data-player="play" href="#"><i class="fa fa-play" title="Play"></i></a></li>
+                <li><a data-player="backward" href="#" class="disabled"><i class="fa fa-step-backward" title="Step Backward"></i></a></li>
+                <li><a data-player="stop" href="#" class="disabled"><i class="fa fa-stop" title="Stop"></i></a></li>
+                <li><a data-player="forward" href="#" class="disabled"><i class="fa fa-step-forward" title="Step Forward"></i></a></li>
             </ul>
         </div>
     </div>

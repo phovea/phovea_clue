@@ -13,6 +13,10 @@ body > div {
   display: flex;
 }
 
+aside {
+  background-color: #fdfdfd;
+}
+
 main {
   position: relative;
 
@@ -24,6 +28,76 @@ main {
       i:hover {
         font-weight: bold;
       }
+    }
+  }
+}
+
+$select-color: orange;
+
+.select-selected {
+  //svg variant
+  stroke: $select-color !important;
+  stroke-width: 1px;
+  fill: $select-color !important;
+  vector-effect : non-scaling-stroke;
+
+  //html variant
+  border: 1px solid $select-color !important;
+  background-color: $select-color !important;
+}
+
+.provenance-simple-vis {
+  line {
+    stroke: black;
+  }
+  circle {
+    fill: steelblue;
+
+    &.act {
+      fill: #00cfff;
+    }
+  }
+
+  .data {
+    stroke: green;
+    &.fill {
+      fill: green;
+    }
+  }
+  .selection {
+    stroke: orange;
+    &.fill {
+      fill: orange;
+    }
+  }
+  .visual {
+    stroke: blue;
+    &.fill {
+      fill: blue;
+    }
+  }
+  .layout {
+    stroke: #02c9ff;
+    &.fill {
+      fill: #02c9ff;
+    }
+  }
+  .logic {
+    stroke: gray;
+    &.fill {
+      fill: gray;
+    }
+  }
+  .custom {
+    stroke: white;
+    &.fill {
+      fill: white;
+    }
+  }
+  .annotation {
+    stroke: lightblue;
+    &.fill {
+      fill: lightblue;
     }
   }
 }
