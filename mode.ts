@@ -15,15 +15,15 @@ export enum ECLUEMode {
   Presentation = 4
 }
 
-export var modes = {
-  E : ECLUEMode.Exploration,
-  S : ECLUEMode.Selection,
+const num_modes = 5;
+
+export const modes = {
+  E: ECLUEMode.Exploration,
+  S: ECLUEMode.Selection,
   B: ECLUEMode.Browsing,
   I: ECLUEMode.Interactive_Story,
-  P : ECLUEMode.Presentation
+  P: ECLUEMode.Presentation
 };
-
-export var modesByIndex = [ECLUEMode.Exploration, ECLUEMode.Selection, ECLUEMode.Browsing, ECLUEMode.Interactive_Story, ECLUEMode.Presentation];
 
 function defaultMode(): ECLUEMode {
   var key = C.hash.getProp('clue', 'P');
@@ -35,6 +35,7 @@ class ModeWrapper extends events.EventHandler {
 
   constructor() {
     super();
+    events.fire('clue.modeChanged', this._mode, this._mode);
   }
 
   set mode(value: ECLUEMode) {
@@ -45,6 +46,7 @@ class ModeWrapper extends events.EventHandler {
     this._mode = value;
     C.hash.setProp('clue', ECLUEMode[value].substring(0,1));
     this.fire('modeChanged', value, bak);
+    events.fire('clue.modeChanged', value, bak);
   }
   get mode() {
     return this._mode;
@@ -69,16 +71,15 @@ export class ModeSelector {
   private $node:d3.Selection<ModeSelector>;
 
   constructor(parent:Element, options:any = {}) {
-    var that = this;
     C.mixin(this.options, options);
     this.$node = d3.select(parent).append('div').classed('clue_modeselector', true).datum(this);
     this.build(this.$node);
 
-    var $input = this.$node.select('input').on('input', function() {
-      var new_mode = this.value;
-      setMode(modesByIndex[new_mode]);
+    const $input = this.$node.select('input').on('input', function() {
+      var new_mode = parseInt(this.value);
+      setMode(new_mode);
     });
-    var listener = (event: events.IEvent, new_: ECLUEMode) => {
+    const listener = (event: events.IEvent, new_: ECLUEMode) => {
       $input.property('value', new_);
     };
     _instance.on('modeChanged', listener);
@@ -91,15 +92,15 @@ export class ModeSelector {
     $node.append('input').attr({
       type: 'range',
       min: 0,
-      max: modesByIndex.length-1,
+      max: num_modes-1,
       value: getMode(),
       list: 'clue_modelist'
     });
     $node.append('span').classed('e',true).text(ECLUEMode[ECLUEMode.Exploration]);
     $node.append('span').classed('p',true).style('float','right').text(ECLUEMode[ECLUEMode.Presentation]);
-    var $options = $node.append('datalist').attr({
+    let $options = $node.append('datalist').attr({
       id: 'clue_modelist'
-    }).selectAll('option').data(modesByIndex);
+    }).selectAll('option').data(d3.range(num_modes));
     $options.enter().append('option');
     $options.attr({
       value: (d, i) => d

@@ -84,7 +84,7 @@ function layout(states:provenance.StateNode[], space:number):(s:provenance.State
 function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[]):INode[] {
   var s = layout(master, 500);
   var base = master.map((m) => ({
-    x: 0,
+    x: 5,
     y: s(m),
     v: m
   }));
@@ -115,7 +115,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     };
   };
 
-  private line = d3.svg.line().interpolate('step').x((d) => d.x).y((d) => d.y);
+  private line = d3.svg.line<INode>().interpolate('step').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -215,7 +215,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     //var $defs = $svg.append('defs');
-    var $g = $svg.append('g').attr('transform', 'translate(20,20)scale(1.2,1.2)');
+    var $g = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')');
     $g.append('g').classed('states', true);
     $g.append('g').classed('actions', true);
 

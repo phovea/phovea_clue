@@ -37,15 +37,15 @@ import cmode = require('./mode');
 cmode.create(document.querySelector('#modeselector'));
 
 import provvis = require('./provvis');
-var story = provvis.create(graph, document.querySelector('#clue'), {});
+const story = provvis.create(graph, document.querySelector('#clue'), {});
 (function () {
-  var $right = $('aside.right');
+  const $right = $('aside.right');
   $right.css('width', story.width + 'px');
-  var $left = $('aside.left');
+  const $left = $('aside.left');
   if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
-    $left.animate({width: 'hide'});
+    $left.hide();
   } else {
-    $left.animate({width: 'show'});
+    $left.show();
   }
   cmode.on('modeChanged', (event, new_) => {
     $right.animate({ width: story.width + 'px'});
