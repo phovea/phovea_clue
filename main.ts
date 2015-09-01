@@ -9,6 +9,7 @@ import datatypes = require('../caleydo_core/datatype');
 import prov = require('../caleydo_provenance/main');
 import player = require('./player');
 import d3 = require('d3');
+import $ = require('jquery');
 
 var a = 5;
 
@@ -37,11 +38,24 @@ cmode.create(document.querySelector('#modeselector'));
 
 import provvis = require('./provvis');
 var story = provvis.create(graph, document.querySelector('#clue'), {});
-var $right = d3.select('aside.right');
-$right.style('width',story.width+'px');
-cmode.on('modeChanged',() => {
-  $right.transition().style('width',story.width+'px');
-});
+(function () {
+  var $right = $('aside.right');
+  $right.css('width', story.width + 'px');
+  var $left = $('aside.left');
+  if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
+    $left.animate({width: 'hide'});
+  } else {
+    $left.animate({width: 'show'});
+  }
+  cmode.on('modeChanged', (event, new_) => {
+    $right.animate({ width: story.width + 'px'});
+    if (new_ >= cmode.ECLUEMode.Interactive_Story) {
+      $left.animate({width: 'hide'});
+    } else {
+      $left.animate({width: 'show'});
+    }
+  });
+})();
 
 
 var p = new player.Player(graph, document.querySelector('#player_controls'));

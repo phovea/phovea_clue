@@ -74,7 +74,7 @@ export class ModeSelector {
     this.$node = d3.select(parent).append('div').classed('clue_modeselector', true).datum(this);
     this.build(this.$node);
 
-    var $input = this.$node.select('input').on('change', function() {
+    var $input = this.$node.select('input').on('input', function() {
       var new_mode = this.value;
       setMode(modesByIndex[new_mode]);
     });

@@ -16,10 +16,6 @@ body > div {
 
 aside {
   background-color: #fdfdfd;
-
-  &.left {
-    width: 15%;
-  }
 }
 
 main {
@@ -37,6 +33,11 @@ main {
       }
     }
   }
+}
+
+#modeselector {
+  color: white;
+  width: 14em;
 }
 
 $select-color: orange;
