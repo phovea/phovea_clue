@@ -37,6 +37,12 @@ cmode.create(document.querySelector('#modeselector'));
 
 import provvis = require('./provvis');
 var story = provvis.create(graph, document.querySelector('#clue'), {});
+var $right = d3.select('aside.right');
+$right.style('width',story.width+'px');
+cmode.on('modeChanged',() => {
+  $right.transition().style('width',story.width+'px');
+});
+
 
 var p = new player.Player(graph, document.querySelector('#player_controls'));
 

@@ -11,14 +11,21 @@ body, html {
 
 body > div {
   display: flex;
+  align-items: stretch;
 }
 
 aside {
   background-color: #fdfdfd;
+
+  &.left {
+    width: 15%;
+  }
 }
 
 main {
   position: relative;
+
+  flex: 1 1 auto;
 
   div.block {
     position: absolute;

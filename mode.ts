@@ -30,20 +30,36 @@ function defaultMode(): ECLUEMode {
   return modes[key] || ECLUEMode.Presentation;
 }
 
-var _mode = defaultMode();
+class ModeWrapper extends events.EventHandler {
+  private _mode = defaultMode();
+
+  constructor() {
+    super();
+  }
+
+  set mode(value: ECLUEMode) {
+    if (this._mode === value) {
+      return;
+    }
+    var bak = this._mode;
+    this._mode = value;
+    C.hash.setProp('clue', ECLUEMode[value].substring(0,1));
+    this.fire('modeChanged', value, bak);
+  }
+  get mode() {
+    return this._mode;
+  }
+}
+var _instance = new ModeWrapper();
+
+export var on = ModeWrapper.prototype.on.bind(_instance);
+export var off = ModeWrapper.prototype.off.bind(_instance);
 
 export function getMode() {
-  return _mode;
+  return _instance.mode;
 }
-
 export function setMode(value: ECLUEMode) {
-  if (_mode === value) {
-    return;
-  }
-  var bak = _mode;
-  _mode = value;
-  C.hash.setProp('clue', ECLUEMode[value].substring(0,1));
-  events.fire('clue.modeChanged', value, bak);
+  _instance.mode = value;
 }
 
 export class ModeSelector {
@@ -65,9 +81,9 @@ export class ModeSelector {
     var listener = (event: events.IEvent, new_: ECLUEMode) => {
       $input.property('value', new_);
     };
-    events.on('clue.modeChanged', listener);
+    _instance.on('modeChanged', listener);
     C.onDOMNodeRemoved(<Element>this.$node.node(), () => {
-      events.off('clue.modeChanged', listener);
+      _instance.off('modeChanged', listener);
     });
   }
 

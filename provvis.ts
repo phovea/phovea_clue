@@ -8,7 +8,6 @@ import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
-import events = require('../caleydo_core/event');
 import cmode = require('./mode');
 
 function translate(x = 0, y = 0) {
@@ -148,14 +147,14 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   private bind() {
     this.data.on('add_node', this.add);
     this.data.on('switch_action', this.trigger);
-    events.on('clue.modeChanged', this.trigger);
+    cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
     this.data.off('add_node', this.add);
     this.data.off('switch_action', this.trigger);
-    events.off('clue.modeChanged', this.trigger);
+    cmode.off('modeChanged', this.trigger);
   }
 
   get rawSize():[number, number] {
