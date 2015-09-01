@@ -100,11 +100,6 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
   private layouts:any = {};
-  private add = (event, node) => {
-    this.layouts[node.id] = {
-      _: node
-    };
-  };
 
   private line = d3.svg.line<{ x: number; y : number}>().interpolate('step').x((d) => d.x).y((d) => d.y);
 
@@ -115,10 +110,6 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     this.options.rotate = 0;
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
-
-    this.data.states.forEach((s) => this.add(null, s));
-    this.data.objects.forEach((s) => this.add(null, s));
-    this.data.actions.forEach((s) => this.add(null, s));
 
     this.bind();
     this.update();
@@ -136,15 +127,13 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private bind() {
-    this.data.on('add_node', this.add);
-    this.data.on('switch_action', this.trigger);
+    this.data.on('switch_state', this.trigger);
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('add_node', this.add);
-    this.data.off('switch_action', this.trigger);
+    this.data.off('switch_state', this.trigger);
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -223,7 +212,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     const nodes = layoutGraph(graph, path);
 
-    const $states = this.$node.select('g.states').selectAll('g.state').data(nodes, (d) => d.v.id);
+    const $states = this.$node.select('g.states').selectAll('g.state').data(nodes, (d) => String(d.v.id));
 
     var $states_enter = $states.enter().append('g').classed('state', true);
     $states_enter.append('circle').attr({

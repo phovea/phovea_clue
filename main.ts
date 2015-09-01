@@ -6,6 +6,7 @@
 
 import vis = require('../caleydo_core/vis');
 import datatypes = require('../caleydo_core/datatype');
+import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
 import player = require('./player');
 import d3 = require('d3');
@@ -18,6 +19,10 @@ var graph = prov.create({
   name: 'CLUE',
   fqname: 'c.CLUE',
   id: 'clue'
+});
+
+graph.on('switch_state', (event: any, state: prov.StateNode) => {
+  C.hash.setProp('clue_state', String(state.id));
 });
 
 import prov_sel = require('../caleydo_provenance/selection');
