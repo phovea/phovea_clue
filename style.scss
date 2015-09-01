@@ -73,14 +73,14 @@ $select-color: orange;
     }
 
     circle {
-      fill: #9ba5ff;
+      fill: gray;
       opacity: 0.6;
     }
 
     &.act {
       opacity: 1;
       circle {
-       fill: #00cfff;
+       fill: lightgray;
       }
     }
 

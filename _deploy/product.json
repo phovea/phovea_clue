@@ -1,0 +1,9 @@
+{
+  "name": "CLUE Demo",
+  "type": "python",
+  "app": "clue_demo",
+  "plugins": [
+    "clue_demo",
+    "caleydo_server"
+  ]
+}

@@ -216,8 +216,9 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     //var $defs = $svg.append('defs');
     var $g = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')');
-    $g.append('g').classed('states', true);
+
     $g.append('g').classed('actions', true);
+    $g.append('g').classed('states', true);
 
     return $svg;
   }
