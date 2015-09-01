@@ -8,6 +8,8 @@ import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
+import events = require('../caleydo_core/event');
+import cmode = require('./mode');
 
 function translate(x = 0, y = 0) {
   return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
@@ -80,14 +82,14 @@ function layout(states:provenance.StateNode[], space:number):(s:provenance.State
   return (s) => scale(String(s.id));
 }
 
-function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[], mode: EMode):INode[] {
+function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[]):INode[] {
   var s = layout(master, 500);
   var base = master.map((m) => ({
     x: 0,
     y: s(m),
     v: m
   }));
-  if (mode >= EMode.DL2_ALTERNATIVE) {
+  if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
     master.forEach((m,i) => {
       var ns = m.nextStates;
       if (ns.length > 1) {
@@ -104,13 +106,6 @@ function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNo
   return base;
 }
 
-export enum EMode {
-  DL0_LINE,
-  DL1_LABEL,
-  DL2_ALTERNATIVE
-}
-
-
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
@@ -121,7 +116,6 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     };
   };
 
-  private _mode = EMode.DL2_ALTERNATIVE;
   private line = d3.svg.line().interpolate('step').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
@@ -141,34 +135,27 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get width() {
-    switch (this._mode) {
-      case EMode.DL0_LINE:
+    switch (cmode.getMode()) {
+      case cmode.ECLUEMode.Presentation:
         return 20;
-      case EMode.DL1_LABEL:
+      case cmode.ECLUEMode.Interactive_Story:
         return 120;
-      case EMode.DL2_ALTERNATIVE:
+      default:
         return 300;
     }
-  }
-
-  set mode(value: EMode) {
-    this._mode = value;
-    this.update();
-  }
-
-  get mode() {
-    return this._mode;
   }
 
   private bind() {
     this.data.on('add_node', this.add);
     this.data.on('switch_action', this.trigger);
+    events.on('clue.modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
     this.data.off('add_node', this.add);
     this.data.off('switch_action', this.trigger);
+    events.off('clue.modeChanged', this.trigger);
   }
 
   get rawSize():[number, number] {
@@ -243,7 +230,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     this.$node.attr('width', this.width);
 
-    var nodes = layoutGraph(graph, path, this._mode);
+    var nodes = layoutGraph(graph, path);
 
     var $states = this.$node.select('g.states').selectAll('g.state').data(nodes);
 
@@ -251,7 +238,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     $states_enter.append('circle').attr({
       r: 5
     });
-    if (this.mode >= EMode.DL1_LABEL) {
+    if (cmode.getMode() >= cmode.ECLUEMode.Presentation) {
       $states_enter.append('text').attr({
         dx: 10,
         dy: 3

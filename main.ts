@@ -32,6 +32,9 @@ databrowser.create(document.querySelector('#databrowser'));
 import selection = require('../caleydo_core/selectioninfo');
 selection.create(document.querySelector('#selectioninfo'));
 
+import cmode = require('./mode');
+cmode.create(document.querySelector('#modeselector'));
+
 import provvis = require('./provvis');
 var story = provvis.create(graph, document.querySelector('#clue'), {});
 
