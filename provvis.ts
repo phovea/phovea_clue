@@ -14,15 +14,6 @@ function translate(x = 0, y = 0) {
   return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
 }
 
-function findLatestPath(state:provenance.StateNode) {
-  var path = state.path.slice();
-  //compute the first path to the end
-  while ((state = state.nextState) != null && (path.indexOf(state) <0)) {
-    path.push(state);
-  }
-  return path;
-}
-
 interface INode {
   x : number;
   y: number;
@@ -84,11 +75,11 @@ function layout(states:provenance.StateNode[], space:number):(s:provenance.State
 function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[]):INode[] {
   var s = layout(master, 500);
   var base = master.map((m) => ({
-    x: 5,
+    x: cmode.getMode() < cmode.ECLUEMode.Interactive_Story ? 40 : 5,
     y: s(m),
     v: m
   }));
-  if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
+  /*if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
     master.forEach((m,i) => {
       var ns = m.nextStates;
       if (ns.length > 1) {
@@ -101,7 +92,7 @@ function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNo
         })));
       }
     })
-  }
+  }*/
   return base;
 }
 
@@ -115,7 +106,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     };
   };
 
-  private line = d3.svg.line<INode>().interpolate('step').x((d) => d.x).y((d) => d.y);
+  private line = d3.svg.line<{ x: number; y : number}>().interpolate('step').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -158,7 +149,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get rawSize():[number, number] {
-    return [300, 800];
+    return [this.width, 800];
   }
 
   get node() {
@@ -224,29 +215,20 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private update() {
-    var graph = this.data,
-      path = findLatestPath(graph.act); //just the active path to the root
+    const graph = this.data,
+      path = provenance.findLatestPath(graph.act); //just the active path to the root
     //actions = path.slice(1).map((s) => s.resultsFrom[0]);
 
     this.$node.attr('width', this.width);
 
-    var nodes = layoutGraph(graph, path);
+    const nodes = layoutGraph(graph, path);
 
-    var $states = this.$node.select('g.states').selectAll('g.state').data(nodes);
+    const $states = this.$node.select('g.states').selectAll('g.state').data(nodes, (d) => d.v.id);
 
-    var $states_enter = $states.enter().append('g').classed('state', true).on('click', (d) => graph.jumpTo(d.v));
+    var $states_enter = $states.enter().append('g').classed('state', true);
     $states_enter.append('circle').attr({
       r: 5
-    });
-    if (cmode.getMode() >= cmode.ECLUEMode.Presentation) {
-      $states_enter.append('text').attr({
-        dx: 10,
-        dy: 3
-      });
-    } else {
-      $states.select('text').remove();
-    }
-
+    }).on('click', (d) => graph.jumpTo(d.v));
     $states.attr({
       transform: (d) => translate(d.x, d.y),
     }).classed('act', (d) => d.v === graph.act)
@@ -257,8 +239,10 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       .classed('future', (d) => {
         var r = path.indexOf(d.v);
         return r > path.indexOf(graph.act);
-      })
-      .select('text').text((d) => d.v.name);
+      });
+
+    this.renderNode($states, cmode.getMode(), nodes);
+
     $states.exit().remove();
 
     var m = {};
@@ -278,6 +262,58 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       'class': (d) => 'action '+d.v.meta.category
      }).select('title').text((d) => d.v.meta.name);
      $lines.exit().remove();
+  }
+
+  private renderNode($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
+
+    this.renderLabel($states, act);
+    this.renderNeighbors($states, act, nodes);
+  }
+
+  private renderLabel($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
+    const base = $states.selectAll('text.label');
+    if (act >= cmode.ECLUEMode.Presentation) {
+      base.remove();
+      return;
+    }
+    const $label = base.data((d) => [d]);
+    $label.enter().append('text').attr({
+      dx: 10,
+      dy: 3,
+      'class': 'label'
+    });
+    $label.text((d) => d.v.name);
+    $label.exit().style('opacity', 0.8).transition().style('opacity', 0).remove();
+  }
+  private renderNeighbors($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
+    const base = $states.selectAll('g.neighbor');
+    if (act >= cmode.ECLUEMode.Interactive_Story) {
+      base.remove();
+      return;
+    }
+    const $neighbors = base.data<provenance.StateNode>((d, i) => {
+      const ns = d.v.nextStates.slice();
+      if (ns.length > 1) {
+        let j = ns.indexOf(nodes[i + 1].v);
+        ns.splice(j, 1);
+        return ns;
+      }
+      return [];
+    });
+    const $neighbors_enter = $neighbors.enter().append('g').classed('neighbor',true);
+    $neighbors_enter.append('path');
+    $neighbors_enter.append('circle').attr({
+      r: 4
+    }).on('click', (d) => this.data.jumpTo(d));
+
+    $neighbors.select('circle').attr({
+      cx : (d,i ) => -10 + -(i) * 5,
+      cy : 2
+    });
+    $neighbors.select('path').attr({
+      d: (d, i, j?) => this.line([{ x : 0, y: 0}, { x : -10 + -(i) * 5, y : 2}])
+    });
+    $neighbors.exit().remove();
   }
 }
 

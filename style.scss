@@ -63,13 +63,12 @@ $select-color: orange;
   g.state {
     cursor: pointer;
 
-    &:hover {
-      circle {
-        fill: $select-color;
-      }
-      text {
-        color: $select-color;
-      }
+    path {
+      fill: none;
+    }
+
+    circle:hover {
+      fill: $select-color;
     }
 
     circle {
