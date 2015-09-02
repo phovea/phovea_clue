@@ -4,7 +4,6 @@
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
 
-import vis = require('../caleydo_core/vis');
 import datatypes = require('../caleydo_core/datatype');
 import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
@@ -63,7 +62,7 @@ const story = provvis.create(graph, document.querySelector('#clue'), {});
 })();
 
 
-var p = new player.Player(graph, document.querySelector('#player_controls'));
+new player.Player(graph, document.querySelector('#player_controls'));
 
 var $main = d3.select('main');
 var $main_ref =  graph.addObject($main, 'Board', 'visual');
@@ -77,9 +76,6 @@ function addElem(inputs, parameter) {
     top: pos.y+'px'
   });
   var $toolbar = $div.append('div').classed('toolbar', true);
-  $toolbar.append('i').attr('class', 'fa fa-close').on('click',() => {
-    graph.push(createRemoveCmd($div_ref));
-  });
   var $body = $div.append('div').classed('body', true);
   /*vis.list(data)[0].load().then((p) => {
     p.factory(data, $body.node());
@@ -87,6 +83,9 @@ function addElem(inputs, parameter) {
   $body.text(data.desc.name);
   var $div_ref = prov.ref($div, 'Block '+data.desc.name, prov.cat.visual);
 
+  $toolbar.append('i').attr('class', 'fa fa-close').on('click',() => {
+    graph.push(createRemoveCmd($div_ref));
+  });
   return {
     created: [$div_ref],
     inverse: createRemoveCmd($div_ref)

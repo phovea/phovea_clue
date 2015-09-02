@@ -99,7 +99,6 @@ function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNo
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
-  private layouts:any = {};
 
   private line = d3.svg.line<{ x: number; y : number}>().interpolate('step').x((d) => d.x).y((d) => d.y);
 
@@ -219,7 +218,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       r: 5
     }).on('click', (d) => graph.jumpTo(d.v));
     $states.attr({
-      transform: (d) => translate(d.x, d.y),
+      transform: (d) => translate(d.x, d.y)
     }).classed('act', (d) => d.v === graph.act)
       .classed('past', (d) => {
         var r = path.indexOf(d.v);

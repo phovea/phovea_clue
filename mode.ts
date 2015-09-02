@@ -76,7 +76,7 @@ export class ModeSelector {
     this.build(this.$node);
 
     const $input = this.$node.select('input').on('input', function() {
-      var new_mode = parseInt(this.value);
+      var new_mode = parseInt(this.value,10);
       setMode(new_mode);
     });
     const listener = (event: events.IEvent, new_: ECLUEMode) => {
