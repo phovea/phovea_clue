@@ -89,13 +89,13 @@ function addElem(inputs, parameter) {
   return {
     created: [$div_ref],
     inverse: createRemoveCmd($div_ref)
-  }
+  };
 }
 function removeElem(inputs) {
   var $div = inputs[0].v,
     inv = createAddCmd($main_ref, graph.findObject($div.datum()), {
-      x : parseInt($div.style('left')),
-      y : parseInt($div.style('top'))
+      x : parseInt($div.style('left'),10),
+      y : parseInt($div.style('top'),10)
     });
   $div.remove();
   return {
