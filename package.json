@@ -18,6 +18,13 @@
         {
           "type": "application",
           "name": "CLUE Demo"
+        },
+        {
+          "type": "actionFactory",
+          "id": "clue_demo",
+          "file": "cmds",
+          "factory": "createCmd",
+          "creates": "(addClueElem|removeClueElem)"
         }
       ],
       "dependencies": {

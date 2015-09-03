@@ -16,6 +16,10 @@ body > div {
 
 aside {
   background-color: #fdfdfd;
+
+  &.left {
+    width: 15%;
+  }
 }
 
 main {

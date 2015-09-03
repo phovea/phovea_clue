@@ -27,7 +27,7 @@ export const modes = {
 
 function defaultMode(): ECLUEMode {
   var key = C.hash.getProp('clue', 'P');
-  return modes[key] || ECLUEMode.Presentation;
+  return (key in modes) ? modes[key] : ECLUEMode.Presentation;
 }
 
 class ModeWrapper extends events.EventHandler {
