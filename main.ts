@@ -98,8 +98,11 @@ let $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
 }
 
 d3.select('#new_workspace').on('click', () => {
-  graph.clear();
-  $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
+  graph.jumpTo(graph.states[0]).then(() => {
+    graph.clear();
+    $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
+    cmode.setMode(cmode.ECLUEMode.Exploration);
+  });
 });
 
 export function dummy() {
