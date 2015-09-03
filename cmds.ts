@@ -5,13 +5,11 @@
 /// <amd-dependency path='bootstrap' />
 
 import datatypes = require('../caleydo_core/datatype');
-import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
-import player = require('./player');
 import d3 = require('d3');
 
 function addElem(inputs, parameter, graph) {
-  var $main : d3.Selection<any> = inputs[0].value,
+  var $main:d3.Selection<any> = inputs[0].value,
     pos = parameter.pos;
 
   return inputs[1].v.then((data) => {
@@ -37,7 +35,7 @@ function addElem(inputs, parameter, graph) {
   });
 }
 function removeElem(inputs, parameter, graph) {
-  var $div : d3.Selection<any> = inputs[0].value,
+  var $div:d3.Selection<any> = inputs[0].value,
     inv = createAddCmd(inputs[1], graph.findObject($div.datum()), {
       x: parseInt($div.style('left'), 10),
       y: parseInt($div.style('top'), 10)
@@ -62,10 +60,12 @@ export function createRemoveCmd($div_ref:ID3Ref, $main_ref:ID3Ref) {
   return prov.action(prov.meta('Remove Block', prov.cat.visual, prov.op.remove), 'removeClueElem', removeElem, [$div_ref, $main_ref]);
 }
 
-export function createCmd(id){
-  switch(id) {
-    case 'addClueElem' : return addElem;
-    case 'removeClueElem': return removeElem;
+export function createCmd(id) {
+  switch (id) {
+    case 'addClueElem' :
+      return addElem;
+    case 'removeClueElem':
+      return removeElem;
   }
   return null;
 }

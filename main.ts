@@ -4,7 +4,6 @@
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
 
-import datatypes = require('../caleydo_core/datatype');
 import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
 import player = require('./player');
@@ -22,7 +21,7 @@ var graph = prov.create({
   startFromScratch: C.hash.is('clue_clear')
 });
 
-graph.on('switch_state', (event: any, state: prov.StateNode) => {
+graph.on('switch_state', (event:any, state:prov.StateNode) => {
   C.hash.setInt('clue_state', state.id);
 });
 
@@ -60,7 +59,7 @@ const story = provvis.create(graph, document.querySelector('#clue'), {});
     $left.show();
   }
   cmode.on('modeChanged', (event, new_) => {
-    $right.animate({ width: story.width + 'px'});
+    $right.animate({width: story.width + 'px'});
     if (new_ >= cmode.ECLUEMode.Interactive_Story) {
       $left.animate({width: 'hide'});
     } else {
@@ -75,7 +74,7 @@ const story = provvis.create(graph, document.querySelector('#clue'), {});
 })();
 
 
-const p = new player.Player(graph, document.querySelector('#player_controls'));
+new player.Player(graph, document.querySelector('#player_controls'));
 
 let $main = d3.select('main');
 let $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
