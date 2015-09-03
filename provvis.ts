@@ -126,13 +126,13 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private bind() {
-    this.data.on('switch_state', this.trigger);
+    this.data.on('switch_state,clear', this.trigger);
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('switch_state', this.trigger);
+    this.data.off('switch_state,clear', this.trigger);
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -281,7 +281,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }
     const $neighbors = base.data<provenance.StateNode>((d, i) => {
       const ns = d.v.nextStates.slice();
-      if (ns.length > 1) {
+      if (ns.length > 1 && i < nodes.length-1) {
         let j = ns.indexOf(nodes[i + 1].v);
         ns.splice(j, 1);
         return ns;

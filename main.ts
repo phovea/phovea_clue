@@ -75,11 +75,11 @@ const story = provvis.create(graph, document.querySelector('#clue'), {});
 })();
 
 
-new player.Player(graph, document.querySelector('#player_controls'));
+const p = new player.Player(graph, document.querySelector('#player_controls'));
 
+let $main = d3.select('main');
+let $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
 {
-  let $main = d3.select('main');
-  let $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
 
   databrowser.makeDropable(<Element>$main.node(), (data, op, pos) => {
     var data_ref = graph.findOrAddObject(data, data.desc.id, 'data');
@@ -96,6 +96,11 @@ new player.Player(graph, document.querySelector('#player_controls'));
     }
   }
 }
+
+d3.select('#new_workspace').on('click', () => {
+  graph.clear();
+  $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
+});
 
 export function dummy() {
   return a;
