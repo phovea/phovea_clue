@@ -6,8 +6,10 @@
 /// <amd-dependency path='css!./style' />
 
 /// <amd-dependency path="text!./template.html" />
+/* tslint:disable no-var-requires*/
 declare var require:(moduleId:string) => any;
-const template:string = require("text!./template.html");
+const template:string = require('text!./template.html');
+/* tslint:enable no-var-requires*/
 
 import C = require('../caleydo_core/main');
 import header = require('../wrapper_bootstrap_fontawesome/header');
