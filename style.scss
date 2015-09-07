@@ -9,9 +9,18 @@ body, html {
   height: 100%;
 }
 
-body > div {
+
+body > div.box {
   display: flex;
   align-items: stretch;
+  flex-flow: column;
+  height: 100%;
+}
+
+body > div.box > div.content {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
 }
 
 aside {
