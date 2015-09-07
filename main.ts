@@ -6,7 +6,6 @@
 
 import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
-import player = require('./player');
 import d3 = require('d3');
 import $ = require('jquery');
 import cmds = require('./cmds');
@@ -19,10 +18,6 @@ var graph = prov.create({
   fqname: 'c.CLUE',
   id: 'clue_demo',
   startFromScratch: C.hash.is('clue_clear')
-});
-
-graph.on('switch_state', (event:any, state:prov.StateNode) => {
-  C.hash.setInt('clue_state', state.id);
 });
 
 import prov_sel = require('../caleydo_provenance/selection');
@@ -38,7 +33,7 @@ databrowser.create(document.querySelector('#databrowser'));
 import selection = require('../caleydo_core/selectioninfo');
 selection.create(document.querySelector('#selectioninfo'));
 
-import cmode = require('./mode');
+import cmode = require('../caleydo_provenance/mode');
 cmode.create(document.querySelector('#modeselector'));
 
 import provvis = require('./provvis');
@@ -73,7 +68,7 @@ const story = provvis.create(graph, document.querySelector('#clue'), {});
   });
 })();
 
-
+import player = require('../caleydo_provenance/player');
 new player.Player(graph, document.querySelector('#player_controls'));
 
 let $main = d3.select('main');
@@ -86,7 +81,11 @@ let $main_ref = graph.findOrAddObject($main, 'Board', 'visual');
   });
 }
 
-{ //jump to stored state
+{
+  graph.on('switch_state', (event:any, state:prov.StateNode) => {
+    C.hash.setInt('clue_state', state.id);
+  });
+  //jump to stored state
   let target_state = C.hash.getInt('clue_state', null);
   if (target_state !== null) {
     let s = graph.states.filter((s) => s.id === target_state)[0];

@@ -1,8 +1,6 @@
 /**
  * Created by Samuel Gratzl on 27.08.2015.
  */
-/// <amd-dependency path='font-awesome' />
-/// <amd-dependency path='bootstrap' />
 
 import datatypes = require('../caleydo_core/datatype');
 import prov = require('../caleydo_provenance/main');
