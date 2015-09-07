@@ -6,9 +6,9 @@
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
+import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
-import cmode = require('./mode');
 
 function translate(x = 0, y = 0) {
   return 'translate(' + (x || 0) + ',' + (y || 0) + ')';

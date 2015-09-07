@@ -22,6 +22,14 @@ aside {
   }
 }
 
+a[data-header="app"] {
+  padding-left: 2em;
+  background-image: url("../assets/caleydo_c.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+
 main {
   position: relative;
 
