@@ -202,7 +202,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     return $svg;
   }
 
-  private update() {
+  update() {
     const graph = this.data,
       path = provenance.findLatestPath(graph.act); //just the active path to the root
     //actions = path.slice(1).map((s) => s.resultsFrom[0]);
