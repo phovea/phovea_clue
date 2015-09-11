@@ -53,6 +53,12 @@ export class CLUEWrapper extends events.EventHandler {
         }
       ]
     });
+
+
+    this.graph.on('sync_start,sync', (event: events.IEvent) => {
+      d3.select('*[data-header="options"] span.glyphicon').classed('fa-spin', event.type !== 'sync');
+    });
+
     {
       let ul = <HTMLElement>document.createElement('ul');
        this.header.insertCustomRightMenu(ul);
