@@ -38,15 +38,15 @@ export class CLUEWrapper extends events.EventHandler {
 
     this.graph = prov.create({
       type: 'provenance_graph',
-      name: options.app,
-      fqname: 'c.'+options.app,
+      name: this.options.app,
+      fqname: 'c.'+this.options.app,
       id: 'clue_demo',
       startFromScratch: C.hash.is('clue_clear')
     });
 
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
-      app: options.app,
+      app: this.options.app,
       mainMenu: [
         {
           name: 'Home'
