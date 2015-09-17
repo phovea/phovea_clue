@@ -20,6 +20,8 @@ import cmode = require('../caleydo_provenance/mode');
 import provvis = require('./provvis');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
+import screenshot = require('../caleydo_screenshot/main');
+
 
 export class CLUEWrapper extends events.EventHandler {
   private options = {
@@ -53,31 +55,11 @@ export class CLUEWrapper extends events.EventHandler {
         }
       ]
     });
-
+    this.initMenu();
 
     this.graph.on('sync_start,sync', (event: events.IEvent) => {
       d3.select('*[data-header="options"] span.glyphicon').classed('fa-spin', event.type !== 'sync');
     });
-
-    {
-      let ul = <HTMLElement>document.createElement('ul');
-       this.header.insertCustomRightMenu(ul);
-      d3.select(ul).attr({
-        'class' : 'nav navbar-nav navbar-right',
-        id: 'player_controls'
-      }).html('<li><a data-player="play" href="#"><i class="fa fa-play" title="Play"></i></a></li>\n'+
-          '<li><a data-player="backward" href="#" class="disabled"><i class="fa fa-step-backward" title="Step Backward"></i></a></li>\n'+
-          '<li><a data-player="stop" href="#" class="disabled"><i class="fa fa-stop" title="Stop"></i></a></li>\n'+
-          '<li><a data-player="forward" href="#" class="disabled"><i class="fa fa-step-forward" title="Step Forward"></i></a></li>\n');
-    }
-    {
-      let div = <HTMLElement>document.createElement('div');
-       this.header.insertCustomRightMenu(div);
-      div.classList.add('nav');
-      div.classList.add('navbar-nav');
-      div.classList.add('navbar-right');
-      div.id = 'modeselector';
-    }
 
     prov_sel.create(this.graph, 'selected', {
       filter: function (idtype) {
@@ -120,6 +102,58 @@ export class CLUEWrapper extends events.EventHandler {
           $left.animate({width: 'show'});
         }
       });
+    }
+  }
+
+  private initMenu() {
+    {
+      let helper = document.querySelector('#menuHelper');
+      while(helper.firstChild) {
+        this.header.mainMenu.appendChild(helper.firstChild);
+      }
+    }
+    d3.select('#attachScreenshot').on('click', () => {
+      const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
+      const bounds = C.bounds(main);
+      this.header.wait();
+      screenshot.take(main, [bounds.w/2, bounds.h/2]).then((image) => {
+        this.header.ready();
+        this.graph.act.setAttr('screenshot', image);
+      }).catch((error) => {
+        console.log(error);
+      });
+    });
+    d3.select('#attachNote form').on('submit', () => {
+      const note = d3.select('#attachNote_note').property('value');
+      this.graph.act.setAttr('note', note);
+      (<any>$('#attachNote')).modal('hide');
+      (<HTMLFormElement>document.querySelector('#attachNote form')).reset();
+      d3.event.preventDefault();
+      d3.event.stopPropagation();
+    });
+
+    this.addPlayerMenu();
+  }
+
+  private addPlayerMenu() {
+    {
+      let ul = <HTMLElement>document.createElement('ul');
+       this.header.insertCustomRightMenu(ul);
+      d3.select(ul).attr({
+        'class' : 'nav navbar-nav navbar-right',
+        id: 'player_controls'
+      }).html('<li><a data-player="play" href="#"><i class="fa fa-play" title="Play"></i></a></li>\n'+
+          '<li><a data-player="backward" href="#" class="disabled"><i class="fa fa-step-backward" title="Step Backward"></i></a></li>\n'+
+          '<li><a data-player="stop" href="#" class="disabled"><i class="fa fa-stop" title="Stop"></i></a></li>\n'+
+          '<li><a data-player="forward" href="#" class="disabled"><i class="fa fa-step-forward" title="Step Forward"></i></a></li>\n');
+    }
+    {
+      let div = <HTMLElement>document.createElement('div');
+       this.header.insertCustomRightMenu(div);
+      div.classList.add('nav');
+      div.classList.add('navbar-nav');
+      div.classList.add('navbar-right');
+      div.id = 'modeselector';
     }
   }
 

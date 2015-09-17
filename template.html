@@ -18,5 +18,36 @@
         </aside>
     </div>
 </div>
+
+<div style="display: none" id="menuHelper">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+           aria-expanded="false">Attach<span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="#" data-toggle="modal" data-target="#attachNote"><i class="fa fa-sticky-note-o"></i> Note</a></li>
+            <li><a href="#" id="attachScreenshot"><i class="fa fa-camera"></i> Screenshot</a></li>
+        </ul>
+    </li>
+</div>
+
+<div class="modal fade" id="attachNote" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" >Attach Note</h4>
+      </div>
+      <div class="modal-body">
+          <form>
+              <div class="form-group">
+                  <label for="attachNote_note">Note</label>
+                  <textarea class="form-control" id="attachNote_note" rows="5" placeholder="Description" required="required"></textarea>
+              </div>
+              <button type="submit" class="btn btn-default"><i class="fa fa-save"></i> Save</button>
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

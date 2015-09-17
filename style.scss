@@ -161,3 +161,11 @@ $select-color: orange;
     }
   }
 }
+
+.popover div.preview {
+  img {
+    width: 230px;
+    height: auto;
+    border: 1px solid black;
+  }
+}

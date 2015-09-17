@@ -11,6 +11,7 @@
     "caleydo_provenance": "*",
     "caleydo_window": "*",
     "caleydo_vis": "*",
+    "caleydo_screenshot": "*",
     "wrapper_bootstrap_fontawesome": "*"
   },
   "caleydo": {

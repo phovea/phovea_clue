@@ -9,6 +9,7 @@ import provenance = require('../caleydo_provenance/main');
 import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
+import $ = require('jquery');
 
 function translate(x = 0, y = 0) {
   return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
@@ -99,6 +100,9 @@ function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNo
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
+  private onStateAdded = (event: any, state: provenance.StateNode) => {
+    state.on('setAttr', this.trigger);
+  };
 
   private line = d3.svg.line<{ x: number; y : number}>().interpolate('step').x((d) => d.x).y((d) => d.y);
 
@@ -127,12 +131,20 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
   private bind() {
     this.data.on('switch_state,clear', this.trigger);
+    this.data.on('add_state', this.onStateAdded);
+    this.data.states.forEach((s) => {
+      s.on('setAttr', this.trigger);
+    });
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
     this.data.off('switch_state,clear', this.trigger);
+    this.data.off('add_state', this.onStateAdded);
+    this.data.states.forEach((s) => {
+      s.off('setAttr', this.trigger);
+    });
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -265,13 +277,43 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       return;
     }
     const $label = base.data((d) => [d]);
-    $label.enter().append('text').attr({
+    const $labels_enter = $label.enter().append('text').attr({
       dx: 10,
       dy: 3,
       'class': 'label'
     });
-    $label.text((d) => d.v.name);
+    $labels_enter.append('tspan');
+    $labels_enter.append('tspan')
+      .attr('class', 'fa flags');
+
+    $label.classed('flagged', (d) => (d.v.hasAttr('note') || d.v.hasAttr('screenshot')));
+    $label.select('tspan').text((d) => d.v.name);
+    $label.select('tspan.flags').text((d: INode) => (d.v.hasAttr('note') ? '\uf24a' : '') + (d.v.hasAttr('screenshot') ? '\uf030' : ''));
+
     $label.exit().style('opacity', 0.8).transition().style('opacity', 0).remove();
+
+    var Jbase = $((<Element>$states.node()).parentNode);
+    (<any>Jbase.find('text.flagged')).popover({
+      trigger: 'hover',
+      placement: 'bottom',
+      title: function() {
+        return d3.select(this).datum().v.name;
+      },
+      container: 'body',
+      html: true,
+      content: function() {
+        const state : provenance.StateNode = d3.select(this).datum().v;
+        const note = state.getAttr('note','');
+        var r = '<div class="preview">';
+        if (state.hasAttr('screenshot')) {
+          r += `<img src="${state.getAttr('screenshot')}">`;
+        }
+        if (state.hasAttr('note')) {
+          r += `<pre>${state.getAttr('note')}</pre>`;
+        }
+        return r+'</div>';
+      }
+    });
   }
   private renderNeighbors($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
     const base = $states.selectAll('g.neighbor');
