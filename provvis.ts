@@ -303,7 +303,6 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       html: true,
       content: function() {
         const state : provenance.StateNode = d3.select(this).datum().v;
-        const note = state.getAttr('note','');
         var r = '<div class="preview">';
         if (state.hasAttr('screenshot')) {
           r += `<img src="${state.getAttr('screenshot')}">`;
