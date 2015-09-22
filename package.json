@@ -28,17 +28,17 @@
           "factory": "createCmd",
           "creates": "(addClueElem|removeClueElem)"
         }
-      ],
-      "dependencies": {
-        "web": {
-          "d3": "~3.5.5"
-        }
+      ]
+    },
+    "dependencies": {
+      "web": {
+        "d3": "~3.5.5"
+      }
+    },
+    "requirejs-config": {
+      "paths": {
       },
-      "requirejs-config": {
-        "paths": {
-        },
-        "shim": {
-        }
+      "shim": {
       }
     }
   },
