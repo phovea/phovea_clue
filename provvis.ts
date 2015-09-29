@@ -85,7 +85,7 @@ function layoutGraph(path:provenance.StateNode[]): { nodes: INode[]; edges: IEdg
     var n = { x: 0, y: i * 20, v : p };
     nodes.push(n);
     if (last) {
-      var actions = last.v.next;
+      var actions = last.v.next.filter((a) => a.inverses == null);
       actions = actions.sort((a,b) => a.resultsIn === p ? -1 : (b.resultsIn === p ? 1 : a.name.localeCompare(b.name)));
       edges = edges.concat(actions.map((a, j) => {
         if (j > 0) {
@@ -101,29 +101,6 @@ function layoutGraph(path:provenance.StateNode[]): { nodes: INode[]; edges: IEdg
     nodes: nodes,
     edges: edges
   };
-
-  /*var s = layout(master, 500);
-  var base = master.map((m) => ({
-    x: cmode.getMode() < cmode.ECLUEMode.Interactive_Story ? 40 : 5,
-    y: s(m),
-    v: m
-  }));
-  /*if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
-    master.forEach((m,i) => {
-      var ns = m.nextStates;
-      if (ns.length > 1) {
-        var j = ns.indexOf(master[i+1]);
-        ns.splice(j, 1);
-        base.push.apply(base, ns.map((m, k) => ({
-          x: 8*(k-1),
-          y: base[i].y + 5,
-          v: m
-        })));
-      }
-    })
-  }
-  return base;
-*/
 }
 
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
