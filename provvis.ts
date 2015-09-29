@@ -20,6 +20,12 @@ interface INode {
   y: number;
   v: provenance.StateNode;
 }
+interface IEdge {
+  s: INode;
+  t: INode;
+  v: provenance.ActionNode;
+}
+
 
 /*
  import dagre = require('dagre');
@@ -73,8 +79,30 @@ function layout(states:provenance.StateNode[], space:number):(s:provenance.State
   return (s) => scale(String(s.id));
 }
 
-function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNode[]):INode[] {
-  var s = layout(master, 500);
+function layoutGraph(path:provenance.StateNode[]): { nodes: INode[]; edges: IEdge[] } {
+  var nodes = [], edges= [], last = null;
+  path.forEach((p, i) => {
+    var n = { x: 0, y: i * 20, v : p };
+    nodes.push(n);
+    if (last) {
+      var actions = last.v.next;
+      actions = actions.sort((a,b) => a.resultsIn === p ? -1 : (b.resultsIn === p ? 1 : a.name.localeCompare(b.name)));
+      edges = edges.concat(actions.map((a, j) => {
+        if (j > 0) {
+          var n2 = {x: j * 20, y: i * 20, v: a.resultsIn};
+          nodes.push(n2);
+        }
+        return ({ s: last, t : (j > 0 ? n2 : n), v: a});
+      }));
+    }
+    last = n;
+  });
+  return {
+    nodes: nodes,
+    edges: edges
+  };
+
+  /*var s = layout(master, 500);
   var base = master.map((m) => ({
     x: cmode.getMode() < cmode.ECLUEMode.Interactive_Story ? 40 : 5,
     y: s(m),
@@ -93,8 +121,9 @@ function layoutGraph(graph:provenance.ProvenanceGraph, master:provenance.StateNo
         })));
       }
     })
-  }*/
+  }
   return base;
+*/
 }
 
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -104,7 +133,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     state.on('setAttr', this.trigger);
   };
 
-  private line = d3.svg.line<{ x: number; y : number}>().interpolate('step').x((d) => d.x).y((d) => d.y);
+  private line = d3.svg.line<{ x: number; y : number}>().interpolate('step-after').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -206,7 +235,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     //var $defs = $svg.append('defs');
-    var $g = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')');
+    var $g = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')').append('g').attr('transform','translate(20,20)');
 
     $g.append('g').classed('actions', true);
     $g.append('g').classed('states', true);
@@ -221,7 +250,9 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     this.$node.attr('width', this.width);
 
-    const nodes = layoutGraph(graph, path);
+    const layout = layoutGraph(path);
+    const nodes = layout.nodes;
+    const edges = layout.edges;
 
     const $states = this.$node.select('g.states').selectAll('g.state').data(nodes, (d) => String(d.v.id));
 
@@ -229,9 +260,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     $states_enter.append('circle').attr({
       r: 5
     }).on('click', (d) => graph.jumpTo(d.v));
-    $states.attr({
-      transform: (d) => translate(d.x, d.y)
-    }).classed('act', (d) => d.v === graph.act)
+    $states
+      .classed('act', (d) => d.v === graph.act)
       .classed('past', (d) => {
         var r = path.indexOf(d.v);
         return r >= 0 && r < path.indexOf(graph.act);
@@ -241,20 +271,15 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
         return r > path.indexOf(graph.act);
       });
 
-    this.renderNode($states, cmode.getMode(), nodes);
+    $states.transition().attr({
+      transform: (d) => translate(d.x, d.y)
+    });
+
+    //this.renderNode($states, cmode.getMode(), nodes);
 
     $states.exit().remove();
 
-    var m = {};
-    nodes.forEach((n) => m[n.v.id] = n);
-
-    var actions = graph.actions.map((a: provenance.ActionNode) => {
-      var s = a.previous;
-      var t = a.resultsIn;
-      return { s: m[s.id], t: m[t.id] , v : a};
-    }).filter((a) => a.s != null && a.t != null);
-
-    var $lines = this.$node.select('g.actions').selectAll('path.action').data(actions);
+    var $lines = this.$node.select('g.actions').selectAll('path.action').data(edges);
      $lines.enter().append('path').classed('action', true).attr({
      }).append('title');
      $lines.attr({

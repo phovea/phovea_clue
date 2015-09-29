@@ -73,12 +73,12 @@ $select-color: orange;
     fill: none;
   }
 
+  path {
+    fill: none;
+  }
+
   g.state {
     cursor: pointer;
-
-    path {
-      fill: none;
-    }
 
     circle:hover {
       fill: $select-color;
