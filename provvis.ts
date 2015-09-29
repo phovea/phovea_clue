@@ -225,17 +225,37 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       path = provenance.findLatestPath(graph.act); //just the active path to the root
     //actions = path.slice(1).map((s) => s.resultsFrom[0]);
 
+
+
     this.$node.attr('width', this.width);
 
-    const layout = layoutGraph(path);
-    const nodes = layout.nodes;
-    const edges = layout.edges;
+    const root = graph.states[0];
+    const cluster = d3.layout.tree<{ v : provenance.StateNode }>()
+      .nodeSize([15,15])
+      //.separation(() => 1)
+      .sort((a,b) => (path.indexOf(a.v) >= 0 ? -1 : (path.indexOf(b.v) >= 0 ? 1 : a.v.name.localeCompare(b.v.name))))
+      .children((n) => n.v.next.filter((a) => a.inverses == null).map((a) => ({ v : a.resultsIn })));
 
-    const $states = this.$node.select('g.states').selectAll('g.state').data(nodes, (d) => String(d.v.id));
+    //const layout = layoutGraph(path);
+    const nodes = cluster({ v : root });
+    const edges = cluster.links(nodes);
 
-    var $states_enter = $states.enter().append('g').classed('state', true);
+    //move all nodes according to their breath
+    //var min = 1000;
+    //nodes.forEach((n: any) => min = Math.min(n.x, min));
+    //nodes.forEach((n: any) => n.x -= min);
+    var levelShift = [];
+    nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
+    //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
+
+    const $states = this.$node.select('g.states')
+      .selectAll('g.state').data(nodes, (d) => String(d.v.id));
+
+    var $states_enter = $states.enter().append('g').classed('state', true).attr({
+      transform: (d) => translate((<any>d).x, (<any>d).y)
+    });
     $states_enter.append('circle').attr({
-      r: 5
+      r: 5,
     }).on('click', (d) => graph.jumpTo(d.v));
     $states
       .classed('act', (d) => d.v === graph.act)
@@ -249,21 +269,21 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       });
 
     $states.transition().attr({
-      transform: (d) => translate(d.x, d.y)
+      transform: (d) => translate((<any>d).x, (<any>d).y)
     });
 
     //this.renderNode($states, cmode.getMode(), nodes);
 
     $states.exit().remove();
 
-    var $lines = this.$node.select('g.actions').selectAll('path.action').data(edges);
-     $lines.enter().append('path').classed('action', true).attr({
-     }).append('title');
-     $lines.attr({
-       d: (d) => this.line([d.s, d.t]),
-      'class': (d) => 'action '+d.v.meta.category
-     }).select('title').text((d) => d.v.meta.name);
-     $lines.exit().remove();
+    var $lines = this.$node.select('g.actions').selectAll('path.action').data(edges, (d) => d.source.v.id + '_'+d.target.v.id);
+    $lines.enter().append('path').classed('action', true).attr({}).append('title');
+    $lines.transition().attr({
+      d: (d: any) => this.line([d.source, d.target]),
+      'class': (d) => 'action ' //+d.v.meta.category
+    }); //.select('title').text((d) => ''); //d.v.meta.name);
+    //$lines.delay(100).attr('opacity', 1);
+    $lines.exit().remove();
   }
 
   private renderNode($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {

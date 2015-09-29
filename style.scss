@@ -75,6 +75,7 @@ $select-color: orange;
 
   path {
     fill: none;
+    stroke: black;
   }
 
   g.state {
@@ -85,26 +86,26 @@ $select-color: orange;
     }
 
     circle {
-      fill: gray;
-      opacity: 0.6;
+      fill: #bbbbbb;
     }
 
     &.act {
-      opacity: 1;
       circle {
-       fill: lightgray;
+       fill: darkgray;
+       stroke: black;
       }
     }
 
     &.past {
-      opacity: 1;
       text {
         color: darkgray;
       }
     }
 
     &.future {
-      opacity: 0.8;
+      circle {
+        fill: lightgray;
+      }
       text {
         font-style: italic;
       }
