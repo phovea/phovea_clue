@@ -241,11 +241,12 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     const edges = cluster.links(nodes);
 
     //move all nodes according to their breath
-    //var min = 1000;
-    //nodes.forEach((n: any) => min = Math.min(n.x, min));
-    //nodes.forEach((n: any) => n.x -= min);
-    var levelShift = [];
-    nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
+    var min = 1000;
+    nodes.forEach((n: any) => min = Math.min(n.x, min));
+    nodes.forEach((n: any) => n.x -= min);
+
+    //var levelShift = [];
+    //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
     //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
 
     const $states = this.$node.select('g.states')
@@ -272,7 +273,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       transform: (d) => translate((<any>d).x, (<any>d).y)
     });
 
-    //this.renderNode($states, cmode.getMode(), nodes);
+    this.renderNode($states, cmode.getMode());
 
     $states.exit().remove();
 
@@ -286,10 +287,10 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     $lines.exit().remove();
   }
 
-  private renderNode($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
+  private renderNode($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
 
-    this.renderLabel($states, act);
-    this.renderNeighbors($states, act, nodes);
+    //this.renderLabel($states, act);
+    //this.renderNeighbors($states, act, nodes);
   }
 
   private renderLabel($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
