@@ -55,7 +55,7 @@ main {
 
 $select-color: orange;
 
-.select-selected {
+/*.select-selected {
   //svg variant
   stroke: $select-color !important;
   stroke-width: 1px;
@@ -65,7 +65,7 @@ $select-color: orange;
   //html variant
   border: 1px solid $select-color !important;
   background-color: $select-color !important;
-}
+}*/
 
 .provenance-simple-vis {
   line {
