@@ -30,6 +30,17 @@
         }
       ]
     },
+    "products": [
+      {
+        "name": "CLUE Demo",
+        "type": "python",
+        "app": "clue_demo",
+        "plugins": [
+          "clue_demo",
+          "caleydo_server"
+        ]
+      }
+    ],
     "dependencies": {
       "web": {
         "d3": "~3.5.5"
