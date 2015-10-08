@@ -9,7 +9,6 @@ import provenance = require('../caleydo_provenance/main');
 import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
-import $ = require('jquery');
 
 function translate(x = 0, y = 0) {
   return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
@@ -64,44 +63,6 @@ interface IEdge {
  }
  */
 
-
-function layout(states:provenance.StateNode[], space:number):(s:provenance.StateNode) => number {
-  var scale = d3.scale.ordinal<number>().domain(states.map((s) => String(s.id))),
-    l = states.length,
-    diff = 30;
-  if (l * diff < space) {
-    scale.range(d3.range(10, 10 + l * diff, diff));
-  } else {
-    //some linear stretching
-  }
-  //target
-  //.rangeRoundPoints([0, space]);
-  return (s) => scale(String(s.id));
-}
-
-function layoutGraph(path:provenance.StateNode[]): { nodes: INode[]; edges: IEdge[] } {
-  var nodes = [], edges= [], last = null;
-  path.forEach((p, i) => {
-    var n = { x: 0, y: i * 20, v : p };
-    nodes.push(n);
-    if (last) {
-      var actions = last.v.next.filter((a) => a.inverses == null);
-      actions = actions.sort((a,b) => a.resultsIn === p ? -1 : (b.resultsIn === p ? 1 : a.name.localeCompare(b.name)));
-      edges = edges.concat(actions.map((a, j) => {
-        if (j > 0) {
-          var n2 = {x: j * 20, y: i * 20, v: a.resultsIn};
-          nodes.push(n2);
-        }
-        return ({ s: last, t : (j > 0 ? n2 : n), v: a});
-      }));
-    }
-    last = n;
-  });
-  return {
-    nodes: nodes,
-    edges: edges
-  };
-}
 
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
@@ -230,14 +191,14 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     this.$node.attr('width', this.width);
 
     const root = graph.states[0];
-    const cluster = d3.layout.tree<{ v : provenance.StateNode }>()
+    const cluster = d3.layout.tree<INode>()
       .nodeSize([15,15])
       //.separation(() => 1)
       .sort((a,b) => (path.indexOf(a.v) >= 0 ? -1 : (path.indexOf(b.v) >= 0 ? 1 : a.v.name.localeCompare(b.v.name))))
-      .children((n) => n.v.next.filter((a) => a.inverses == null).map((a) => ({ v : a.resultsIn })));
+      .children((n) => n.v.next.filter((a) => a.inverses == null).map((a) => ({ v : a.resultsIn, x: 0, y: 0 })));
 
     //const layout = layoutGraph(path);
-    const nodes = cluster({ v : root });
+    const nodes = cluster({ v : root, x: 0, y: 0 });
     const edges = cluster.links(nodes);
 
     //move all nodes according to their breath
@@ -256,7 +217,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       transform: (d) => translate((<any>d).x, (<any>d).y)
     });
     $states_enter.append('circle').attr({
-      r: 5,
+      r: 5
     }).on('click', (d) => graph.jumpTo(d.v));
     $states
       .classed('act', (d) => d.v === graph.act)
@@ -293,7 +254,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     //this.renderNeighbors($states, act, nodes);
   }
 
-  private renderLabel($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
+  /*private renderLabel($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
     const base = $states.selectAll('text.label');
     if (act >= cmode.ECLUEMode.Presentation) {
       base.remove();
@@ -367,6 +328,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     });
     $neighbors.exit().remove();
   }
+  */
 }
 
 export function create(data:provenance.ProvenanceGraph, parent:Element, options = {}) {
