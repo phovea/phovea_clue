@@ -71,7 +71,7 @@ function isSmallMode() {
 
 function getWidth() {
   const m = cmode.getMode();
-  return 35 + Math.round(m.authoring*300);
+  return 40 + Math.round(m.authoring*300);
 }
 
 
@@ -120,7 +120,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get rawSize():[number, number] {
-    return [this.width, 800];
+    return [this.width, 500];
   }
 
   get node() {

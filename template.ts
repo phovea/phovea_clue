@@ -55,7 +55,15 @@ export class CLUEWrapper extends events.EventHandler {
         }
       ]
     });
-    this.initMenu();
+
+    {
+      let div = <HTMLElement>document.createElement('div');
+       this.header.insertCustomRightMenu(div);
+      div.classList.add('nav');
+      div.classList.add('navbar-nav');
+      div.classList.add('navbar-right');
+      div.id = 'modeselector';
+    }
 
     this.graph.on('sync_start,sync', (event: events.IEvent) => {
       d3.select('*[data-header="options"] span.glyphicon').classed('fa-spin', event.type !== 'sync');
@@ -82,36 +90,50 @@ export class CLUEWrapper extends events.EventHandler {
     });
 
     {
+      let new_ = cmode.getMode();
       $('main').attr('data-clue', cmode.getMode().toString());
+      $('nav').css('background-color', d3.rgb(255*new_.exploration, 255*new_.authoring, 255*new_.presentation));
       const $right = $('aside.right');
-      $right.css('width', story.width + 'px');
+      if (new_.presentation > 0.8) {
+          $right.hide(); //({width: 'hide'});
+        } else {
+          $right.show().css({width: story.width + 'px'});
+        }
       const $left = $('aside.left');
-      if (cmode.getMode().exploration < 0.8) {
+      if (new_.exploration < 0.8) {
         $left.hide();
       } else {
         $left.show();
       }
+      const $footer = $('footer');
+      if (new_.presentation < 0.3) {
+        $footer.hide();
+      } else {
+        $footer.show();
+      }
       this.propagate(cmode, 'modeChanged');
-      this.fire('modeChanged', cmode.getMode());
+      this.fire('modeChanged', new_);
       cmode.on('modeChanged', (event, new_) => {
         $('main').attr('data-clue', new_.toString());
-        $right.animate({width: story.width + 'px'});
-        if (new_.exploration < 0.8) {
-          $left.animate({width: 'hide'});
+        $('nav').css('background-color', d3.rgb(255*new_.exploration, 255*new_.authoring, 255*new_.presentation));
+        if (new_.presentation > 0.8) {
+          $right.hide(); //({width: 'hide'});
         } else {
-          $left.animate({width: 'show'});
+          $right.show().css({width: story.width + 'px'});
+        }
+        if (new_.exploration < 0.8) {
+          $left.hide(); //({width: 'hide'});
+        } else {
+          $left.show(); //({width: 'show'});
+        }
+        if (new_.presentation < 0.3) {
+          $footer.hide();
+        } else {
+          $footer.show();
         }
       });
     }
-  }
 
-  private initMenu() {
-    {
-      let helper = document.querySelector('#menuHelper');
-      while(helper.firstChild) {
-        this.header.mainMenu.appendChild(helper.firstChild);
-      }
-    }
     d3.select('#attachScreenshot').on('click', () => {
       const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
       const bounds = C.bounds(main);
@@ -131,30 +153,10 @@ export class CLUEWrapper extends events.EventHandler {
       d3.event.preventDefault();
       d3.event.stopPropagation();
     });
+    d3.select('#undoStep').on('click', () => {
+      this.graph.undo();
+    });
 
-    this.addPlayerMenu();
-  }
-
-  private addPlayerMenu() {
-    {
-      let ul = <HTMLElement>document.createElement('ul');
-       this.header.insertCustomRightMenu(ul);
-      d3.select(ul).attr({
-        'class' : 'nav navbar-nav navbar-right',
-        id: 'player_controls'
-      }).html('<li><a data-player="play" href="#"><i class="fa fa-play" title="Play"></i></a></li>\n'+
-          '<li><a data-player="backward" href="#" class="disabled"><i class="fa fa-step-backward" title="Step Backward"></i></a></li>\n'+
-          '<li><a data-player="stop" href="#" class="disabled"><i class="fa fa-stop" title="Stop"></i></a></li>\n'+
-          '<li><a data-player="forward" href="#" class="disabled"><i class="fa fa-step-forward" title="Step Forward"></i></a></li>\n');
-    }
-    {
-      let div = <HTMLElement>document.createElement('div');
-       this.header.insertCustomRightMenu(div);
-      div.classList.add('nav');
-      div.classList.add('navbar-nav');
-      div.classList.add('navbar-right');
-      div.id = 'modeselector';
-    }
   }
 
   jumpToStored() {
