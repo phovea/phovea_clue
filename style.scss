@@ -50,8 +50,16 @@ main {
 
 #modeselector {
   color: white;
-  width: 14em;
+  width: 30em;
+
+
+  .clue_slidermodeselector {
+    label {
+      margin: 0 5px;
+    }
+  }
 }
+
 
 $select-color: orange;
 

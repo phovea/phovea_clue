@@ -86,14 +86,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get width() {
-    switch (cmode.getMode()) {
-      case cmode.ECLUEMode.Presentation:
-        return 20;
-      case cmode.ECLUEMode.Interactive_Story:
-        return 120;
-      default:
-        return 300;
-    }
+    const m = cmode.getMode();
+    return 20 + Math.round(m.authoring*300);
   }
 
   private bind() {
@@ -234,7 +228,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       transform: (d) => translate((<any>d).x, (<any>d).y)
     });
 
-    this.renderNode($states, cmode.getMode());
+    this.renderNode($states));
 
     $states.exit().remove();
 
@@ -248,7 +242,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     $lines.exit().remove();
   }
 
-  private renderNode($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
+  private renderNode($states: d3.Selection<INode>) {
 
     //this.renderLabel($states, act);
     //this.renderNeighbors($states, act, nodes);

@@ -25,13 +25,13 @@ elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
     elems.graph.push(cmds.createAddCmd(elems.$main_ref, data_ref, pos));
   });
   var $left_data = $(databrowserElem);
-    if (cmode.getMode() > cmode.ECLUEMode.Exploration) {
+    if (cmode.getMode().exploration < 0.8) {
       $left_data.hide();
     } else {
       $left_data.show();
     }
   elems.on('modeChanged', (event, new_) => {
-    if (new_ > cmode.ECLUEMode.Exploration) {
+    if (new_.exploration < 0.8) {
       $left_data.animate({height: 'hide'});
     } else {
       $left_data.animate({height: 'show'});

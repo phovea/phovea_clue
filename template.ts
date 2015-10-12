@@ -82,11 +82,11 @@ export class CLUEWrapper extends events.EventHandler {
     });
 
     {
-      $('main').attr('data-clue', cmode.ECLUEMode[cmode.getMode()]);
+      $('main').attr('data-clue', cmode.getMode().toString());
       const $right = $('aside.right');
       $right.css('width', story.width + 'px');
       const $left = $('aside.left');
-      if (cmode.getMode() >= cmode.ECLUEMode.Interactive_Story) {
+      if (cmode.getMode().exploration < 0.8) {
         $left.hide();
       } else {
         $left.show();
@@ -94,9 +94,9 @@ export class CLUEWrapper extends events.EventHandler {
       this.propagate(cmode, 'modeChanged');
       this.fire('modeChanged', cmode.getMode());
       cmode.on('modeChanged', (event, new_) => {
-        $('main').attr('data-clue', cmode.ECLUEMode[new_]);
+        $('main').attr('data-clue', new_.toString());
         $right.animate({width: story.width + 'px'});
-        if (new_ >= cmode.ECLUEMode.Interactive_Story) {
+        if (new_.exploration < 0.8) {
           $left.animate({width: 'hide'});
         } else {
           $left.animate({width: 'show'});
@@ -172,7 +172,7 @@ export class CLUEWrapper extends events.EventHandler {
     this.graph.jumpTo(this.graph.states[0]).then(() => {
       this.graph.clear();
       this.$main_ref = this.graph.findOrAddObject(this.$main, 'Application', 'visual');
-      cmode.setMode(cmode.ECLUEMode.Exploration);
+      cmode.setMode(cmode.modes.Exploration);
     });
   }
 }
