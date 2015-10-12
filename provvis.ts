@@ -176,8 +176,19 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       'class': 'provenance-simple-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
-    //var $defs = $svg.append('defs');
-    var $g = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')').append('g').attr('transform','translate(20,20)');
+    var $base = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')').append('g');
+    $base.call(d3.behavior.zoom().scaleExtent([1, 8]).on('zoom', () => {
+      const event = <any>d3.event;
+      $g.attr('transform', 'translate(' + event.translate + ')scale(' + event.scale + ')translate(20,20)');
+    }));
+    $base.append('rect').attr({
+      width: '100%',
+      height: '100%',
+    }).style({
+      fill: 'none',
+      'pointer-events':'all'
+    });
+    var $g = $base.append('g').attr('transform','translate(20,20)');
 
     $g.append('g').classed('actions', true);
     $g.append('g').classed('states', true);
