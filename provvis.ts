@@ -64,6 +64,17 @@ interface IEdge {
  */
 
 
+
+function isSmallMode() {
+  return cmode.getMode().authoring < 0.3;
+}
+
+function getWidth() {
+  const m = cmode.getMode();
+  return 35 + Math.round(m.authoring*300);
+}
+
+
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
@@ -86,8 +97,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get width() {
-    const m = cmode.getMode();
-    return 20 + Math.round(m.authoring*300);
+    return getWidth();
   }
 
   private bind() {
@@ -180,20 +190,24 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       path = provenance.findLatestPath(graph.act); //just the active path to the root
     //actions = path.slice(1).map((s) => s.resultsFrom[0]);
 
-
-
     this.$node.attr('width', this.width);
+    var nodes : INode[];
+    var edges : {source:INode; target: INode}[];
+    if (isSmallMode()) {
+      nodes = path.map((p,i) => ({v: p, x: 0, y: i*15}));
+      edges = nodes.slice(1).map((p,i) => ({source: nodes[i], target:p}));
+    } else {
+      const root = graph.states[0];
+      const cluster = d3.layout.tree<INode>()
+        .nodeSize([15, 15])
+        //.separation(() => 1)
+        //.sort((a, b) => (path.indexOf(a.v) >= 0 ? -1 : (path.indexOf(b.v) >= 0 ? 1 : a.v.name.localeCompare(b.v.name))))
+        .children((n) => n.v.next.filter((a) => a.inverses == null).map((a) => ({v: a.resultsIn, x: 0, y: 0})));
 
-    const root = graph.states[0];
-    const cluster = d3.layout.tree<INode>()
-      .nodeSize([15,15])
-      //.separation(() => 1)
-      .sort((a,b) => (path.indexOf(a.v) >= 0 ? -1 : (path.indexOf(b.v) >= 0 ? 1 : a.v.name.localeCompare(b.v.name))))
-      .children((n) => n.v.next.filter((a) => a.inverses == null).map((a) => ({ v : a.resultsIn, x: 0, y: 0 })));
-
-    //const layout = layoutGraph(path);
-    const nodes = cluster({ v : root, x: 0, y: 0 });
-    const edges = cluster.links(nodes);
+      //const layout = layoutGraph(path);
+      nodes = cluster({v: root, x: 0, y: 0});
+      edges = cluster.links(nodes);
+    }
 
     //move all nodes according to their breath
     var min = 1000;
@@ -228,7 +242,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       transform: (d) => translate((<any>d).x, (<any>d).y)
     });
 
-    this.renderNode($states));
+    this.renderNode($states);
 
     $states.exit().remove();
 

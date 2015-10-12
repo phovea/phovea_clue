@@ -48,6 +48,8 @@ main {
   }
 }
 
+$clue_triangle_width:30px;
+
 #modeselector {
   color: white;
   width: 30em;
@@ -56,6 +58,18 @@ main {
   .clue_slidermodeselector {
     label {
       margin: 0 5px;
+    }
+  }
+
+  .clue_trianglemodeselector {
+    circle.point {
+      fill: red;
+      cursor: crosshair;
+      stroke: lighten(red,0.3);
+      stroke-width: 2;
+    }
+    path {
+      fill: lightgray;
     }
   }
 }
