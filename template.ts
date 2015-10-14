@@ -18,6 +18,7 @@ import prov_sel = require('../caleydo_provenance/selection');
 import selection = require('../caleydo_d3/selectioninfo');
 import cmode = require('../caleydo_provenance/mode');
 import provvis = require('./provvis');
+import storyvis = require('./storyvis');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
@@ -78,7 +79,8 @@ export class CLUEWrapper extends events.EventHandler {
     selection.create(body.querySelector('#selectioninfo'));
     cmode.create(body.querySelector('#modeselector'));
 
-    const story = provvis.create(this.graph, body.querySelector('#clue'), {});
+    const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
+    const svis = storyvis.create(this.graph, body.querySelector('#story_vis'), {});
 
     new player.Player(this.graph, body.querySelector('#player_controls'));
 
@@ -90,49 +92,43 @@ export class CLUEWrapper extends events.EventHandler {
     });
 
     {
-      let new_ = cmode.getMode();
-      $('main').attr('data-clue', cmode.getMode().toString());
-      $('nav').css('background-color', d3.rgb(255*new_.exploration, 255*new_.authoring, 255*new_.presentation));
       const $right = $('aside.right');
-      if (new_.presentation > 0.8) {
-          $right.hide(); //({width: 'hide'});
-        } else {
-          $right.show().css({width: story.width + 'px'});
-        }
       const $left = $('aside.left');
-      if (new_.exploration < 0.8) {
-        $left.hide();
-      } else {
-        $left.show();
-      }
       const $footer = $('footer');
-      if (new_.presentation < 0.3) {
-        $footer.hide();
-      } else {
-        $footer.show();
-      }
       this.propagate(cmode, 'modeChanged');
-      this.fire('modeChanged', new_);
-      cmode.on('modeChanged', (event, new_) => {
+      let update = (new_: cmode.CLUEMode) => {
         $('main').attr('data-clue', new_.toString());
-        $('nav').css('background-color', d3.rgb(255*new_.exploration, 255*new_.authoring, 255*new_.presentation));
+        $('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
         if (new_.presentation > 0.8) {
           $right.hide(); //({width: 'hide'});
         } else {
-          $right.show().css({width: story.width + 'px'});
+          $right.show().css({width: pvis.width + 'px'});
         }
         if (new_.exploration < 0.8) {
           $left.hide(); //({width: 'hide'});
         } else {
           $left.show(); //({width: 'show'});
         }
-        if (new_.presentation < 0.3) {
+        if (new_.exploration > 0.2) {
           $footer.hide();
         } else {
           $footer.show();
         }
-      });
+        if (new_.authoring > 0.8) {
+          $('#story_toolbar, #story_vis').hide();
+        } else {
+          $('#story_toolbar, #story_vis').show();
+        }
+      };
+      cmode.on('modeChanged', (event, new_) => update(new_));
+      this.fire('modeChanged', cmode.getMode());
+      update(cmode.getMode());
     }
+
+    d3.select('#story_toolbar button.fa-magic').on('click', () => {
+      const selected = this.graph.selectedStates();
+      const story = this.graph.extractStory(selected);
+    });
 
     d3.select('#attachScreenshot').on('click', () => {
       const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));

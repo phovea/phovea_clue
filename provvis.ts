@@ -5,6 +5,7 @@
 
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
+import idtypes = require('../caleydo_core/idtype');
 import provenance = require('../caleydo_provenance/main');
 import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
@@ -63,23 +64,25 @@ interface IEdge {
  }
  */
 
-
-
-function isSmallMode() {
-  return cmode.getMode().authoring < 0.3;
-}
-
-function getWidth() {
-  const m = cmode.getMode();
-  return 40 + Math.round(m.authoring*300);
-}
-
+const modeFeatures = {
+  isSmallMode: () => cmode.getMode().authoring < 0.3,
+  getWidth: () => {
+    const m = cmode.getMode();
+    return 40 + Math.round(m.authoring * 300);
+  },
+  storySelectionMode: () => cmode.getMode().authoring > 0.8,
+  showStorySelection: () => cmode.getMode().authoring > 0.8
+};
 
 export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
-  private onStateAdded = (event: any, state: provenance.StateNode) => {
+  private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
+  };
+  private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
+    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.State).filter(this.data.states);
+    this.$node.selectAll('g.state').classed('select-'+type,(d: INode) => selectedStates.indexOf(d.v) >= 0);
   };
 
   private line = d3.svg.line<{ x: number; y : number}>().interpolate('step-after').x((d) => d.x).y((d) => d.y);
@@ -97,12 +100,13 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   get width() {
-    return getWidth();
+    return modeFeatures.getWidth();
   }
 
   private bind() {
     this.data.on('switch_state,clear', this.trigger);
     this.data.on('add_state', this.onStateAdded);
+    this.data.on('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
     });
@@ -113,6 +117,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     super.destroy();
     this.data.off('switch_state,clear', this.trigger);
     this.data.off('add_state', this.onStateAdded);
+    this.data.off('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
       s.off('setAttr', this.trigger);
     });
@@ -176,7 +181,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       'class': 'provenance-simple-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
-    var $base = $svg.append('g').attr('transform', 'scale('+this.options.scale[0]+','+this.options.scale[1]+')').append('g');
+    var $base = $svg.append('g').attr('transform', 'scale(' + this.options.scale[0] + ',' + this.options.scale[1] + ')').append('g');
     $base.call(d3.behavior.zoom().scaleExtent([1, 8]).on('zoom', () => {
       const event = <any>d3.event;
       $g.attr('transform', 'translate(' + event.translate + ')scale(' + event.scale + ')translate(20,20)');
@@ -186,14 +191,23 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
       height: '100%',
     }).style({
       fill: 'none',
-      'pointer-events':'all'
+      'pointer-events': 'all'
     });
-    var $g = $base.append('g').attr('transform','translate(20,20)');
+    var $g = $base.append('g').attr('transform', 'translate(20,20)');
 
+    $g.append('g').classed('stories', true);
     $g.append('g').classed('actions', true);
     $g.append('g').classed('states', true);
 
     return $svg;
+  }
+
+  private onStateClick(d: INode) {
+    this.data.selectState(d.v, idtypes.toSelectOperation(d3.event));
+
+    if (!modeFeatures.storySelectionMode) {
+      this.data.jumpTo(d.v);
+    }
   }
 
   update() {
@@ -202,11 +216,11 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     //actions = path.slice(1).map((s) => s.resultsFrom[0]);
 
     this.$node.attr('width', this.width);
-    var nodes : INode[];
-    var edges : {source:INode; target: INode}[];
-    if (isSmallMode()) {
-      nodes = path.map((p,i) => ({v: p, x: 0, y: i*15}));
-      edges = nodes.slice(1).map((p,i) => ({source: nodes[i], target:p}));
+    var nodes:INode[];
+    var edges:{source:INode; target: INode}[];
+    if (modeFeatures.isSmallMode()) {
+      nodes = path.map((p, i) => ({v: p, x: 0, y: i * 15}));
+      edges = nodes.slice(1).map((p, i) => ({source: nodes[i], target: p}));
     } else {
       const root = graph.states[0];
       const cluster = d3.layout.tree<INode>()
@@ -222,8 +236,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     //move all nodes according to their breath
     var min = 1000;
-    nodes.forEach((n: any) => min = Math.min(n.x, min));
-    nodes.forEach((n: any) => n.x -= min);
+    nodes.forEach((n:any) => min = Math.min(n.x, min));
+    nodes.forEach((n:any) => n.x -= min);
 
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
@@ -237,8 +251,12 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     });
     $states_enter.append('circle').attr({
       r: 5
-    }).on('click', (d) => graph.jumpTo(d.v));
+    }).on('click', this.onStateClick.bind(this))
+      .on('mouseenter', (d) => graph.selectState(d.v, idtypes.SelectOperation.SET, idtypes.hoverSelectionType))
+      .on('mouseleave', (d) => graph.selectState(d.v, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType));
+
     $states
+      .attr('data-id', (d) => d.v.id)
       .classed('act', (d) => d.v === graph.act)
       .classed('past', (d) => {
         var r = path.indexOf(d.v);
@@ -257,97 +275,121 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     $states.exit().remove();
 
-    var $lines = this.$node.select('g.actions').selectAll('path.action').data(edges, (d) => d.source.v.id + '_'+d.target.v.id);
+    var $lines = this.$node.select('g.actions').selectAll('path.action').data(edges, (d) => d.source.v.id + '_' + d.target.v.id);
     $lines.enter().append('path').classed('action', true).attr({}).append('title');
     $lines.transition().attr({
-      d: (d: any) => this.line([d.source, d.target]),
+      d: (d:any) => this.line([d.source, d.target]),
       'class': (d) => 'action ' //+d.v.meta.category
     }); //.select('title').text((d) => ''); //d.v.meta.name);
     //$lines.delay(100).attr('opacity', 1);
     $lines.exit().remove();
+
+    if (modeFeatures.showStorySelection()) {
+      this.renderStories($states, nodes);
+    }
   }
 
-  private renderNode($states: d3.Selection<INode>) {
+  private renderStories($states: d3.Selection<INode>, nodes: INode[]) {
+    const stories : provenance.JumpToStoryNode[][] = this.data.getStories().map((story) => <provenance.JumpToStoryNode[]>story.filter((s) => s instanceof provenance.JumpToStoryNode));
+    const scale = d3.scale.category10();
+
+    const bak = <string>this.line.interpolate();
+    this.line.interpolate('basis');
+    var storyLines = stories.map((story,i) => {
+      const storyNodes = story.map((s) => nodes.filter((n) => n.v === s.state) [0]);
+      //mark the story nodes with their color stroke color
+      $states.filter((n) => storyNodes.indexOf(n) >= 0).style('stroke', scale(String(i)));
+      return storyNodes;
+    });
+    var $stories = this.$node.select('g.stories').selectAll('path.story').data(storyLines);
+    $stories.enter().append('path').classed('story',true);
+    $stories.attr('d', this.line);
+    $stories.style('stroke', (d,i) => scale(String(i)));
+    $stories.exit().remove();
+    this.line.interpolate(bak);
+  }
+
+  private renderNode($states:d3.Selection<INode>) {
 
     //this.renderLabel($states, act);
     //this.renderNeighbors($states, act, nodes);
   }
 
   /*private renderLabel($states: d3.Selection<INode>, act: cmode.ECLUEMode) {
-    const base = $states.selectAll('text.label');
-    if (act >= cmode.ECLUEMode.Presentation) {
-      base.remove();
-      return;
-    }
-    const $label = base.data((d) => [d]);
-    const $labels_enter = $label.enter().append('text').attr({
-      dx: 10,
-      dy: 3,
-      'class': 'label'
-    });
-    $labels_enter.append('tspan');
-    $labels_enter.append('tspan')
-      .attr('class', 'fa flags');
+   const base = $states.selectAll('text.label');
+   if (act >= cmode.ECLUEMode.Presentation) {
+   base.remove();
+   return;
+   }
+   const $label = base.data((d) => [d]);
+   const $labels_enter = $label.enter().append('text').attr({
+   dx: 10,
+   dy: 3,
+   'class': 'label'
+   });
+   $labels_enter.append('tspan');
+   $labels_enter.append('tspan')
+   .attr('class', 'fa flags');
 
-    $label.classed('flagged', (d) => (d.v.hasAttr('note') || d.v.hasAttr('screenshot')));
-    $label.select('tspan').text((d) => d.v.name);
-    $label.select('tspan.flags').text((d: INode) => (d.v.hasAttr('note') ? '\uf24a' : '') + (d.v.hasAttr('screenshot') ? '\uf030' : ''));
+   $label.classed('flagged', (d) => (d.v.hasAttr('note') || d.v.hasAttr('screenshot')));
+   $label.select('tspan').text((d) => d.v.name);
+   $label.select('tspan.flags').text((d: INode) => (d.v.hasAttr('note') ? '\uf24a' : '') + (d.v.hasAttr('screenshot') ? '\uf030' : ''));
 
-    $label.exit().style('opacity', 0.8).transition().style('opacity', 0).remove();
+   $label.exit().style('opacity', 0.8).transition().style('opacity', 0).remove();
 
-    var Jbase = $((<Element>$states.node()).parentNode);
-    (<any>Jbase.find('text.flagged')).popover({
-      trigger: 'hover',
-      placement: 'bottom',
-      title: function() {
-        return d3.select(this).datum().v.name;
-      },
-      container: 'body',
-      html: true,
-      content: function() {
-        const state : provenance.StateNode = d3.select(this).datum().v;
-        var r = '<div class="preview">';
-        if (state.hasAttr('screenshot')) {
-          r += `<img src="${state.getAttr('screenshot')}">`;
-        }
-        if (state.hasAttr('note')) {
-          r += `<pre>${state.getAttr('note')}</pre>`;
-        }
-        return r+'</div>';
-      }
-    });
-  }
-  private renderNeighbors($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
-    const base = $states.selectAll('g.neighbor');
-    if (act >= cmode.ECLUEMode.Interactive_Story) {
-      base.remove();
-      return;
-    }
-    const $neighbors = base.data<provenance.StateNode>((d, i) => {
-      const ns = d.v.nextStates.slice();
-      if (ns.length > 1 && i < nodes.length-1) {
-        let j = ns.indexOf(nodes[i + 1].v);
-        ns.splice(j, 1);
-        return ns;
-      }
-      return [];
-    });
-    const $neighbors_enter = $neighbors.enter().append('g').classed('neighbor',true);
-    $neighbors_enter.append('path');
-    $neighbors_enter.append('circle').attr({
-      r: 4
-    }).on('click', (d) => this.data.jumpTo(d));
+   var Jbase = $((<Element>$states.node()).parentNode);
+   (<any>Jbase.find('text.flagged')).popover({
+   trigger: 'hover',
+   placement: 'bottom',
+   title: function() {
+   return d3.select(this).datum().v.name;
+   },
+   container: 'body',
+   html: true,
+   content: function() {
+   const state : provenance.StateNode = d3.select(this).datum().v;
+   var r = '<div class="preview">';
+   if (state.hasAttr('screenshot')) {
+   r += `<img src="${state.getAttr('screenshot')}">`;
+   }
+   if (state.hasAttr('note')) {
+   r += `<pre>${state.getAttr('note')}</pre>`;
+   }
+   return r+'</div>';
+   }
+   });
+   }
+   private renderNeighbors($states: d3.Selection<INode>, act: cmode.ECLUEMode, nodes: INode[]) {
+   const base = $states.selectAll('g.neighbor');
+   if (act >= cmode.ECLUEMode.Interactive_Story) {
+   base.remove();
+   return;
+   }
+   const $neighbors = base.data<provenance.StateNode>((d, i) => {
+   const ns = d.v.nextStates.slice();
+   if (ns.length > 1 && i < nodes.length-1) {
+   let j = ns.indexOf(nodes[i + 1].v);
+   ns.splice(j, 1);
+   return ns;
+   }
+   return [];
+   });
+   const $neighbors_enter = $neighbors.enter().append('g').classed('neighbor',true);
+   $neighbors_enter.append('path');
+   $neighbors_enter.append('circle').attr({
+   r: 4
+   }).on('click', (d) => this.data.jumpTo(d));
 
-    $neighbors.select('circle').attr({
-      cx : (d,i ) => -10 + -(i) * 5,
-      cy : 2
-    });
-    $neighbors.select('path').attr({
-      d: (d, i, j?) => this.line([{ x : 0, y: 0}, { x : -10 + -(i) * 5, y : 2}])
-    });
-    $neighbors.exit().remove();
-  }
-  */
+   $neighbors.select('circle').attr({
+   cx : (d,i ) => -10 + -(i) * 5,
+   cy : 2
+   });
+   $neighbors.select('path').attr({
+   d: (d, i, j?) => this.line([{ x : 0, y: 0}, { x : -10 + -(i) * 5, y : 2}])
+   });
+   $neighbors.exit().remove();
+   }
+   */
 }
 
 export function create(data:provenance.ProvenanceGraph, parent:Element, options = {}) {

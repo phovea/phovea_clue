@@ -33,6 +33,15 @@ aside {
 
 footer {
   min-height: 3em;
+  > div {
+    display: inline-block;
+  }
+}
+
+.selectioninfo {
+  .no-selection-selected.no-selection-hovered {
+    display: none;
+  }
 }
 
 main {
@@ -80,6 +89,7 @@ $clue_triangle_width:30px;
 
 
 $select-color: orange;
+$hover-color: #ffdd05;
 
 /*.select-selected {
   //svg variant
@@ -107,8 +117,15 @@ $select-color: orange;
   g.state {
     cursor: pointer;
 
-    circle:hover {
-      fill: $select-color;
+    &.select-selected {
+      circle {
+        fill: $select-color
+      }
+    }
+    &.select-hovered {
+      circle {
+        fill: $hover-color;
+      }
     }
 
     circle {
@@ -194,5 +211,22 @@ $select-color: orange;
     width: 230px;
     height: auto;
     border: 1px solid black;
+  }
+}
+
+.provenance-simple-story-vis {
+  position: relative;
+
+  path.time {
+    stroke: darkgray;
+    stroke-width: 2;
+  }
+
+  circle.story {
+    fill: black;
+
+    &:hover {
+      fill: $hover-color;
+    }
   }
 }

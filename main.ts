@@ -32,9 +32,9 @@ elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
     }
   elems.on('modeChanged', (event, new_) => {
     if (new_.exploration < 0.8) {
-      $left_data.animate({height: 'hide'});
+      $left_data.hide(); //.animate({height: 'hide'});
     } else {
-      $left_data.animate({height: 'show'});
+      $left_data.show(); //animate({height: 'show'});
     }
   });
   elems.jumpToStored();
