@@ -86,24 +86,24 @@ export class CLUEWrapper extends events.EventHandler {
     this.$main = d3.select(body).select('main');
     this.$main_ref = this.graph.findOrAddObject(this.$main, 'Application', 'visual');
 
-    function renderText(overlay: prov.TextStoryNode) {
+    const renderText = (overlay: prov.TextStoryNode) => {
       return new Promise((resolve) => {
-        var $div = this.$main.append('div').classed('overlay', true).attr('data-id',overlay.id).style('opacity', 0);
-        $div.append('span').text(overlay.text);
-        $div.transition().duration(100).style('opacity', 1).on('end', () => {
+        var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id',overlay.id).style('opacity', 0);
+        $div.append('h1').text(overlay.text);
+        $div.transition().duration(100).style('opacity', 1).each('end', () => {
           resolve($div);
         });
       });
-    }
+    };
 
-    function hideText(overlay: prov.TextStoryNode) {
+    const hideText = (overlay: prov.TextStoryNode) => {
       return new Promise((resolve) => {
-        var $div = this.$main.select(`div.overlay[data-id="${overlay.id}"]`);
-        $div.transition().duration(100).style('opacity', 0).on('end', () => {
+        var $div = this.$main.select(`div.text-overlay[data-id="${overlay.id}"]`);
+        $div.transition().duration(100).style('opacity', 0).each('end', () => {
           resolve();
         }).remove();
       });
-    }
+    };
 
     new player.Player(this.graph, body.querySelector('#player_controls'), {
       renderOverlay: renderText,
@@ -149,7 +149,7 @@ export class CLUEWrapper extends events.EventHandler {
     }
 
     d3.select('#story_toolbar button.fa-magic').on('click', () => {
-      const selected = this.graph.selectedStates();
+      const selected = pvis.getAnClearStorySelection();
       const story = this.graph.extractStory(selected);
     });
 

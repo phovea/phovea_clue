@@ -48,9 +48,22 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
 
+  private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
+    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Story).filter(this.data.stories);
+    this.$node.selectAll('g.story').classed('select-'+type,(d: provenance.AStoryNode) => selectedStates.indexOf(d) >= 0);
+  };
+
   private options = {
     scale: [1, 1],
     rotate: 0
+  };
+
+  private story: provenance.AStoryNode;
+
+
+  private chooseStory = (event: any, story: provenance.AStoryNode) => {
+    this.story = story;
+    this.update();
   };
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, options:any) {
@@ -59,17 +72,23 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
     this.bind();
+    const s = data.getStoryChains();
+    this.story = s[s.length-1];
     this.update();
   }
 
   private bind() {
-    this.data.on('extract_story,clear', this.trigger);
+    this.data.on('extract_story', this.chooseStory);
+    this.data.on('add_story,clear', this.trigger);
+    this.data.on('select', this.onSelectionChanged);
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('extract_story,clear', this.trigger);
+    this.data.off('extract_story', this.chooseStory);
+    this.data.off('add_story,clear', this.trigger);
+    this.data.off('select', this.onSelectionChanged);
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -137,24 +156,24 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
   }
 
   update() {
-    const graph = this.data,
-      stories = graph.getStoryChains();
-    const story = toPath(stories[stories.length-1]);
+    const graph = this.data;
+    const story = toPath(this.story);
 
-    this.$node.attr('width', story.length * 50);
+    this.$node.attr('width', (story.length * 70+4)*1.2);
 
     const to_id = (d) => String(d.id);
 
-    var scale = d3.scale.ordinal().domain(story.map(to_id)).rangeRoundPoints([20,story.length * 50-20]);
+    var scale = d3.scale.ordinal().domain(story.map(to_id)).rangeRoundPoints([0,story.length * 70+40], .4);
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
     //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
 
-    const $states = this.$node.selectAll('circle.story').data(story, to_id);
+    const $states = this.$node.selectAll('g.story').data(story, to_id);
 
-    var $states_enter = $states.enter().append('circle').classed('story', true).attr({
-      cx: (d) => scale(to_id(d)),
-      cy: 20,
+    var $states_enter = $states.enter().append('g').classed('story', true).attr({
+      transform: (d) => translate(scale(to_id(d)), 20)
+    });
+    $states_enter.append('circle').attr({
       r: 5
     }).on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) =>  {
@@ -169,6 +188,14 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
         }
         graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
+    var mm_ss = d3.time.format("%M:%S:%L");
+    $states_enter.append('text').attr({
+      y: 15
+    });
+
+    $states.attr({
+      transform: (d) => translate(scale(to_id(d)), 20)
+    }).select('text').text((d) => mm_ss(new Date(d.duration)));
 
     $states.exit().remove();
 

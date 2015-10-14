@@ -85,6 +85,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     this.$node.selectAll('g.state').classed('select-'+type,(d: INode) => selectedStates.indexOf(d.v) >= 0);
   };
 
+  private storySelection : INode[] = null;
+
   private line = d3.svg.line<{ x: number; y : number}>().interpolate('step-after').x((d) => d.x).y((d) => d.y);
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
@@ -192,7 +194,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }).style({
       fill: 'none',
       'pointer-events': 'all'
-    });
+    }).on('click', this.onBackgroundClick.bind(this));
     var $g = $base.append('g').attr('transform', 'translate(20,20)');
 
     $g.append('g').classed('stories', true);
@@ -203,11 +205,34 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private onStateClick(d: INode) {
+    d3.event.stopPropagation();
     this.data.selectState(d.v, idtypes.toSelectOperation(d3.event));
 
-    if (!modeFeatures.storySelectionMode) {
+    if (!modeFeatures.storySelectionMode()) {
       this.data.jumpTo(d.v);
+    } else {
+      if (this.storySelection == null) {
+        this.storySelection = [d];
+      } else if (this.storySelection[this.storySelection.length-1] === d) {
+        this.storySelection.splice(this.storySelection.length-1,1);
+      } else {
+        this.storySelection.push(d);
+      }
+      this.update();
     }
+  }
+
+  private onBackgroundClick() {
+    this.storySelection = null;
+  }
+
+  getAnClearStorySelection() {
+    if (!this.storySelection) {
+      return [];
+    }
+    const r = this.storySelection.map((d) => d.v);
+    this.storySelection = null;
+    return r;
   }
 
   update() {
@@ -235,9 +260,9 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }
 
     //move all nodes according to their breath
-    var min = 1000;
-    nodes.forEach((n:any) => min = Math.min(n.x, min));
-    nodes.forEach((n:any) => n.x -= min);
+    //var min = 1000;
+    //nodes.forEach((n:any) => min = Math.min(n.x, min));
+    //nodes.forEach((n:any) => n.x -= min);
 
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
@@ -290,17 +315,21 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private renderStories($states: d3.Selection<INode>, nodes: INode[]) {
-    const stories : provenance.JumpToStoryNode[][] = this.data.getStories().map((story) => <provenance.JumpToStoryNode[]>story.filter((s) => s instanceof provenance.JumpToStoryNode));
+    const stories:provenance.JumpToStoryNode[][] = this.data.getStories().map((story) => <provenance.JumpToStoryNode[]>story.filter((s) => s instanceof provenance.JumpToStoryNode));
     const scale = d3.scale.category10();
 
     const bak = <string>this.line.interpolate();
     this.line.interpolate('basis');
-    var storyLines = stories.map((story,i) => {
+    var storyLines = stories.map((story, i) => {
       const storyNodes = story.map((s) => nodes.filter((n) => n.v === s.state) [0]);
       //mark the story nodes with their color stroke color
       $states.filter((n) => storyNodes.indexOf(n) >= 0).style('stroke', scale(String(i)));
       return storyNodes;
     });
+    if (this.storySelection != null && this.storySelection.length > 0) {
+      $states.filter((n) => this.storySelection.indexOf(n) >= 0).style('stroke', scale(String(storyLines.length)));
+      storyLines.push(this.storySelection);
+    }
     var $stories = this.$node.select('g.stories').selectAll('path.story').data(storyLines);
     $stories.enter().append('path').classed('story',true);
     $stories.attr('d', this.line);
