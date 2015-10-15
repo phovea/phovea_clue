@@ -319,21 +319,42 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     const scale = d3.scale.category10();
 
     const bak = <string>this.line.interpolate();
-    this.line.interpolate('basis');
+    this.line.interpolate('bundle');
     var storyLines = stories.map((story, i) => {
       const storyNodes = story.map((s) => nodes.filter((n) => n.v === s.state) [0]);
       //mark the story nodes with their color stroke color
-      $states.filter((n) => storyNodes.indexOf(n) >= 0).style('stroke', scale(String(i)));
+      $states.filter((n) => storyNodes.indexOf(n) >= 0).style('stroke', scale(String(i+1)));
       return storyNodes;
     });
     if (this.storySelection != null && this.storySelection.length > 0) {
-      $states.filter((n) => this.storySelection.indexOf(n) >= 0).style('stroke', scale(String(storyLines.length)));
+      $states.filter((n) => this.storySelection.indexOf(n) >= 0).style('stroke', scale(String(storyLines.length+1)));
       storyLines.push(this.storySelection);
     }
+
+    function extend(d: INode[]) {
+      if (d.length <= 1) {
+        return d;
+      }
+      var r = [d[0]];
+      d.slice(1).forEach((di,i) => {
+        const prev = d[i];
+        var arrow = [di.x - prev.x, di.y - prev.y];
+        const l = Math.sqrt(arrow[0]*arrow[0]+arrow[1]*arrow[1]);
+        var middle = {
+          x: (prev.x + di.x) * 0.5 + arrow[1] / l * 20,
+          y: (prev.y + di.y) * 0.5 + -arrow[0] / l * 20,
+          v: null
+        };
+        r.push(middle);
+        r.push(di);
+      });
+      return r;
+    }
+
     var $stories = this.$node.select('g.stories').selectAll('path.story').data(storyLines);
     $stories.enter().append('path').classed('story',true);
-    $stories.attr('d', this.line);
-    $stories.style('stroke', (d,i) => scale(String(i)));
+    $stories.attr('d', (d) => this.line(extend(d)));
+    $stories.style('stroke', (d,i) => scale(String(i+1)));
     $stories.exit().remove();
     this.line.interpolate(bak);
   }
