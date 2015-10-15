@@ -28,7 +28,7 @@ export class Renderer {
         height: (d: prov.IStateAnnotation) => d.size ? d.size[1]+'px': null,
         transform: (d: prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${d.rotation||0})scale(${d.scale ? d.scale[1] : 1},${d.scale ? d.scale[1] : 1})`
       });
-      if (this.options.animation) {
+      if (this.options.animation && !$anns.empty()) {
         $anns.transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
           resolve($anns.node());
         });
@@ -40,10 +40,10 @@ export class Renderer {
     });
   }
 
-  removeAnnotations() {
+  hideAnnotations() {
     return new Promise((resolve) => {
       const $div = this.$main.selectAll('div.text-annotation');
-      if (this.options.animation) {
+      if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
         }).remove();
@@ -72,7 +72,7 @@ export class Renderer {
   hide(overlay:prov.TextStoryNode) {
     return new Promise((resolve) => {
       var $div = this.$main.select(`div.text-overlay[data-id="${overlay.id}"]`);
-      if (this.options.animation) {
+      if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
         }).remove();
