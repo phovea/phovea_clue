@@ -227,6 +227,20 @@ $hover-color: #ffdd05;
   height: 100%;
 
   z-index: 99;
+  > div {
+    position: relative;
+
+    textarea {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+    }
+  }
+  div.text-overlay-body textarea {
+    min-height: 5em;
+  }
 }
 
 .text-annotation {
@@ -264,6 +278,10 @@ $hover-color: #ffdd05;
     div.glyph span {
       font-size: smaller;
       vertical-align:super;
+    }
+
+    div.duration {
+      cursor: pointer;
     }
 
     &.select-selected {

@@ -82,8 +82,6 @@ export class CLUEWrapper extends events.EventHandler {
     cmode.create(body.querySelector('#modeselector'));
     //cmode.createButton(body.querySelector('#modeselector'));
 
-    const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
-    const svis = storyvis.create(this.graph, body.querySelector('#story_vis'), {});
 
 
     this.$main = d3.select(body).select('main');
@@ -92,9 +90,18 @@ export class CLUEWrapper extends events.EventHandler {
     const r = renderer.create(<HTMLElement>this.$main.node(), this.graph);
 
     new player.Player(this.graph, body.querySelector('#player_controls'), {
-      render: r
+      render: r.render
     });
-    const seditor = storyeditor.create(this.graph, body.querySelector('#storyeditor'), {});
+    /*const seditor = storyeditor.create(this.graph, body.querySelector('#storyeditor'), {
+      editor: r.edit
+    });
+    */
+
+
+    const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
+    const svis = storyvis.create(this.graph, body.querySelector('#story_vis'), {
+      render: r.render
+    });
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {
       C.hash.setInt('clue_state', state.id);

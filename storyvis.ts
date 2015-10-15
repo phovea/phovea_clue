@@ -56,7 +56,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
   private options = {
     scale: [1, 1],
     rotate: 0,
-    editor: (state: provenance.AStoryNode) => Promise.resolve(null)
+    render: (state: provenance.AStoryNode) => Promise.resolve(null)
   };
 
   private story: provenance.AStoryNode;
@@ -153,6 +153,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
   private onStateClick(d: provenance.AStoryNode) {
     this.data.selectStory(d);
+    this.options.render(d);
   }
 
   update() {
