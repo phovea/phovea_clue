@@ -225,6 +225,8 @@ $hover-color: #ffdd05;
 
   width: 100%;
   height: 100%;
+
+  z-index: 99;
 }
 
 .text-annotation {
@@ -233,34 +235,45 @@ $hover-color: #ffdd05;
   top: 0;
 
   font-size: larger;
+
+  z-index: 100;
 }
 
 .provenance-simple-story-vis {
   position: relative;
 
-  path.time {
-    stroke: darkgray;
-    stroke-width: 2;
+  div.time {
+    border-top: 2px solid gray;
+    position: absolute;
+    top: 1.5em;
+    width: 100%;
   }
 
-  g.story {
-    circle {
-      fill: black;
+  div.story {
+    display: inline-block;
+    margin: 0 2em;
+
+    font-size: 7pt;
+    text-align: center;
+
+    div {
+      display: block;
+      margin: 0;
     }
 
-    text {
-      font-size: 7pt;
-      text-anchor: middle;
+    div.glyph span {
+      font-size: smaller;
+      vertical-align:super;
     }
 
     &.select-selected {
-      circle {
-        fill: $select-color
+      div.glyph {
+        color: $select-color
       }
     }
     &.select-hovered {
-      circle {
-        fill: $hover-color;
+      div.glyph {
+        color: $hover-color;
       }
     }
   }

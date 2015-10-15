@@ -12,7 +12,7 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 function translate(x = 0, y = 0) {
-  return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
+  return `translate(${x||0}px,${y||0}px)`;
 }
 
 interface INode {
@@ -50,12 +50,13 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Story).filter(this.data.stories);
-    this.$node.selectAll('g.story').classed('select-'+type,(d: provenance.AStoryNode) => selectedStates.indexOf(d) >= 0);
+    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.AStoryNode) => selectedStates.indexOf(d) >= 0);
   };
 
   private options = {
     scale: [1, 1],
-    rotate: 0
+    rotate: 0,
+    editor: (state: provenance.AStoryNode) => Promise.resolve(null)
   };
 
   private story: provenance.AStoryNode;
@@ -143,39 +144,36 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
   private build($parent:d3.Selection<any>) {
     var size = this.size;
     //  scale = this.options.scale;
-    var $svg = $parent.append('svg').attr({
-      'class': 'provenance-simple-story-vis',
-      height: 40
+    var $svg = $parent.append('div').attr({
+      'class': 'provenance-simple-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
-    $svg.append('path').classed('time',true).attr('d','M0,20l1000,0');
+    $svg.append('div').classed('time',true);
     return $svg;
   }
 
-  private onStateClick(d: INode) {
-    //TODO
+  private onStateClick(d: provenance.AStoryNode) {
+    this.data.selectStory(d);
   }
 
   update() {
     const graph = this.data;
     const story = toPath(this.story);
 
-    this.$node.attr('width', (story.length * 70+4)*1.2);
+    //this.$node.attr('width', (story.length * 70+4)*1.2);
 
     const to_id = (d) => String(d.id);
 
-    var scale = d3.scale.ordinal().domain(story.map(to_id)).rangeRoundPoints([0,story.length * 70+40], .4);
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
     //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
 
-    const $states = this.$node.selectAll('g.story').data(story, to_id);
+    const $states = this.$node.selectAll('div.story').data(story, to_id);
 
-    var $states_enter = $states.enter().append('g').classed('story', true).attr({
-      transform: (d) => translate(scale(to_id(d)), 20)
+    var $states_enter = $states.enter().append('div').classed('story', true).style({
     });
-    $states_enter.append('circle').attr({
-      r: 5
-    }).on('click', this.onStateClick.bind(this))
+    var $glyph_enter = $states_enter.append('div')
+      .attr('class', (d) => `glyph fa fa-lg fa-${d instanceof provenance.TextStoryNode ? 'file-text' : 'circle'}`)
+      .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) =>  {
         if (d instanceof provenance.JumpToStoryNode) {
           graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
@@ -188,14 +186,20 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
         }
         graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
+    $glyph_enter
+      .append('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
     var mm_ss = d3.time.format("%M:%S:%L");
-    $states_enter.append('text').attr({
-      y: 15
+    $states_enter.append('div').attr({
+      'class': 'duration'
+    }).on('click', function(d) {
+      d.duration = +(prompt('Enter new duration', d.duration));
+      d3.select(this).text(mm_ss(new Date(d.duration)));
     });
-
+    $states.select('div.glyph')
+      .attr('title', (d) => (d instanceof provenance.TextStoryNode) ? d.title : null)
+      .select('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
     $states.attr({
-      transform: (d) => translate(scale(to_id(d)), 20)
-    }).select('text').text((d) => mm_ss(new Date(d.duration)));
+    }).select('div.duration').text((d) => mm_ss(new Date(d.duration)));
 
     $states.exit().remove();
 

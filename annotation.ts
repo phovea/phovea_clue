@@ -14,8 +14,26 @@ export class Renderer {
     markdown: true
   };
 
-  constructor(private $main:d3.Selection<any>, options = {}) {
+  render: (state: prov.AStoryNode) => Promise<void>;
+
+  constructor(private $main:d3.Selection<any>, private graph: prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
+    this.render = this.renderImpl.bind(this);
+  }
+
+  private renderImpl(state: prov.AStoryNode) {
+    var takedown = this.hideOld();
+    if (!state) {
+      return takedown;
+    }
+    var next = Promise.resolve(null);
+    if (state instanceof prov.TextStoryNode) {
+      next = this.renderText(<prov.TextStoryNode>state);
+    }
+    if (state instanceof prov.JumpToStoryNode) {
+      next = Promise.all([this.graph.jumpTo(state.state), this.renderAnnotations(state.annotations)]);
+    }
+    return Promise.all([takedown, next]);
   }
 
   renderAnnotations(anns:prov.IStateAnnotation[]) {
@@ -26,7 +44,7 @@ export class Renderer {
       $anns.style({
         width: (d: prov.IStateAnnotation) => d.size ? d.size[0]+'px': null,
         height: (d: prov.IStateAnnotation) => d.size ? d.size[1]+'px': null,
-        transform: (d: prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${d.rotation||0})scale(${d.scale ? d.scale[1] : 1},${d.scale ? d.scale[1] : 1})`
+        transform: (d: prov.IStateAnnotation) => `translate(${d.pos[0]}px,${d.pos[1]}px)rotate(${d.rotation||0}deg)scale(${d.scale ? d.scale[1] : 1},${d.scale ? d.scale[1] : 1})`
       });
       if (this.options.animation && !$anns.empty()) {
         $anns.transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
@@ -40,9 +58,9 @@ export class Renderer {
     });
   }
 
-  hideAnnotations() {
+  hideOld() {
     return new Promise((resolve) => {
-      const $div = this.$main.selectAll('div.text-annotation');
+      const $div = this.$main.selectAll('div.text-annotation, div.text-overlay');
       if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
@@ -54,10 +72,11 @@ export class Renderer {
     });
   }
 
-  render(overlay:prov.TextStoryNode) {
+  renderText(overlay:prov.TextStoryNode) {
     return new Promise((resolve) => {
       var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
-      $div.html(this.options.markdown ? marked(overlay.text) : overlay.text);
+      $div.append('div').classed('text-overlay-header',true).html(this.options.markdown ? marked(overlay.title) : overlay.title);
+      $div.append('div').classed('text-overlay-body',true).html(this.options.markdown ? marked(overlay.text) : overlay.text);
       if (this.options.animation) {
         $div.transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
           resolve($div.node());
@@ -68,22 +87,8 @@ export class Renderer {
       }
     });
   }
-
-  hide(overlay:prov.TextStoryNode) {
-    return new Promise((resolve) => {
-      var $div = this.$main.select(`div.text-overlay[data-id="${overlay.id}"]`);
-      if (this.options.animation && !$div.empty()) {
-        $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
-          resolve();
-        }).remove();
-      } else {
-        $div.remove();
-        resolve();
-      }
-    });
-  }
 }
 
-export function create(main:HTMLElement) {
-  return new Renderer(d3.select(main));
+export function create(main:HTMLElement, graph: prov.ProvenanceGraph) {
+  return (new Renderer(d3.select(main), graph)).render;
 }

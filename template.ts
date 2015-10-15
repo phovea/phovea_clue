@@ -88,13 +88,10 @@ export class CLUEWrapper extends events.EventHandler {
     this.$main = d3.select(body).select('main');
     this.$main_ref = this.graph.findOrAddObject(this.$main, 'Application', 'visual');
 
-    const r = renderer.create(<HTMLElement>this.$main.node());
+    const r = renderer.create(<HTMLElement>this.$main.node(), this.graph);
 
     new player.Player(this.graph, body.querySelector('#player_controls'), {
-      renderOverlay: r.render.bind(r),
-      hideOverlay: r.hide.bind(r),
-      renderAnnotations: r.renderAnnotations.bind(r),
-      hideAnnotations: r.hideAnnotations.bind(r)
+      render: r
     });
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {
