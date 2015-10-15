@@ -227,6 +227,18 @@ $hover-color: #ffdd05;
   height: 100%;
 
   z-index: 99;
+
+
+  div.editable:hover {
+    border: 1px solid black;
+  }
+
+  div.text-overlay-body textarea {
+    min-height: 5em;
+  }
+}
+
+.text-overlay, .text-annotation {
   > div {
     position: relative;
 
@@ -238,9 +250,13 @@ $hover-color: #ffdd05;
       top: 0;
     }
   }
-  div.text-overlay-body textarea {
-    min-height: 5em;
-  }
+}
+
+button.add-text-annotation {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .text-annotation {
@@ -251,6 +267,36 @@ $hover-color: #ffdd05;
   font-size: larger;
 
   z-index: 100;
+
+  &.editable:hover {
+    border: 1px solid black;
+  }
+
+  > div {
+    width: 100%;
+    height: 100%;
+  }
+
+  button {
+    position: absolute;
+    padding: 3px 6px;
+    &.fa-remove {
+      top: -1.2em;
+      right: -1.2em;
+    }
+    &.fa-arrows {
+      top: -1.2em;
+      left: -1.2em;
+    }
+    &.fa-rotate-right {
+      bottom: -1.2em;
+      left: -1.2em;
+    }
+    &.fa-expand {
+      bottom: -1.2em;
+      right: -1.2em;
+    }
+  }
 }
 
 .provenance-simple-story-vis {
