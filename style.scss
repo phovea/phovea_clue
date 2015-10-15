@@ -77,12 +77,13 @@ $clue_triangle_width:30px;
   .clue_trianglemodeselector {
     circle.point {
       fill: red;
-      cursor: crosshair;
-      stroke: lighten(red,0.3);
+      stroke: lighten(red, 0.3);
       stroke-width: 2;
+      cursor: crosshair;
     }
     path {
       fill: lightgray;
+      cursor: crosshair;
     }
   }
 }

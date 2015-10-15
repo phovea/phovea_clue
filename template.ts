@@ -22,6 +22,7 @@ import storyvis = require('./storyvis');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
+import renderer = require('./renderer');
 
 
 export class CLUEWrapper extends events.EventHandler {
@@ -86,28 +87,11 @@ export class CLUEWrapper extends events.EventHandler {
     this.$main = d3.select(body).select('main');
     this.$main_ref = this.graph.findOrAddObject(this.$main, 'Application', 'visual');
 
-    const renderText = (overlay: prov.TextStoryNode) => {
-      return new Promise((resolve) => {
-        var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id',overlay.id).style('opacity', 0);
-        $div.append('h1').text(overlay.text);
-        $div.transition().duration(100).style('opacity', 1).each('end', () => {
-          resolve($div);
-        });
-      });
-    };
-
-    const hideText = (overlay: prov.TextStoryNode) => {
-      return new Promise((resolve) => {
-        var $div = this.$main.select(`div.text-overlay[data-id="${overlay.id}"]`);
-        $div.transition().duration(100).style('opacity', 0).each('end', () => {
-          resolve();
-        }).remove();
-      });
-    };
+    const r = renderer.create(<HTMLElement>this.$main.node());
 
     new player.Player(this.graph, body.querySelector('#player_controls'), {
-      renderOverlay: renderText,
-      hideOverlay: hideText
+      renderOverlay: r.render,
+      hideOverlay: r.hide
     });
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {
