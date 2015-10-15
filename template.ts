@@ -19,6 +19,7 @@ import selection = require('../caleydo_d3/selectioninfo');
 import cmode = require('../caleydo_provenance/mode');
 import provvis = require('./provvis');
 import storyvis = require('./storyvis');
+import storyeditor = require('./storyeditor');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
@@ -93,6 +94,7 @@ export class CLUEWrapper extends events.EventHandler {
     new player.Player(this.graph, body.querySelector('#player_controls'), {
       render: r
     });
+    const seditor = storyeditor.create(this.graph, body.querySelector('#storyeditor'), {});
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {
       C.hash.setInt('clue_state', state.id);
@@ -122,9 +124,9 @@ export class CLUEWrapper extends events.EventHandler {
           $footer.show();
         }
         if (new_.authoring < 0.8) {
-          $('#story_toolbar, #story_vis').hide();
+          $('#story_toolbar, #story_vis, #storyeditor').hide();
         } else {
-          $('#story_toolbar, #story_vis').show();
+          $('#story_toolbar, #story_vis, #storyeditor').show();
         }
       };
       cmode.on('modeChanged', (event, new_) => update(new_));

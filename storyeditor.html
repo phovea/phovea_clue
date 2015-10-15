@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+
+</head>
+<body>
+<form>
+    <fieldset disabled="disabled">
+        <div class="form-group storyeditor_text_fields">
+            <label class="sr-only" for="storyeditor_title">Title</label>
+            <input type="text" class="form-control" id="storyeditor_title" placeholder="Title">
+        </div>
+        <div class="form-group storyeditor_text_fields">
+            <label class="sr-only" for="storyeditor_text">Text</label>
+            <textarea class="form-control" id="storyeditor_text" rows="5"
+                      placeholder="Body Text (MarkDown supported)"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="storyeditor_duration">Duration</label>
+
+            <div class="input-group">
+                <div class="input-group-addon">Duration</div>
+                <input type="number" class="form-control" id="storyeditor_duration" min="0" step="100">
+
+                <div class="input-group-addon">ms</div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </fieldset>
+</form>
+</body>
+</html>
