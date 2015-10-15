@@ -43,7 +43,11 @@
     ],
     "dependencies": {
       "web": {
-        "d3": "~3.5.5"
+        "d3": "~3.5.5",
+        "marked": "~0.3.3"
+      },
+      "tsd": {
+        "marked": "935bfa"
       }
     },
     "requirejs-config": {

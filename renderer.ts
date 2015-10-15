@@ -16,7 +16,7 @@ export function create(main:HTMLElement): IRenderer {
     render: (overlay:prov.TextStoryNode) => {
       return new Promise((resolve) => {
         var $div = $main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
-        $div.append('h1').text(overlay.text);
+        $div.html(overlay.text);
         $div.transition().duration(100).style('opacity', 1).each('end', () => {
           resolve($div.node());
         });
