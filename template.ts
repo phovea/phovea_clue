@@ -91,7 +91,9 @@ export class CLUEWrapper extends events.EventHandler {
 
     new player.Player(this.graph, body.querySelector('#player_controls'), {
       renderOverlay: r.render,
-      hideOverlay: r.hide
+      hideOverlay: r.hide,
+      renderAnnotations: r.renderAnnotations,
+      hideAnnotations: r.hideAnnotations
     });
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {

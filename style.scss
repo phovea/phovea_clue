@@ -221,13 +221,18 @@ $hover-color: #ffdd05;
   background-color: white;
   opacity: 0.98;
 
+  font-size: larger;
+
   width: 100%;
   height: 100%;
+}
 
-  span {
-    display: block;
-    margin: auto;
-  }
+.text-annotation {
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  font-size: larger;
 }
 
 .provenance-simple-story-vis {
