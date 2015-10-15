@@ -22,7 +22,7 @@ import storyvis = require('./storyvis');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
-import renderer = require('./renderer');
+import renderer = require('./annotation');
 
 
 export class CLUEWrapper extends events.EventHandler {
@@ -123,7 +123,7 @@ export class CLUEWrapper extends events.EventHandler {
         } else {
           $footer.show();
         }
-        if (new_.authoring > 0.8) {
+        if (new_.authoring < 0.8) {
           $('#story_toolbar, #story_vis').hide();
         } else {
           $('#story_toolbar, #story_vis').show();
