@@ -311,6 +311,8 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
 
     if (modeFeatures.showStorySelection()) {
       this.renderStories($states, nodes);
+    } else {
+      this.$node.selectAll('path.story').remove();
     }
   }
 

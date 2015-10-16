@@ -43,7 +43,7 @@ export class Renderer {
       if (state instanceof prov.JumpToStoryNode) {
         next = this.graph.jumpTo(state.state);
       }
-      return Promise.all([takedown, next, this.renderAnnotations(state)]);
+      return Promise.all([takedown, next, this.renderAnnotations(state)]); //, this.renderArrows(state)]);
     });
     return this.prev;
   }
@@ -107,7 +107,7 @@ export class Renderer {
           const e : any = d3.event;
           d.size = [d.pos[0] + e.x, d.pos[1] + e.y];
           state.setAnnotation(i, d);
-          d3.select(this.parentNode).style({
+          d3.select(this.parentNode).select('div').style({
             width: (d:prov.IStateAnnotation) => d.size ? d.size[0] + 'px' : null,
             height: (d:prov.IStateAnnotation) => d.size ? d.size[1] + 'px' : null,
           });
@@ -127,22 +127,91 @@ export class Renderer {
           }
           if (d.rotation !== bak) {
             state.setAnnotation(i, d);
-            d3.select(this.parentNode).style('transform', updateTransform);
+            d3.select(this.parentNode).select('div').style('transform', updateTransform);
           }
         }));
     }
-    $anns.select('div').html((d) => this.renderer(d.text));
-    $anns.style({
-      left: (d:prov.IStateAnnotation) => d.pos[0] + 'px',
-      top: (d:prov.IStateAnnotation) => d.pos[1] + 'px',
+    $anns.select('div').html((d) => this.renderer(d.text)).style({
       width: (d:prov.IStateAnnotation) => d.size ? d.size[0] + 'px' : null,
       height: (d:prov.IStateAnnotation) => d.size ? d.size[1] + 'px' : null,
       transform: updateTransform
+    });
+    $anns.style({
+      left: (d:prov.IStateAnnotation) => d.pos[0] + 'px',
+      top: (d:prov.IStateAnnotation) => d.pos[1] + 'px'
     });
 
     $anns.exit().remove();
 
     return $anns;
+  }
+
+  private renderArrowsImpl(state: prov.AStoryNode) {
+    const arrows = state.arrows;
+    const editable = modeFeatures.isEditable();
+
+    var $svg = this.$main.select('svg.text-arrow');
+    if ($svg.empty()) {
+      $svg = this.$main.append('svg').classed('text-arrow', true);
+    }
+    $svg.style('display', arrows.length === 0 ? 'none' : null);
+    if (arrows.length > 0) {
+      const xminmax = d3.extent(arrows, (d) => Math.min(d.start[0], d.end[0]));
+      const yminmax = d3.extent(arrows, (d) => Math.min(d.start[1], d.end[1]));
+
+      $svg.attr({
+        width: (50) + xminmax[1] - xminmax[0],
+        height: (50) + yminmax[1] - yminmax[0],
+        transform: `translate(${-xminmax[0]},${-yminmax[0]})`
+      });
+      $svg.append('defs').append('marker').attr({
+        id: 'clue_text_arrow_marker',
+        viewBox: '0 -5 10 10',
+        refX: 15,
+        refY: -1.5,
+        markerWidth: 6,
+        markerHeight: 6,
+        orient: 'auto',
+      }).append('path').attr('d', 'M0,-5L10,0L0,5');
+
+      const $arrows = $svg.selectAll('g.arrow').data(arrows);
+      const $arrows_enter = $arrows.enter().append('g');
+      $arrows_enter.append('line').classed('arrow', true).attr({
+        'marker-end': 'url(#clue_text_arrow_marker)',
+        x1: (d) => d.start[0],
+        x2: (d) => d.end[0],
+        y1: (d) => d.start[1],
+        y2: (d) => d.end[1]
+      });
+    }
+    return $svg;
+  }
+
+  renderArrows(state:prov.AStoryNode) {
+    return new Promise((resolve) => {
+      const editable = modeFeatures.isEditable();
+
+      const $svg = this.renderArrowsImpl(state);
+
+      if (editable) {
+        this.$main.append('button').attr('class', 'btn btn-default fa fa-location-arrow add-text-annotation').on('click', () => {
+          state.pushArrow({
+            start: [100, 100],
+            end: [200,200]
+          });
+          this.renderArrowsImpl(state);
+        });
+      }
+
+      if (this.options.animation && !$svg.empty()) {
+        $svg.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
+          resolve($svg.node());
+        });
+      } else {
+        $svg.style('opacity', 1);
+        resolve($svg.node());
+      }
+    });
   }
 
   renderAnnotations(state:prov.AStoryNode) {
@@ -173,7 +242,7 @@ export class Renderer {
 
   hideOld() {
     return new Promise((resolve) => {
-      const $div = this.$main.selectAll('div.text-annotation, div.text-overlay, button.add-text-annotation');
+      const $div = this.$main.selectAll('div.text-annotation, div.text-overlay, button.add-text-annotation, svg.text-arrow');
       if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
