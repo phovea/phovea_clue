@@ -65,7 +65,12 @@ $clue_triangle_width:30px;
 
 #modeselector {
   color: white;
-  width: 30em;
+  min-width: 30em;
+  
+  > div {
+    display: inline-block;
+    vertical-align: middle;
+  }
 
 
   .clue_slidermodeselector {
