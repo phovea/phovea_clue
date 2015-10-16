@@ -11,10 +11,6 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
-function translate(x = 0, y = 0) {
-  return `translate(${x||0}px,${y||0}px)`;
-}
-
 interface INode {
   x : number;
   y: number;
@@ -142,8 +138,6 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
 
   private build($parent:d3.Selection<any>) {
-    var size = this.size;
-    //  scale = this.options.scale;
     var $svg = $parent.append('div').attr({
       'class': 'provenance-simple-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
@@ -189,7 +183,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
       });
     $glyph_enter
       .append('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
-    var mm_ss = d3.time.format("%M:%S:%L");
+    var mm_ss = d3.time.format('%M:%S:%L');
     $states_enter.append('div').attr({
       'class': 'duration'
     }).on('click', function(d) {

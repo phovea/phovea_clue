@@ -109,7 +109,7 @@ export class Renderer {
           state.setAnnotation(i, d);
           d3.select(this.parentNode).select('div').style({
             width: (d:prov.IStateAnnotation) => d.size ? d.size[0] + 'px' : null,
-            height: (d:prov.IStateAnnotation) => d.size ? d.size[1] + 'px' : null,
+            height: (d:prov.IStateAnnotation) => d.size ? d.size[1] + 'px' : null
           });
         }));
       //rotate
@@ -148,7 +148,7 @@ export class Renderer {
 
   private renderArrowsImpl(state: prov.AStoryNode) {
     const arrows = state.arrows;
-    const editable = modeFeatures.isEditable();
+    //const editable = modeFeatures.isEditable();
 
     var $svg = this.$main.select('svg.text-arrow');
     if ($svg.empty()) {
@@ -171,7 +171,7 @@ export class Renderer {
         refY: -1.5,
         markerWidth: 6,
         markerHeight: 6,
-        orient: 'auto',
+        orient: 'auto'
       }).append('path').attr('d', 'M0,-5L10,0L0,5');
 
       const $arrows = $svg.selectAll('g.arrow').data(arrows);

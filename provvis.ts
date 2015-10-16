@@ -184,13 +184,9 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     var $base = $svg.append('g').attr('transform', 'scale(' + this.options.scale[0] + ',' + this.options.scale[1] + ')').append('g');
-    $base.call(d3.behavior.zoom().scaleExtent([1, 8]).on('zoom', () => {
-      const event = <any>d3.event;
-      $g.attr('transform', 'translate(' + event.translate + ')scale(' + event.scale + ')translate(20,20)');
-    }));
     $base.append('rect').attr({
       width: '100%',
-      height: '100%',
+      height: '100%'
     }).style({
       fill: 'none',
       'pointer-events': 'all'
@@ -200,6 +196,11 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
     $g.append('g').classed('stories', true);
     $g.append('g').classed('actions', true);
     $g.append('g').classed('states', true);
+
+    $base.call(d3.behavior.zoom().scaleExtent([1, 8]).on('zoom', () => {
+      const event = <any>d3.event;
+      $g.attr('transform', 'translate(' + event.translate + ')scale(' + event.scale + ')translate(20,20)');
+    }));
 
     return $svg;
   }

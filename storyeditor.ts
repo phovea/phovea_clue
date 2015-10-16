@@ -10,7 +10,6 @@ import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
 import d3 = require('d3');
-import vis = require('../caleydo_core/vis');
 
 export class StoryNodeEditor {
   private options = {
@@ -53,8 +52,8 @@ export class StoryNodeEditor {
         node.title = $form.select('#storyeditor_title').property('value');
         node.text = $form.select('#storyeditor_text').property('value');
       }
-      node.duration = parseInt($form.select('#storyeditor_duration').property('value'));
-    })
+      node.duration = parseInt($form.select('#storyeditor_duration').property('value'), 10);
+    });
   }
 
   private switchTo(node: provenance.AStoryNode) {

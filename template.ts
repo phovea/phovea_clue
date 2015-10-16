@@ -19,7 +19,6 @@ import selection = require('../caleydo_d3/selectioninfo');
 import cmode = require('../caleydo_provenance/mode');
 import provvis = require('./provvis');
 import storyvis = require('./storyvis');
-import storyeditor = require('./storyeditor');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
@@ -101,7 +100,7 @@ export class CLUEWrapper extends events.EventHandler {
 
 
     const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
-    const svis = storyvis.create(this.graph, body.querySelector('#story_vis'), {
+    storyvis.create(this.graph, body.querySelector('#story_vis'), {
       render: r.render
     });
 
@@ -145,7 +144,7 @@ export class CLUEWrapper extends events.EventHandler {
 
     d3.select('#story_toolbar button.fa-magic').on('click', () => {
       const selected = pvis.getAnClearStorySelection();
-      const story = this.graph.extractStory(selected);
+      this.graph.extractStory(selected);
     });
 
     d3.select('#attachScreenshot').on('click', () => {
