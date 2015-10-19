@@ -257,14 +257,14 @@ $hover-color: #ffdd05;
   }
 }
 
-button.add-text-annotation {
+div.add-text-annotation {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 100;
 }
 
-.text-annotation {
+div.annotation {
   position: absolute;
   left: 0;
   top: 0;
@@ -300,6 +300,26 @@ button.add-text-annotation {
     &.fa-expand {
       bottom: -1.2em;
       right: -1.2em;
+    }
+  }
+}
+
+.arrow-annotation {
+  line {
+    stroke: red;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  marker {
+    fill: red;
+  }
+
+  circle.anchor {
+    fill: black;
+    cursor: move;
+    &:hover {
+      fill: darkgray;
     }
   }
 }
