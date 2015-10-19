@@ -324,6 +324,15 @@ div.annotation {
   }
 }
 
+.frame-annotation {
+  border-radius: 5px;
+  border: 5px solid red;
+
+  &.editable:hover {
+  border: 5px solid black !important;
+  }
+}
+
 .provenance-simple-story-vis {
   position: relative;
 

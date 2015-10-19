@@ -75,10 +75,11 @@ export class Renderer {
       });
     }
 
-
     const updateTransform = (d:prov.ITextStateAnnotation) => `rotate(${d.rotation || 0}deg)`;
 
+    //Text
     $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<prov.ITextStateAnnotation>, $texts_enter: d3.selection.Update<prov.ITextStateAnnotation>) => {
+
       let onEdit = function (d:prov.ITextStateAnnotation, i) {
         const $elem = d3.select(this);
         if (!d3.select(this.parentNode).classed('editable')) {
@@ -105,10 +106,12 @@ export class Renderer {
       });
     }, $anns_enter.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')));
 
+
+    //Arrow
     $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<prov.IArrowStateAnnotation>, $arrows_enter: d3.selection.Update<prov.IArrowStateAnnotation>) => {
       var $svg_enter = $arrows_enter.append('svg').attr({
-          width: (d) => 50+Math.abs(d.at[0]),  //TODO (50) + xminmax[1] - xminmax[0],
-          height: (d) => 50+Math.abs(d.at[1]), //TODO yminmax[1] - yminmax[0],
+          width: (d) => 50+Math.abs(d.at[0]),
+          height: (d) => 50+Math.abs(d.at[1]),
         });
       $svg_enter.append('defs').append('marker').attr({
           id: (d,i) => 'clue_text_arrow_marker'+i,
@@ -167,8 +170,8 @@ export class Renderer {
       });
     }, $anns_enter.filter((d) => d.type === 'arrow'));
 
+    //FRAME
     $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<prov.IFrameStateAnnotation>, $frames_enter: d3.selection.Update<prov.IFrameStateAnnotation>) => {
-      $frames_enter.append('div').classed('frame', true);
       $frames.style({
         width: (d) => d.size[0] + 'px',
         height: (d) => d.size[1] + 'px'
@@ -177,6 +180,39 @@ export class Renderer {
           d3.select(this).style(d.styles);
         }
       });
+
+      //resize
+      $frames_enter.append('button').attr('tabindex',-1).attr('class', 'btn btn-default fa fa-expand fa-flip-horizontal')
+        .call(d3.behavior.drag()
+          .origin((d:prov.IFrameStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
+          .on('drag', function (d:prov.IFrameStateAnnotation, i) {
+          const e : any = d3.event;
+          d.size = [e.x, e.y];
+          state.setAnnotation(i, d);
+          d3.select(this.parentNode).style({
+            width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + 'px' : null,
+            height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + 'px' : null
+          });
+        }));
+      //rotate
+      $frames_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-rotate-right').call(d3.behavior.drag()
+        .origin(() => ({x : 0, y: 0}))
+        .on('drag', function (d:prov.IFrameStateAnnotation, i) {
+          const e:any = d3.event;
+          //const base_pos = C.bounds(this);
+          //const bounds = C.bounds(this.parentNode);
+          var bak = d.rotation || 0;
+          if (e.dx > 1) {
+            d.rotation = bak + 10;
+          } else if (e.dx < -1) {
+            d.rotation = bak - 10;
+          }
+          if (d.rotation !== bak) {
+            state.setAnnotation(i, d);
+            d3.select(this.parentNode).style('transform', updateTransform);
+          }
+        }));
+
     }, $anns_enter.filter((d) => d.type === 'frame'));
 
     $anns.style({
