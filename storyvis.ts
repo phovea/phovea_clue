@@ -59,7 +59,15 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
 
   private chooseStory = (event: any, story: provenance.AStoryNode) => {
+    if (this.story != null) {
+      toPath(this.story).forEach((s) => {
+        s.off('setAttr', this.trigger);
+      });
+    }
     this.story = story;
+    toPath(this.story).forEach((s) => {
+      s.on('setAttr', this.trigger);
+    });
     this.update();
   };
 
@@ -70,8 +78,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     C.onDOMNodeRemoved(this.node, this.destroy, this);
     this.bind();
     const s = data.getStoryChains();
-    this.story = s[s.length-1];
-    this.update();
+    this.chooseStory(null, s[s.length-1]);
   }
 
   private bind() {
