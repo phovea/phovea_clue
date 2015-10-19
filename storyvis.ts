@@ -190,6 +190,17 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
       });
     $glyph_enter
       .append('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
+
+    $glyph_enter.append('span').attr('class', 'fa fa-remove').on('click', (d) => {
+      //remove me
+      if (d === story[0]) {
+        this.story = story[1];
+      }
+      graph.removeStoryNode(d);
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+      this.update();
+    });
     var mm_ss = d3.time.format('%M:%S:%L');
     $states_enter.append('div').attr({
       'class': 'duration'

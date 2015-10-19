@@ -358,6 +358,15 @@ div.annotation {
     div.glyph span {
       font-size: smaller;
       vertical-align:super;
+
+      &.fa-remove {
+        visibility: hidden;
+        cursor: pointer;
+
+        &:hover {
+          color: darkorange;
+        }
+      }
     }
 
     div.duration {
@@ -373,6 +382,10 @@ div.annotation {
       div.glyph {
         color: $hover-color;
       }
+    }
+
+    &:hover div.glyph span.fa-remove {
+      visibility: visible;
     }
   }
 }
