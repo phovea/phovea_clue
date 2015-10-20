@@ -52,7 +52,8 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
   private options = {
     scale: [1, 1],
     rotate: 0,
-    render: (state: provenance.AStoryNode) => Promise.resolve(null)
+    render: (state: provenance.AStoryNode) => Promise.resolve(null),
+    extract: () => <provenance.AStoryNode>null
   };
 
   private story: provenance.AStoryNode;
@@ -159,7 +160,12 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
   update() {
     const graph = this.data;
-    const story = toPath(this.story);
+    const story_raw = toPath(this.story);
+    const story = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isFake: true}] : [];
+    story_raw.forEach((s,i) => {
+      story.push(s);
+      story.push({ id: 'f'+i, i: i, isFake: true});
+    });
 
     //this.$node.attr('width', (story.length * 70+4)*1.2);
 
@@ -171,9 +177,11 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
     const $states = this.$node.selectAll('div.story').data(story, to_id);
 
-    var $states_enter = $states.enter().append('div').classed('story', true).style({
-    });
-    var $glyph_enter = $states_enter.append('div')
+    const $states_enter = $states.enter().append('div').classed('story', true);
+    const $story_enter = $states_enter.filter((d) => !d.isFake);
+    const $fake_enter = $states_enter.filter((d) => d.isFake).classed('fake',true);
+
+    var $glyph_enter = $story_enter.append('div')
       .attr('class', (d) => `glyph fa fa-lg fa-${d instanceof provenance.TextStoryNode ? 'file-text' : 'circle'}`)
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) =>  {
@@ -193,8 +201,8 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
     $glyph_enter.append('span').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
-      if (d === story[0]) {
-        this.story = story[1];
+      if (d === this.story) {
+        this.story = this.story.next;
       }
       graph.removeStoryNode(d);
       d3.event.stopPropagation();
@@ -202,17 +210,38 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
       this.update();
     });
     var mm_ss = d3.time.format('%M:%S:%L');
-    $states_enter.append('div').attr({
+    $story_enter.append('div').attr({
       'class': 'duration'
     }).on('click', function(d) {
       d.duration = +(prompt('Enter new duration', d.duration));
       d3.select(this).text(mm_ss(new Date(d.duration)));
     });
+
+    $fake_enter.append('span').attr('class', 'fa fa-file-text').on('click', (d, i) => {
+      const new_ = graph.makeTextStory();
+      if (d.i < 0 ) {
+        this.story = graph.insertIntoStory(new_, this.story);
+      } else {
+        graph.insertIntoStory(new_,story_raw[d.i]);
+      }
+      this.update();
+    }).attr('title', 'Add new text slide');
+    $fake_enter.append('span').attr('class', 'fa fa-magic').on('click', (d, i) => {
+      const new_ = this.options.extract();
+      if (d.i < 0 ) {
+        this.story = graph.insertIntoStory(new_, this.story);
+      } else {
+        graph.insertIntoStory(new_, story_raw[d.i]);
+      }
+      this.update();
+    }).attr('title', 'Insert currently selected story');
+
     $states.select('div.glyph')
       .attr('title', (d) => (d instanceof provenance.TextStoryNode) ? d.title : null)
       .select('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
-    $states.attr({
-    }).select('div.duration').text((d) => mm_ss(new Date(d.duration)));
+    $states.select('div.duration').text((d) => mm_ss(new Date(d.duration)));
+
+    $states.order();
 
     $states.exit().remove();
 

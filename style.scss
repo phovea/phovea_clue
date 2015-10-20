@@ -339,13 +339,13 @@ div.annotation {
   div.time {
     border-top: 2px solid gray;
     position: absolute;
-    top: 1.5em;
+    top: 1em;
     width: 100%;
   }
 
   div.story {
     display: inline-block;
-    margin: 0 2em;
+    margin: 0 1em;
 
     font-size: 7pt;
     text-align: center;
@@ -353,6 +353,19 @@ div.annotation {
     div {
       display: block;
       margin: 0;
+    }
+
+    &.fake {
+      opacity: 0;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      span:hover {
+        color: darkorange;
+      }
     }
 
     div.glyph span {
