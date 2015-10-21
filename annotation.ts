@@ -75,7 +75,7 @@ export class Renderer {
       });
     }
 
-    const updateTransform = (d:prov.ITextStateAnnotation) => `rotate(${d.rotation || 0}deg)`;
+    const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
 
     //Text
     $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<prov.ITextStateAnnotation>, $texts_enter: d3.selection.Update<prov.ITextStateAnnotation>) => {
