@@ -111,7 +111,7 @@ export class Renderer {
     $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<prov.IArrowStateAnnotation>, $arrows_enter: d3.selection.Update<prov.IArrowStateAnnotation>) => {
       var $svg_enter = $arrows_enter.append('svg').attr({
           width: (d) => 50+Math.abs(d.at[0]),
-          height: (d) => 50+Math.abs(d.at[1]),
+          height: (d) => 50+Math.abs(d.at[1])
         });
       $svg_enter.append('defs').append('marker').attr({
           id: (d,i) => 'clue_text_arrow_marker'+i,
@@ -132,7 +132,7 @@ export class Renderer {
       function updateShift() {
         $svg.attr({
           width: (d) => 50+Math.abs(d.at[0]),  //TODO (50) + xminmax[1] - xminmax[0],
-          height: (d) => 50+Math.abs(d.at[1]), //TODO yminmax[1] - yminmax[0],
+          height: (d) => 50+Math.abs(d.at[1]) //TODO yminmax[1] - yminmax[0],
         });
         $svg.select('g').attr('transform', (d) => `translate(${-Math.min(0,d.at[0])+25},${-Math.min(0,d.at[1])+25})`);
       }
