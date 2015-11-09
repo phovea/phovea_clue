@@ -27,7 +27,7 @@ aside {
   background-color: #E5E5E5;
 
   &.left {
-    width: 15vw;
+    width: 12vw;
   }
 }
 
@@ -66,7 +66,7 @@ $clue_triangle_width:30px;
 #modeselector {
   color: white;
   min-width: 30em;
-  
+
   > div {
     display: inline-block;
     vertical-align: middle;
