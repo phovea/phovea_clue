@@ -27,7 +27,8 @@ import renderer = require('./annotation');
 
 export class CLUEWrapper extends events.EventHandler {
   private options = {
-    app: 'CLUE'
+    app: 'CLUE',
+    id: 'clue_demo'
   };
 
   graph: prov.ProvenanceGraph;
@@ -44,7 +45,7 @@ export class CLUEWrapper extends events.EventHandler {
       type: 'provenance_graph',
       name: this.options.app,
       fqname: 'c.'+this.options.app,
-      id: 'clue_demo',
+      id: this.options.id,
       startFromScratch: C.hash.is('clue_clear')
     });
 
