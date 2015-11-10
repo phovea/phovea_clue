@@ -275,10 +275,6 @@ div.annotation {
 
   z-index: 100;
 
-  &.editable:hover {
-    border: 1px solid black;
-  }
-
   > div {
     width: 100%;
     height: 100%;
@@ -324,6 +320,12 @@ main[data-clue='P'] {
   }
 }
 
+.text-annotation {
+  &.editable:hover line {
+    border: 1px solid #b8000b;
+  }
+}
+
 .arrow-annotation {
   line {
     stroke: red;
@@ -343,6 +345,10 @@ main[data-clue='P'] {
     }
   }
 
+  &.editable:hover line {
+    stroke: #b8000b;
+  }
+
   svg {
     position: relative;
   }
@@ -353,7 +359,7 @@ main[data-clue='P'] {
   border: 5px solid red;
 
   &.editable:hover {
-  border: 5px solid black !important;
+  border: 5px solid #b8000b;
   }
 }
 

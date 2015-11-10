@@ -64,17 +64,19 @@ export class Renderer {
         //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
         .on('drag', function (d:prov.IStateAnnotation, i) {
           var mouse = d3.mouse(this.parentNode.parentNode);
-          const e:any = d3.event;
-          d.pos = mouse; //[d.x, d.y];
+          const bounds = C.bounds(this.parentNode.parentNode);
+          d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
           state.setAnnotation(i, d);
-          d3.select(this.parentNode).style('left', d.pos[0] + 'px').style('top', d.pos[1] + 'px');
-        }));
+          d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
+        }))
+        .on('contextmenu',function (d:prov.IStateAnnotation, i) {
+          d3.select(this.parentNode).remove();
+          state.removeAnnotation(i);
+          d3.event.preventDefault();
+        });
 
       //remove
-      $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-remove').on('click', function (d:prov.IStateAnnotation, i) {
-        d3.select(this.parentNode).remove();
-        state.removeAnnotation(i);
-      });
+      //$anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-remove').on('click',
     }
 
 
@@ -180,8 +182,8 @@ export class Renderer {
     //FRAME
     $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<prov.IFrameStateAnnotation>, $frames_enter: d3.selection.Update<prov.IFrameStateAnnotation>) => {
       $frames.style({
-        width: (d) => d.size[0] + 'px',
-        height: (d) => d.size[1] + 'px'
+        width: (d) => d.size[0] + '%',
+        height: (d) => d.size[1] + '%'
       }).each(function (d) {
         if (d.styles) {
           d3.select(this).style(d.styles);
@@ -193,19 +195,20 @@ export class Renderer {
         .call(d3.behavior.drag()
           .on('drag', function (d:prov.IFrameStateAnnotation, i) {
             var mouse = d3.mouse(this.parentNode.parentNode);
-              d.size = [mouse[0]-d.pos[0], mouse[1]-d.pos[1]];
+            const bounds = C.bounds(this.parentNode.parentNode);
+            d.size = [mouse[0]*100/bounds.w-d.pos[0], mouse[1]*100/bounds.h-d.pos[1]];
             state.setAnnotation(i, d);
             d3.select(this.parentNode).style({
-              width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + 'px' : null,
-              height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + 'px' : null
+              width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + '%' : null,
+              height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + '%' : null
             });
         }));
 
     }, $anns_enter.filter((d) => d.type === 'frame'));
 
     $anns.style({
-      left: (d:prov.IStateAnnotation) => d.pos[0] + 'px',
-      top: (d:prov.IStateAnnotation) => d.pos[1] + 'px'
+      left: (d:prov.IStateAnnotation) => d.pos[0] + '%',
+      top: (d:prov.IStateAnnotation) => d.pos[1] + '%'
     });
 
     $anns.exit().remove();
@@ -228,7 +231,7 @@ export class Renderer {
         $buttons.select('#clue_add_text').on('click', () => {
           state.pushAnnotation({
             type: 'text',
-            pos: [100, 100],
+            pos: [10, 10],
             text: ''
           });
           this.renderAnnotationsImpl(state);
@@ -237,7 +240,7 @@ export class Renderer {
         $buttons.select('#clue_add_arrow').on('click', () => {
           state.pushAnnotation({
             type: 'arrow',
-            pos: [100, 100],
+            pos: [10, 10],
             at: [200,200]
           });
           this.renderAnnotationsImpl(state);
@@ -246,8 +249,8 @@ export class Renderer {
         $buttons.select('#clue_add_frame').on('click', () => {
           state.pushAnnotation({
             type: 'frame',
-            pos: [100, 100],
-            size: [200,200]
+            pos: [10, 10],
+            size: [20,20]
           });
           this.renderAnnotationsImpl(state);
           d3.event.preventDefault();
