@@ -78,7 +78,9 @@ export class CLUEWrapper extends events.EventHandler {
       }
     });
 
-    selection.create(body.querySelector('#selectioninfo'));
+    selection.create(body.querySelector('#selectioninfo'), {
+      useNames: true
+    });
 
     cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('#modeselector'));
