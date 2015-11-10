@@ -306,6 +306,24 @@ div.annotation {
   }
 }
 
+main[data-clue='E'] {
+  div.annotation {
+    display: none !important;
+  }
+}
+
+main[data-clue='P'] {
+  div.annotation {
+    pointer-events: none;
+  }
+  div.add-text-annotation, div.annotation button {
+    display: none !important;
+  }
+  svg circle.anchor {
+    display: none !important;
+  }
+}
+
 .arrow-annotation {
   line {
     stroke: red;
@@ -323,6 +341,10 @@ div.annotation {
     &:hover {
       fill: darkgray;
     }
+  }
+
+  svg {
+    position: relative;
   }
 }
 

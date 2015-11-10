@@ -57,13 +57,15 @@ export class Renderer {
       .attr('class',(d) => d.type+'-annotation annotation')
       .classed('editable',editable);
 
+    const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
     if (editable) {
       //move
       $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-arrows').call(d3.behavior.drag()
-        .origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
+        //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
         .on('drag', function (d:prov.IStateAnnotation, i) {
+          var mouse = d3.mouse(this.parentNode.parentNode);
           const e:any = d3.event;
-          d.pos = [e.x, e.y];
+          d.pos = mouse; //[d.x, d.y];
           state.setAnnotation(i, d);
           d3.select(this.parentNode).style('left', d.pos[0] + 'px').style('top', d.pos[1] + 'px');
         }));
@@ -75,7 +77,6 @@ export class Renderer {
       });
     }
 
-    const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
 
     //Text
     $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<prov.ITextStateAnnotation>, $texts_enter: d3.selection.Update<prov.ITextStateAnnotation>) => {
@@ -109,9 +110,12 @@ export class Renderer {
 
     //Arrow
     $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<prov.IArrowStateAnnotation>, $arrows_enter: d3.selection.Update<prov.IArrowStateAnnotation>) => {
-      var $svg_enter = $arrows_enter.append('svg').attr({
-          width: (d) => 50+Math.abs(d.at[0]),
-          height: (d) => 50+Math.abs(d.at[1])
+      var $svg_enter = $arrows_enter.insert('svg',':first-child').attr({
+          width: (d) => 30+Math.abs(d.at[0]),
+          height: (d) => 30+Math.abs(d.at[1])
+        }).style({
+          left: (d) => (-15 + Math.min(0,d.at[0]))+'px',
+          top: (d) => (-15 + Math.min(0,d.at[1]))+'px'
         });
       $svg_enter.append('defs').append('marker').attr({
           id: (d,i) => 'clue_text_arrow_marker'+i,
@@ -131,10 +135,13 @@ export class Renderer {
 
       function updateShift() {
         $svg.attr({
-          width: (d) => 50+Math.abs(d.at[0]),  //TODO (50) + xminmax[1] - xminmax[0],
-          height: (d) => 50+Math.abs(d.at[1]) //TODO yminmax[1] - yminmax[0],
+          width: (d) => 30+Math.abs(d.at[0]),  //TODO (50) + xminmax[1] - xminmax[0],
+          height: (d) => 30+Math.abs(d.at[1]) //TODO yminmax[1] - yminmax[0],
+        }).style({
+          left: (d) => (-15 + Math.min(0,d.at[0]))+'px',
+          top: (d) => (-15 + Math.min(0,d.at[1]))+'px'
         });
-        $svg.select('g').attr('transform', (d) => `translate(${-Math.min(0,d.at[0])+25},${-Math.min(0,d.at[1])+25})`);
+        $svg.select('g').attr('transform', (d) => `translate(${-Math.min(0,d.at[0])+15},${-Math.min(0,d.at[1])+15})`);
       }
 
       if (editable) {
@@ -143,7 +150,6 @@ export class Renderer {
           cx: (d) => d.at[0],
           cy: (d) => d.at[1]
         }).call(d3.behavior.drag()
-          .origin((d:prov.IArrowStateAnnotation) => ({x: d.at[0], y: d.at[1] }))
           .on('drag', function (d:prov.IArrowStateAnnotation, i) {
             const e:any = d3.event;
             d.at = [e.x, e.y];
@@ -152,7 +158,7 @@ export class Renderer {
               cx: d.at[0],
               cy: d.at[1]
             });
-            $svg.select('line').attr({
+            $svg.select('line[data-index="'+i+'"]').attr({
               x2: d.at[0],
               y2: d.at[1]
             });
@@ -161,6 +167,7 @@ export class Renderer {
       }
       updateShift();
       $svg.select('line').attr({
+        'data-index': (d,i) => i,
         x2: (d) => d.at[0],
         y2: (d) => d.at[1]
       }).each(function (d) {
@@ -184,33 +191,14 @@ export class Renderer {
       //resize
       $frames_enter.append('button').attr('tabindex',-1).attr('class', 'btn btn-default fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
-          .origin((d:prov.IFrameStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
           .on('drag', function (d:prov.IFrameStateAnnotation, i) {
-          const e : any = d3.event;
-          d.size = [e.x, e.y];
-          state.setAnnotation(i, d);
-          d3.select(this.parentNode).style({
-            width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + 'px' : null,
-            height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + 'px' : null
-          });
-        }));
-      //rotate
-      $frames_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-rotate-right').call(d3.behavior.drag()
-        .origin(() => ({x : 0, y: 0}))
-        .on('drag', function (d:prov.IFrameStateAnnotation, i) {
-          const e:any = d3.event;
-          //const base_pos = C.bounds(this);
-          //const bounds = C.bounds(this.parentNode);
-          var bak = d.rotation || 0;
-          if (e.dx > 1) {
-            d.rotation = bak + 10;
-          } else if (e.dx < -1) {
-            d.rotation = bak - 10;
-          }
-          if (d.rotation !== bak) {
+            var mouse = d3.mouse(this.parentNode.parentNode);
+              d.size = [mouse[0]-d.pos[0], mouse[1]-d.pos[1]];
             state.setAnnotation(i, d);
-            d3.select(this.parentNode).style('transform', updateTransform);
-          }
+            d3.select(this.parentNode).style({
+              width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + 'px' : null,
+              height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + 'px' : null
+            });
         }));
 
     }, $anns_enter.filter((d) => d.type === 'frame'));
