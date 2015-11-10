@@ -303,7 +303,7 @@ div.annotation {
 }
 
 main[data-clue='E'] {
-  div.annotation {
+  div.annotation, div.add-text-annotation {
     display: none !important;
   }
 }

@@ -28,7 +28,8 @@ const modeFeatures = {
     const m = cmode.getMode();
     return 40 + Math.round(m.authoring * 300);
   },
-  showStorySelection: () => cmode.getMode().authoring > 0.8
+  showStorySelection: () => cmode.getMode().authoring > 0.8,
+  isPresenterMode: () => cmode.getMode().presentation > 0.8
 };
 
 function toPath(s?: provenance.AStoryNode) {
@@ -179,7 +180,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
     const $states_enter = $states.enter().append('div').classed('story', true);
     const $story_enter = $states_enter.filter((d) => !d.isFake);
-    const $fake_enter = $states_enter.filter((d) => d.isFake).classed('fake',true);
+    const $fake_enter = $states_enter.filter((d) => d.isFake).classed('fake',true).classed('justauthor',true);
 
     var $glyph_enter = $story_enter.append('div')
       .attr('class', (d) => `glyph fa fa-lg fa-${d instanceof provenance.TextStoryNode ? 'file-text' : 'circle'}`)
@@ -197,9 +198,9 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
         graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
     $glyph_enter
-      .append('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
+      .append('span').attr('class',(d) => `justauthor fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
 
-    $glyph_enter.append('span').attr('class', 'fa fa-remove').on('click', (d) => {
+    $glyph_enter.append('span').attr('class', 'justauthor fa fa-remove').on('click', (d) => {
       //remove me
       if (d === this.story) {
         this.story = this.story.next;
@@ -211,7 +212,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     });
     var mm_ss = d3.time.format('%M:%S:%L');
     $story_enter.append('div').attr({
-      'class': 'duration'
+      'class': 'duration justauthor'
     }).on('click', function(d) {
       d.duration = +(prompt('Enter new duration', d.duration));
       d3.select(this).text(mm_ss(new Date(d.duration)));
@@ -254,6 +255,8 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     //$lines.delay(100).attr('opacity', 1);
     $lines.exit().remove();
     */
+
+    this.$node.selectAll('.justauthor').style('display', modeFeatures.isPresenterMode() ? 'none': null);
   }
 }
 
