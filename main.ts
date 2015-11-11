@@ -4,7 +4,7 @@
 
 import template = require('./template');
 import cmds = require('./cmds');
-import databrowser = require('../caleydo_window/databrowser');
+import databrowser = require('../caleydo_d3/databrowser');
 import cmode = require('../caleydo_provenance/mode');
 import $ = require('jquery');
 
