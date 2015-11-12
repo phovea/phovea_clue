@@ -183,7 +183,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     const $fake_enter = $states_enter.filter((d) => d.isFake).classed('fake',true).classed('justauthor',true);
 
     var $glyph_enter = $story_enter.append('div')
-      .attr('class', (d) => `glyph fa fa-lg fa-${d.state == null ? 'file-text' : 'circle'}`)
+      .attr('class', (d) => `glyph fa fa-lg fa-${d.isTextOnly ? 'file-text' : 'circle'}`)
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) =>  {
         const s = d.state;

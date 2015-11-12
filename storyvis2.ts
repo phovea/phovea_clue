@@ -118,6 +118,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   }
 
   update() {
+    const that = this;
     const graph = this.data;
     const story_raw = toPath(this.story);
 
@@ -145,7 +146,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       .attr('draggable',true)
       .on('dragstart', (d) => {
         const e = <DragEvent>(<any>d3.event);
-        e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+        e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.name);
         e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
       })
@@ -163,7 +164,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
 
-    $story_enter.append('span').attr('class', 'fa fa-remove').on('click', (d) => {
+    $story_enter.append('span').classed('slabel', true);
+    $story_enter.append('div').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
       d3.event.preventDefault();
@@ -199,42 +201,49 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         }
     }).on('dragleave', function () {
       d3.select(this).classed('hover', false);
-    }).on('drop', (d) => {
+    }).on('drop', function(d) {
+      d3.select(this).classed('hover', false);
       var e = <DragEvent>(<any>d3.event);
       e.preventDefault();
       const insertIntoStory = (new_: provenance.StoryNode) => {
         if (d.i < 0) {
           let bak = this.story;
-          this.story = new_;
-          this.data.insertIntoStory(bak, new_);
+          that.story = new_;
+          that.data.insertIntoStory(new_, bak, true);
         } else {
-          this.data.insertIntoStory(new_, story_raw[d.i]);
+          that.data.insertIntoStory(new_, story_raw[d.i], false);
         }
       };
       if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
-        const state = this.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state')));
-        insertIntoStory(this.data.wrapAsStory(state));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state')));
+        insertIntoStory(that.data.wrapAsStory(state));
 
       } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
-        insertIntoStory(this.data.makeTextStory());
+        insertIntoStory(that.data.makeTextStory());
       }else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
-        const story = this.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story')));
-        if (story_raw.indexOf(story) >= 0) { //internal move
+        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story')));
+        if (story_raw.indexOf(story) >= 0 && e.dataTransfer.dropEffect != 'copy') { //internal move
           if (d.i < 0) {
             let bak = this.story;
-            this.story = story;
-            this.data.moveStory(story, bak, true);
+            that.story = story;
+            that.data.moveStory(story, bak, true);
           } else {
-            this.data.moveStory(story, story_raw[d.i], false);
+            that.data.moveStory(story, story_raw[d.i], false);
           }
         } else { //multi story move
-          insertIntoStory(this.data.cloneSingleStoryNode(story));
+          insertIntoStory(that.data.cloneSingleStoryNode(story));
         }
       }
+      that.update();
       return false;
     });
 
     $states.order();
+
+    const $stories = $states.filter((d) => !d.isPlaceholder);
+    $stories.classed('text', (d) => d.isTextOnly);
+    $stories.style('background-image', (d) => d.isTextOnly ? 'url(text.png)' : 'url(todo.png)');
+    $stories.select('span.slabel').text((d) => d.name);
 
     $states.exit().remove();
   }
@@ -333,7 +342,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     this.stories = this.stories.filter((s) => {
       const i = stories.indexOf(s.story);
       if (i < 0) {
-        s.destroy();
+        d3.select(s.node).remove();
         return false;
       }
       stories.splice(i,1);

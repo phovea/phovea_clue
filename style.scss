@@ -105,7 +105,7 @@ $clue_triangle_width: 30px;
   }
 }
 
-$select-color: orange;
+$select-color: #db8f00;
 $hover-color: #ffdd05;
 
 /*.select-selected {
@@ -144,7 +144,7 @@ $hover-color: #ffdd05;
       width: 100%;
       height: 100%;
       display: inline-block;
-      border: 1px solid #989898;
+      border: 2px solid #989898;
 
       background-position: left center;
       background-repeat: no-repeat;
@@ -154,7 +154,7 @@ $hover-color: #ffdd05;
 
     &.small {
       background-color: #b4b4b4;
-      border: 1px solid #989898;
+      border: 2px solid #989898;
       .sthumbnail, .slabel {
         display: none;
       }
@@ -503,25 +503,30 @@ main[data-clue='P'] {
 }
 
 .provenance-multi-story-vis {
+  display: flex;
+  flex-direction: row;
   > div {
     display: inline-block;
+    flex: 1 1 auto;
   }
 }
 
 .provenance-vertical-story-vis {
   width: 200px;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 
   div.story {
+    position: relative;
     display: block;
-    border: 1px solid gray;
+    border: 2px solid gray;
     border-radius: 2px;
 
     flex: 1 1 auto;
+
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &.placeholder {
       height: 5px;
@@ -544,6 +549,24 @@ main[data-clue='P'] {
       }
       &.select-hovered {
         border-color: $select-color;
+      }
+    }
+
+    div.fa-remove {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 10;
+      display: none;
+
+      &:hover {
+        font-weight: bold;
+      }
+    }
+
+    &:hover {
+      div.fa-remove {
+        display: block;
       }
     }
   }

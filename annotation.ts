@@ -37,7 +37,7 @@ export class Renderer {
         return takedown;
       }
       var next = Promise.resolve(null);
-      if (state.state === null) {
+      if (state.isTextOnly) {
         next = this.renderText(state);
       } else {
         next = this.graph.jumpTo(state.state);
