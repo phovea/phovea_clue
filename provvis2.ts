@@ -168,11 +168,6 @@ class StateRepr {
       top: (d) => d.xy[1]+'px'
     });
   }
-
-  private renderThumbnail($elem: d3.Selection<StateRepr>) {
-    $elem.classed('small',false).classed('round',false);
-
-  }
 }
 
 export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -303,7 +298,25 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .attr('data-id', (d) => d.s.id)
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) => graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType))
-      .on('mouseleave', (d) => graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType));
+      .on('mouseleave', (d) => graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType))
+      .attr('draggable',true)
+      .on('dragstart', (d) => {
+        const e = <DragEvent>(<any>d3.event);
+        e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+        e.dataTransfer.setData('text/plain', d.s.name);
+        e.dataTransfer.setData('application/caleydo-prov-state',String(d.s.id));
+      });
+
+    $states_enter.append('div').classed('sthumbnail', true);
+    $states_enter.append('span').classed('slabel',true).on('click', (d) => {
+      d.s.name = prompt('Comment', d.s.name);
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+    });
+
+    $states.call(StateRepr.render);
+
+    $states.exit().remove();
 
     var edges = [];
     states.forEach((s) => {
@@ -318,12 +331,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $edges.enter().append('path');
     $edges.transition().attr('d', (d) => this.line([d.s, d.t]));
 
-    $states_enter.append('div').classed('sthumbnail', true);
-    $states_enter.append('span').classed('slabel',true);
-
-    $states.call(StateRepr.render);
-
-    $states.exit().remove();
   }
 }
 
