@@ -106,15 +106,15 @@ export class CLUEWrapper extends events.EventHandler {
     */
 
 
-    const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
-    provvis2.create(this.graph, body.querySelector('#clue'), {});
+    //const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
+    const pvis = provvis2.create(this.graph, body.querySelector('#clue'), {});
 
     storyvis.create(this.graph, body.querySelector('#story_vis'), {
       render: r.render,
-      extract: () => {
-        const selected = pvis.getAnClearStorySelection();
-        return this.graph.extractStory(selected, false);
-      }
+      /*extract: () => {
+        //const selected = pvis.getAnClearStorySelection();
+        //return this.graph.extractStory(selected, false);
+      }*/
     });
 
    this.graph.on('switch_state', (event:any, state:prov.StateNode) => {
@@ -156,8 +156,8 @@ export class CLUEWrapper extends events.EventHandler {
     }
 
     d3.select('#story_toolbar button.fa-magic').on('click', () => {
-      const selected = pvis.getAnClearStorySelection();
-      this.graph.extractStory(selected);
+      //const selected = pvis.getAnClearStorySelection();
+      //this.graph.extractStory(selected);
     });
 
     d3.select('#attachScreenshot').on('click', () => {
