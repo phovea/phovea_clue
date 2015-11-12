@@ -18,6 +18,7 @@ import prov_sel = require('../caleydo_provenance/selection');
 import selection = require('../caleydo_d3/selectioninfo');
 import cmode = require('../caleydo_provenance/mode');
 import provvis = require('./provvis');
+import provvis2 = require('./provvis2');
 import storyvis = require('./storyvis');
 import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
@@ -79,7 +80,10 @@ export class CLUEWrapper extends events.EventHandler {
     });
 
     selection.create(body.querySelector('#selectioninfo'), {
-      useNames: true
+      useNames: true,
+      filter: (idtype) => {
+        return idtype && idtype.name[0] !== '_';
+      }
     });
 
     cmode.create(body.querySelector('#modeselector'));
@@ -103,6 +107,8 @@ export class CLUEWrapper extends events.EventHandler {
 
 
     const pvis = provvis.create(this.graph, body.querySelector('#clue'), {});
+    provvis2.create(this.graph, body.querySelector('#clue'), {});
+
     storyvis.create(this.graph, body.querySelector('#story_vis'), {
       render: r.render,
       extract: () => {

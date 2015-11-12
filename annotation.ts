@@ -29,7 +29,7 @@ export class Renderer {
     this.renderer = (d:string) => modeFeatures.isEditable() && d.length === 0 ? '<i>Enter Text by Clicking (MarkDown supported)</i>' : (this.options.markdown ? marked(d) : d);
   }
 
-  render(state:prov.AStoryNode) {
+  render(state:prov.StoryNode) {
     //create full chain
     this.prev = this.prev.then(() => {
       var takedown = this.hideOld();
@@ -37,10 +37,9 @@ export class Renderer {
         return takedown;
       }
       var next = Promise.resolve(null);
-      if (state instanceof prov.TextStoryNode) {
-        next = this.renderText(<prov.TextStoryNode>state);
-      }
-      if (state instanceof prov.JumpToStoryNode) {
+      if (state.state === null) {
+        next = this.renderText(state);
+      } else {
         next = this.graph.jumpTo(state.state);
       }
       return Promise.all([takedown, next, this.renderAnnotations(state)]); //, this.renderArrows(state)]);
@@ -48,7 +47,7 @@ export class Renderer {
     return this.prev;
   }
 
-  private renderAnnotationsImpl(state:prov.AStoryNode) {
+  private renderAnnotationsImpl(state:prov.StoryNode) {
     const that = this;
     const editable = modeFeatures.isEditable();
 
@@ -216,7 +215,7 @@ export class Renderer {
     return $anns;
   }
 
-  renderAnnotations(state:prov.AStoryNode) {
+  renderAnnotations(state:prov.StoryNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
       const editable = modeFeatures.isEditable();
@@ -283,39 +282,10 @@ export class Renderer {
     });
   }
 
-  renderText(overlay:prov.TextStoryNode) {
+  renderText(overlay:prov.StoryNode) {
     const that = this;
     return new Promise((resolve) => {
       var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
-      var $divs = $div.selectAll('div').data([overlay.title, overlay.text]);
-      $divs.enter().append('div');
-      $divs.attr('class', (d, i) => `text-overlay-${i === 0 ? 'header' : 'body'}`);
-
-      const editable = modeFeatures.isEditable();
-
-      $divs.classed('editable', editable);
-      let onEdit = function (d) {
-        const $elem = d3.select(this);
-        if (!$elem.classed('editable')) {
-          return;
-        }
-        $elem.on('click', null);
-        //disable on click handler
-        const isBody = $elem.classed('text-overlay-body');
-
-        $elem.append('textarea').property('value', d).on('blur', function () {
-          if (!isBody) {
-            overlay.title = this.value;
-          } else {
-            overlay.text = this.value;
-          }
-          //update value and enable edit click handler again
-          $elem.datum(this.value).html(that.renderer).on('click', onEdit);
-        });
-      };
-      $divs.on('click', onEdit);
-
-      $divs.html(that.renderer);
 
       if (this.options.animation) {
         $div.transition().duration(this.options.duration).style('opacity', 1).each('end', () => {

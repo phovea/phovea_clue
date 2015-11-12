@@ -318,7 +318,7 @@ export class SimpleProvVis extends vis.AVisInstance implements vis.IVisInstance 
   }
 
   private renderStories($states: d3.Selection<INode>, nodes: INode[]) {
-    const stories:provenance.JumpToStoryNode[][] = this.data.getStories().map((story) => <provenance.JumpToStoryNode[]>story.filter((s) => s instanceof provenance.JumpToStoryNode));
+    const stories:provenance.StoryNode[][] = this.data.getStories().map((story) => <provenance.StoryNode[]>story.filter((s) => s.state != null));
     const scale = d3.scale.category10();
 
     const bak = <string>this.line.interpolate();

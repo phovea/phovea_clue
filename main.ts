@@ -20,16 +20,19 @@ elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
 
   databrowser.create(databrowserElem);
 
+  elems.$main.classed('clue_demo',true);
+
   databrowser.makeDropable(<Element>elems.$main_ref.value.node(), (data, op, pos) => {
     var data_ref = elems.graph.findOrAddObject(data, data.desc.id, 'data');
     elems.graph.push(cmds.createAddCmd(elems.$main_ref, data_ref, pos));
   });
   var $left_data = $(databrowserElem);
-    if (cmode.getMode().exploration < 0.8) {
-      $left_data.hide();
-    } else {
-      $left_data.show();
-    }
+  if (cmode.getMode().exploration < 0.8) {
+    $left_data.hide();
+  } else {
+    $left_data.show();
+  }
+
   elems.on('modeChanged', (event, new_) => {
     if (new_.exploration < 0.8) {
       $left_data.hide(); //.animate({height: 'hide'});

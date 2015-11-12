@@ -14,7 +14,7 @@ import vis = require('../caleydo_core/vis');
 interface INode {
   x : number;
   y: number;
-  v: provenance.AStoryNode;
+  v: provenance.StoryNode;
 }
 interface IEdge {
   s: INode;
@@ -32,7 +32,7 @@ const modeFeatures = {
   isPresenterMode: () => cmode.getMode().presentation > 0.8
 };
 
-function toPath(s?: provenance.AStoryNode) {
+function toPath(s?: provenance.StoryNode) {
   var r = [];
   while (s) {
     r.push(s);
@@ -47,20 +47,20 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Story).filter(this.data.stories);
-    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.AStoryNode) => selectedStates.indexOf(d) >= 0);
+    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.StoryNode) => selectedStates.indexOf(d) >= 0);
   };
 
   private options = {
     scale: [1, 1],
     rotate: 0,
-    render: (state: provenance.AStoryNode) => Promise.resolve(null),
-    extract: () => <provenance.AStoryNode>null
+    render: (state: provenance.StoryNode) => Promise.resolve(null),
+    extract: () => <provenance.StoryNode>null
   };
 
-  private story: provenance.AStoryNode;
+  private story: provenance.StoryNode;
 
 
-  private chooseStory = (event: any, story: provenance.AStoryNode) => {
+  private chooseStory = (event: any, story: provenance.StoryNode) => {
     if (this.story != null) {
       toPath(this.story).forEach((s) => {
         s.off('setAttr', this.trigger);
@@ -154,7 +154,7 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     return $svg;
   }
 
-  private onStateClick(d: provenance.AStoryNode) {
+  private onStateClick(d: provenance.StoryNode) {
     this.data.selectStory(d);
     this.options.render(d);
   }
@@ -183,17 +183,19 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     const $fake_enter = $states_enter.filter((d) => d.isFake).classed('fake',true).classed('justauthor',true);
 
     var $glyph_enter = $story_enter.append('div')
-      .attr('class', (d) => `glyph fa fa-lg fa-${d instanceof provenance.TextStoryNode ? 'file-text' : 'circle'}`)
+      .attr('class', (d) => `glyph fa fa-lg fa-${d.state == null ? 'file-text' : 'circle'}`)
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) =>  {
-        if (d instanceof provenance.JumpToStoryNode) {
-          graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        const s = d.state;
+        if (s) {
+          graph.selectState(s,idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
         }
         graph.selectStory(d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
       .on('mouseleave', (d) => {
-        if (d instanceof provenance.JumpToStoryNode) {
-          graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        const s = d.state;
+        if (s) {
+          graph.selectState(s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
         }
         graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
@@ -238,7 +240,6 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     }).attr('title', 'Insert currently selected story');
 
     $states.select('div.glyph')
-      .attr('title', (d) => (d instanceof provenance.TextStoryNode) ? d.title : null)
       .select('span').attr('class',(d) => `fa ${d.annotations.length > 0 ? 'fa-comments': ''}`);
     $states.select('div.duration').text((d) => mm_ss(new Date(d.duration)));
 
