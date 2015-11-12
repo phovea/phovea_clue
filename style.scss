@@ -49,14 +49,29 @@ main {
 
   flex: 1 1 auto;
 
+
+}
+
+main.clue_demo {
   div.block {
     position: absolute;
+
+    div.body {
+      border: 1px solid black;
+      padding: 5px;
+      border-radius: 5px;
+    }
 
     .toolbar {
       text-align: right;
       i:hover {
         font-weight: bold;
       }
+    }
+  }
+  &:not([ data-clue = "E" ]) {
+    div.toolbar {
+      display: none;
     }
   }
 }
@@ -108,6 +123,68 @@ $hover-color: #ffdd05;
   border: 1px solid $select-color !important;
   background-color: $select-color !important;
 }*/
+
+.provenance-layout-vis {
+  svg {
+    path {
+      fill: none;
+      stroke: black;
+    }
+  }
+
+  div.state {
+    position: absolute;
+
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &.round {
+      border-radius: 50%;
+    }
+
+    .sthumbnail {
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      border: 1px solid #989898;
+
+      background-position: left center;
+      background-repeat: no-repeat;
+      background-clip: border-box;
+      background-size: contain;
+    }
+
+    &.small {
+      background-color: #b4b4b4;
+      border: 1px solid #989898;
+      .sthumbnail, .slabel {
+        display: none;
+      }
+      width: 10px;
+      height: 10px;
+    }
+
+    &.full {
+      margin-left: 3px;
+      height: 44px;
+      .sthumbnail {
+        width: 44px;
+      }
+    }
+
+    &.select-selected .sthumbnail {
+      border-color: $select-color;
+    }
+
+    &.select-hovered {
+      .sthumbnail, &.small {
+        border-color: $select-color;
+      }
+    }
+  }
+}
 
 .provenance-simple-vis {
   line {
