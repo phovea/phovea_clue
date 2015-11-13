@@ -11,10 +11,6 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
-function translate(x = 0, y = 0) {
-  return 'translate(' + (x || 0) + ',' + (y || 0) + ')';
-}
-
 
 class StateRepr {
   doi: number;
@@ -269,7 +265,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
   private build($parent:d3.Selection<any>) {
-    var size = this.size;
     //  scale = this.options.scale;
     var $svg = $parent.append('div').attr({
       'class': 'provenance-layout-vis'

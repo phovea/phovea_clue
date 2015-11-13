@@ -189,13 +189,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     $placeholder_enter
       .on('dragenter', function() {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')){
+        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', () => {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')){
-          d3.event.preventDefault();
+      if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
+        d3.event.preventDefault();
           C.updateDropEffect(d3.event);
           return false;
         }
@@ -215,14 +215,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         }
       };
       if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state')));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         insertIntoStory(that.data.wrapAsStory(state));
 
       } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
         insertIntoStory(that.data.makeTextStory());
       }else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
-        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story')));
-        if (story_raw.indexOf(story) >= 0 && e.dataTransfer.dropEffect != 'copy') { //internal move
+        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
+        if (story_raw.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
           if (d.i < 0) {
             let bak = this.story;
             that.story = story;
@@ -255,7 +255,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
 
   private options = {
     scale: [1, 1],
-    rotate: 0,
+    rotate: 0
   };
 
   private stories : VerticalStoryVis[] = [];

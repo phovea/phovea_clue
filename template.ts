@@ -109,7 +109,7 @@ export class CLUEWrapper extends events.EventHandler {
     const pvis = provvis2.create(this.graph, body.querySelector('#clue'), {});
 
     storyvis.create(this.graph, body.querySelector('#clue'), {
-      render: r.render,
+      render: r.render
       /*extract: () => {
         //const selected = pvis.getAnClearStorySelection();
         //return this.graph.extractStory(selected, false);

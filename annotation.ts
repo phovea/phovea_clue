@@ -283,7 +283,6 @@ export class Renderer {
   }
 
   renderText(overlay:prov.StoryNode) {
-    const that = this;
     return new Promise((resolve) => {
       var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
 
