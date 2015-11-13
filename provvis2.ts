@@ -161,7 +161,7 @@ class StateRepr {
       .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)') : null);
     $elem.select('span.star')
       .classed('fa-star-o', (d) => !d.s.getAttr('starred',false))
-      .classed('fa-star', (d) => d.s.getAttr('starred',false))
+      .classed('fa-star', (d) => d.s.getAttr('starred',false));
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'

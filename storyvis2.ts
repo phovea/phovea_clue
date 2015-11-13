@@ -333,9 +333,17 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     var $node = $parent.append('div').attr({
       'class': 'provenance-multi-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
-    $node.append('div').classed('toolbar', true)
-      .append('button').attr('class', 'btn btn-default fa fa-plus').attr('title','create a new story').on('click', () => {
+    const $toolbar = $node.append('div').classed('toolbar', true);
+    $toolbar.append('button').attr('class', 'btn btn-default fa fa-plus').attr('title','create a new story').on('click', () => {
       this.data.startNewStory('Welcome');
+    });
+    $toolbar.append('button').attr('class', 'btn btn-default fa fa-clone').attr('title','create a new story by extracting the current path').on('click', () => {
+      var state = this.data.selectedStates()[0];
+      this.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
+    });
+    $toolbar.append('button').attr('class', 'btn btn-default fa fa-star').attr('title','create a new story by extracting all starred one in a ').on('click', () => {
+      var states = this.data.states.filter((d) => d.getAttr('starred',false));
+      this.data.startNewStory('My favorite findings', states);
     });
     $node.append('div').classed('stories', true);
     return $node;
