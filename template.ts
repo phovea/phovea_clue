@@ -74,12 +74,7 @@ export class CLUEWrapper extends events.EventHandler {
 
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
-      app: this.options.app,
-      mainMenu: [
-        {
-          name: 'Home'
-        }
-      ]
+      app: this.options.app
     });
 
     {
