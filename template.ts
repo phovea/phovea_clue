@@ -95,6 +95,19 @@ export class CLUEWrapper extends events.EventHandler {
       this.graph = chooseProvenanceGraph(this.manager, $ul);
     }
 
+
+    {
+      let div = <HTMLElement>document.createElement('div');
+      this.header.insertCustomRightMenu(div);
+      div.id = 'player_controls';
+      div.classList.add('nav');
+      div.classList.add('navbar-nav');
+      div.classList.add('navbar-right');
+      div.innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
+            <button data-player="play" class="btn btn-default fa fa-play" title="Play"></button>
+            <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
+    }
+
     {
       let div = <HTMLElement>document.createElement('div');
       this.header.insertCustomRightMenu(div);

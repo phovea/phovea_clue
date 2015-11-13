@@ -520,11 +520,13 @@ main[data-clue='P'] {
 }
 
 .provenance-multi-story-vis {
-  display: flex;
-  flex-direction: row;
-  > div {
-    display: inline-block;
-    flex: 1 1 auto;
+  div.stories {
+    display: flex;
+    flex-direction: row;
+    > div {
+      display: inline-block;
+      flex: 1 1 auto;
+    }
   }
 }
 

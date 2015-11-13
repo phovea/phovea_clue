@@ -333,6 +333,11 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     var $node = $parent.append('div').attr({
       'class': 'provenance-multi-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
+    $node.append('div').classed('toolbar', true)
+      .append('button').attr('class', 'btn btn-default fa fa-plus').attr('title','create a new story').on('click', () => {
+      this.data.startNewStory('Welcome');
+    });
+    $node.append('div').classed('stories', true);
     return $node;
   }
 
@@ -342,14 +347,14 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     this.stories = this.stories.filter((s) => {
       const i = stories.indexOf(s.story);
       if (i < 0) {
-        d3.select(s.node).remove();
+        s.node.parentNode.removeChild(s.node);
         return false;
       }
       stories.splice(i,1);
       return true;
     });
     stories.forEach((story) => {
-      this.stories.push(new VerticalStoryVis(this.data, story, this.node, this.options));
+      this.stories.push(new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options));
     });
   }
 }
