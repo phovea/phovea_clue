@@ -157,13 +157,14 @@ export class CLUEWrapper extends events.EventHandler {
       //const pvis = provvis.create(graph, body.querySelector('#clue'), {});
       const pvis = provvis2.create(graph, body.querySelector('#clue'), {});
 
-      storyvis.create(graph, body.querySelector('#clue'), {
+      const svis = storyvis.create(graph, body.querySelector('#clue'), {
         render: r.render
         /*extract: () => {
           //const selected = pvis.getAnClearStorySelection();
           //return graph.extractStory(selected, false);
         }*/
       });
+      (<HTMLElement>svis.node).id = 'story_vis';
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
@@ -172,7 +173,7 @@ export class CLUEWrapper extends events.EventHandler {
       {
         const $right = $('aside.right');
         const $left = $('aside.left');
-        const $footer = $('footer');
+        const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {
           $('main').attr('data-clue', new_.toString());
@@ -202,12 +203,6 @@ export class CLUEWrapper extends events.EventHandler {
         this.fire('modeChanged', cmode.getMode());
         update(cmode.getMode());
       }
-
-      d3.select('#story_toolbar button.fa-magic').on('click', () => {
-        graph.startNewStory('Welcome');
-        //const selected = pvis.getAnClearStorySelection();
-        //graph.extractStory(selected);
-      });
 
       d3.select('#attachScreenshot').on('click', () => {
         const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
