@@ -529,7 +529,6 @@ main[data-clue='P'] {
   div.story {
     position: relative;
     display: block;
-    border: 2px solid gray;
     border-radius: 2px;
 
     flex: 1 1 auto;
@@ -540,13 +539,20 @@ main[data-clue='P'] {
 
     &.placeholder {
       height: 5px;
-      opacity: .1;
-      background-color: black;
+    border: 2px solid #efefef;
+      background-color: #efefef;
       &.hover {
-        opacity: 1
+        background-color: #959595;
+      }
+
+      &.last {
+        height: auto;
+        text-align: center;
+        line-height: 3em;
       }
     }
     &:not(.placeholder) {
+    border: 2px solid gray;
       padding-left: 3em;
       height: 3em;
       background-position: left center;

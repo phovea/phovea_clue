@@ -245,6 +245,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.style('background-image', (d) => d.isTextOnly ? 'url(text.png)' : (d.state.hasAttr('thumbnail') ?  `url(${d.state.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)'));
     $stories.select('span.slabel').text((d) => d.name);
 
+    const $placeholders = $states.filter((d) => d.isPlaceholder);
+    $placeholders
+      .classed('last', (d) => d.i === (story_raw.length-1))
+      .text((d) => d.i === (story_raw.length-1) ? '+' : null);
+
     $states.exit().remove();
   }
 }
