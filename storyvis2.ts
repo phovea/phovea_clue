@@ -207,7 +207,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       e.preventDefault();
       const insertIntoStory = (new_: provenance.StoryNode) => {
         if (d.i < 0) {
-          let bak = this.story;
+          let bak = that.story;
           that.story = new_;
           that.data.insertIntoStory(new_, bak, true);
         } else {
@@ -224,7 +224,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
         if (story_raw.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
           if (d.i < 0) {
-            let bak = this.story;
+            let bak = that.story;
             that.story = story;
             that.data.moveStory(story, bak, true);
           } else {
@@ -338,7 +338,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       this.data.startNewStory('Welcome');
     });
     $toolbar.append('button').attr('class', 'btn btn-default fa fa-clone').attr('title','create a new story by extracting the current path').on('click', () => {
-      var state = this.data.selectedStates()[0];
+      var state = this.data.selectedStates()[0] || this.data.act;
       this.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
     });
     $toolbar.append('button').attr('class', 'btn btn-default fa fa-star').attr('title','create a new story by extracting all starred one in a ').on('click', () => {
