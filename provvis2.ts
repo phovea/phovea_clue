@@ -154,11 +154,14 @@ class StateRepr {
       .classed('small', (d) => d.doi < 0.5)
       .classed('round', (d) => d.doi <= 0.8)
       .classed('full', (d) => d.doi >= 1)
-      .classed('select-selected', (d) => d.selected);
+      .classed('select-selected', (d) => d.selected)
+      .classed('starred', (d) => d.s.getAttr('starred', false));
     $elem.select('span.slabel').text((d) => d.s.name);
     $elem.select('div.sthumbnail')
       .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)') : null);
-
+    $elem.select('span.star')
+      .classed('fa-star-o', (d) => !d.s.getAttr('starred',false))
+      .classed('fa-star', (d) => d.s.getAttr('starred',false))
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'
@@ -303,6 +306,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       });
 
     $states_enter.append('div').classed('sthumbnail', true);
+    $states_enter.append('span').attr('class','star fa').on('click', (d) => {
+      d.s.setAttr('starred',!d.s.getAttr('starred',false));
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+    });
     $states_enter.append('span').classed('slabel',true).on('click', (d) => {
       d.s.name = prompt('Comment', d.s.name);
       d3.event.stopPropagation();
