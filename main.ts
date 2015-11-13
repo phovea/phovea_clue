@@ -10,8 +10,6 @@ import $ = require('jquery');
 
 const elems = template.create(document.body);
 
-elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
-
 {
   let databrowserElem = document.createElement('section');
   databrowserElem.innerHTML = '<h2>Data Browser</h2>';
@@ -22,10 +20,6 @@ elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
 
   elems.$main.classed('clue_demo',true);
 
-  databrowser.makeDropable(<Element>elems.$main_ref.value.node(), (data, op, pos) => {
-    var data_ref = elems.graph.findOrAddObject(data, data.desc.id, 'data');
-    elems.graph.push(cmds.createAddCmd(elems.$main_ref, data_ref, pos));
-  });
   var $left_data = $(databrowserElem);
   if (cmode.getMode().exploration < 0.8) {
     $left_data.hide();
@@ -39,6 +33,13 @@ elems.header.addMainMenu('New Workspace', elems.reset.bind(elems));
     } else {
       $left_data.show(); //animate({height: 'show'});
     }
+  });
+
+  databrowser.makeDropable(<Element>elems.$main_ref.value.node(), (data, op, pos) => {
+    elems.graph.then((graph) => {
+      var data_ref = graph.findOrAddObject(data, data.desc.id, 'data');
+      graph.push(cmds.createAddCmd(elems.$main_ref, data_ref, pos));
+    });
   });
   elems.jumpToStored();
 }

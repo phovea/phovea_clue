@@ -157,7 +157,7 @@ class StateRepr {
       .classed('select-selected', (d) => d.selected);
     $elem.select('span.slabel').text((d) => d.s.name);
     $elem.select('div.sthumbnail')
-      .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(todo.png)') : null);
+      .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)') : null);
 
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
@@ -170,7 +170,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
   private onStateAdded = (event:any, state:provenance.StateNode) => {
-    state.on('setAttr', this.trigger);
+    state.on('attr-thumbnail', this.trigger);
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.State).filter(this.data.states);
