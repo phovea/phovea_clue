@@ -223,7 +223,8 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     $fake_enter.append('span').attr('class', 'fa fa-file-text').on('click', (d, i) => {
       const new_ = graph.makeTextStory();
       if (d.i < 0 ) {
-        this.story = graph.insertIntoStory(new_, this.story);
+        graph.insertIntoStory(new_, this.story);
+        this.story = new_;
       } else {
         graph.insertIntoStory(new_,story_raw[d.i]);
       }
@@ -232,7 +233,8 @@ export class SimpleStoryVis extends vis.AVisInstance implements vis.IVisInstance
     $fake_enter.append('span').attr('class', 'fa fa-magic').on('click', (d, i) => {
       const new_ = this.options.extract();
       if (d.i < 0 ) {
-        this.story = graph.insertIntoStory(new_, this.story);
+        graph.insertIntoStory(new_, this.story);
+        this.story = new_;
       } else {
         graph.insertIntoStory(new_, story_raw[d.i]);
       }
