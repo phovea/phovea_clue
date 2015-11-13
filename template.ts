@@ -60,7 +60,7 @@ export class CLUEWrapper extends events.EventHandler {
     id: 'clue_demo'
   };
 
-  manager = new prov.LocalStorageProvenanceGraphManager();
+  private manager : prov.IProvenanceGraphManager;
 
   graph: Promise<prov.ProvenanceGraph>;
   header: header.AppHeader;
@@ -72,6 +72,7 @@ export class CLUEWrapper extends events.EventHandler {
     C.mixin(this.options, options);
     body.innerHTML = template;
 
+    this.manager = new prov.LocalStorageProvenanceGraphManager(sessionStorage, this.options.id);
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
       app: this.options.app
@@ -249,7 +250,7 @@ export class CLUEWrapper extends events.EventHandler {
 
   reset() {
     this.graph.then((graph) => {
-      graph.jumpTo(this.graph.states[0]).then(() => {
+      graph.jumpTo(graph.states[0]).then(() => {
         graph.clear();
         this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
         cmode.setMode(cmode.modes.Exploration);
