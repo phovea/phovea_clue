@@ -164,9 +164,10 @@ export class CLUEWrapper extends events.EventHandler {
       const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
       const bounds = C.bounds(main);
       this.header.wait();
-      screenshot.take(main, [bounds.w/2, bounds.h/2]).then((image) => {
+      screenshot.takeCanvas(main, [bounds.w/2, bounds.h/2]).then((canvas) => {
         this.header.ready();
-        this.graph.act.setAttr('screenshot', image);
+        this.graph.act.setAttr('screenshot', screenshot.toString(canvas));
+        this.graph.act.setAttr('thumbnail', screenshot.toString(screenshot.createThumbnailCanvas(canvas, [128,128])));
       }).catch((error) => {
         console.log(error);
       });

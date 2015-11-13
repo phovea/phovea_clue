@@ -242,7 +242,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
-    $stories.style('background-image', (d) => d.isTextOnly ? 'url(text.png)' : 'url(todo.png)');
+    $stories.style('background-image', (d) => d.isTextOnly ? 'url(text.png)' : (d.state.hasAttr('thumbnail') ?  `url(${d.state.getAttr('thumbnail')})` : 'url(todo.png)'));
     $stories.select('span.slabel').text((d) => d.name);
 
     $states.exit().remove();

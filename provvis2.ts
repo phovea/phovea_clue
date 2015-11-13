@@ -157,7 +157,7 @@ class StateRepr {
       .classed('select-selected', (d) => d.selected);
     $elem.select('span.slabel').text((d) => d.s.name);
     $elem.select('div.sthumbnail')
-      .style('background-image', (d) => d.doi >= 1.0 ? 'url(todo.png)' : null);
+      .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(todo.png)') : null);
 
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
