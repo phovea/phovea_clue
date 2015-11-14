@@ -57,7 +57,7 @@ class StateRepr {
     } else if (this.doi >= 0.5) {
       return [20,20];
     } else {
-      return  [10,10];
+      return  [16,16];
     }
   }
 
@@ -161,12 +161,13 @@ class StateRepr {
       visual: 'bar-chart',
       data: 'database',
       logic: 'gear',
+      layout: 'desktop',
       selection: 'pencil-square',
       annotation: 'sticky-note'
     };
     const type_icons = {
       create: 'plus',
-      update: 'exchange',
+      update: 'refresh',
       remove: 'remove'
     };
     return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fa fa-${cat_icons[meta.category]}"></i><i class="super fa fa-${type_icons[meta.operation]}"></i></span>`;
@@ -273,8 +274,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     var $svg = $parent.append('svg');
-    $svg.append('g').attr('transform','translate(3,3)').classed('storyhighlights', true);
-    $svg.append('g').attr('transform','translate(3,3)').classed('edges', true);
+    $svg.append('g').attr('transform','translate(1,1)').classed('storyhighlights', true);
+    $svg.append('g').attr('transform','translate(1,1)').classed('edges', true);
     $parent.append('div');
 
     return $parent;
