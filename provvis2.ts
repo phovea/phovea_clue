@@ -27,11 +27,16 @@ class StateRepr {
     this.a = s.creator;
   }
 
-  build(lookup: { [id:number] :StateRepr }) {
+  build(lookup: { [id:number] :StateRepr }, line: StateRepr[]) {
     const p = this.s.previousState;
     if (p) {
       this.parent = lookup[p.id];
-      this.parent.children.push(this);
+      if (line.indexOf(this) >= 0) {
+        //ensure first
+        this.parent.children.unshift(this);
+      } else {
+        this.parent.children.push(this);
+      }
     }
   }
 
@@ -70,8 +75,6 @@ class StateRepr {
       lookup[s.id] = r;
       return r;
     });
-    //build tree
-    states.forEach((s) => s.build(lookup));
 
     //mark selected
     const selected = graph.act;
@@ -83,6 +86,8 @@ class StateRepr {
       r.doi = maxDoI;
       return r;
     });
+    //build tree
+    states.forEach((s) => s.build(lookup, line));
 
     this.layout(states, line);
 
@@ -94,10 +99,10 @@ class StateRepr {
     var byLevel : StateRepr[][] = [];
     const root = states.filter((s) => s.parent === null)[0];
     byLevel.push([root]);
-    byLevel.push(root.children);
+    byLevel.push(root.children.slice());
 
     while(byLevel[byLevel.length-1].length > 0) {
-      byLevel.push([].concat.apply([],byLevel[byLevel.length - 1].map((c) => c.children)));
+      byLevel.push([].concat.apply([],byLevel[byLevel.length - 1].map((c) => c.children.slice())));
     }
     byLevel.forEach((level,i) => {
       if (i < line.length) {
@@ -107,21 +112,35 @@ class StateRepr {
       }
     });
 
-    byLevel.forEach((level, i) => {
-      //ensure that my children have at least a >= index than me
-      level.forEach((s,j) => {
-        if (s) {
-          s.xy = [j,i];
-          if (s.children.length > 0) {
-            var start = byLevel[i+1].indexOf(s.children[0]);
-            while(start < j) {
-              byLevel[i+1].splice(start,0, null);
-              start += 1;
+    var changed = false, loop = 0;
+   do {
+      changed = false;
+     loop++;
+
+      byLevel.forEach((level, i) => {
+        //ensure that my children have at least a >= index than me
+        for (let j = 0; j < level.length; ++j) {
+          let s = level[j];
+          if (s) {
+            s.xy = [j,i];
+            if (s.children.length > 0) {
+              var start = byLevel[i+1].indexOf(s.children[0]);
+              changed = changed || start !== j;
+              if(start < j) {
+                byLevel[i+1].splice.apply(byLevel[i+1],[start,0].concat(d3.range(j-start).map((d) => null)));
+              } else if (j < start && j > 0) {
+                level.splice.apply(level,[j,0].concat(d3.range(start-j).map((d) => null)));
+                s.xy[0] = start;
+                j = start;
+              }
             }
           }
         }
       });
-    });
+
+    } while (changed && loop < 5 );
+
+
 
     //we have a bread first with the line at the first position
 
@@ -288,6 +307,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   update() {
+    const that = this;
     const graph = this.data;
 
     const states = StateRepr.toRepr(graph);
@@ -304,7 +324,29 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.s.name);
         e.dataTransfer.setData('application/caleydo-prov-state',String(d.s.id));
-      });
+      })
+      .on('dragenter', function () {
+        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+          d3.select(this).classed('hover', true);
+          return false;
+        }
+      }).on('dragover', () => {
+        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+          d3.event.preventDefault();
+          C.updateDropEffect(d3.event);
+          return false;
+        }
+      }).on('dragleave', function () {
+        d3.select(this).classed('hover', false);
+      }).on('drop', function (d) {
+        d3.select(this).classed('hover', false);
+        var e = <DragEvent>(<any>d3.event);
+        e.preventDefault();
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
+        that.data.fork(state, d.s);
+        return false;
+    });
+
 
     $states_enter.append('div').classed('sthumbnail', true);
     $states_enter.append('span').classed('icon', true);
