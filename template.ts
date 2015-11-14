@@ -154,24 +154,19 @@ export class CLUEWrapper extends events.EventHandler {
       */
 
 
-      //const pvis = provvis.create(graph, body.querySelector('#clue'), {});
-      const pvis = provvis2.create(graph, body.querySelector('#clue'), {});
+      const pvis = provvis2.create(graph, body.querySelector('#provenancevis'), {});
 
-      const svis = storyvis.create(graph, body.querySelector('#clue'), {
+      const svis = storyvis.create(graph, body.querySelector('#storyvis'), {
         render: r.render
-        /*extract: () => {
-          //const selected = pvis.getAnClearStorySelection();
-          //return graph.extractStory(selected, false);
-        }*/
       });
-      (<HTMLElement>svis.node).id = 'story_vis';
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
       });
 
       {
-        const $right = $('aside.right');
+        const $right = $('aside.prov_right');
+        const $right_story = $('aside.story_right');
         const $left = $('aside.left');
         const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
@@ -181,7 +176,7 @@ export class CLUEWrapper extends events.EventHandler {
           if (new_.presentation > 0.8) {
             $right.hide(); //({width: 'hide'});
           } else {
-            $right.show().css({width: pvis.width + 'px'});
+            $right.show();
           }
           if (new_.exploration < 0.8) {
             $left.hide(); //({width: 'hide'});
@@ -194,9 +189,9 @@ export class CLUEWrapper extends events.EventHandler {
             $footer.show();
           }
           if (new_.authoring < 0.8) {
-            $('#story_toolbar, #story_vis, #storyeditor').hide();
+            $right_story.hide(); //({width: 'hide'});
           } else {
-            $('#story_toolbar, #story_vis, #storyeditor').show();
+            $right_story.show();
           }
         };
         cmode.on('modeChanged', (event, new_) => update(new_));

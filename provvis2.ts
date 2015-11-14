@@ -172,6 +172,7 @@ class StateRepr {
 export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
+  private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('attr-thumbnail', this.trigger);
   };
@@ -181,6 +182,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   };
 
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
+
+  private dim : [number, number] = [200, 100];
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -194,12 +197,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.update();
   }
 
-  get width() {
-    return 300;
-  }
-
   private bind() {
     this.data.on('switch_state,clear', this.trigger);
+    this.data.on('add_story,move_story,remove_story', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
@@ -211,6 +211,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   destroy() {
     super.destroy();
     this.data.off('switch_state,clear', this.trigger);
+    this.data.off('add_story,move_story,remove_story', this.triggerStoryHighlight);
     this.data.off('add_state', this.onStateAdded);
     this.data.off('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
@@ -220,7 +221,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   get rawSize():[number, number] {
-    return [this.width, 500];
+    return this.dim;
   }
 
   get node() {
@@ -241,42 +242,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     return Promise.resolve(null);
   }
 
-  transform(scale?:number[], rotate:number = 0) {
-    var bak = {
-      scale: this.options.scale || [1, 1],
-      rotate: this.options.rotate || 0
-    };
-    if (arguments.length === 0) {
-      return bak;
-    }
-    var dims = this.data.dim;
-    var width = 20, height = dims[0];
-    this.$node.attr({
-      width: width * scale[0],
-      height: height * scale[1]
-    }).style('transform', 'rotate(' + rotate + 'deg)');
-    //this.$node.select('g').attr('transform', 'scale(' + scale[0] + ',' + scale[1] + ')');
-    var new_ = {
-      scale: scale,
-      rotate: rotate
-    };
-    this.fire('transform', new_, bak);
-    this.options.scale = scale;
-    this.options.rotate = rotate;
-    return new_;
-  }
-
-
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $svg = $parent.append('div').attr({
+    var $parent = $parent.append('div').attr({
       'class': 'provenance-layout-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
-    $svg.append('svg');
-    $svg.append('div');
+    var $svg = $parent.append('svg');
+    $svg.append('g').classed('storyhighlights', true);
+    $svg.append('g').classed('edges', true);
+    $parent.append('div');
 
-    return $svg;
+    return $parent;
   }
 
   private onStateClick(d: StateRepr) {
@@ -287,7 +264,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   update() {
     const graph = this.data;
-
 
     const states = StateRepr.toRepr(graph);
     const $states = this.$node.select('div').selectAll('div.state').data(states, (d) => ''+d.s.id);
@@ -326,14 +302,49 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       edges.push.apply(edges, s.children.map((c) => ({s : s, t : c})));
     });
 
-    this.$node.select('svg')
-      .attr('width', d3.max(states, (s) => s.xy[0]+s.size[0]))
-      .attr('height', d3.max(states, (s) => s.xy[1]+s.size[1]));
+    this.dim = [
+      d3.max(states, (s) => s.xy[0]+s.size[0]) + 200, //for label
+      d3.max(states, (s) => s.xy[1]+s.size[1])
+    ];
 
-    const $edges = this.$node.select('svg').selectAll('path').data(edges, (d) => d.s.s.id+'-'+d.t.s.id);
+    this.$node.select('svg')
+      .attr('width', this.dim[0])
+      .attr('height', this.dim[1]);
+
+    const $edges = this.$node.select('svg g.edges').selectAll('path').data(edges, (d) => d.s.s.id+'-'+d.t.s.id);
     $edges.enter().append('path');
     $edges.transition().attr('d', (d) => this.line([d.s, d.t]));
 
+    this.updateStoryHighlight();
+  }
+
+  private updateStoryHighlight() {
+    //TODO hide if not needed
+    const $g = this.$node.select('svg g.storyhighlights');
+    const states = this.$node.select('div').selectAll<StateRepr>('div.state').data();
+    const lookup : any = {};
+    states.forEach((s) => lookup[s.s.id] = s);
+    const areas = this.data.getStories().map((story) => {
+      const reprs = story.map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
+      var r= [];
+      reprs.forEach((repr) => {
+        var xy = repr.xy,
+          size = repr.size;
+        r.push({ x0: xy[0], y0: xy[1]-2, x1: xy[0]+size[0], y1: xy[1]-2});
+        r.push({ x0: xy[0], y0: xy[1]+size[1]+2, x1: xy[0]+size[0], y1: xy[1]+size[1]+2});
+      });
+      return r;
+    });
+    const $areas = $g.selectAll('path.story').data(areas);
+    $areas.enter().append('path').classed('story', true);
+    const area = d3.svg.area<{ x0: number; y0: number; x1: number, y1: number}>().interpolate('basis')
+      .x0((d) => d.x0)
+      .x1((d) => d.x1)
+      .y0((d) => d.y0)
+      .y1((d) => d.y1);
+    const colors = d3.scale.category10();
+    $areas.attr('d',area).style('fill', (d,i) => colors(i));
+    $areas.exit().remove();
   }
 }
 

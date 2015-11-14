@@ -122,9 +122,12 @@ $hover-color: #ffdd05;
 
 .provenance-layout-vis {
   svg {
-    path {
+    g.edges path {
       fill: none;
       stroke: black;
+    }
+    g.storyhighlights path {
+      opacity: 0.4;
     }
   }
 

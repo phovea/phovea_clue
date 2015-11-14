@@ -248,7 +248,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $placeholders = $states.filter((d) => d.isPlaceholder);
     $placeholders
       .classed('last', (d) => d.i === (story_raw.length-1))
-      .text((d) => d.i === (story_raw.length-1) ? '+' : null);
+      .text((d) => d.i === (story_raw.length-1) ? 'drop state here' : null);
 
     $states.exit().remove();
   }
@@ -339,6 +339,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       'class': 'provenance-multi-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     const $toolbar = $node.append('div').classed('toolbar', true);
+    $toolbar.append('h2').text('Story Editor').style('display','inline-block');
     $toolbar.append('button').attr('class', 'btn btn-default fa fa-plus').attr('title','create a new story').on('click', () => {
       this.data.startNewStory('Welcome');
     });
@@ -356,18 +357,23 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
 
   update() {
     const stories = this.data.getStoryChains();
-
+    const colors = d3.scale.category10();
     this.stories = this.stories.filter((s) => {
       const i = stories.indexOf(s.story);
       if (i < 0) {
         s.node.parentNode.removeChild(s.node);
         return false;
       }
-      stories.splice(i,1);
       return true;
     });
-    stories.forEach((story) => {
-      this.stories.push(new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options));
+    stories.forEach((story, i) => {
+      var s = C.search(this.stories, (s) => s.story === story);
+      if (!s) {
+        s = new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options);
+        this.stories.push(s);
+      }
+      const c = d3.rgb(colors(String(i)));
+      d3.select(s.node).style('background-color',`rgba(${c.r},${c.g},${c.b},0.1)`);
     });
   }
 }
