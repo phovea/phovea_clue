@@ -162,7 +162,7 @@ $hover-color: #ffdd05;
     &.small {
       background-color: #b4b4b4;
       border: 2px solid #989898;
-      .sthumbnail, .slabel {
+      .sthumbnail, .slabel, span.star {
         display: none;
       }
       width: 10px;
