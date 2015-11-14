@@ -120,6 +120,12 @@ $hover-color: #ffdd05;
   background-color: $select-color !important;
 }*/
 
+.fa.super {
+  vertical-align: super;
+  font-size: 50%;
+  margin-left: -.5em;
+}
+
 .provenance-layout-vis {
   svg {
     g.edges path {
@@ -144,10 +150,13 @@ $hover-color: #ffdd05;
     }
 
     span.star {
+      position: absolute;
+      left: 63px;
       &:hover {
         font-weight: bold;
       }
     }
+
 
     .sthumbnail {
       width: 100%;
@@ -168,15 +177,21 @@ $hover-color: #ffdd05;
       .sthumbnail, .slabel, span.star {
         display: none;
       }
-      width: 10px;
-      height: 10px;
+      width: 16px;
+      height: 16px;
+      font-size: 65%;
     }
 
     &.full {
-      margin-left: 3px;
+      margin-left: 6px;
+      martin-top: 3px;
       height: 44px;
       .sthumbnail {
         width: 44px;
+      }
+      span.icon {
+        position: absolute;
+        left: 44px;
       }
     }
 

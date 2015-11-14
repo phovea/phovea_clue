@@ -20,8 +20,11 @@ class StateRepr {
   parent: StateRepr = null;
   children: StateRepr[] = [];
 
+  a : provenance.ActionNode = null;
+
   constructor(public s: provenance.StateNode) {
     this.doi = 0.1;
+    this.a = s.creator;
   }
 
   build(lookup: { [id:number] :StateRepr }) {
@@ -149,6 +152,26 @@ class StateRepr {
     });
   }
 
+  static toIcon(repr: StateRepr) {
+    if (!repr.a) {
+      return `<i class="fa fa-circle" title="${repr.s.name}"></i>`;
+    }
+    const meta = repr.a.meta;
+    const cat_icons = {
+      visual: 'bar-chart',
+      data: 'database',
+      logic: 'gear',
+      selection: 'pencil-square',
+      annotation: 'sticky-note'
+    };
+    const type_icons = {
+      create: 'plus',
+      update: 'exchange',
+      remove: 'remove'
+    };
+    return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fa fa-${cat_icons[meta.category]}"></i><i class="super fa fa-${type_icons[meta.operation]}"></i></span>`;
+  }
+
   static render($elem: d3.Selection<StateRepr>) {
     $elem
       .classed('small', (d) => d.doi < 0.5)
@@ -156,12 +179,13 @@ class StateRepr {
       .classed('full', (d) => d.doi >= 1)
       .classed('select-selected', (d) => d.selected)
       .classed('starred', (d) => d.s.getAttr('starred', false));
-    $elem.select('span.slabel').text((d) => d.s.name);
+    $elem.select('span.icon').html(StateRepr.toIcon);
+    $elem.select('span.slabel').text((d) => d.a ? d.a.name : d.s.name);
     $elem.select('div.sthumbnail')
       .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)') : null);
     $elem.select('span.star')
-      .classed('fa-star-o', (d) => !d.s.getAttr('starred',false))
-      .classed('fa-star', (d) => d.s.getAttr('starred',false));
+      .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred',false))
+      .classed('fa-bookmark', (d) => d.s.getAttr('starred',false));
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'
@@ -249,8 +273,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     var $svg = $parent.append('svg');
-    $svg.append('g').classed('storyhighlights', true);
-    $svg.append('g').classed('edges', true);
+    $svg.append('g').attr('transform','translate(3,3)').classed('storyhighlights', true);
+    $svg.append('g').attr('transform','translate(3,3)').classed('edges', true);
     $parent.append('div');
 
     return $parent;
@@ -282,6 +306,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       });
 
     $states_enter.append('div').classed('sthumbnail', true);
+    $states_enter.append('span').classed('icon', true);
     $states_enter.append('span').attr('class','star fa').on('click', (d) => {
       d.s.setAttr('starred',!d.s.getAttr('starred',false));
       d3.event.stopPropagation();
@@ -343,7 +368,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .y0((d) => d.y0)
       .y1((d) => d.y1);
     const colors = d3.scale.category10();
-    $areas.attr('d',area).style('fill', (d,i) => colors(i));
+    $areas.attr('d',area).style('fill', (d,i) => colors(String(i)));
     $areas.exit().remove();
   }
 }

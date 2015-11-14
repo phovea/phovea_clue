@@ -50,12 +50,12 @@ interface ID3Ref extends prov.IObjectRef<d3.Selection<any>> {
 }
 
 export function createAddCmd($main_ref:ID3Ref, data:prov.IObjectRef<datatypes.IDataType>, pos:{x: number; y:number}) {
-  return prov.action(prov.meta('Block for ' + data.value.desc.name, prov.cat.visual, prov.op.create), 'addClueElem', addElem, [$main_ref, data], {
+  return prov.action(prov.meta('add block for ' + data.value.desc.name, prov.cat.visual, prov.op.create), 'addClueElem', addElem, [$main_ref, data], {
     pos: pos
   });
 }
 export function createRemoveCmd($div_ref:ID3Ref, $main_ref:ID3Ref) {
-  return prov.action(prov.meta('Remove Block', prov.cat.visual, prov.op.remove), 'removeClueElem', removeElem, [$div_ref, $main_ref]);
+  return prov.action(prov.meta('rmove block of '+$div_ref.value.datum().desc.name, prov.cat.visual, prov.op.remove), 'removeClueElem', removeElem, [$div_ref, $main_ref]);
 }
 
 export function createCmd(id) {
