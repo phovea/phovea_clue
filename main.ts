@@ -37,8 +37,7 @@ const elems = template.create(document.body);
 
   databrowser.makeDropable(<Element>elems.$main.node(), (data, op, pos) => {
     elems.graph.then((graph) => {
-      var data_ref = graph.findOrAddObject(data, data.desc.id, 'data');
-      graph.push(cmds.createAddCmd(elems.$main_ref, data_ref, pos));
+      graph.push(cmds.createAddCmd(elems.$main_ref, data.desc.name, pos));
     });
   });
   elems.jumpToStored();

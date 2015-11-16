@@ -242,7 +242,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   private bind() {
-    this.data.on('switch_state,clear', this.trigger);
+    this.data.on('switch_state,forked_branch,clear', this.trigger);
     this.data.on('add_story,move_story,remove_story', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
@@ -343,7 +343,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
-        that.data.fork(state, d.s);
+        that.data.fork(state.creator, d.s);
         return false;
     });
 
