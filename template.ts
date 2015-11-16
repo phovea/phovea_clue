@@ -154,9 +154,9 @@ export class CLUEWrapper extends events.EventHandler {
       */
 
 
-      const pvis = provvis2.create(graph, body.querySelector('#provenancevis'), {});
+      provvis2.create(graph, body.querySelector('#provenancevis'), {});
 
-      const svis = storyvis.create(graph, body.querySelector('#storyvis'), {
+      storyvis.create(graph, body.querySelector('#storyvis'), {
         render: r.render
       });
 

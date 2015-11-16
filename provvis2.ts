@@ -288,16 +288,16 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $parent = $parent.append('div').attr({
+    var $p = $parent.append('div').attr({
       'class': 'provenance-layout-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
-    var $svg = $parent.append('svg');
+    var $svg = $p.append('svg');
     $svg.append('g').attr('transform','translate(1,1)').classed('storyhighlights', true);
     $svg.append('g').attr('transform','translate(1,1)').classed('edges', true);
-    $parent.append('div');
+    $p.append('div');
 
-    return $parent;
+    return $p;
   }
 
   private onStateClick(d: StateRepr) {
