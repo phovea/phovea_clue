@@ -411,7 +411,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .y0((d) => d.y0)
       .y1((d) => d.y1);
     const colors = d3.scale.category10();
-    $areas.attr('d',area).style('fill', (d,i) => colors(String(i)));
+    $areas.transition().attr('d',area).style('fill', (d,i) => colors(String(i)));
     $areas.exit().remove();
   }
 }
