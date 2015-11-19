@@ -347,7 +347,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       var state = this.data.selectedStates()[0] || this.data.act;
       this.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
     });
-    $toolbar.append('button').attr('class', 'btn btn-default fa fa-star').attr('title','create a new story by extracting all starred one in a ').on('click', () => {
+    $toolbar.append('button').attr('class', 'btn btn-default fa fa-bookmark').attr('title','create a new story by extracting all starred one in a ').on('click', () => {
       var states = this.data.states.filter((d) => d.getAttr('starred',false));
       this.data.startNewStory('My favorite findings', states);
     });
