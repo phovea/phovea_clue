@@ -207,6 +207,7 @@ class StateRepr {
     $elem.select('span.star')
       .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred',false))
       .classed('fa-bookmark', (d) => d.s.getAttr('starred',false));
+    $elem.select('span.fa-tags').attr('title', (d) => d.s.getAttr('tags',[]).join(' '));
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'
@@ -353,6 +354,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $states_enter.append('span').classed('icon', true);
     $states_enter.append('span').attr('class','star fa').on('click', (d) => {
       d.s.setAttr('starred',!d.s.getAttr('starred',false));
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+    });
+    $states_enter.append('span').attr('class','fa fa-tags').on('click', (d) => {
+      var tags = d.s.getAttr('tags',[]).join(' ');
+      dialogs.prompt(tags, 'Tags').then((new_) => {
+        d.s.setAttr('tags', new_.split(' '));
+      });
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });

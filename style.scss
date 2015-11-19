@@ -156,6 +156,13 @@ $hover-color: #ffdd05;
         font-weight: bold;
       }
     }
+    span.fa-tags {
+      position: absolute;
+      left: 75px;
+      &:hover {
+        font-weight: bold;
+      }
+    }
 
 
     .sthumbnail {
