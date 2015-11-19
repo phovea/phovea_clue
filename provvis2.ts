@@ -8,6 +8,7 @@ import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
 import provenance = require('../caleydo_provenance/main');
 import cmode = require('../caleydo_provenance/mode');
+import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
@@ -356,7 +357,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       d3.event.preventDefault();
     });
     $states_enter.append('span').classed('slabel',true).on('click', (d) => {
-      d.s.name = prompt('Comment', d.s.name);
+      dialogs.prompt(d.s.name, 'Comment').then((new_) => {
+        d.s.name = new_;
+      });
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });
