@@ -90,11 +90,17 @@ export class CLUEWrapper extends events.EventHandler {
       injectHeadlessSupport(this);
     }
 
-    this.manager = new prov.RemoteStorageProvenanceGraphManager({
-      prefix: this.options.id,
-      storage: sessionStorage,
-      application: this.options.application
-    });
+    if (C.hash.getProp('clue_store','local') === 'local') {
+      this.manager = new prov.LocalStorageProvenanceGraphManager({
+        prefix: this.options.id,
+        storage: sessionStorage,
+        application: this.options.application
+      });
+    } else {
+      this.manager = new prov.RemoteStorageProvenanceGraphManager({
+        application: this.options.application
+      });
+    }
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
       app: this.options.app
@@ -154,7 +160,7 @@ export class CLUEWrapper extends events.EventHandler {
 
     this.graph.then((graph) => {
       graph.on('sync_start,sync', (event: events.IEvent) => {
-        d3.select('*[data-header="options"] span.glyphicon').classed('fa-spin', event.type !== 'sync');
+        d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
       prov_sel.create(graph, 'selected', {
