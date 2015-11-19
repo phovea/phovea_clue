@@ -54,9 +54,23 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
   });
 }
 
+/**
+ * injection for headless support
+ * @param wrapper
+ */
+function injectHeadlessSupport(wrapper: CLUEWrapper) {
+  var w : any = window;
+  w.__caleydo = w.__caleydo || {};
+  w.__caleydo.clue = wrapper;
+  wrapper.on('jumped_to', () => {
+    w.__caleydo.ready = true;
+  });
+}
+
 export class CLUEWrapper extends events.EventHandler {
   private options = {
     app: 'CLUE',
+    application: '/clue_demo',
     id: 'clue_demo'
   };
 
@@ -72,7 +86,15 @@ export class CLUEWrapper extends events.EventHandler {
     C.mixin(this.options, options);
     body.innerHTML = template;
 
-    this.manager = new prov.LocalStorageProvenanceGraphManager(sessionStorage, this.options.id);
+    if (C.hash.is('clue_headless')) {
+      injectHeadlessSupport(this);
+    }
+
+    this.manager = new prov.RemoteStorageProvenanceGraphManager({
+      prefix: this.options.id,
+      storage: sessionStorage,
+      application: this.options.application
+    });
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
       app: this.options.app
@@ -242,13 +264,19 @@ export class CLUEWrapper extends events.EventHandler {
     //jump to stored state
     let target_state = C.hash.getInt('clue_state', null);
     if (target_state !== null) {
-      this.graph.then((graph) => {
+      return this.graph.then((graph) => {
         let s = graph.getStateById(target_state);
         if (s) {
-          graph.jumpTo(s);
+          return graph.jumpTo(s).then(() => {
+            this.fire('jumped_to', s);
+            return this;
+          });
         }
+        return Promise.reject('state not found');
       });
     }
+    //no stored state nothing to jump to
+    return Promise.resolve(this);
   }
 
   reset() {
