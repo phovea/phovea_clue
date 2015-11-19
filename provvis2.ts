@@ -220,7 +220,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private trigger = C.bind(this.update, this);
   private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
   private onStateAdded = (event:any, state:provenance.StateNode) => {
-    state.on('attr-thumbnail', this.trigger);
+    state.on('setAttr', this.trigger);
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.State).filter(this.data.states);
