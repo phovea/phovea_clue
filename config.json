@@ -1,0 +1,6 @@
+{
+  "phantomjs2": "phantomjs",
+  "memcached": [
+    "127.0.0.1:11211"
+  ]
+}

@@ -10,15 +10,21 @@ body, html {
 }
 
 body > div.box {
+  display: -webkit-flex;
   display: flex;
+  -webkit-align-items: stretch;
   align-items: stretch;
+  -webkit-flex-flow: column;
   flex-flow: column;
   height: 100%;
 }
 
 body > div.box > div.content {
+  display: -webkit-flex;
   display: flex;
+  -webkit-align-items: stretch;
   align-items: stretch;
+  -webkit-flex: 1 1 auto;          /* Chrome */
   flex: 1 1 auto;
 }
 
@@ -46,6 +52,7 @@ footer {
 main {
   position: relative;
 
+  -webkit-flex: 1 1 auto;          /* Chrome */
   flex: 1 1 auto;
 
 }
@@ -127,6 +134,8 @@ $hover-color: #ffdd05;
 }
 
 .provenance-layout-vis {
+  position: relative;
+  background-color: green;
   svg {
     g.edges path {
       fill: none;
@@ -191,7 +200,7 @@ $hover-color: #ffdd05;
 
     &.full {
       margin-left: 6px;
-      martin-top: 3px;
+      margin-top: 3px;
       height: 44px;
       .sthumbnail {
         width: 44px;
@@ -537,10 +546,13 @@ main[data-clue='P'] {
 
 .provenance-multi-story-vis {
   div.stories {
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: row;
     flex-direction: row;
     > div {
       display: inline-block;
+      -webkit-flex: 1 1 auto;
       flex: 1 1 auto;
     }
   }
@@ -548,7 +560,9 @@ main[data-clue='P'] {
 
 .provenance-vertical-story-vis {
   width: 200px;
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-direction: column;
   flex-direction: column;
 
   div.story {
@@ -556,6 +570,7 @@ main[data-clue='P'] {
     display: block;
     border-radius: 2px;
 
+    -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
 
     overflow-x: hidden;

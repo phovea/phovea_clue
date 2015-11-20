@@ -28,6 +28,15 @@
           "factory": "createCmd",
           "creates": "(addClueElem|removeClueElem)"
         }
+      ],
+      "python": [
+        {
+          "type": "namespace",
+          "id": "caleydo-clue-screenshot",
+          "file": "remoteplayer",
+          "namespace": "/api/clue",
+          "factory": "create"
+        }
       ]
     },
     "products": [
@@ -48,6 +57,12 @@
       },
       "tsd": {
         "marked": "935bfa"
+      },
+      "python": {
+        "selenium": "2.48.0"
+      },
+      "debian": {
+        "phantomjs": ""
       }
     },
     "requirejs-config": {

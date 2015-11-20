@@ -63,7 +63,10 @@ function injectHeadlessSupport(wrapper: CLUEWrapper) {
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   wrapper.on('jumped_to', () => {
-    w.__caleydo.ready = true;
+    setTimeout(() => {
+      document.body.classList.add('clue_jumped');
+    },5000);
+    //prompt('clue_done_magic_key','test');
   });
 }
 
@@ -87,7 +90,9 @@ export class CLUEWrapper extends events.EventHandler {
     body.innerHTML = template;
 
     if (C.hash.is('clue_headless')) {
+      console.log('init headless mode');
       injectHeadlessSupport(this);
+      d3.select('body').classed('headless', true);
     }
 
     if (C.hash.getProp('clue_store','local') === 'local') {
@@ -158,7 +163,10 @@ export class CLUEWrapper extends events.EventHandler {
 
     this.$main = d3.select(body).select('main');
 
+
+    console.log('graph loading');
     this.graph.then((graph) => {
+      console.log('graph loaded');
       graph.on('sync_start,sync', (event: events.IEvent) => {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
@@ -263,23 +271,30 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
       this.fire('loaded_graph', graph);
+      console.log('done init');
     });
   }
 
   jumpToStored() {
     //jump to stored state
     let target_state = C.hash.getInt('clue_state', null);
+    console.log('jump to stored start', target_state);
     if (target_state !== null) {
       return this.graph.then((graph) => {
         let s = graph.getStateById(target_state);
         if (s) {
+          console.log('jump to stored', s.id);
           return graph.jumpTo(s).then(() => {
+          console.log('jumped to stored', s.id);
             this.fire('jumped_to', s);
             return this;
           });
         }
+        this.fire('jumped_to', null);
         return Promise.reject('state not found');
       });
+    } else {
+      this.fire('jumped_to', null);
     }
     //no stored state nothing to jump to
     return Promise.resolve(this);
