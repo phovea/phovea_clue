@@ -2,8 +2,6 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import datatypes = require('../caleydo_core/datatype');
-import datas = require('../caleydo_core/data');
 import prov = require('../caleydo_provenance/main');
 import d3 = require('d3');
 
