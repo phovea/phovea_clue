@@ -78,6 +78,8 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
     mc.set(key, obj)
   return obj
 
+def mimetype_of(format):
+  return dict(png='image/png',jpg='image/jpeg',jpeg='image/jpeg').get(format,'image/png')
 
 @app.route('/screenshot/<app>/<prov_id>/<state>.<format>')
 def create_screenshot(app, prov_id, state, format):
@@ -85,7 +87,7 @@ def create_screenshot(app, prov_id, state, format):
   height = flask.request.args.get('height', 1080)
 
   s = _create_screenshot_impl(app, prov_id, state, format, width, height)
-  return flask.Response(s, mimetype='image/'+format)
+  return flask.Response(s, mimetype=mimetype_of(format))
 
 
 @app.route('/thumbnail/<app>/<prov_id>/<state>.<format>')
@@ -114,7 +116,7 @@ def create_thumbnail(app, prov_id, state, format):
     obj = b.read()
     mc.set(key, obj)
 
-  return flask.Response(obj, mimetype='image/'+format)
+  return flask.Response(obj, mimetype=mimetype_of(format))
 
 
 def create():
