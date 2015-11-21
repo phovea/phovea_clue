@@ -243,7 +243,7 @@ export class CLUEWrapper extends events.EventHandler {
         screenshot.takeCanvas(main, [bounds.w/2, bounds.h/2]).then((canvas) => {
           this.header.ready();
           graph.act.setAttr('screenshot', screenshot.toString(canvas));
-          graph.act.setAttr('thumbnail', screenshot.toString(screenshot.createThumbnailCanvas(canvas, [128,128])));
+          graph.act.setAttr('thumbnail', screenshot.toString(screenshot.createThumbnailCanvas(canvas, 128)));
         }).catch((error) => {
           console.log(error);
         });
