@@ -4,6 +4,7 @@
 /// <reference path="../../tsd.d.ts" />
 
 import C = require('../caleydo_core/main');
+import $ = require('jquery');
 import ajax = require('../caleydo_core/ajax');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
@@ -17,7 +18,7 @@ import vis = require('../caleydo_core/vis');
 function to_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode) {
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of) {
-    return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.png`);
+    return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.jpg`);
   }
   return '/clue_demo/todo.png';
 }
@@ -83,26 +84,39 @@ class StateRepr {
     }
   }
 
-  static toRepr(graph : provenance.ProvenanceGraph) {
+  static toRepr(graph : provenance.ProvenanceGraph, filter: any) {
     //assign doi
     const maxDoI = 1;
     const lookup : any = {};
+
+
+    //mark selected
+    const selected = graph.act;
+    const selected_path = selected.path.reverse();
+
     const states = graph.states.map((s) => {
       var r = new StateRepr(s, graph);
+      var a = s.creator;
+      var meta = a ? a.meta : provenance.meta('No','none','none');
+
+      const category = filter.category[meta.category] ? 0 : -1;
+      const operation = filter.operation[meta.operation] ? 0 : -1;
+      const bookmark = (filter.bookmark ? (s.getAttr('starred', false) ? 2: -2) : 0);
+      const tags = (filter.tags.length > 0 ? (s.getAttr('tags', []).some((d) => filter.tags.indexOf(d) >= 0) ? 2: -2) : 0);
+      const is_selected = s === selected ? 2: 0;
+      const inpath = selected_path.indexOf(s) >= 0 ? Math.max(0,4-selected_path.indexOf(s)) : -2;
+      //combine to a doi value
+      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath;
+
+      r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
+      r.selected = s === selected;
+
       lookup[s.id] = r;
       return r;
     });
 
-    //mark selected
-    const selected = graph.act;
-    lookup[selected.id].selected = true;
-
     //route to path = 1
-    const line = selected.path.map((p) => {
-      const r = lookup[p.id];
-      r.doi = maxDoI;
-      return r;
-    });
+    const line = selected.path.map((p) => lookup[p.id]);
     //build tree
     states.forEach((s) => s.build(lookup, line));
 
@@ -215,7 +229,8 @@ class StateRepr {
       .classed('round', (d) => d.doi <= 0.8)
       .classed('full', (d) => d.doi >= 1)
       .classed('select-selected', (d) => d.selected)
-      .classed('starred', (d) => d.s.getAttr('starred', false));
+      .classed('starred', (d) => d.s.getAttr('starred', false))
+      .attr('data-doi',(d) => d.doi);
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.a ? d.a.name : d.s.name);
     $elem.select('div.sthumbnail')
@@ -246,6 +261,25 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
 
   private dim : [number, number] = [200, 100];
+
+  private filter = {
+    category: {
+      data: true,
+      visual: true,
+      selection: true,
+      logic: true,
+      layout: true,
+      none: false
+    },
+    operation: {
+      create: true,
+      remove: true,
+      update: true,
+      none: false
+    },
+    bookmark: true,
+    tags: []
+  };
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -310,10 +344,84 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       'class': 'provenance-layout-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
-    var $svg = $p.append('svg');
-    $svg.append('g').attr('transform','translate(1,1)').classed('storyhighlights', true);
-    $svg.append('g').attr('transform','translate(1,1)').classed('edges', true);
-    $p.append('div');
+    $p.html(`
+      <form class="form-inline toolbar" onsubmit="return false;">
+      <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default btn-xs active" title="data actions">
+          <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="visual actions">
+          <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="selection actions">
+          <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="layout actions">
+          <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="logic actions">
+          <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i>
+        </label>
+      </div>
+
+      <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default btn-xs active" title="create actions">
+          <input type="checkbox" autocomplete="off" name="operation" value="create" checked="checked"> <i class="fa fa-plus"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="update actions">
+          <input type="checkbox" autocomplete="off" name="operation" value="update" checked="checked"> <i class="fa fa-refresh"></i>
+        </label>
+        <label class="btn btn-default btn-xs active" title="remove actions">
+          <input type="checkbox" autocomplete="off" name="operation" value="remove" checked="checked"> <i class="fa fa-remove"></i>
+        </label>
+      </div>
+
+      <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default btn-xs" title="bookmarked actions">
+          <input type="checkbox" autocomplete="off" name="bookmark"> <i class="fa fa-bookmark"></i>
+        </label>
+        <div class="form-group btn-group">
+          <div class="btn-group btn-group-xs" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+              <i class="fa fa-tags"></i><span class="caret"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon" title="tagged states"><i class="fa fa-tags"></i></span>
+                <input name="tags" type="text" class="form-control input-sm" placeholder="tags">
+              </div>
+            </div>
+          </div>
+        </div>
+       </div>
+      </form>
+      <svg>
+        <g transform="translate(1,1)" class="storyhighlights"></g>
+        <g transform="translate(1,1)" class="edges"></g>
+      </svg>
+      <div class="states"></div>
+    `);
+
+    //init the toolbar filter options
+    const jp = $($p.node());
+    const that = this;
+    //must use bootstrap since they are manually triggered
+    jp.find('form.toolbar input').on('change', function() {
+      if (this.type==='text') {
+        that.filter.tags = this.value.split(' ');
+        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.filter.tags.length > 0);
+      } else {
+        if (this.name === 'bookmark') {
+          that.filter.bookmark = this.checked;
+        } else {
+          that.filter[this.name][this.value] = this.checked;
+        }
+      }
+      that.update();
+    });
+    //initialize bootstrap
+    (<any>jp.find('.btn-group[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
     return $p;
   }
@@ -328,8 +436,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const that = this;
     const graph = this.data;
 
-    const states = StateRepr.toRepr(graph);
-    const $states = this.$node.select('div').selectAll('div.state').data(states, (d) => ''+d.s.id);
+    const states = StateRepr.toRepr(graph, this.filter);
+    const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $states_enter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
