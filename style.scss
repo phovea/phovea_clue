@@ -139,6 +139,20 @@ $hover-color: #ffdd05;
   margin-left: -.5em;
 }
 
+
+body.headless {
+  main {
+    width: 100vw  !important;
+    height: 100vh  !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  nav, aside {
+    display: none;
+  }
+}
+
 .provenance-layout-vis {
   position: relative;
   svg {
