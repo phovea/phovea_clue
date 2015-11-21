@@ -9,6 +9,11 @@ body, html {
   height: 100%;
 }
 
+* {
+  //print precisely
+  -webkit-print-color-adjust: exact;
+}
+
 body > div.box {
   display: -webkit-flex;
   display: flex;
@@ -29,7 +34,8 @@ body > div.box > div.content {
 }
 
 aside {
-  background-color: #E5E5E5;
+  -webkit-print-color-adjust: exact;
+  background-color: #E5E5E5 !important;
 
   &.left {
     width: 12vw;
@@ -135,7 +141,6 @@ $hover-color: #ffdd05;
 
 .provenance-layout-vis {
   position: relative;
-  background-color: green;
   svg {
     g.edges path {
       fill: none;

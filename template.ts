@@ -65,8 +65,9 @@ function injectHeadlessSupport(wrapper: CLUEWrapper) {
   wrapper.on('jumped_to', () => {
     setTimeout(() => {
       document.body.classList.add('clue_jumped');
+      prompt('clue_done_magic_key','test');
     },5000);
-    //prompt('clue_done_magic_key','test');
+
   });
 }
 
