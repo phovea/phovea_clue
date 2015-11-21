@@ -4,6 +4,7 @@
 /// <reference path="../../tsd.d.ts" />
 
 import C = require('../caleydo_core/main');
+import ajax = require('../caleydo_core/ajax');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
 import provenance = require('../caleydo_provenance/main');
@@ -12,6 +13,14 @@ import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
+
+function to_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode) {
+  const d = (<any>graph.desc);
+  if (d.attrs && d.attrs.of) {
+    return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.png`);
+  }
+  return '/clue_demo/todo.png';
+}
 
 class StateRepr {
   doi: number;
@@ -23,9 +32,16 @@ class StateRepr {
 
   a : provenance.ActionNode = null;
 
-  constructor(public s: provenance.StateNode) {
+  constructor(public s: provenance.StateNode, private graph: provenance.ProvenanceGraph) {
     this.doi = 0.1;
     this.a = s.creator;
+  }
+
+  get thumbnail() {
+    if (this.s.hasAttr('thumbnail')) {
+      return this.s.getAttr('thumbnail');
+    }
+    return to_url(this.graph, this.s);
   }
 
   build(lookup: { [id:number] :StateRepr }, line: StateRepr[]) {
@@ -72,7 +88,7 @@ class StateRepr {
     const maxDoI = 1;
     const lookup : any = {};
     const states = graph.states.map((s) => {
-      var r = new StateRepr(s);
+      var r = new StateRepr(s, graph);
       lookup[s.id] = r;
       return r;
     });
@@ -203,7 +219,7 @@ class StateRepr {
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.a ? d.a.name : d.s.name);
     $elem.select('div.sthumbnail')
-      .style('background-image', (d) => d.doi >= 1.0 ? (d.s.hasAttr('thumbnail') ?  `url(${d.s.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)') : null);
+      .style('background-image', (d) => d.doi >= 1.0 ? `url(${d.thumbnail})` : null);
     $elem.select('span.star')
       .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred',false))
       .classed('fa-bookmark', (d) => d.s.getAttr('starred',false));
