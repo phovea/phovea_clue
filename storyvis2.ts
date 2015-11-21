@@ -338,18 +338,69 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     var $node = $parent.append('div').attr({
       'class': 'provenance-multi-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
+    $node.append('h2').text('Story Editor');
     const $toolbar = $node.append('div').classed('toolbar', true);
-    $toolbar.append('h2').text('Story Editor').style('display','inline-block');
-    $toolbar.append('button').attr('class', 'btn btn-default fa fa-plus').attr('title','create a new story').on('click', () => {
-      this.data.startNewStory('Welcome');
+    $toolbar.html(`
+    <div class="btn-group create_story" role="group" aria-label="create_story">
+      <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i></button>
+      <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i
+        class="fa fa-clone"></i></button>
+      <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i
+        class="fa fa-bookmark"></i></button>
+      <div class="btn-group btn-group-xs" role="group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+          Select<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <!--<li><a href="#">A</a></li>-->
+        </ul>
+      </div>
+    </div>
+
+    <div class="btn-group" role="group" aria-label="add_story">
+      <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-font"></i></button>
+      <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-square-o"></i></button>
+      <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-clone"></i></button>
+    </div>
+
+    <div class="btn-group" role="group" aria-label="annotations">
+      <button class="btn btn-default btn-xs" title="add text annotation"><i class="fa fa-font"></i></button>
+      <button class="btn btn-default btn-xs" title="add arrow"><i class="fa fa-arrow-right"></i></button>
+      <button class="btn btn-default btn-xs" title="add frame"><i class="fa fa-square-o"></i></button>
+    </div>
+    `);
+
+    const that = this;
+    $toolbar.selectAll('button[data-create]').on('click', function() {
+      var create = this.dataset.create;
+      switch(create) {
+        case 'plus':
+          that.data.startNewStory('Welcome');
+          break;
+        case 'clone':
+          var state = that.data.selectedStates()[0] || that.data.act;
+      that.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
+          break;
+        case 'bookmark':
+           var states = that.data.states.filter((d) => d.getAttr('starred',false));
+          that.data.startNewStory('My favorite findings', states);
+          break;
+      }
     });
-    $toolbar.append('button').attr('class', 'btn btn-default fa fa-clone').attr('title','create a new story by extracting the current path').on('click', () => {
-      var state = this.data.selectedStates()[0] || this.data.act;
-      this.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
-    });
-    $toolbar.append('button').attr('class', 'btn btn-default fa fa-bookmark').attr('title','create a new story by extracting all starred one in a ').on('click', () => {
-      var states = this.data.states.filter((d) => d.getAttr('starred',false));
-      this.data.startNewStory('My favorite findings', states);
+    $toolbar.selectAll('button[data-add]').on('click', function() {
+      var create = this.dataset.add;
+      switch(create) {
+        case 'text':
+          //TODO
+          break;
+        case 'extract':
+          //TODO
+          break;
+        case 'clone':
+          //TODO
+          break;
+      }
     });
     $node.append('div').classed('stories', true);
     return $node;
