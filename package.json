@@ -59,10 +59,12 @@
         "marked": "935bfa"
       },
       "python": {
-        "selenium": "2.48.0"
+        "selenium": "==2.48.0",
+        "python-memcached": "==1.57"
       },
       "debian": {
-        "phantomjs": ""
+        "phantomjs": "",
+        "memcached": ""
       }
     },
     "requirejs-config": {
