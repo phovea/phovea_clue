@@ -49,13 +49,13 @@ interface ID3Ref extends prov.IObjectRef<d3.Selection<any>> {
 }
 
 export function createAddCmd($main_ref:ID3Ref, desc_name: string, pos:{x: number; y:number}) {
-  return prov.action(prov.meta('add block for ' + desc_name, prov.cat.data, prov.op.create), 'addClueElem', addElem, [$main_ref], {
+  return prov.action(prov.meta(desc_name, prov.cat.data, prov.op.create), 'addClueElem', addElem, [$main_ref], {
     pos: pos,
     desc_name: desc_name
   });
 }
 export function createRemoveCmd($div_ref:ID3Ref, $main_ref:ID3Ref) {
-  return prov.action(prov.meta('remove block of '+$div_ref.name, prov.cat.data, prov.op.remove), 'removeClueElem', removeElem, [$div_ref, $main_ref]);
+  return prov.action(prov.meta($div_ref.name, prov.cat.data, prov.op.remove), 'removeClueElem', removeElem, [$div_ref, $main_ref]);
 }
 
 export function createCmd(id) {
