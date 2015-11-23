@@ -578,6 +578,15 @@ main[data-clue='P'] {
       flex: 1 1 auto;
     }
   }
+
+  #story_list {
+    font-size: 85%;
+    padding: 0;
+
+    a {
+      padding: 2px;
+    }
+  }
 }
 
 .provenance-vertical-story-vis {

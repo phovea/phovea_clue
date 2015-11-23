@@ -10,6 +10,7 @@ import idtypes = require('../caleydo_core/idtype');
 import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
+import utils = require('./utils');
 
 
 function toPath(s?: provenance.StoryNode) {
@@ -242,7 +243,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
-    $stories.style('background-image', (d) => d.isTextOnly ? 'url(text.png)' : (d.state.hasAttr('thumbnail') ?  `url(${d.state.getAttr('thumbnail')})` : 'url(/assets/caleydo_c_gray.svg)'));
+    $stories.style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`);
     $stories.select('span.slabel').text((d) => d.name);
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);
@@ -263,7 +264,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     rotate: 0
   };
 
-  private stories : VerticalStoryVis[] = [];
+  private story : VerticalStoryVis = null;
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, options:any = {}) {
     super();
@@ -333,6 +334,15 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     return new_;
   }
 
+  private switchTo(story: provenance.StoryNode) {
+    if (this.story != null) {
+      this.story.destroy();
+    }
+    if (story) {
+      this.story = new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options);
+      this.data.selectStory(story);
+    }
+  }
 
   private build($parent:d3.Selection<any>) {
     var $node = $parent.append('div').attr({
@@ -352,7 +362,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
                 aria-expanded="false">
           Select<span class="caret"></span>
         </button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu" id="story_list">
           <!--<li><a href="#">A</a></li>-->
         </ul>
       </div>
@@ -374,30 +384,37 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     const that = this;
     $toolbar.selectAll('button[data-create]').on('click', function() {
       var create = this.dataset.create;
+      var story;
       switch(create) {
         case 'plus':
-          that.data.startNewStory('Welcome');
+          story = that.data.startNewStory('Welcome');
           break;
         case 'clone':
           var state = that.data.selectedStates()[0] || that.data.act;
-      that.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
+          story = that.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
           break;
         case 'bookmark':
-           var states = that.data.states.filter((d) => d.getAttr('starred',false));
-          that.data.startNewStory('My favorite findings', states);
+          var states = that.data.states.filter((d) => d.getAttr('starred',false));
+          story = that.data.startNewStory('My favorite findings', states);
           break;
       }
+      that.switchTo(story);
     });
     $toolbar.selectAll('button[data-add]').on('click', function() {
       var create = this.dataset.add;
+      if (!that.story) {
+        return null;
+      }
       switch(create) {
         case 'text':
-          //TODO
+          that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed'));
           break;
         case 'extract':
-          //TODO
+          //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
+          //this.actStory.addText();
           break;
         case 'clone':
+
           //TODO
           break;
       }
@@ -409,23 +426,24 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   update() {
     const stories = this.data.getStoryChains();
     const colors = d3.scale.category10();
-    this.stories = this.stories.filter((s) => {
-      const i = stories.indexOf(s.story);
-      if (i < 0) {
-        s.node.parentNode.removeChild(s.node);
-        return false;
-      }
-      return true;
-    });
-    stories.forEach((story, i) => {
-      var s = C.search(this.stories, (s) => s.story === story);
-      if (!s) {
-        s = new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options);
-        this.stories.push(s);
-      }
-      const c = d3.rgb(colors(String(i)));
-      d3.select(s.node).style('background-color',`rgba(${c.r},${c.g},${c.b},0.1)`);
-    });
+    {
+      const $stories = this.$node.select('#story_list').selectAll('li').data(stories);
+      const $stories_enter = $stories.enter().append('li').append('a');
+      $stories_enter.append('i').attr('class','fa fa-square');
+      $stories_enter.append('span').attr('href', '#').on('click', (d) => {
+        this.switchTo(d);
+      });
+      $stories.exit().remove();
+      $stories.select('i').style('color', (d, i) => colors(String(i)));
+      $stories.select('span').text((d) => d.name);
+    }
+
+    if (this.story === null && stories.length > 0) {
+      this.switchTo(stories[0]);
+    }
+    if (this.story) {
+      this.story.update();
+    }
   }
 }
 
