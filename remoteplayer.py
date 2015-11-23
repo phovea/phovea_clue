@@ -78,8 +78,8 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
     mc.set(key, obj)
   return obj
 
-def mimetype_of(format):
-  return dict(png='image/png',jpg='image/jpeg',jpeg='image/jpeg').get(format,'image/png')
+def fix_format(format):
+  return 'jpeg' if format == 'jpg' else format
 
 @app.route('/screenshot/<app>/<prov_id>/<state>.<format>')
 def create_screenshot(app, prov_id, state, format):
@@ -87,11 +87,12 @@ def create_screenshot(app, prov_id, state, format):
   height = flask.request.args.get('height', 1080)
 
   s = _create_screenshot_impl(app, prov_id, state, format, width, height)
-  return flask.Response(s, mimetype=mimetype_of(format))
+  return flask.Response(s, mimetype='image/'+fix_format(format))
 
 
 @app.route('/thumbnail/<app>/<prov_id>/<state>.<format>')
 def create_thumbnail(app, prov_id, state, format):
+  format = fix_format(format)
   width = int(flask.request.args.get('width', 128))
 
   url = generate_url(app, prov_id, state)
@@ -111,12 +112,12 @@ def create_thumbnail(app, prov_id, state, format):
     img.thumbnail((width, height), PIL.Image.ANTIALIAS)
 
     b = io.BytesIO()
-    img.save(b, format=format)
+    img.save(b, format='jpeg' if format == 'jpg' else format)
     b.seek(0)
     obj = b.read()
     mc.set(key, obj)
 
-  return flask.Response(obj, mimetype=mimetype_of(format))
+  return flask.Response(obj, mimetype='image/'+format)
 
 
 def create():
