@@ -218,45 +218,6 @@ export class Renderer {
   renderAnnotations(state:prov.StoryNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
-      const editable = modeFeatures.isEditable();
-      if (editable) {
-        var $buttons = this.$main.append('div').attr('class', 'btn-group add-text-annotation').html(`
-          <button type="button" class="btn btn-default dropdown-toggle fa fa-plus-square" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-          <ul class="dropdown-menu">
-            <li><a href="#" id="clue_add_text"><i class="fa fa-font fa-fw"></i> Text</a></li>
-            <li><a href="#" id="clue_add_arrow"><i class="fa fa-arrow-right fa-fw"></i> Arrow</a></li>
-            <li><a href="#" id="clue_add_frame"><i class="fa fa-square-o fa-fw"></i> Frame</a></li>
-          </ul>`);
-        $buttons.select('#clue_add_text').on('click', () => {
-          state.pushAnnotation({
-            type: 'text',
-            pos: [10, 10],
-            text: ''
-          });
-          this.renderAnnotationsImpl(state);
-          d3.event.preventDefault();
-        });
-        $buttons.select('#clue_add_arrow').on('click', () => {
-          state.pushAnnotation({
-            type: 'arrow',
-            pos: [10, 10],
-            at: [200,200]
-          });
-          this.renderAnnotationsImpl(state);
-          d3.event.preventDefault();
-        });
-        $buttons.select('#clue_add_frame').on('click', () => {
-          state.pushAnnotation({
-            type: 'frame',
-            pos: [10, 10],
-            size: [20,20]
-          });
-          this.renderAnnotationsImpl(state);
-          d3.event.preventDefault();
-        });
-      }
-
-
       if (this.options.animation && !$anns.empty()) {
         $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
           resolve($anns.node());

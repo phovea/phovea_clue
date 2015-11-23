@@ -113,6 +113,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return $node;
   }
 
+  pushAnnotation(ann: provenance.IStateAnnotation) {
+    var selected = this.data.selectedStories()[0];
+    if (selected) {
+      selected.pushAnnotation(ann);
+      this.options.render(selected);
+    }
+  }
+
   private onStateClick(d: provenance.StoryNode) {
     this.data.selectStory(d);
     this.options.render(d);
@@ -289,7 +297,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   get rawSize():[number, number] {
-    return [this.stories.length * 200, 500];
+    return [200, 500];
   }
 
   get node() {
@@ -375,9 +383,9 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     </div>
 
     <div class="btn-group" role="group" aria-label="annotations">
-      <button class="btn btn-default btn-xs" title="add text annotation"><i class="fa fa-font"></i></button>
-      <button class="btn btn-default btn-xs" title="add arrow"><i class="fa fa-arrow-right"></i></button>
-      <button class="btn btn-default btn-xs" title="add frame"><i class="fa fa-square-o"></i></button>
+      <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i></button>
+      <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i></button>
+      <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i></button>
     </div>
     `);
 
@@ -419,6 +427,41 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
           break;
       }
     });
+
+
+    $toolbar.selectAll('button[data-ann]').on('click', function() {
+      var create = this.dataset.ann;
+      var ann;
+      switch(create) {
+        case 'text':
+          ann = {
+            type: 'text',
+            pos: [10, 10],
+            text: ''
+          };
+          break;
+        case 'arrow':
+          ann = {
+            type: 'arrow',
+            pos: [10, 10],
+            at: [200,200]
+          };
+          //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
+          //this.actStory.addText();
+          break;
+        case 'frame':
+          ann = {
+            type: 'frame',
+            pos: [10, 10],
+            size: [20,20]
+          };
+          break;
+      }
+      if (that.story && ann) {
+        that.story.pushAnnotation(ann);
+      }
+    });
+
     $node.append('div').classed('stories', true);
     return $node;
   }
