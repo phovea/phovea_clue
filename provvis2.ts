@@ -5,7 +5,6 @@
 
 import C = require('../caleydo_core/main');
 import $ = require('jquery');
-import ajax = require('../caleydo_core/ajax');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
 import provenance = require('../caleydo_provenance/main');
@@ -89,9 +88,7 @@ class StateRepr {
 
   static toRepr(graph : provenance.ProvenanceGraph, filter: any) {
     //assign doi
-    const maxDoI = 1;
     const lookup : any = {};
-
 
     //mark selected
     const selected = graph.act;
