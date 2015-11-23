@@ -14,14 +14,7 @@ import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
-
-function to_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode) {
-  const d = (<any>graph.desc);
-  if (d.attrs && d.attrs.of) {
-    return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.jpg`);
-  }
-  return '/clue_demo/todo.png';
-}
+import utils = require('./utils');
 
 class StateRepr {
   doi: number;
@@ -39,10 +32,7 @@ class StateRepr {
   }
 
   get thumbnail() {
-    if (this.s.hasAttr('thumbnail')) {
-      return this.s.getAttr('thumbnail');
-    }
-    return to_url(this.graph, this.s);
+    return `url(${utils.thumbnail_url(this.graph, this.s)})`;
   }
 
   build(lookup: { [id:number] :StateRepr }, line: StateRepr[]) {
@@ -72,15 +62,28 @@ class StateRepr {
     return this.xy[1] + this.size[1]*0.5;
   }
 
+  get doi_lg() {
+    return this.doi >= 0.9;
+  }
+  get doi_() {
+    return this.doi >= 0.7 && this.doi < 0.9;
+  }
+  get doi_sm() {
+    return this.doi >= 0.4 && this.doi < 0.7;
+  }
+  get doi_xs() {
+    return this.doi < 0.4;
+  }
+
   get size() {
-    if (this.doi === 1.0) {
+    if (this.doi_lg) {
       return [50,50];
-    } else if (this.doi >= 0.8) {
-      return [50, 50];
-    } else if (this.doi >= 0.5) {
+    } else if (this.doi_) {
+      return [30, 30];
+    } else if (this.doi_sm) {
       return [20,20];
     } else {
-      return  [16,16];
+      return  [10,10];
     }
   }
 
@@ -103,10 +106,10 @@ class StateRepr {
       const operation = filter.operation[meta.operation] ? 0 : -1;
       const bookmark = (filter.bookmark ? (s.getAttr('starred', false) ? 2: -2) : 0);
       const tags = (filter.tags.length > 0 ? (s.getAttr('tags', []).some((d) => filter.tags.indexOf(d) >= 0) ? 2: -2) : 0);
-      const is_selected = s === selected ? 2: 0;
+      const is_selected = s === selected ? 3: 0;
       const inpath = selected_path.indexOf(s) >= 0 ? Math.max(0,4-selected_path.indexOf(s)) : -2;
       //combine to a doi value
-      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath;
+      const sum = 7 + category + operation + bookmark + tags + is_selected + inpath;
 
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
       r.selected = s === selected;
@@ -212,8 +215,7 @@ class StateRepr {
       data: 'database',
       logic: 'gear',
       layout: 'desktop',
-      selection: 'pencil-square',
-      annotation: 'sticky-note'
+      selection: 'pencil-square'
     };
     const type_icons = {
       create: 'plus',
@@ -225,20 +227,17 @@ class StateRepr {
 
   static render($elem: d3.Selection<StateRepr>) {
     $elem
-      .classed('small', (d) => d.doi < 0.5)
-      .classed('round', (d) => d.doi <= 0.8)
-      .classed('full', (d) => d.doi >= 1)
+      .classed('doi-xs', (d) => d.doi_xs)
+      .classed('doi-sm', (d) => d.doi_sm)
+      .classed('doi', (d) => d.doi_)
+      .classed('doi-lg', (d) => d.doi_lg)
       .classed('select-selected', (d) => d.selected)
-      .classed('starred', (d) => d.s.getAttr('starred', false))
+      .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .attr('data-doi',(d) => d.doi);
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.a ? d.a.name : d.s.name);
     $elem.select('div.sthumbnail')
-      .style('background-image', (d) => d.doi >= 1.0 ? `url(${d.thumbnail})` : null);
-    $elem.select('span.star')
-      .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred',false))
-      .classed('fa-bookmark', (d) => d.s.getAttr('starred',false));
-    $elem.select('span.fa-tags').attr('title', (d) => d.s.getAttr('tags',[]).join(' '));
+      .style('background-image', (d) => d.doi_lg ? d.thumbnail : null);
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'
@@ -277,7 +276,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       update: true,
       none: false
     },
-    bookmark: true,
+    bookmark: false,
     tags: []
   };
 
@@ -396,11 +395,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         </div>
        </div>
       </form>
-      <svg>
-        <g transform="translate(1,1)" class="storyhighlights"></g>
-        <g transform="translate(1,1)" class="edges"></g>
-      </svg>
-      <div class="states"></div>
+      <div style="position: relative">
+        <svg>
+          <g transform="translate(1,1)" class="storyhighlights"></g>
+          <g transform="translate(1,1)" class="edges"></g>
+        </svg>
+        <div class="states"></div>
+      </div>
     `);
 
     //init the toolbar filter options
@@ -476,7 +477,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     $states_enter.append('div').classed('sthumbnail', true);
     $states_enter.append('span').classed('icon', true);
-    $states_enter.append('span').attr('class','star fa').on('click', (d) => {
+    /*$states_enter.append('span').attr('class','star fa').on('click', (d) => {
       d.s.setAttr('starred',!d.s.getAttr('starred',false));
       d3.event.stopPropagation();
       d3.event.preventDefault();
@@ -488,7 +489,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       });
       d3.event.stopPropagation();
       d3.event.preventDefault();
-    });
+    });*/
     $states_enter.append('span').classed('slabel',true).on('click', (d) => {
       dialogs.prompt(d.s.name, 'Comment').then((new_) => {
         d.s.name = new_;
