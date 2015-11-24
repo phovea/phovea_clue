@@ -208,7 +208,7 @@ export class CLUEWrapper extends events.EventHandler {
         const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {
-          $('main').attr('data-clue', new_.toString());
+          $('body').attr('data-clue', new_.toString());
           $('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
           if (new_.presentation > 0.8) {
             $right.hide(); //({width: 'hide'});
