@@ -29,7 +29,7 @@ export class Renderer {
     this.renderer = (d:string) => modeFeatures.isEditable() && d.length === 0 ? '<i>Enter Text by Clicking (MarkDown supported)</i>' : (this.options.markdown ? marked(d) : d);
   }
 
-  render(state:prov.StoryNode) {
+  render(state:prov.SlideNode) {
     //create full chain
     this.prev = this.prev.then(() => {
       var takedown = this.hideOld();
@@ -47,7 +47,7 @@ export class Renderer {
     return this.prev;
   }
 
-  private renderAnnotationsImpl(state:prov.StoryNode) {
+  private renderAnnotationsImpl(state:prov.SlideNode) {
     const that = this;
     const editable = modeFeatures.isEditable();
 
@@ -215,7 +215,7 @@ export class Renderer {
     return $anns;
   }
 
-  renderAnnotations(state:prov.StoryNode) {
+  renderAnnotations(state:prov.SlideNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
       if (this.options.animation && !$anns.empty()) {
@@ -243,7 +243,7 @@ export class Renderer {
     });
   }
 
-  renderText(overlay:prov.StoryNode) {
+  renderText(overlay:prov.SlideNode) {
     return new Promise((resolve) => {
       var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
 

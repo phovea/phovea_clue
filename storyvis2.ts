@@ -13,7 +13,7 @@ import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
 
 
-function toPath(s?: provenance.StoryNode) {
+function toPath(s?: provenance.SlideNode) {
   var r = [];
   while (s) {
     r.push(s);
@@ -28,16 +28,16 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Story).filter(this.data.stories);
-    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.StoryNode) => selectedStates.indexOf(d) >= 0);
+    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.SlideNode) => selectedStates.indexOf(d) >= 0);
   };
 
   private options = {
     scale: [1, 1],
     rotate: 0,
-    render: (state: provenance.StoryNode) => Promise.resolve(null)
+    render: (state: provenance.SlideNode) => Promise.resolve(null)
   };
 
-  constructor(public data:provenance.ProvenanceGraph, public story: provenance.StoryNode, public parent:Element, options:any= {}) {
+  constructor(public data:provenance.ProvenanceGraph, public story: provenance.SlideNode, public parent:Element, options:any= {}) {
     super();
     this.options = C.mixin(this.options,options);
     this.$node = this.build(d3.select(parent));
@@ -121,7 +121,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
   }
 
-  private onStateClick(d: provenance.StoryNode) {
+  private onStateClick(d: provenance.SlideNode) {
     this.data.selectStory(d);
     this.options.render(d);
   }
@@ -185,7 +185,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           return;
         }
       }
-      graph.removeStoryNode(d);
+      graph.removeSlideNode(d);
       this.update();
     });
     var mm_ss = d3.time.format('%M:%S:%L');
@@ -214,7 +214,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       d3.select(this).classed('hover', false);
       var e = <DragEvent>(<any>d3.event);
       e.preventDefault();
-      const insertIntoStory = (new_: provenance.StoryNode) => {
+      const insertIntoStory = (new_: provenance.SlideNode) => {
         if (d.i < 0) {
           let bak = that.story;
           that.story = new_;
@@ -240,7 +240,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
             that.data.moveStory(story, story_raw[d.i], false);
           }
         } else { //multi story move
-          insertIntoStory(that.data.cloneSingleStoryNode(story));
+          insertIntoStory(that.data.cloneSingleSlideNode(story));
         }
       }
       that.update();
@@ -342,7 +342,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     return new_;
   }
 
-  private switchTo(story: provenance.StoryNode) {
+  private switchTo(story: provenance.SlideNode) {
     if (this.story != null) {
       this.story.destroy();
     }
@@ -490,7 +490,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 }
 
-export function createSingle(data:provenance.ProvenanceGraph, story: provenance.StoryNode, parent:Element, options = {}) {
+export function createSingle(data:provenance.ProvenanceGraph, story: provenance.SlideNode, parent:Element, options = {}) {
   return new VerticalStoryVis(data, story, parent, options);
 }
 
