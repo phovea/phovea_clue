@@ -1,7 +1,5 @@
 var page = require('webpage').create(),
   system = require('system');
-console.log('asdadsf');
-console.error('asdfasdf');
 
 var address = system.args[1],
   output = system.args[2],

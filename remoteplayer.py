@@ -15,9 +15,11 @@ mc_prefix = 'clue_'
 
 
 def generate_url(app, prov_id, state):
-  return 'http://localhost:9000/{0}/#clue_graph={1}&clue_state={2}&clue=P&clue_store=remote&clue_headless=Y'.format(app,
-                                                                                                                    prov_id,
-                                                                                                                    state)
+  base = '{0}{1}/#clue_graph={2}&clue_state={3}&clue=P&clue_store=remote&clue_headless=Y'
+
+  return base.format(conf.server, app,
+                     prov_id,
+                     state)
 
 
 def create_via_selenium(url, width, height):
@@ -73,6 +75,7 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
 
   obj = mc.get(key)
   if not obj:
+    print 'requesting url', url
     obj = create_via_selenium(url, width, height)
     # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
