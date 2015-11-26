@@ -549,19 +549,29 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $states.exit().remove();
 
 
-    (<any>$(this.node).find('div.state span.icon')).popover(StateRepr.popover)
+    //just for the entered ones
+    (<any>$($states_enter[0][0]).find('> span.icon')).popover(StateRepr.popover)
       .parent().on({
         mouseenter: function () {
-          (<any>$(this).find('span.icon')).popover('show');
+          console.log(this);
+          var $icon = $(this).find('> span.icon');
+          $icon.addClass('popping');
+          $icon.data('popoup', setTimeout(function () {
+            (<any>$icon).popover('show');
+          }, 200));
         },
         mouseleave: function () {
+          var $icon = $(this).find('> span.icon');
+          const id = +$icon.data('popoup');
+          clearTimeout(id);
+          $icon.removeData('popoup');
           const d:StateRepr = d3.select(this).datum();
-          if (d) {
+          if (d && $icon.has('textarea')) {
             const val = $(this).find('textarea').val();
             d.s.setAttr('tags', extractTags(val));
             d.s.setAttr('note', val);
           }
-          (<any>$(this).find('span.icon')).popover('hide');
+          (<any>$icon).popover('hide');
         }
       });
 
