@@ -23,6 +23,7 @@ import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
+import login = require('../caleydo_security_flask/login');
 
 function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
   const graph = C.hash.getProp('clue_graph', null);
@@ -129,6 +130,8 @@ export class CLUEWrapper extends events.EventHandler {
       this.graph = chooseProvenanceGraph(this.manager, $ul);
     }
 
+
+    this.createLogin();
 
     {
       let div = <HTMLElement>document.createElement('div');
@@ -276,6 +279,59 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
+  private createLogin() {
+    {
+      let ul = document.createElement('ul');
+      let $ul = d3.select(ul).attr('class','nav navbar-nav navbar-right').html(`
+      <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><span class="glyphicon glyphicon-user"></span></a></li>
+        <li style="display: none" class="dropdown" id="user_menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+               aria-expanded="false"><span class="glyphicon glyphicon-user"></span> Unknown</a>
+            <ul class="dropdown-menu">
+                <li role="separator" class="divider"></li>
+                <li><a href="#" id="logout_link">Logout</a></li>
+            </ul>
+        </li>`);
+
+      this.header.insertCustomRightMenu(ul);
+    }
+    const that = this;
+    $('#loginDialog div.modal-body').load('../caleydo_security_flask/_login_form.html', function () {
+      var $form = $(this).find('form'),
+        $alert = $form.parent().find('div.alert');
+
+      $alert.hide();
+      login.bindLoginForm(<HTMLFormElement>$form[0], (error, user) => {
+        $('#login_menu').hide();
+        var $base = $('#user_menu').show();
+
+        if (!error) {
+          $form.removeClass('has-error');
+          $base.find('> a:first').text(user.name);
+
+          (<any>$('#loginDialog')).modal('hide');
+
+          $('.login_required.disabled').removeClass('disabled');
+        } else {
+          that.header.ready();
+          $form.addClass('has-error');
+          $alert.html(error).show();
+        }
+      });
+  });
+
+
+  $('#logout_link').on('click', function () {
+    this.header.wait();
+    login.logout().then(function() {
+      $('#user_menu').hide();
+      $('#login_menu').show();
+      $('.login_required').addClass('disabled');
+      //TODO
+    })
+  });
+  }
+
   jumpToStored() {
     //jump to stored state
     let target_state = C.hash.getInt('clue_state', null);
@@ -288,15 +344,17 @@ export class CLUEWrapper extends events.EventHandler {
           return graph.jumpTo(s).then(() => {
           console.log('jumped to stored', s.id);
             this.fire('jumped_to', s);
+            this.header.ready();
             return this;
           });
         }
         this.fire('jumped_to', null);
+        this.header.ready();
         return Promise.reject('state not found');
       });
-    } else {
-      this.fire('jumped_to', null);
     }
+    this.fire('jumped_to', null);
+    this.header.ready();
     //no stored state nothing to jump to
     return Promise.resolve(this);
   }

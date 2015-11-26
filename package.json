@@ -12,7 +12,8 @@
     "caleydo_window": "*",
     "caleydo_vis": "*",
     "caleydo_screenshot": "*",
-    "wrapper_bootstrap_fontawesome": "*"
+    "wrapper_bootstrap_fontawesome": "*",
+    "caleydo_security_flask": "*"
   },
   "caleydo": {
     "plugins": {
