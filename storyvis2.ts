@@ -366,7 +366,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     <div class="btn-group create_story" role="group" aria-label="create_story">
       <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i></button>
       <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i
-        class="fa fa-clone"></i></button>
+        class="fa fa-files-o"></i></button>
       <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i
         class="fa fa-bookmark"></i></button>
       <div class="btn-group btn-group-xs" role="group">
@@ -381,9 +381,9 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     </div>
 
     <div class="btn-group" role="group" aria-label="add_story">
-      <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-font"></i></button>
-      <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-square-o"></i></button>
-      <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-clone"></i></button>
+      <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
+      <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
+      <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
     </div>
 
     <div class="btn-group" role="group" aria-label="annotations">
@@ -417,19 +417,22 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       if (!that.story) {
         return null;
       }
+      var current = that.data.selectedStories()[0] || that.story.story;
       switch(create) {
         case 'text':
-          that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed'));
+          that.data.moveStory(that.data.makeTextStory('Unnamed'), current, false);
           break;
         case 'extract':
-          //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
-          //this.actStory.addText();
+          var state = that.data.selectedStates()[0] || that.data.act;
+          that.data.moveStory(that.data.extractStory([state], false), current, false);
           break;
         case 'clone':
-
-          //TODO
+          if (current) {
+            that.data.moveStory(that.data.cloneSingleSlideNode(current), current, false);
+          }
           break;
       }
+      that.story.update();
     });
 
 
