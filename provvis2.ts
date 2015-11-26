@@ -253,7 +253,7 @@ class StateRepr {
 
   static popover = {
       trigger: 'manual',
-      placement: 'bottom',
+      placement: 'left',
       delay: 300,
       title: function () {
         const d : StateRepr = d3.select(this).datum();

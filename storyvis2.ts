@@ -11,6 +11,7 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
+import StateRepr from "./provvis2";
 
 
 function toPath(s?: provenance.SlideNode) {
@@ -126,6 +127,72 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.options.render(d);
   }
 
+  private dndSupport(elem : d3.Selection<StateRepr>) {
+    const that = this;
+     elem
+      .on('dragenter', function() {
+        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
+          d3.select(this).classed('hover', true);
+          return false;
+        }
+      }).on('dragover', () => {
+      if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
+        d3.event.preventDefault();
+          C.updateDropEffect(d3.event);
+          return false;
+        }
+    }).on('dragleave', function () {
+      d3.select(this).classed('hover', false);
+    }).on('drop', function(d) {
+      d3.select(this).classed('hover', false);
+      var e = <DragEvent>(<any>d3.event);
+      e.preventDefault();
+      const full_story = toPath(that.story);
+      const insertIntoStory = (new_: provenance.SlideNode) => {
+        if (d.i < 0) {
+          let bak = that.story;
+          that.story = new_;
+          that.data.insertIntoStory(new_, bak, true);
+        } else {
+          that.data.insertIntoStory(new_, full_story[d.i], false);
+        }
+        that.update();
+      };
+      if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
+        insertIntoStory(that.data.wrapAsStory(state));
+
+      } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
+        insertIntoStory(that.data.makeTextStory());
+      }else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
+        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
+        if (full_story.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
+          if (d.i < 0) { //no self move
+            if (story !== that.story) {
+              let bak = that.story;
+              that.story = story;
+              that.data.moveStory(story, bak, true);
+              that.update();
+            }
+          } else {
+            let ref =  full_story[d.i];
+            if (ref !== story) {
+              //we might moved the first one
+              if (story === that.story) {
+                that.story = story.next;
+              }
+              that.data.moveStory(story, ref, false);
+              that.update();
+            }
+          }
+        } else { //multi story move
+          insertIntoStory(that.data.cloneSingleSlideNode(story));
+        }
+      }
+      return false;
+    });
+  }
+
   update() {
     const that = this;
     const graph = this.data;
@@ -196,56 +263,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       d3.select(this).text(mm_ss(new Date(d.duration)));
     });
 
-    $placeholder_enter
-      .on('dragenter', function() {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
-          d3.select(this).classed('hover', true);
-          return false;
-        }
-      }).on('dragover', () => {
-      if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
-        d3.event.preventDefault();
-          C.updateDropEffect(d3.event);
-          return false;
-        }
-    }).on('dragleave', function () {
-      d3.select(this).classed('hover', false);
-    }).on('drop', function(d) {
-      d3.select(this).classed('hover', false);
-      var e = <DragEvent>(<any>d3.event);
-      e.preventDefault();
-      const insertIntoStory = (new_: provenance.SlideNode) => {
-        if (d.i < 0) {
-          let bak = that.story;
-          that.story = new_;
-          that.data.insertIntoStory(new_, bak, true);
-        } else {
-          that.data.insertIntoStory(new_, story_raw[d.i], false);
-        }
-      };
-      if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
-        insertIntoStory(that.data.wrapAsStory(state));
-
-      } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
-        insertIntoStory(that.data.makeTextStory());
-      }else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
-        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
-        if (story_raw.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
-          if (d.i < 0) {
-            let bak = that.story;
-            that.story = story;
-            that.data.moveStory(story, bak, true);
-          } else {
-            that.data.moveStory(story, story_raw[d.i], false);
-          }
-        } else { //multi story move
-          insertIntoStory(that.data.cloneSingleSlideNode(story));
-        }
-      }
-      that.update();
-      return false;
-    });
+    $placeholder_enter.call(this.dndSupport.bind(this));
 
     $states.order();
 
