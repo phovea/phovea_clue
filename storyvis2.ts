@@ -121,7 +121,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
   }
 
-  private onStateClick(d: provenance.SlideNode) {
+  onStateClick(d: provenance.SlideNode) {
     this.data.selectStory(d);
     this.options.render(d);
   }
@@ -342,12 +342,16 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     return new_;
   }
 
-  private switchTo(story: provenance.SlideNode) {
+  switchTo(story: provenance.SlideNode) {
     if (this.story != null) {
       this.story.destroy();
     }
     if (story) {
-      this.story = new VerticalStoryVis(this.data, story, <Element>this.$node.select('div.stories').node(), this.options);
+      let story_start = story;
+      while(story_start.previous) {
+        story_start = story_start.previous;
+      }
+      this.story = new VerticalStoryVis(this.data, story_start, <Element>this.$node.select('div.stories').node(), this.options);
       this.data.selectStory(story);
     }
   }

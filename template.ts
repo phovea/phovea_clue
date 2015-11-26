@@ -86,6 +86,9 @@ export class CLUEWrapper extends events.EventHandler {
   $main: d3.Selection<any>;
   $main_ref: prov.IObjectRef<d3.Selection<any>>;
 
+  private player: player.Player;
+  private storyvis: storyvis.StoryManager;
+
   constructor(body:HTMLElement, options: any = {}) {
     super();
     C.mixin(this.options, options);
@@ -185,7 +188,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       const r = renderer.create(<HTMLElement>this.$main.node(), graph);
 
-      new player.Player(graph, body.querySelector('#player_controls'), {
+      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
         render: r.render
       });
       /*const seditor = storyeditor.create(graph, body.querySelector('#storyeditor'), {
@@ -196,12 +199,15 @@ export class CLUEWrapper extends events.EventHandler {
 
       provvis2.create(graph, body.querySelector('#provenancevis'), {});
 
-      storyvis.create(graph, body.querySelector('#storyvis'), {
+      this.storyvis = storyvis.create(graph, body.querySelector('#storyvis'), {
         render: r.render
       });
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
+      });
+     graph.on('select_story', (event:any, state:prov.SlideNode) => {
+        C.hash.setInt('clue_story', state.id);
       });
 
       {
@@ -332,26 +338,54 @@ export class CLUEWrapper extends events.EventHandler {
   });
   }
 
+  private jumpToStory(story: number) {
+    console.log('jump to stored story', story);
+    return this.graph.then((graph) => {
+      const s = graph.getStoryById(story);
+      if (s) {
+        console.log('jump to stored story', s.id);
+        this.storyvis.switchTo(s);
+        if (C.hash.is('clue_autoplay')) {
+          this.player.start();
+        }
+        this.fire('jumped_to', s);
+        this.header.ready();
+        return this;
+      }
+      this.fire('jumped_to', null);
+      this.header.ready();
+      return Promise.reject('story not found');
+    });
+  }
+
+  private jumpToState(state: number) {
+    console.log('jump to stored state', state);
+    return this.graph.then((graph) => {
+      let s = graph.getStateById(state);
+      if (s) {
+        console.log('jump to stored', s.id);
+        return graph.jumpTo(s).then(() => {
+        console.log('jumped to stored', s.id);
+          this.fire('jumped_to', s);
+          this.header.ready();
+          return this;
+        });
+      }
+      this.fire('jumped_to', null);
+      this.header.ready();
+      return Promise.reject('state not found');
+    });
+  }
+
   jumpToStored() {
     //jump to stored state
-    let target_state = C.hash.getInt('clue_state', null);
-    console.log('jump to stored start', target_state);
+    const target_story = C.hash.getInt('clue_story', null);
+    if (target_story !== null) {
+      return this.jumpToStory(target_story);
+    }
+    const target_state = C.hash.getInt('clue_state', null);
     if (target_state !== null) {
-      return this.graph.then((graph) => {
-        let s = graph.getStateById(target_state);
-        if (s) {
-          console.log('jump to stored', s.id);
-          return graph.jumpTo(s).then(() => {
-          console.log('jumped to stored', s.id);
-            this.fire('jumped_to', s);
-            this.header.ready();
-            return this;
-          });
-        }
-        this.fire('jumped_to', null);
-        this.header.ready();
-        return Promise.reject('state not found');
-      });
+      return this.jumpToState(target_state);
     }
     this.fire('jumped_to', null);
     this.header.ready();
