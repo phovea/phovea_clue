@@ -207,7 +207,7 @@ export class CLUEWrapper extends events.EventHandler {
         C.hash.setInt('clue_state', state.id);
       });
      graph.on('select_story', (event:any, state:prov.SlideNode) => {
-        C.hash.setInt('clue_story', state.id);
+        C.hash.setInt('clue_slide', state.id);
       });
 
       {
@@ -379,7 +379,7 @@ export class CLUEWrapper extends events.EventHandler {
 
   jumpToStored() {
     //jump to stored state
-    const target_story = C.hash.getInt('clue_story', null);
+    const target_story = C.hash.getInt('clue_slide', null);
     if (target_story !== null) {
       return this.jumpToStory(target_story);
     }
