@@ -367,6 +367,11 @@ body.headless {
   }
 }
 
+#provenancegraph_list div.popover {
+  width: 30em;
+  max-width: 30em;
+}
+
 .text-overlay {
   position: absolute;
   left: 0;

@@ -24,6 +24,7 @@ import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
 import login = require('../caleydo_security_flask/login');
+import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 
 function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
   const graph = C.hash.getProp('clue_graph', null);
@@ -38,6 +39,67 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
       C.hash.setProp('clue_graph', d.id);
       window.location.reload();
       d3.event.preventDefault();
+    });
+    (<any>$('#provenancegraph_list li.graph a')).popover({
+      html: true,
+      trigger: 'manual',
+      title: function() {
+        const graph = d3.select(this).datum();
+        return `${graph.name}`;
+      },
+      content: function() {
+        const graph = d3.select(this).datum();
+        const creator = graph.creator;
+        const description = graph.description;
+        const ts = graph.ts;
+        const nnodes = graph.size[0];
+        const nedges = graph.size[1];
+        const locked = false;
+        const $elem = $(`
+            <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-3">Creator:</div>
+                <div class="col-sm-9">${creator}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">Creationdate:</div>
+                <div class="col-sm-9">${ts}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">Description:</div>
+                <div class="col-sm-9">${description}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">Nodes/Edges:</div>
+                <div class="col-sm-9">${nnodes}/${nedges}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 text-right">
+                    <button class="btn btn-primary" data-toggle="modal"><span class="fa fa-open"></span> Select</button>
+                    <button class="btn btn-warning" data-toggle="modal"><span class="fa fa-${locked ? 'unlock' : 'lock'}"></span> Lock</button>
+                    <button class="btn btn-danger" data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+                </div>
+            </div>
+        </div>`);
+        $elem.find('button.btn-danger').on('click', () => {
+          dialogs.areyousure('Are you sure to delete: "'+graph.name+'"').then((deleteIt) => {
+            if (deleteIt) {
+              //TODO
+            }
+          })
+        });
+        $elem.find('button.btn-warning').on('click', () => {
+          //TODO lock
+        });
+        return $elem;
+      }
+    }).parent().on({
+      mouseenter: function () {
+        (<any>$(this).find('a')).popover('show');
+      },
+      mouseleave: function () {
+        (<any>$(this).find('a')).popover('hide');
+      }
     });
 
     if (graph === null || graph === 'new') {
