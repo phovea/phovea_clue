@@ -15,6 +15,15 @@ import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
 
+
+function extractTags(text: string) {
+  const matches = /\S*#(?:\[[^\]]+\]|\S+)/.exec(text);
+  if (matches && matches.length > 0){
+    return matches.map((m) => m);
+  }
+  return [];
+}
+
 class StateRepr {
   doi: number;
   xy: [number, number] = [0,0];
@@ -25,7 +34,7 @@ class StateRepr {
 
   a : provenance.ActionNode = null;
 
-  constructor(public s: provenance.StateNode, private graph: provenance.ProvenanceGraph) {
+  constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
     this.doi = 0.1;
     this.a = s.creator;
   }
@@ -85,6 +94,7 @@ class StateRepr {
       return  [10,10];
     }
   }
+
 
   static toRepr(graph : provenance.ProvenanceGraph, filter: any) {
     //assign doi
@@ -240,6 +250,45 @@ class StateRepr {
       top: (d) => d.xy[1]+'px'
     });
   }
+
+  static popover = {
+      trigger: 'manual',
+      placement: 'bottom',
+      delay: 300,
+      title: function () {
+        const d : StateRepr = d3.select(this).datum();
+        const icon = StateRepr.toIcon(d);
+        const title = d.a ? d.a.name : d.s.name;
+        return `<span class="icon">${icon}</span>${title}`;
+      },
+      html: true,
+      content: function () {
+        const d : StateRepr = d3.select(this).datum();
+        const thumbnail = utils.thumbnail_url(d.graph, d.s);
+        const notes = d.s.getAttr('note', '');
+        const starred = d.s.getAttr('starred', false);
+        const content = $(`
+        <div class="preview">
+          <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="bookmark this state for latter use"></span>
+          <img src="${thumbnail}">
+          <textarea placeholder="place for notes...">${notes}</textarea>
+        </div>`);
+        content.find('span.star').on('click', function() {
+          d.s.setAttr('starred',!d.s.getAttr('starred',false));
+          $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
+          return false;
+        });
+        content.find('textarea').on('change', function() {
+          const val = this.value;
+          d.s.setAttr('tags', extractTags(val));
+          d.s.setAttr('note', val);
+          return false;
+        }).on('click', function(event) {
+          event.stopPropagation();
+        });
+        return content;
+      }
+    };
 }
 
 export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -498,6 +547,23 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $states.call(StateRepr.render);
 
     $states.exit().remove();
+
+
+    (<any>$(this.node).find('div.state span.icon')).popover(StateRepr.popover)
+      .parent().on({
+        mouseenter: function () {
+          (<any>$(this).find('span.icon')).popover('show');
+        },
+        mouseleave: function () {
+          const d:StateRepr = d3.select(this).datum();
+          if (d) {
+            const val = $(this).find('textarea').val();
+            d.s.setAttr('tags', extractTags(val));
+            d.s.setAttr('note', val);
+          }
+          (<any>$(this).find('span.icon')).popover('hide');
+        }
+      });
 
     var edges = [];
     states.forEach((s) => {

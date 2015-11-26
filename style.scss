@@ -170,11 +170,13 @@ body.headless {
 
     max-width: 200px;
     text-overflow: ellipsis;
-    overflow: hidden;
+    //overflow-x: hidden;
     white-space: nowrap;
 
     &:hover {
-      color: $hover-color;
+      .slabel, .icon {
+        color: $hover-color;
+      }
     }
 
 
@@ -348,6 +350,16 @@ body.headless {
 }
 
 .popover div.preview {
+  span.star {
+    position: absolute;
+    right: 0.2em;
+    top: 0.2em;
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    height: 5em;
+  }
   img {
     width: 230px;
     height: auto;
