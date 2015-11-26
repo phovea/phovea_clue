@@ -345,12 +345,18 @@ export class CLUEWrapper extends events.EventHandler {
       if (s) {
         console.log('jump to stored story', s.id);
         this.storyvis.switchTo(s);
+        var next;
         if (C.hash.is('clue_autoplay')) {
           this.player.start();
+          next = Promise.resolve();
+        } else {
+          next = this.player.render(s);
         }
-        this.fire('jumped_to', s);
-        this.header.ready();
-        return this;
+        return next.then(() => {
+          this.fire('jumped_to', s);
+          this.header.ready();
+          return this;
+        });
       }
       this.fire('jumped_to', null);
       this.header.ready();

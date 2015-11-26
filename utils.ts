@@ -18,6 +18,17 @@ export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenan
   return '/clue_demo/todo.png';
 }
 
+export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode) {
+  if (state.hasAttr('thumbnail')) {
+    return state.getAttr('thumbnail');
+  }
+
+  const d = (<any>graph.desc);
+  if (d.attrs && d.attrs.of) {
+    return ajax.api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.jpg`);
+  }
+  return '/clue_demo/todo.png';
+}
 
 export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode) {
   if (state.hasAttr('screnshot')) {
