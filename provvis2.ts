@@ -340,7 +340,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private bind() {
     this.data.on('switch_state,forked_branch,clear', this.trigger);
-    this.data.on('add_story,move_story,remove_story', this.triggerStoryHighlight);
+    this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
@@ -352,7 +352,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   destroy() {
     super.destroy();
     this.data.off('switch_state,clear', this.trigger);
-    this.data.off('add_story,move_story,remove_story', this.triggerStoryHighlight);
+    this.data.off('add_slide,move_slidey,remove_slide', this.triggerStoryHighlight);
     this.data.off('add_state', this.onStateAdded);
     this.data.off('select', this.onSelectionChanged);
     this.data.states.forEach((s) => {
@@ -601,7 +601,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const states = this.$node.select('div').selectAll<StateRepr>('div.state').data();
     const lookup : any = {};
     states.forEach((s) => lookup[s.s.id] = s);
-    const areas = this.data.getStories().map((story) => {
+    const areas = this.data.getSlides().map((story) => {
       const reprs = story.map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
       var r= [];
       reprs.forEach((repr) => {

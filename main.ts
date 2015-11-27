@@ -28,21 +28,12 @@ const elems = template.create(document.body);
     }
   });
 
-
-  const databrowserElem = document.querySelector('#databrowser');
-  databrowser.create(databrowserElem);
+  databrowser.create(document.querySelector('#databrowser'));
 
   elems.$main.classed('clue_demo',true);
-
   const $left = $('aside.left');
-  const $left_data = $(databrowserElem);
 
   function updateMode(new_) {
-    if (new_.exploration < 0.8) {
-      $left_data.hide(); //.animate({height: 'hide'});
-    } else {
-      $left_data.show(); //animate({height: 'show'});
-    }
     if (new_.exploration < 0.8) {
       $left.hide(); //({width: 'hide'});
     } else {

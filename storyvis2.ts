@@ -11,7 +11,6 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
-import {SlideNode} from "../caleydo_provenance/main";
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -33,7 +32,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private trigger = C.bind(this.update, this);
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
-    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Story).filter(this.data.stories);
+    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
     this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.SlideNode) => selectedStates.indexOf(d) >= 0);
   };
 
@@ -120,15 +119,15 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   }
 
   pushAnnotation(ann: provenance.IStateAnnotation) {
-    var selected = this.data.selectedStories()[0];
+    var selected = this.data.selectedSlides()[0];
     if (selected) {
       selected.pushAnnotation(ann);
       this.options.render(selected);
     }
   }
 
-  onStateClick(d: provenance.SlideNode) {
-    this.data.selectStory(d);
+  onSlideClick(d: provenance.SlideNode) {
+    this.data.selectSlide(d);
     this.options.render(d);
   }
 
@@ -157,26 +156,26 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         if (d.i < 0) {
           let bak = that.story;
           that.story = new_;
-          that.data.insertIntoStory(new_, bak, true);
+          that.data.insertIntoSlide(new_, bak, true);
         } else {
-          that.data.insertIntoStory(new_, full_story[d.i], false);
+          that.data.insertIntoSlide(new_, full_story[d.i], false);
         }
         that.update();
       };
       if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
-        insertIntoStory(that.data.wrapAsStory(state));
+        insertIntoStory(that.data.wrapAsSlide(state));
 
       } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
-        insertIntoStory(that.data.makeTextStory());
+        insertIntoStory(that.data.makeTextSlide());
       }else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
-        const story = that.data.getStoryById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
+        const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'),10));
         if (full_story.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
           if (d.i < 0) { //no self move
             if (story !== that.story) {
               let bak = that.story;
               that.story = story;
-              that.data.moveStory(story, bak, true);
+              that.data.moveSlide(story, bak, true);
               that.update();
             }
           } else {
@@ -186,7 +185,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
               if (story === that.story) {
                 that.story = story.next;
               }
-              that.data.moveStory(story, ref, false);
+              that.data.moveSlide(story, ref, false);
               that.update();
             }
           }
@@ -230,18 +229,18 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         e.dataTransfer.setData('text/plain', d.name);
         e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
       })
-      .on('click', this.onStateClick.bind(this))
+      .on('click', this.onSlideClick.bind(this))
       .on('mouseenter', (d) =>  {
         if (d.state != null) {
           graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
         }
-        graph.selectStory(d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        graph.selectSlide(d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
       .on('mouseleave', (d) => {
         if (d.state != null) {
           graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
         }
-        graph.selectStory(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        graph.selectSlide(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       });
 
     $story_enter.append('span').classed('slabel', true);
@@ -252,7 +251,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       if (d === this.story) {
         this.story = this.story.next;
         if (this.story === null) {
-          this.data.removeFullStory(d);
+          this.data.removeFullSlide(d);
           return;
         }
       }
@@ -308,13 +307,13 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   private bind() {
-    this.data.on('start_story,destroy_story', this.trigger);
+    this.data.on('start_slide,destroy_slide', this.trigger);
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('start_story,destroy_story', this.trigger);
+    this.data.off('start_slide,destroy_slide', this.trigger);
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -374,7 +373,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
         story_start = story_start.previous;
       }
       this.story = new VerticalStoryVis(this.data, story_start, <Element>this.$node.select('div.stories').node(), this.options);
-      this.data.selectStory(story);
+      this.data.selectSlide(story);
     }
   }
 
@@ -421,15 +420,15 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       var story;
       switch(create) {
         case 'plus':
-          story = that.data.startNewStory('Welcome');
+          story = that.data.startNewSlide('Welcome');
           break;
         case 'clone':
           var state = that.data.selectedStates()[0] || that.data.act;
-          story = that.data.startNewStory('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
+          story = that.data.startNewSlide('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
           break;
         case 'bookmark':
           var states = that.data.states.filter((d) => d.getAttr('starred',false));
-          story = that.data.startNewStory('My favorite findings', states);
+          story = that.data.startNewSlide('My favorite findings', states);
           break;
       }
       that.switchTo(story);
@@ -439,18 +438,18 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       if (!that.story) {
         return null;
       }
-      var current = that.data.selectedStories()[0] || that.story.story;
+      var current = that.data.selectedSlides()[0] || that.story.story;
       switch(create) {
         case 'text':
-          that.data.moveStory(that.data.makeTextStory('Unnamed'), current, false);
+          that.data.moveSlide(that.data.makeTextSlide('Unnamed'), current, false);
           break;
         case 'extract':
           var state = that.data.selectedStates()[0] || that.data.act;
-          that.data.moveStory(that.data.extractStory([state], false), current, false);
+          that.data.moveSlide(that.data.extractSlide([state], false), current, false);
           break;
         case 'clone':
           if (current) {
-            that.data.moveStory(that.data.cloneSingleSlideNode(current), current, false);
+            that.data.moveSlide(that.data.cloneSingleSlideNode(current), current, false);
           }
           break;
       }
@@ -496,7 +495,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   update() {
-    const stories = this.data.getStoryChains();
+    const stories = this.data.getSlideChains();
     const colors = d3.scale.category10();
     {
       const $stories = this.$node.select('#story_list').selectAll('li').data(stories);

@@ -253,7 +253,7 @@ export class CLUEWrapper extends events.EventHandler {
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
       });
-     graph.on('select_story', (event:any, state:prov.SlideNode) => {
+     graph.on('select_slide', (event:any, state:prov.SlideNode) => {
         C.hash.setInt('clue_slide', state.id);
       });
 
@@ -382,7 +382,7 @@ export class CLUEWrapper extends events.EventHandler {
   private jumpToStory(story: number) {
     console.log('jump to stored story', story);
     return this.graph.then((graph) => {
-      const s = graph.getStoryById(story);
+      const s = graph.getSlideById(story);
       if (s) {
         console.log('jump to stored story', s.id);
         this.storyvis.switchTo(s);
