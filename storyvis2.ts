@@ -12,7 +12,6 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
 import marked = require('marked');
-import ISlideNodeRepr from "./";
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -52,7 +51,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     render: (state: provenance.SlideNode) => Promise.resolve(null)
   };
 
-  private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 520]);
+  private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 220]);
 
   constructor(public data:provenance.ProvenanceGraph, public story: provenance.SlideNode, public parent:Element, options:any= {}) {
     super();
@@ -213,27 +212,19 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private changeDuration($elem: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $elem.call(d3.behavior.drag()
-      .origin(function () {
-        const slide = <Element>(<Element>this).previousElementSibling;
-        const slides = slide.parentElement;
-        const b = C.bounds(slide);
-        const b2 = C.bounds(slides);
-        console.log((<Element>this).previousSibling, b, b2);
-
-        return { x : 0, y : (b.y - b2.y)};
-      })
+      .origin(() => ({ x : 0, y : 0}))
       .on('drag', function(d: ISlideNodeRepr) {
         //update the height of the slide node
         const e : any = d3.event;
         const $elem = d3.select((<Element>this).previousSibling);
         const height = Math.max(0,that.duration2pixel(d.to.duration)+e.y);
+        console.log(e.y);
         $elem.style('height', height+'px');
-        d3.select(this).attr('title',to_duration(that.duration2pixel.invert(height)));
+        $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
       }).on('dragend', function(d: ISlideNodeRepr) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).previousSibling).style('height'));
         d.to.duration = that.duration2pixel.invert(h);
-        d3.select(this).attr('title',null);
       }));
   }
 
@@ -312,12 +303,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       graph.removeSlideNode(d);
       this.update();
     });
-    $story_enter.append('div').attr({
-      'class': 'duration'
-    }).on('click', function(d) {
-      d.duration = +(prompt('Enter new duration', d.duration));
-      d3.select(this).text(to_duration(d.duration));
-    });
+    $story_enter.append('div').classed('duration', true);
 
     $placeholder_enter.call(this.dndSupport.bind(this));
     $placeholder_enter.call(this.changeDuration.bind(this));
@@ -327,7 +313,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.select('div.preview').style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
-    $stories.select('div.slabel').html((d) => marked(d.name));
+    $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
+    $stories.select('div.duration').text((d) => to_duration(d.duration));
     $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);

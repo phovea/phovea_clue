@@ -509,7 +509,6 @@ body[data-clue='P'] {
       background-position: left center;
       background-repeat: repeat-y;
       background-clip: border-box;
-      background-size: contain;
     }
 
     div.slabel {
@@ -538,6 +537,13 @@ body[data-clue='P'] {
       &:hover {
         font-weight: bold;
       }
+    }
+
+    div.duration {
+      position: absolute;
+      bottom: 0;
+      left: 0.2em;
+      font-size: 60%;
     }
 
     &:hover {
