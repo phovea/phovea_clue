@@ -450,7 +450,7 @@ body[data-clue='P'] {
 }
 
 .provenance-vertical-story-vis {
-  width: 200px;
+  width: 20em;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
@@ -458,15 +458,15 @@ body[data-clue='P'] {
 
   div.story {
     position: relative;
-    display: block;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+
     border-radius: 2px;
 
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
-
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 
     &.placeholder {
       height: 5px;
@@ -501,9 +501,11 @@ body[data-clue='P'] {
     }
 
     div.preview {
-      display: inline-block;
       width: 4em;
-      height: calc(100% - 5px);
+
+      -webkit-flex: 0 0 auto;
+      flex: 0 0 auto;
+
       background-position: left center;
       background-repeat: repeat-y;
       background-clip: border-box;
@@ -511,7 +513,19 @@ body[data-clue='P'] {
     }
 
     div.slabel {
-      display: inline-block;
+      position: relative;
+
+      -webkit-flex: 1 1 auto;
+      flex: 1 1 auto;
+
+
+      textarea {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
     }
 
     div.fa-remove {

@@ -11,6 +11,8 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
+import marked = require('marked');
+import ISlideNodeRepr from "./";
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -286,7 +288,16 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     $story_enter.call(this.storyInteraction.bind(this));
     $story_enter.append('div').classed('preview', true);
-    $story_enter.append('div').classed('slabel', true);
+    let onEdit = function (d:ISlideNodeRepr, i) {
+      const $elem = d3.select(this);
+      $elem.on('click', null);
+      $elem.append('textarea').property('value', d.name).on('blur', function () {
+        d.name = this.value;
+        //update value and enable edit click handler again
+        $elem.html(marked(this.value)).on('click', onEdit);
+      });
+    };
+    $story_enter.append('div').classed('slabel', true).on('click', onEdit);
     $story_enter.append('div').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
@@ -316,7 +327,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.select('div.preview').style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
-    $stories.select('div.slabel').text((d) => d.name);
+    $stories.select('div.slabel').html((d) => marked(d.name));
     $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);
