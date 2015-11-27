@@ -86,7 +86,7 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
             if (deleteIt) {
               //TODO
             }
-          })
+          });
         });
         $elem.find('button.btn-warning').on('click', () => {
           //TODO lock
@@ -396,7 +396,7 @@ export class CLUEWrapper extends events.EventHandler {
       $('#login_menu').show();
       $('.login_required').addClass('disabled');
       //TODO
-    })
+    });
   });
   }
 

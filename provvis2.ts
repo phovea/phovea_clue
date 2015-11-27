@@ -18,7 +18,7 @@ import utils = require('./utils');
 
 function extractTags(text: string) {
   const matches = /\S*#(?:\[[^\]]+\]|\S+)/.exec(text);
-  if (matches && matches.length > 0){
+  if (matches && matches.length > 0) {
     return matches.map((m) => m);
   }
   return [];

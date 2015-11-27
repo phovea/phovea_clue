@@ -11,8 +11,6 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
-import StateRepr from "./provvis2";
-
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -194,7 +192,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   }
 
   update() {
-    const that = this;
     const graph = this.data;
     const story_raw = toPath(this.story);
 
