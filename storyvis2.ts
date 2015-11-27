@@ -218,7 +218,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         //update the height of the slide node
         const e : any = d3.event;
         const $elem = d3.select((<Element>this).previousSibling);
-        const height = Math.max(0,that.duration2pixel(d.to.duration)+e.y);
+        const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.to.duration)+e.y);
         console.log(e.y);
         $elem.style('height', height+'px');
         $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
