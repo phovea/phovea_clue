@@ -202,9 +202,7 @@ export class CLUEWrapper extends events.EventHandler {
       let div = <HTMLElement>document.createElement('div');
       this.header.insertCustomRightMenu(div);
       div.id = 'player_controls';
-      div.classList.add('nav');
-      div.classList.add('navbar-nav');
-      div.classList.add('navbar-right');
+      div.classList.add('nav', 'navbar-nav', 'navbar-right');
       div.innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
             <button data-player="play" class="btn btn-default fa fa-play" title="Play"></button>
             <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
@@ -213,9 +211,7 @@ export class CLUEWrapper extends events.EventHandler {
     {
       let div = <HTMLElement>document.createElement('div');
       this.header.insertCustomRightMenu(div);
-      div.classList.add('nav');
-      div.classList.add('navbar-nav');
-      div.classList.add('navbar-right');
+      div.classList.add('nav', 'navbar-nav', 'navbar-right');
       div.id = 'modeselector';
     }
 
@@ -350,7 +346,8 @@ export class CLUEWrapper extends events.EventHandler {
   private createLogin() {
     {
       let ul = document.createElement('ul');
-      let $ul = d3.select(ul).attr('class','nav navbar-nav navbar-right').html(`
+      ul.classList.add('nav','navbar-nav','navbar-right');
+      ul.innerHTML = `
       <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><span class="glyphicon glyphicon-user"></span></a></li>
         <li style="display: none" class="dropdown" id="user_menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -359,7 +356,7 @@ export class CLUEWrapper extends events.EventHandler {
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="logout_link">Logout</a></li>
             </ul>
-        </li>`);
+        </li>`;
 
       this.header.insertCustomRightMenu(ul);
     }
