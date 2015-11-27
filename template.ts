@@ -246,7 +246,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       provvis2.create(graph, body.querySelector('#provenancevis'), {});
 
-      this.storyvis = storyvis.create(graph, body.querySelector('#storyvis'), {
+      this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
         render: r.render
       });
 
@@ -259,7 +259,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       {
         const $right = $('aside.prov_right');
-        const $right_story = $('aside.story_right');
+        const $right_story = $(this.storyvis.node);
         const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {

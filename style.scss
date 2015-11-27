@@ -427,16 +427,15 @@ body[data-clue='P'] {
 }
 
 .provenance-multi-story-vis {
+
   div.stories {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: row;
-    flex-direction: row;
-    > div {
-      display: inline-block;
-      -webkit-flex: 1 1 auto;
-      flex: 1 1 auto;
-    }
+    position: relative;
+    height: calc(100% - 22px);
+    overflow: auto;
+  }
+
+  div.toolbar {
+    height: 22px;
   }
 
   #story_list {
@@ -445,6 +444,12 @@ body[data-clue='P'] {
 
     a {
       padding: 2px;
+    }
+  }
+
+  &.readonly {
+    div.toolbar {
+      display: none;
     }
   }
 }

@@ -460,7 +460,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   private build($parent:d3.Selection<any>) {
-    var $node = $parent.append('div').attr({
+    var $node = $parent.append('aside').attr({
       'class': 'provenance-multi-story-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.append('h2').text('Story Editor');
@@ -577,6 +577,9 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   update() {
+    this.$node.classed('readonly', !isEditAble());
+
+
     const stories = this.data.getSlideChains();
     const colors = d3.scale.category10();
     {
