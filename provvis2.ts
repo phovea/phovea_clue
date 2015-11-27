@@ -228,12 +228,12 @@ class StateRepr {
     });
 
     //convert indices to real positions
-    const acccolwidths = colwidths.reduce((arr, b) => {
-        arr.push(arr[arr.length - 1] + b);
+    const acccolwidths = colwidths.reduce((arr, b, i) => {
+        arr[i+1] = arr[arr.length - 1] + b;
         return arr;
       }, [0]),
-      accrowheights = rowheights.reduce((arr, b) => {
-        arr.push(arr[arr.length - 1] + b);
+      accrowheights = rowheights.reduce((arr, b, i) => {
+        arr[i+1] = arr[arr.length - 1] + b;
         return arr;
       }, [0]);
     acccolwidths.shift();
@@ -525,6 +525,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('large', lod  === LevelOfDetail.Large);
     this.$node.classed('medium', lod  === LevelOfDetail.Medium);
     this.$node.classed('small', lod  === LevelOfDetail.Small);
+    this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
     const states = StateRepr.toRepr(graph, this.filter);
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);

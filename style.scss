@@ -203,10 +203,10 @@ body.headless {
       width: 10px;
       height: 10px;
 
-      &.select-selected .icon {
+      &.select-selected {
         background-color: $select-color;
       }
-      &.select-hovered .icon {
+      &.select-hovered {
         background-color: $hover-color;
       }
     }
@@ -285,7 +285,7 @@ body.headless {
     }
   }
 
-  &.medium, &.small {
+  &.medium, &.small, &.xsmall {
 
     form.toolbar, h2 {
       display: none;
