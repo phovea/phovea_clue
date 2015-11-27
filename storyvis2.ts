@@ -223,7 +223,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
       }).on('dragend', function(d: ISlideNodeRepr) {
         //update the stored duration just once
-        const h = parseInt(d3.select((<Element>this).previousSibling).style('height'));
+        const h = parseInt(d3.select((<Element>this).previousSibling).style('height'),10);
         d.to.duration = that.duration2pixel.invert(h);
       }));
   }
