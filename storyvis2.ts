@@ -91,13 +91,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private bind() {
     this.data.on('select', this.onSelectionChanged);
-    cmode.on('modeChanged', this.trigger);
+    //cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
     this.data.off('select', this.onSelectionChanged);
-    cmode.off('modeChanged', this.trigger);
+    //cmode.off('modeChanged', this.trigger);
   }
 
   get rawSize():[number, number] {
@@ -577,7 +577,11 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   }
 
   update() {
-    this.$node.classed('readonly', !isEditAble());
+
+    const lod = getLevelOfDetail();
+    this.$node.classed('large', lod  === LevelOfDetail.Large);
+    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
+    this.$node.classed('small', lod  === LevelOfDetail.Small);
 
 
     const stories = this.data.getSlideChains();

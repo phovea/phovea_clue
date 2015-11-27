@@ -447,8 +447,9 @@ body[data-clue='P'] {
     }
   }
 
-  &.readonly {
-    div.toolbar {
+  &.medium, &.small {
+
+    div.toolbar, h2 {
       display: none;
     }
   }
@@ -459,6 +460,9 @@ body[data-clue='P'] {
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
+
+
+  //transition: all 200ms linear;
 
   div.story {
     position: relative;
@@ -500,12 +504,13 @@ body[data-clue='P'] {
         border-color: $select-color;
       }
       &.select-hovered {
-        border-color: $select-color;
+        border-color: $hover-color;
       }
     }
 
     div.preview {
-      width: 4em;
+      max-width: 4em;
+      width: 100%;
 
       -webkit-flex: 0 0 auto;
       flex: 0 0 auto;
@@ -547,7 +552,7 @@ body[data-clue='P'] {
   &.large {
     width: 20em;
 
-    div.state {
+    div.story {
 
       &:hover {
         div.toolbar {
@@ -560,7 +565,7 @@ body[data-clue='P'] {
   &.medium {
     width: 4em;
 
-    div.state {
+    div.story {
       div.slabel {
         display: none;
       }
@@ -573,16 +578,16 @@ body[data-clue='P'] {
   &.small {
     width: 1em;
 
-    div.state {
-      div.preview {
+    div.story {
+      div.preview, div.slabel, &.placeholder, div.duration {
         display: none;
       }
 
-      div.slabel {
-        display: none;
+      &.select-selected {
+        background-color: $select-color;
       }
-      &.placeholder {
-        display: none;
+      &.select-hovered {
+        background-color: $hover-color;
       }
     }
   }
