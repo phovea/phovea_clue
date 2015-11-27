@@ -15,7 +15,6 @@ import prov = require('../caleydo_provenance/main');
 import d3 = require('d3');
 import $ = require('jquery');
 import prov_sel = require('../caleydo_provenance/selection');
-import selection = require('../caleydo_d3/selectioninfo');
 import cmode = require('../caleydo_provenance/mode');
 import provvis2 = require('./provvis2');
 import storyvis = require('./storyvis2');
@@ -215,23 +214,13 @@ export class CLUEWrapper extends events.EventHandler {
       div.id = 'modeselector';
     }
 
-    selection.create(body.querySelector('#selectioninfo'), {
-      useNames: true,
-      filter: (idtype) => {
-        return idtype && idtype.name[0] !== '_';
-      }
-    });
-
     cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('#modeselector'));
     cmode.createSlider(body.querySelector('#modeselector'));
 
     this.$main = d3.select(body).select('main');
 
-
-    console.log('graph loading');
     this.graph.then((graph) => {
-      console.log('graph loaded');
       graph.on('sync_start,sync', (event: events.IEvent) => {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
@@ -271,7 +260,6 @@ export class CLUEWrapper extends events.EventHandler {
       {
         const $right = $('aside.prov_right');
         const $right_story = $('aside.story_right');
-        const $left = $('aside.left');
         const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {
@@ -281,11 +269,6 @@ export class CLUEWrapper extends events.EventHandler {
             $right.hide(); //({width: 'hide'});
           } else {
             $right.show();
-          }
-          if (new_.exploration < 0.8) {
-            $left.hide(); //({width: 'hide'});
-          } else {
-            $left.show(); //({width: 'show'});
           }
           if (new_.exploration > 0.2) {
             $footer.hide();
@@ -339,7 +322,6 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
       this.fire('loaded_graph', graph);
-      console.log('done init');
     });
   }
 
