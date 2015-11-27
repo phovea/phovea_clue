@@ -11,6 +11,7 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
+import {SlideNode} from "../caleydo_provenance/main";
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -19,6 +20,12 @@ function toPath(s?: provenance.SlideNode) {
     s = s.next;
   }
   return r;
+}
+
+interface IStoryNodeRepr {
+  id: string;
+  i: number;
+  isPlaceholder?: boolean;
 }
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -125,7 +132,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.options.render(d);
   }
 
-  private dndSupport(elem : d3.Selection<StateRepr>) {
+  private dndSupport(elem : d3.Selection<IStoryNodeRepr>) {
     const that = this;
      elem
       .on('dragenter', function() {
