@@ -346,6 +346,23 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
     $story_enter.append('div').classed('duration', true);
 
+    /*$story_enter.attr('title', 'test');
+    (<any>$($story_enter[0][0])).tooltip({
+      placement: 'left'
+    });
+    var popover = {
+      html: true,
+      placement: 'left',
+      trigger: 'hover',
+      delay: { "show": 500, "hide": 100 },
+      content: function() {
+        const d : provenance.SlideNode = d3.select(this).datum();
+        const thumbnail = d.isTextOnly ? '/clue_demo/text.png' : utils.preview_thumbnail_url(this.data, d);
+        const text = d.name;
+        return `<img src="${thumbnail}"><div>${text}</div>`;
+      }
+    };*/
+
     $placeholder_enter.call(this.dndSupport.bind(this));
     $placeholder_enter.call(this.changeDuration.bind(this));
 
@@ -353,7 +370,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
-    $stories.select('div.preview').style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
+    $stories.attr('title', (d) => `(${to_duration(d.duration)})\n${d.name}`);
+    $stories.attr('data-toggle', 'tooltip');
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration').text((d) => to_duration(d.duration));
     $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
