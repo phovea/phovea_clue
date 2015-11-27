@@ -202,6 +202,13 @@ body.headless {
       border: 2px solid #989898;
       width: 10px;
       height: 10px;
+
+      &.select-selected .icon {
+        background-color: $select-color;
+      }
+      &.select-hovered .icon {
+        background-color: $hover-color;
+      }
     }
     &.doi-sm {
       .sthumbnail, .slabel {
@@ -211,6 +218,13 @@ body.headless {
       height: 20px;
       font-size: 100%;
       padding-left: 5px;
+
+      &.select-selected .icon {
+        color: $select-color;
+      }
+      &.select-hovered .icon {
+        color: $hover-color;
+      }
     }
     &.doi {
      .sthumbnail {
@@ -219,6 +233,13 @@ body.headless {
       height: 30px;
       font-size: 100%;
       padding-left: 10px;
+
+      &.select-selected {
+        color: $select-color;
+      }
+      &.select-hovered {
+        color: $hover-color;
+      }
     }
 
     &.doi-lg {
@@ -232,17 +253,18 @@ body.headless {
         position: absolute;
         left: 44px;
       }
-    }
 
-    &.select-selected .sthumbnail {
-      border-color: $select-color;
-    }
-
-    &.select-hovered {
-      .sthumbnail, &.doi-sm, &.doi-xs {
+      &.select-selected .sthumbnail {
         border-color: $select-color;
       }
+      &.select-hovered .sthumbnail {
+        border-color: $hover-color;
+      }
     }
+
+
+
+
   }
 
   .popover div.preview {
@@ -260,6 +282,13 @@ body.headless {
       width: 230px;
       height: auto;
       border: 1px solid black;
+    }
+  }
+
+  &.medium, &.small {
+
+    form.toolbar, h2 {
+      display: none;
     }
   }
 }
@@ -517,6 +546,7 @@ body[data-clue='P'] {
 
       background-position: left center;
       background-repeat: repeat-y;
+      background-color: white;
       background-clip: border-box;
       background-size: contain;
     }

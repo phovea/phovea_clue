@@ -216,7 +216,7 @@ export class CLUEWrapper extends events.EventHandler {
 
     cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('#modeselector'));
-    cmode.createSlider(body.querySelector('#modeselector'));
+    //cmode.createSlider(body.querySelector('#modeselector'));
 
     this.$main = d3.select(body).select('main');
 
@@ -275,7 +275,7 @@ export class CLUEWrapper extends events.EventHandler {
           } else {
             $footer.show();
           }
-          if (new_.authoring < 0.1) {
+          if (new_.exploration > 0.8) {
             $right_story.hide(); //({width: 'hide'});
           } else {
             $right_story.show();

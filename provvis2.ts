@@ -24,6 +24,27 @@ function extractTags(text: string) {
   return [];
 }
 
+enum LevelOfDetail {
+  ExtraSmall = 0,
+  Small = 1,
+  Medium = 2,
+  Large = 3
+}
+
+function getLevelOfDetail() {
+  const mode = cmode.getMode();
+  if (mode.exploration >= 0.8) {
+    return LevelOfDetail.Small;
+  }
+  if (mode.presentation > 0.3) {
+    return LevelOfDetail.ExtraSmall;
+  }
+  if (mode.authoring >= 0.8) {
+    return LevelOfDetail.Large;
+  }
+  return LevelOfDetail.Medium;
+}
+
 class StateRepr {
   doi: number;
   xy: [number, number] = [0,0];
@@ -70,29 +91,40 @@ class StateRepr {
     return this.xy[1] + this.size[1]*0.5;
   }
 
-  get doi_lg() {
-    return this.doi >= 0.9;
+  get lod_local() {
+    if (this.doi >= 0.9) {
+      return LevelOfDetail.Large;
+    }
+    if (this.doi >= 0.7) {
+      return LevelOfDetail.Medium;
+    }
+    if (this.doi >= 0.4) {
+      return LevelOfDetail.Small;
+    }
+    return LevelOfDetail.ExtraSmall;
   }
-  get doi_() {
-    return this.doi >= 0.7 && this.doi < 0.9;
-  }
-  get doi_sm() {
-    return this.doi >= 0.4 && this.doi < 0.7;
-  }
-  get doi_xs() {
-    return this.doi < 0.4;
+
+  get lod() {
+    const global = getLevelOfDetail();
+    const local = this.lod_local;
+    return global < local ? global: local;
   }
 
   get size() {
-    if (this.doi_lg) {
-      return [50,50];
-    } else if (this.doi_) {
-      return [30, 30];
-    } else if (this.doi_sm) {
-      return [20,20];
-    } else {
-      return  [10,10];
+    switch (this.lod) {
+      case LevelOfDetail.Large:
+        return [50, 50];
+      case LevelOfDetail.Medium:
+        return [30, 30];
+      case LevelOfDetail.Small:
+        return [20, 20];
+      default:
+        return [10, 10];
     }
+  }
+
+  get name() {
+    return this.a ? this.a.name : this.s.name;
   }
 
 
@@ -104,7 +136,9 @@ class StateRepr {
     const selected = graph.act;
     const selected_path = selected.path.reverse();
 
-    const states = graph.states.map((s) => {
+    const lod = getLevelOfDetail();
+
+    const toState = (s) => {
       var r = new StateRepr(s, graph);
       var a = s.creator;
       var meta = a ? a.meta : provenance.meta('No','none','none');
@@ -123,7 +157,8 @@ class StateRepr {
 
       lookup[s.id] = r;
       return r;
-    });
+    };
+    const states = (lod < LevelOfDetail.Medium ? selected_path : graph.states).map(toState);
 
     //route to path = 1
     const line = selected.path.map((p) => lookup[p.id]);
@@ -234,17 +269,19 @@ class StateRepr {
 
   static render($elem: d3.Selection<StateRepr>) {
     $elem
-      .classed('doi-xs', (d) => d.doi_xs)
-      .classed('doi-sm', (d) => d.doi_sm)
-      .classed('doi', (d) => d.doi_)
-      .classed('doi-lg', (d) => d.doi_lg)
+      .classed('doi-xs', (d) => d.lod === LevelOfDetail.ExtraSmall)
+      .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
+      .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
+      .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
       .classed('select-selected', (d) => d.selected)
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
-      .attr('data-doi',(d) => d.doi);
+      .attr('data-doi',(d) => d.doi)
+      .attr('title', (d) => d.name);
+
     $elem.select('span.icon').html(StateRepr.toIcon);
-    $elem.select('span.slabel').text((d) => d.a ? d.a.name : d.s.name);
+    $elem.select('span.slabel').text((d) => d.name);
     $elem.select('div.sthumbnail')
-      .style('background-image', (d) => d.doi_lg ? d.thumbnail : null);
+      .style('background-image', (d) => d.lod === LevelOfDetail.Large ? d.thumbnail : null);
     $elem.transition().style({
       left: (d) => d.xy[0]+'px',
       top: (d) => d.xy[1]+'px'
@@ -385,11 +422,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $p = $parent.append('div').attr({
+    var $p = $parent.append('aside').attr({
       'class': 'provenance-layout-vis'
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
+      <h2>Provenance Graph</h2>
       <form class="form-inline toolbar" onsubmit="return false;">
       <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default btn-xs active" title="data actions">
@@ -483,6 +521,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const that = this;
     const graph = this.data;
 
+    const lod = getLevelOfDetail();
+    this.$node.classed('large', lod  === LevelOfDetail.Large);
+    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
+    this.$node.classed('small', lod  === LevelOfDetail.Small);
+
     const states = StateRepr.toRepr(graph, this.filter);
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $states_enter = $states.enter().append('div')
@@ -550,29 +593,29 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
     //just for the entered ones
-    (<any>$($states_enter[0][0]).find('> span.icon')).popover(StateRepr.popover)
-      .parent().on({
-        mouseenter: function () {
-          var $icon = $(this).find('> span.icon');
-          $icon.addClass('popping');
-          $icon.data('popup', setTimeout(function () {
-            (<any>$icon).popover('show');
-          }, 200));
-        },
-        mouseleave: function () {
-          var $icon = $(this).find('> span.icon');
-          const id = +$icon.data('popoup');
-          clearTimeout(id);
-          $icon.removeData('popup');
-          const d:StateRepr = d3.select(this).datum();
-          if (d && $icon.has('textarea')) {
-            const val = $(this).find('textarea').val();
-            d.s.setAttr('tags', extractTags(val));
-            d.s.setAttr('note', val);
-          }
-          (<any>$icon).popover('hide');
-        }
-      });
+    //(<any>$($states_enter[0][0]).find('> span.icon')).popover(StateRepr.popover)
+    //  .parent().on({
+    //    mouseenter: function () {
+    //      var $icon = $(this).find('> span.icon');
+    //      $icon.addClass('popping');
+    //      $icon.data('popup', setTimeout(function () {
+    //        (<any>$icon).popover('show');
+    //      }, 200));
+    //    },
+    //    mouseleave: function () {
+    //      var $icon = $(this).find('> span.icon');
+    //      const id = +$icon.data('popoup');
+    //      clearTimeout(id);
+    //      $icon.removeData('popup');
+    //      const d:StateRepr = d3.select(this).datum();
+    //      if (d && $icon.has('textarea')) {
+    //        const val = $(this).find('textarea').val();
+    //        d.s.setAttr('tags', extractTags(val));
+    //        d.s.setAttr('note', val);
+    //      }
+    //      (<any>$icon).popover('hide');
+    //    }
+    //  });
 
     var edges = [];
     states.forEach((s) => {
@@ -580,7 +623,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
 
     this.dim = [
-      d3.max(states, (s) => s.xy[0]+s.size[0]) + 200, //for label
+      d3.max(states, (s) => s.xy[0]+s.size[0]) + (lod >= LevelOfDetail.Medium ? 200 : 0), //for label
       d3.max(states, (s) => s.xy[1]+s.size[1])
     ];
 
@@ -591,6 +634,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const $edges = this.$node.select('svg g.edges').selectAll('path').data(edges, (d) => d.s.s.id+'-'+d.t.s.id);
     $edges.enter().append('path');
     $edges.transition().attr('d', (d) => this.line([d.s, d.t]));
+    $edges.exit().remove();
 
     this.updateStoryHighlight();
   }
@@ -598,7 +642,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private updateStoryHighlight() {
     //TODO hide if not needed
     const $g = this.$node.select('svg g.storyhighlights');
-    const states = this.$node.select('div').selectAll<StateRepr>('div.state').data();
+    const states = this.$node.select('div.states').selectAll<StateRepr>('div.state').data();
     const lookup : any = {};
     states.forEach((s) => lookup[s.s.id] = s);
     const areas = this.data.getSlides().map((story) => {

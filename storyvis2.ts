@@ -372,7 +372,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.attr('title', (d) => `(${to_duration(d.duration)})\n${d.name}`);
     $stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration').text((d) => to_duration(d.duration));
     $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
