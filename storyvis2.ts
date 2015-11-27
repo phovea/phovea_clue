@@ -64,7 +64,7 @@ function isEditAble() {
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
-  private trigger = C.bind(this.update, this);
+  //private trigger = C.bind(this.update, this);
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
