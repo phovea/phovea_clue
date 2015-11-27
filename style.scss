@@ -470,26 +470,27 @@ body[data-clue='P'] {
 
     &.placeholder {
       height: 5px;
-    border: 2px solid #efefef;
+      border: 2px solid #efefef;
       background-color: #efefef;
+
       &.hover {
         background-color: #959595;
       }
 
-      &.last {
+      &:hover:not(.hover):not(:first-of-type) {
+        cursor: ns-resize;
+      }
+
+      &:last-of-type {
         height: auto;
         text-align: center;
         line-height: 3em;
       }
     }
+
     &:not(.placeholder) {
-    border: 2px solid gray;
-      padding-left: 3em;
+      border: 2px solid gray;
       height: 3em;
-      background-position: left center;
-      background-repeat: no-repeat;
-      background-clip: border-box;
-      background-size: contain;
 
       &.select-selected {
         border-color: $select-color;
@@ -497,6 +498,20 @@ body[data-clue='P'] {
       &.select-hovered {
         border-color: $select-color;
       }
+    }
+
+    div.preview {
+      display: inline-block;
+      width: 4em;
+      height: calc(100% - 5px);
+      background-position: left center;
+      background-repeat: repeat-y;
+      background-clip: border-box;
+      background-size: contain;
+    }
+
+    div.slabel {
+      display: inline-block;
     }
 
     div.fa-remove {

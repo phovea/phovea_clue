@@ -21,10 +21,18 @@ function toPath(s?: provenance.SlideNode) {
   return r;
 }
 
-interface IStoryNodeRepr {
+interface ISlideNodeRepr {
   id: string;
   i: number;
   isPlaceholder?: boolean;
+  name?: string;
+  state?: provenance.StateNode;
+  to?: provenance.SlideNode;
+}
+
+function to_duration(d: number) {
+  var mm_ss = d3.time.format('%M:%S:%L');
+  return mm_ss(new Date(d));
 }
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -41,6 +49,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     rotate: 0,
     render: (state: provenance.SlideNode) => Promise.resolve(null)
   };
+
+  private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 520]);
 
   constructor(public data:provenance.ProvenanceGraph, public story: provenance.SlideNode, public parent:Element, options:any= {}) {
     super();
@@ -131,7 +141,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.options.render(d);
   }
 
-  private dndSupport(elem : d3.Selection<IStoryNodeRepr>) {
+
+  private dndSupport(elem : d3.Selection<ISlideNodeRepr>) {
     const that = this;
      elem
       .on('dragenter', function() {
@@ -158,7 +169,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           that.story = new_;
           that.data.insertIntoSlide(new_, bak, true);
         } else {
-          that.data.insertIntoSlide(new_, full_story[d.i], false);
+          that.data.insertIntoSlide(new_, d.to, false);
         }
         that.update();
       };
@@ -179,7 +190,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
               that.update();
             }
           } else {
-            let ref =  full_story[d.i];
+            let ref =  d.to;
             if (ref !== story) {
               //we might moved the first one
               if (story === that.story) {
@@ -197,14 +208,66 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
   }
 
+  private changeDuration($elem: d3.Selection<ISlideNodeRepr>) {
+    const that = this;
+    $elem.call(d3.behavior.drag()
+      .origin(function () {
+        const slide = <Element>(<Element>this).previousElementSibling;
+        const slides = slide.parentElement;
+        const b = C.bounds(slide);
+        const b2 = C.bounds(slides);
+        console.log((<Element>this).previousSibling, b, b2);
+
+        return { x : 0, y : (b.y - b2.y)};
+      })
+      .on('drag', function(d: ISlideNodeRepr) {
+        //update the height of the slide node
+        const e : any = d3.event;
+        const $elem = d3.select((<Element>this).previousSibling);
+        const height = Math.max(0,that.duration2pixel(d.to.duration)+e.y);
+        $elem.style('height', height+'px');
+        d3.select(this).attr('title',to_duration(that.duration2pixel.invert(height)));
+      }).on('dragend', function(d: ISlideNodeRepr) {
+        //update the stored duration just once
+        const h = parseInt(d3.select((<Element>this).previousSibling).style('height'));
+        d.to.duration = that.duration2pixel.invert(h);
+        d3.select(this).attr('title',null);
+      }));
+  }
+
+  private storyInteraction(elem: d3.Selection<ISlideNodeRepr>) {
+    const graph = this.data;
+
+    elem.attr('draggable',true)
+      .on('dragstart', (d) => {
+        const e = <DragEvent>(<any>d3.event);
+        e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+        e.dataTransfer.setData('text/plain', d.name);
+        e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
+      })
+      .on('click', this.onSlideClick.bind(this))
+      .on('mouseenter', (d) =>  {
+        if (d.state != null) {
+          graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        }
+        graph.selectSlide(<provenance.SlideNode><any>d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+      })
+      .on('mouseleave', (d) => {
+        if (d.state != null) {
+          graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        }
+        graph.selectSlide(<provenance.SlideNode><any>d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+      });
+  }
+
   update() {
     const graph = this.data;
     const story_raw = toPath(this.story);
 
-    const story = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true}] : [];
+    const story = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
     story_raw.forEach((s,i) => {
       story.push(s);
-      story.push({ id: 'f'+i, i: i, isPlaceholder: true});
+      story.push({ id: 'f'+i, i: i, isPlaceholder: true, to: s});
     });
 
     //this.$node.attr('width', (story.length * 70+4)*1.2);
@@ -221,29 +284,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $story_enter = $states_enter.filter((d) => !d.isPlaceholder);
     const $placeholder_enter = $states_enter.filter((d) => d.isPlaceholder).classed('placeholder',true);
 
-    $story_enter
-      .attr('draggable',true)
-      .on('dragstart', (d) => {
-        const e = <DragEvent>(<any>d3.event);
-        e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
-        e.dataTransfer.setData('text/plain', d.name);
-        e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
-      })
-      .on('click', this.onSlideClick.bind(this))
-      .on('mouseenter', (d) =>  {
-        if (d.state != null) {
-          graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
-        }
-        graph.selectSlide(d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
-      })
-      .on('mouseleave', (d) => {
-        if (d.state != null) {
-          graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
-        }
-        graph.selectSlide(d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
-      });
-
-    $story_enter.append('span').classed('slabel', true);
+    $story_enter.call(this.storyInteraction.bind(this));
+    $story_enter.append('div').classed('preview', true);
+    $story_enter.append('div').classed('slabel', true);
     $story_enter.append('div').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
@@ -258,26 +301,26 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       graph.removeSlideNode(d);
       this.update();
     });
-    var mm_ss = d3.time.format('%M:%S:%L');
     $story_enter.append('div').attr({
-      'class': 'duration justauthor'
+      'class': 'duration'
     }).on('click', function(d) {
       d.duration = +(prompt('Enter new duration', d.duration));
-      d3.select(this).text(mm_ss(new Date(d.duration)));
+      d3.select(this).text(to_duration(d.duration));
     });
 
     $placeholder_enter.call(this.dndSupport.bind(this));
+    $placeholder_enter.call(this.changeDuration.bind(this));
 
     $states.order();
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
-    $stories.style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
-    $stories.select('span.slabel').text((d) => d.name);
+    $stories.select('div.preview').style('background-image', (d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`);
+    $stories.select('div.slabel').text((d) => d.name);
+    $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);
     $placeholders
-      .classed('last', (d) => d.i === (story_raw.length-1))
       .text((d) => d.i === (story_raw.length-1) ? 'drop state here' : null);
 
     $states.exit().remove();
