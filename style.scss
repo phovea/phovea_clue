@@ -527,14 +527,14 @@ body[data-clue='P'] {
       }
     }
 
-    div.fa-remove {
+    div.toolbar {
       position: absolute;
       right: 0;
       top: 0;
       z-index: 10;
       display: none;
 
-      &:hover {
+      i:hover {
         font-weight: bold;
       }
     }
@@ -547,7 +547,7 @@ body[data-clue='P'] {
     }
 
     &:hover {
-      div.fa-remove {
+      div.toolbar {
         display: block;
       }
     }

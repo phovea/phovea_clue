@@ -8,6 +8,7 @@ import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
 import idtypes = require('../caleydo_core/idtype');
 import cmode = require('../caleydo_provenance/mode');
+import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
@@ -279,17 +280,23 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     $story_enter.call(this.storyInteraction.bind(this));
     $story_enter.append('div').classed('preview', true);
-    let onEdit = function (d:ISlideNodeRepr, i) {
-      const $elem = d3.select(this);
-      $elem.on('click', null);
-      $elem.append('textarea').property('value', d.name).on('blur', function () {
-        d.name = this.value;
-        //update value and enable edit click handler again
-        $elem.html(marked(this.value)).on('click', onEdit);
+    $story_enter.append('div').classed('slabel', true);
+    const $toolbar_enter = $story_enter.append('div').classed('toolbar', true);
+    $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      //remove me
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+      dialogs.prompt(d.name, {
+        title: 'Edit name',
+        placeholder: 'Markdown supported...',
+        multiline: true
+      }).then((text) => {
+        d.name = text;
+        this.update();
       });
-    };
-    $story_enter.append('div').classed('slabel', true).on('click', onEdit);
-    $story_enter.append('div').attr('class', 'fa fa-remove').on('click', (d) => {
+      return false;
+    });
+    $toolbar_enter.append('i').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
       d3.event.preventDefault();
