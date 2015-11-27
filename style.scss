@@ -14,6 +14,7 @@ body, html {
   -webkit-print-color-adjust: exact;
 }
 
+//main content
 body > div.box {
   display: -webkit-flex;
   display: flex;
@@ -23,6 +24,7 @@ body > div.box {
   flex-flow: column;
   height: 100%;
 }
+
 
 body > div.box > div.content {
   display: -webkit-flex;
@@ -36,10 +38,6 @@ body > div.box > div.content {
 aside {
   -webkit-print-color-adjust: exact;
   background-color: #E5E5E5 !important;
-
-  &.left {
-    width: 12vw;
-  }
 }
 
 footer {
@@ -133,13 +131,14 @@ $hover-color: #ffdd05;
   background-color: $select-color !important;
 }*/
 
+//super script fontawesome icon
 .fa.super {
   vertical-align: super;
   font-size: 50%;
   margin-left: -.5em;
 }
 
-
+//if we render in headless mode
 body.headless {
   main {
     width: 100vw  !important;
@@ -245,127 +244,26 @@ body.headless {
       }
     }
   }
-}
 
-
-.provenance-simple-vis {
-  line {
-    stroke: black;
-    fill: none;
-  }
-
-  path {
-    fill: none;
-    stroke: black;
-  }
-
-  g.state {
-    cursor: pointer;
-
-    &.select-selected {
-      circle {
-        fill: $select-color
-      }
+  .popover div.preview {
+    span.star {
+      position: absolute;
+      right: 0.2em;
+      top: 0.2em;
     }
-    &.select-hovered {
-      circle {
-        fill: $hover-color;
-      }
+    textarea {
+      display: block;
+      width: 100%;
+      height: 5em;
     }
-
-    circle {
-      fill: #bbbbbb;
-    }
-
-    &.act {
-      circle {
-        //fill: darkgray;
-        stroke: black;
-      }
-    }
-
-    &.past {
-      text {
-        stroke: darkgray;
-      }
-    }
-
-    &.future {
-      circle {
-        //fill: lightgray;
-        stroke: lightgray;
-      }
-      text {
-        font-style: italic;
-      }
-    }
-
-    text {
-      font-size: 8pt;
-    }
-  }
-
-  .data {
-    stroke: green;
-    &.fill {
-      fill: green;
-    }
-  }
-  .selection {
-    stroke: orange;
-    &.fill {
-      fill: orange;
-    }
-  }
-  .visual {
-    stroke: blue;
-    &.fill {
-      fill: blue;
-    }
-  }
-  .layout {
-    stroke: #02c9ff;
-    &.fill {
-      fill: #02c9ff;
-    }
-  }
-  .logic {
-    stroke: gray;
-    &.fill {
-      fill: gray;
-    }
-  }
-  .custom {
-    stroke: white;
-    &.fill {
-      fill: white;
-    }
-  }
-  .annotation {
-    stroke: lightblue;
-    &.fill {
-      fill: lightblue;
+    img {
+      width: 230px;
+      height: auto;
+      border: 1px solid black;
     }
   }
 }
 
-.popover div.preview {
-  span.star {
-    position: absolute;
-    right: 0.2em;
-    top: 0.2em;
-  }
-  textarea {
-    display: block;
-    width: 100%;
-    height: 5em;
-  }
-  img {
-    width: 230px;
-    height: auto;
-    border: 1px solid black;
-  }
-}
 
 #provenancegraph_list div.popover {
   width: 30em;
@@ -525,76 +423,6 @@ body[data-clue='P'] {
 
   &.editable:hover {
     border: 5px solid #b8000b;
-  }
-}
-
-.provenance-simple-story-vis {
-  position: relative;
-
-  div.time {
-    border-top: 2px solid gray;
-    position: absolute;
-    top: 1em;
-    width: 100%;
-  }
-
-  div.story {
-    display: inline-block;
-    margin: 0 1em;
-
-    font-size: 7pt;
-    text-align: center;
-
-    div {
-      display: block;
-      margin: 0;
-    }
-
-    &.fake {
-      opacity: 0;
-      cursor: pointer;
-
-      &:hover {
-        opacity: 1;
-      }
-
-      span:hover {
-        color: darkorange;
-      }
-    }
-
-    div.glyph span {
-      font-size: smaller;
-      vertical-align: super;
-
-      &.fa-remove {
-        visibility: hidden;
-        cursor: pointer;
-
-        &:hover {
-          color: darkorange;
-        }
-      }
-    }
-
-    div.duration {
-      cursor: pointer;
-    }
-
-    &.select-selected {
-      div.glyph {
-        color: $select-color
-      }
-    }
-    &.select-hovered {
-      div.glyph {
-        color: $hover-color;
-      }
-    }
-
-    &:hover div.glyph span.fa-remove {
-      visibility: visible;
-    }
   }
 }
 
