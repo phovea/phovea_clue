@@ -214,9 +214,9 @@ export class CLUEWrapper extends events.EventHandler {
       div.id = 'modeselector';
     }
 
-    cmode.create(body.querySelector('#modeselector'));
+    //cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('#modeselector'));
-    cmode.createSlider(body.querySelector('#modeselector'));
+    //cmode.createSlider(body.querySelector('#modeselector'));
 
     this.$main = d3.select(body).select('main');
 
