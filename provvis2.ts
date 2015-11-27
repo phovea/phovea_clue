@@ -124,7 +124,7 @@ class StateRepr {
   }
 
   get name() {
-    return this.a ? this.a.name : this.s.name;
+    return this.s.name;
   }
 
 
@@ -288,44 +288,44 @@ class StateRepr {
     });
   }
 
-  static popover = {
-      trigger: 'manual',
-      placement: 'left',
-      delay: 300,
-      title: function () {
-        const d : StateRepr = d3.select(this).datum();
-        const icon = StateRepr.toIcon(d);
-        const title = d.a ? d.a.name : d.s.name;
-        return `<span class="icon">${icon}</span>${title}`;
-      },
-      html: true,
-      content: function () {
-        const d : StateRepr = d3.select(this).datum();
-        const thumbnail = utils.thumbnail_url(d.graph, d.s);
-        const notes = d.s.getAttr('note', '');
-        const starred = d.s.getAttr('starred', false);
-        const content = $(`
-        <div class="preview">
-          <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="bookmark this state for latter use"></span>
-          <img src="${thumbnail}">
-          <textarea placeholder="place for notes...">${notes}</textarea>
-        </div>`);
-        content.find('span.star').on('click', function() {
-          d.s.setAttr('starred',!d.s.getAttr('starred',false));
-          $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
-          return false;
-        });
-        content.find('textarea').on('change', function() {
-          const val = this.value;
-          d.s.setAttr('tags', extractTags(val));
-          d.s.setAttr('note', val);
-          return false;
-        }).on('click', function(event) {
-          event.stopPropagation();
-        });
-        return content;
-      }
-    };
+  showDialog() {
+    const d = this;
+    const icon = StateRepr.toIcon(d);
+    const title = d.s.name;
+      const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
+
+    const thumbnail = utils.thumbnail_url(d.graph, d.s);
+    const notes = d.s.getAttr('note', '');
+    const starred = d.s.getAttr('starred', false);
+    const $body = d3.select(dia.body);
+    $body.html(`
+    <form class="state_info" onsubmit="return false">
+      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="bookmark this state for latter use"></span>
+      <div class="img"><img src="${thumbnail}"></div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" class="form-control" placeholder="name" value="${title}">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea class="form-control" placeholder="place for notes...">${notes}</textarea>
+      </div>
+    </form>`);
+    $body.select('span.star').on('click', function() {
+      d.s.setAttr('starred',!d.s.getAttr('starred',false));
+      $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
+      return false;
+    });
+
+    dia.onHide(() => {
+      const name = $body.select('input').property('value');
+      d.s.name = name;
+      const val =  $body.select('textarea').property('value');
+      d.s.setAttr('tags', extractTags(val));
+      d.s.setAttr('note', val);
+    });
+    dia.show();
+  }
 }
 
 export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -580,10 +580,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });*/
-    $states_enter.append('span').classed('slabel',true).on('click', (d) => {
-      dialogs.prompt(d.s.name, 'Comment').then((new_) => {
-        d.s.name = new_;
-      });
+    $states_enter.append('span').classed('slabel',true);
+    const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
+    $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      d.showDialog();
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });

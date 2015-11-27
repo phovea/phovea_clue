@@ -192,6 +192,13 @@ body.headless {
       background-color: white;
     }
 
+    .toolbar {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0.1em;
+    }
+
 
     &.doi-xs {
       .sthumbnail, .slabel, .icon {
@@ -260,6 +267,12 @@ body.headless {
       &.select-hovered .sthumbnail {
         border-color: $hover-color;
       }
+
+      &:hover {
+        .toolbar {
+          display: block;
+        }
+      }
     }
 
 
@@ -267,23 +280,7 @@ body.headless {
 
   }
 
-  .popover div.preview {
-    span.star {
-      position: absolute;
-      right: 0.2em;
-      top: 0.2em;
-    }
-    textarea {
-      display: block;
-      width: 100%;
-      height: 5em;
-    }
-    img {
-      width: 230px;
-      height: auto;
-      border: 1px solid black;
-    }
-  }
+
 
   &.medium, &.small, &.xsmall {
 
@@ -293,6 +290,31 @@ body.headless {
   }
 }
 
+form.state_info {
+  span.star {
+    position: absolute;
+    right: 0.2em;
+    top: 0.2em;
+    font-size: 200%;
+  }
+
+  input {
+  }
+  textarea {
+    height: 5em;
+  }
+
+  div.img {
+    width: 100%;
+    text-align: center;
+    img {
+      width: auto;
+      margin: auto 0;
+      height: 12em;
+      border: 1px solid black;
+    }
+  }
+}
 
 #provenancegraph_list div.popover {
   width: 30em;
