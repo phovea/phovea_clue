@@ -388,8 +388,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);
-    $placeholders
-      .text((d) => d.i === (story_raw.length-1) ? 'drop state here' : null);
 
     $states.exit().remove();
   }

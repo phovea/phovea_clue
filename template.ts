@@ -246,11 +246,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       provvis2.create(graph, body.querySelector('#provenancevis'), {});
 
-      this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
-        render: r.render
-      });
-
-      storyvis.create(graph, body.querySelector('div.box'), {
+      this.storyvis = storyvis.create(graph, body.querySelector('div.box'), {
         render: r.render,
         class: 'horizontal'
       });
