@@ -405,35 +405,36 @@ div.annotation {
   }
 }
 
-body[data-clue='E'] main  {
-  div.annotation, div.add-text-annotation {
-    display: none !important;
-  }
-}
-
-body[data-clue='P'] {
+body {
   nav {
-    opacity: 0;
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 10;
+    transition: margin-top 1s ease;
+    margin-top: 0px;
   }
-  &:hover {
+  &[data-clue='E'] main {
+    div.annotation, div.add-text-annotation {
+      display: none !important;
+    }
+  }
+
+  &[data-clue='P'] {
     nav {
-      transition: opacity 3s ease 0s;
-      opacity: 1;
+      margin-top: -50px;
+
+      &:hover {
+        margin-top: 0px;
+      }
     }
-  }
-  main {
-    div.annotation {
-      pointer-events: none;
-    }
-    div.add-text-annotation, div.annotation button {
-      display: none !important;
-    }
-    svg circle.anchor {
-      display: none !important;
+
+    main {
+      div.annotation {
+        pointer-events: none;
+      }
+      div.add-text-annotation, div.annotation button {
+        display: none !important;
+      }
+      svg circle.anchor {
+        display: none !important;
+      }
     }
   }
 }
