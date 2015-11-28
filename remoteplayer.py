@@ -32,24 +32,27 @@ def create_via_selenium(url, width, height):
   from selenium import webdriver
 
   driver = webdriver.PhantomJS(executable_path=conf.phantomjs2)  # or add to your PATH
-  driver.implicitly_wait(10)
+  driver.implicitly_wait(20) #wait at most 20 seconds
   driver.set_window_size(width, height)  # optional
   print url
   driver.get(url)
-  main_elem = driver.find_element_by_css_selector('main')
-  for entry in driver.get_log('browser'):
-    print entry
-  check = driver.find_element_by_css_selector('body.clue_jumped')
-  # try:
-  # we have to wait for the page to refresh, the last thing that seems to be updated is the title
-  # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
+  try:
+    main_elem = driver.find_element_by_css_selector('main')
+    for entry in driver.get_log('browser'):
+      print entry
+    check = driver.find_element_by_css_selector('body.clue_jumped')
+    # try:
+    # we have to wait for the page to refresh, the last thing that seems to be updated is the title
+    # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
 
-  # You should see "cheese! - Google Search"
-  # print driver.title
+    # You should see "cheese! - Google Search"
+    # print driver.title
 
-  # finally:
-  #    driver.quit()
-  # obj = main_elem.screenshot_as_png()
+    # finally:
+    #    driver.quit()
+    # obj = main_elem.screenshot_as_png()
+  except Exception, e:
+    print 'cant fullfil query', e
   obj = driver.get_screenshot_as_png()
   driver.quit()
   return obj
