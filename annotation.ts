@@ -231,7 +231,7 @@ export class Renderer {
 
   hideOld() {
     return new Promise((resolve) => {
-      const $div = this.$main.selectAll('div.annotation, div.text-overlay, div.add-text-annotation');
+      const $div = this.$main.classed('hide-all-non-annotations',false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation');
       if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
@@ -245,16 +245,8 @@ export class Renderer {
 
   renderText(overlay:prov.SlideNode) {
     return new Promise((resolve) => {
-      var $div = this.$main.append('div').classed('text-overlay', true).attr('data-id', overlay.id).style('opacity', 0);
-
-      if (this.options.animation) {
-        $div.transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
-          resolve($div.node());
-        });
-      } else {
-        $div.style('opacity', 1);
-        resolve($div.node());
-      }
+      this.$main.classed('hide-all-non-annotations', true);
+      resolve(this.$main.node());
     });
   }
 }

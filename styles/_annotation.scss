@@ -25,6 +25,10 @@
   }
 }
 
+main.hide-all-non-annotations > *:not(.annotation) {
+  display: none !important;
+}
+
 .text-overlay, .text-annotation {
   > div {
     position: relative;
