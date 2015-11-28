@@ -308,10 +308,14 @@ form.state_info {
     width: 100%;
     text-align: center;
     img {
+      min-width: 20em;
       width: auto;
       margin: auto 0;
       height: 12em;
       border: 1px solid black;
+      background-image: url(/assets/caleydo_c_anim_gray.svg);
+      background-position: center center;
+      background-repeat: no-repeat;
     }
   }
 }

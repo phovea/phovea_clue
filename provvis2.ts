@@ -294,7 +294,7 @@ class StateRepr {
     const title = d.s.name;
       const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
 
-    const thumbnail = utils.thumbnail_url(d.graph, d.s);
+    const thumbnail = utils.thumbnail_url(d.graph, d.s, { width: 512, format: 'png' });
     const notes = d.s.getAttr('note', '');
     const starred = d.s.getAttr('starred', false);
     const $body = d3.select(dia.body);
