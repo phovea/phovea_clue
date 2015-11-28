@@ -1,0 +1,171 @@
+/**
+ * Created by Samuel Gratzl on 27.08.2014.
+ */
+
+.provenance-layout-vis {
+  position: relative;
+  svg {
+    g.edges path {
+      fill: none;
+      stroke: #949494;
+    }
+    g.storyhighlights path {
+      opacity: 0.4;
+    }
+  }
+
+  div.state {
+    position: absolute;
+
+    max-width: 200px;
+    text-overflow: ellipsis;
+    //overflow-x: hidden;
+    white-space: nowrap;
+
+    &:hover {
+      .slabel, .icon {
+        color: $hover-color;
+      }
+    }
+
+
+    .sthumbnail {
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      border: 2px solid #989898;
+
+      background-position: left center;
+      background-repeat: no-repeat;
+      background-clip: border-box;
+      background-size: contain;
+      background-color: white;
+    }
+
+    .toolbar {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0.1em;
+    }
+
+
+    &.doi-xs {
+      .sthumbnail, .slabel, .icon {
+        display: none;
+      }
+      border-radius: 50%;
+      background-color: #b4b4b4;
+      border: 2px solid #989898;
+      width: 10px;
+      height: 10px;
+
+      &.select-selected {
+        background-color: $select-color;
+      }
+      &.select-hovered {
+        background-color: $hover-color;
+      }
+    }
+    &.doi-sm {
+      .sthumbnail, .slabel {
+        display: none;
+      }
+      width: 20px;
+      height: 20px;
+      font-size: 100%;
+      padding-left: 5px;
+
+      &.select-selected .icon {
+        color: $select-color;
+      }
+      &.select-hovered .icon {
+        color: $hover-color;
+      }
+    }
+    &.doi {
+     .sthumbnail {
+       display: none;
+     }
+      height: 30px;
+      font-size: 100%;
+      padding-left: 10px;
+
+      &.select-selected {
+        color: $select-color;
+      }
+      &.select-hovered {
+        color: $hover-color;
+      }
+    }
+
+    &.doi-lg {
+      margin-left: 6px;
+      margin-top: 3px;
+      height: 44px;
+      .sthumbnail {
+        width: 44px;
+      }
+      > span.icon {
+        position: absolute;
+        left: 44px;
+      }
+
+      &.select-selected .sthumbnail {
+        border-color: $select-color;
+      }
+      &.select-hovered .sthumbnail {
+        border-color: $hover-color;
+      }
+
+      &:hover {
+        .toolbar {
+          display: block;
+        }
+      }
+    }
+
+
+
+
+  }
+
+
+
+  &.medium, &.small, &.xsmall {
+
+    form.toolbar, h2 {
+      display: none;
+    }
+  }
+}
+
+form.state_info {
+  span.star {
+    position: absolute;
+    right: 0.2em;
+    top: 0.2em;
+    font-size: 200%;
+  }
+
+  input {
+  }
+  textarea {
+    height: 5em;
+  }
+
+  div.img {
+    width: 100%;
+    text-align: center;
+    img {
+      min-width: 20em;
+      width: auto;
+      margin: auto 0;
+      height: 12em;
+      border: 1px solid black;
+      background-image: url(/assets/caleydo_c_anim_gray.svg);
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
+  }
+}
