@@ -161,10 +161,23 @@ body.headless {
 
 
 body {
-  nav {
-    transition: margin-top 1s ease;
-    margin-top: 0px;
+  nav.navbar {
+    transition: top 1s ease;
+    position: fixed;
+    z-index: 100;
+    top: -50px;
+    left: 0;
+    right: 0;
+
+    &:hover {
+      top: 0px;
+    }
   }
+
+  div.content {
+    margin-top: 7px;
+  }
+
   &[data-clue='E'] main {
     div.annotation, div.add-text-annotation {
       display: none !important;
@@ -172,13 +185,6 @@ body {
   }
 
   &[data-clue='P'] {
-    nav {
-      margin-top: -50px;
-
-      &:hover {
-        margin-top: 0px;
-      }
-    }
 
     main {
       div.annotation {
