@@ -227,6 +227,9 @@ $hover-color: #ffdd05;
 
       -webkit-flex: 1 1 auto;
       flex: 1 1 auto;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     div.toolbar {

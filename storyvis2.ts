@@ -253,8 +253,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const e : any = d3.event;
         const $elem = d3.select((<Element>this).previousSibling);
         const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.to.duration)+e[that.options.xy]);
-        console.log(that.options.wh, that.options.xy, e[that.options.xy], height);
-        //console.log(e[that.options.xy]);
         $elem.style(that.options.wh, height+'px');
         $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
       }).on('dragend', function(d: ISlideNodeRepr) {

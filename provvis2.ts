@@ -33,9 +33,9 @@ enum LevelOfDetail {
 
 function getLevelOfDetail() {
   const mode = cmode.getMode();
-  if (mode.exploration >= 0.8) {
-    return LevelOfDetail.Small;
-  }
+  //if (mode.exploration >= 0.8) {
+  //  return LevelOfDetail.Small;
+  //}
   if (mode.presentation > 0.3) {
     return LevelOfDetail.ExtraSmall;
   }
