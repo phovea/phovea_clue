@@ -298,6 +298,9 @@ export class CLUEWrapper extends events.EventHandler {
           console.log(error);
         });
       });
+      d3.select('#bookmarkState').on('click', () => {
+        graph.act.setAttr('starred', true);
+      });
       d3.select('#attachNote form').on('submit', () => {
         const note = d3.select('#attachNote_note').property('value');
         graph.act.setAttr('note', note);
