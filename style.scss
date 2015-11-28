@@ -160,6 +160,12 @@ body.headless {
 }
 
 
+div.shortcuts {
+  position: absolute;
+  bottom: 0;
+  margin-left: -20px;
+}
+
 body {
   nav.navbar {
     transition: top 1s ease;
