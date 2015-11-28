@@ -250,6 +250,11 @@ export class CLUEWrapper extends events.EventHandler {
         render: r.render
       });
 
+      storyvis.create(graph, body.querySelector('div.box'), {
+        render: r.render,
+        class: 'horizontal'
+      });
+
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
       });

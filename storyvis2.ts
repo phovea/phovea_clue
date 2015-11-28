@@ -74,7 +74,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private options = {
     scale: [1, 1],
     rotate: 0,
-    render: (state: provenance.SlideNode) => Promise.resolve(null)
+    render: (state: provenance.SlideNode) => Promise.resolve(null),
+
+
+    class: 'vertical',
+    xy: 'y',
+    wh: 'height'
   };
 
   private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 220]);
@@ -82,6 +87,10 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   constructor(public data:provenance.ProvenanceGraph, public story: provenance.SlideNode, public parent:Element, options:any= {}) {
     super();
     this.options = C.mixin(this.options,options);
+    if (this.options.class === 'horizontal') {
+      this.options.xy = 'x';
+      this.options.wh = 'width';
+    }
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
     this.bind();
@@ -150,7 +159,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private build($parent:d3.Selection<any>) {
     var $node = $parent.append('div').attr({
-      'class': 'provenance-vertical-story-vis'
+      'class': 'provenance-story-vis '+this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     return $node;
   }
@@ -243,13 +252,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         //update the height of the slide node
         const e : any = d3.event;
         const $elem = d3.select((<Element>this).previousSibling);
-        const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.to.duration)+e.y);
-        //console.log(e.y);
-        $elem.style('height', height+'px');
+        const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.to.duration)+e[that.options.xy]);
+        console.log(that.options.wh, that.options.xy, e[that.options.xy], height);
+        //console.log(e[that.options.xy]);
+        $elem.style(that.options.wh, height+'px');
         $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
       }).on('dragend', function(d: ISlideNodeRepr) {
         //update the stored duration just once
-        const h = parseInt(d3.select((<Element>this).previousSibling).style('height'),10);
+        const h = parseInt(d3.select((<Element>this).previousSibling).style(that.options.wh),10);
         d.to.duration = that.duration2pixel.invert(h);
       }));
   }
@@ -375,7 +385,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration').text((d) => to_duration(d.duration));
-    $stories.style('height', (d) => this.duration2pixel(d.duration)+'px');
+    $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
 
     const $placeholders = $states.filter((d) => d.isPlaceholder);
     $placeholders
@@ -391,7 +401,8 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
 
   private options = {
     scale: [1, 1],
-    rotate: 0
+    rotate: 0,
+    class: 'vertical'
   };
 
   private story : VerticalStoryVis = null;
@@ -481,10 +492,11 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
 
   private build($parent:d3.Selection<any>) {
     var $node = $parent.append('aside').attr({
-      'class': 'provenance-multi-story-vis'
+      'class': 'provenance-multi-story-vis '+this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
-    $node.append('h2').text('Story Editor');
-    const $toolbar = $node.append('div').classed('toolbar', true);
+    const $helper = $node.append('div');
+    $helper.append('h2').text('Story Editor');
+    const $toolbar = $helper.append('div').classed('toolbar', true);
     $toolbar.html(`
     <div class="btn-group create_story" role="group" aria-label="create_story">
       <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i></button>
