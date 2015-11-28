@@ -44,10 +44,27 @@ $hover-color: #ffdd05;
     }
   }
 
-  &.medium, &.small {
+  h2#player_controls {
+    margin-top: 10px;
+    text-align: center;
+  }
 
-    div.toolbar, h2 {
+  &.medium {
+
+    div.toolbar, h2:not(#player_controls) {
       display: none;
+    }
+  }
+
+  &.small {
+    div.toolbar, h2:not(#player_controls) {
+      display: none;
+    }
+
+    h2#player_controls {
+      margin: 0;
+      margin-top: -20px;
+      z-index: 101;
     }
   }
 }

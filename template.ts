@@ -200,16 +200,6 @@ export class CLUEWrapper extends events.EventHandler {
     {
       let div = <HTMLElement>document.createElement('div');
       this.header.insertCustomRightMenu(div);
-      div.id = 'player_controls';
-      div.classList.add('nav', 'navbar-nav', 'navbar-right');
-      div.innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
-            <button data-player="play" class="btn btn-default fa fa-play" title="Play"></button>
-            <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
-    }
-
-    {
-      let div = <HTMLElement>document.createElement('div');
-      this.header.insertCustomRightMenu(div);
       div.classList.add('nav', 'navbar-nav', 'navbar-right');
       div.id = 'modeselector';
     }
@@ -235,9 +225,6 @@ export class CLUEWrapper extends events.EventHandler {
 
       const r = renderer.create(<HTMLElement>this.$main.node(), graph);
 
-      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
-        render: r.render
-      });
       /*const seditor = storyeditor.create(graph, body.querySelector('#storyeditor'), {
         editor: r.edit
       });
@@ -249,6 +236,19 @@ export class CLUEWrapper extends events.EventHandler {
       this.storyvis = storyvis.create(graph, body.querySelector('div.box'), {
         render: r.render,
         class: 'horizontal'
+      });
+
+      //inject into the storyvis the player controls where h2 was
+      {
+        let h2 = <HTMLElement>this.storyvis.node.querySelector('h2');
+        h2.id = 'player_controls';
+        h2.innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
+            <button data-player="play" class="btn btn-primary fa fa-play" title="Play"></button>
+            <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
+      }
+
+      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
+        render: r.render
       });
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
