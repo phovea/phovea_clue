@@ -68,7 +68,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
-    this.$node.selectAll('div.story').classed('select-'+type,(d: provenance.SlideNode) => selectedStates.indexOf(d) >= 0);
+    this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,(d: provenance.SlideNode) => selectedStates.indexOf(d) >= 0);
   };
 
   private options = {
@@ -269,13 +269,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
       })
       .on('click', this.onSlideClick.bind(this))
-      .on('mouseenter', (d) =>  {
+      .on('mouseenter', function(d)  {
         if (d.state != null) {
           graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
         }
         graph.selectSlide(<provenance.SlideNode><any>d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
-      .on('mouseleave', (d) => {
+      .on('mouseleave', function(d) {
         if (d.state != null) {
           graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
         }
@@ -371,7 +371,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.attr('title', (d) => `(${to_duration(d.duration)})\n${d.name}`);
-    $stories.attr('data-toggle', 'tooltip');
+    //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(/clue_demo/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration').text((d) => to_duration(d.duration));
@@ -467,6 +467,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
   switchTo(story: provenance.SlideNode) {
     if (this.story != null) {
       this.story.destroy();
+      this.story = null;
     }
     if (story) {
       let story_start = story;
