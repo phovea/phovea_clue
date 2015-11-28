@@ -28,6 +28,8 @@ import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
   const graph = C.hash.getProp('clue_graph', null);
   $ul.select('#provenancegraph_new').on('click', () => {
+    C.hash.removeProp('clue_slide', false);
+    C.hash.removeProp('clue_state', false);
     C.hash.setProp('clue_graph', 'new');
     window.location.reload();
       d3.event.preventDefault();
