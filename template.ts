@@ -177,6 +177,8 @@ export class CLUEWrapper extends events.EventHandler {
       app: this.options.app
     });
 
+    this.header.wait();
+
     {
       let ul = document.createElement('ul');
       let $ul = d3.select(ul).attr('class','nav navbar-nav').html(`
@@ -326,6 +328,8 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
       this.fire('loaded_graph', graph);
+
+    this.header.ready();
     });
   }
 
