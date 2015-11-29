@@ -18,12 +18,12 @@ export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenan
   }
 
   const d = (<any>graph.desc);
-  if (d.attrs && d.attrs.of) {
+  if (d.attrs && d.attrs.of && !(d.local)) {
     return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return '/clue_demo/todo.png';
+  return '../clue_demo/assets/not_available.png';
 }
 
 export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode, options= {}) {
@@ -36,12 +36,12 @@ export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: 
   }
 
   const d = (<any>graph.desc);
-  if (d.attrs && d.attrs.of) {
+  if (d.attrs && d.attrs.of && !(d.local)) {
     return ajax.api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return '/clue_demo/todo.png';
+  return '../clue_demo/assets/not_available.png';
 }
 
 export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
@@ -54,10 +54,10 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
   }
 
   const d = (<any>graph.desc);
-  if (d.attrs && d.attrs.of) {
+  if (d.attrs && d.attrs.of && !(d.local)) {
     return ajax.api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return '/clue_demo/todo.png';
+  return '../clue_demo/assets/not_available.png';
 }
