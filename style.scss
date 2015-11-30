@@ -79,6 +79,7 @@ aside {
   }
 }
 
+
 //main content
 body > div.box {
   display: -webkit-flex;
@@ -97,6 +98,8 @@ body > div.box > div.content {
   align-items: stretch;
   -webkit-flex: 1 1 auto; /* Chrome */
   flex: 1 1 auto;
+
+  position: relative;
 }
 
 aside {
@@ -106,9 +109,17 @@ aside {
 }
 
 footer {
-  min-height: 3em;
-  > div {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.5em;
+  text-align: center;
+
+  #player_controls {
     display: inline-block;
+    padding: 5px 2em;
+    background-color: $presentation-stage;
+    border-radius: 10px 10px;
   }
 }
 
@@ -261,9 +272,14 @@ body {
     //margin-top: 7px;
   }
 
-  &[data-clue='E'] main {
-    div.annotation, div.add-text-annotation {
-      display: none !important;
+  &[data-clue='E'] {
+    main {
+      div.annotation, div.add-text-annotation {
+        display: none !important;
+      }
+    }
+    footer {
+      display: none;
     }
   }
 

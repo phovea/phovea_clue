@@ -251,10 +251,7 @@ export class CLUEWrapper extends events.EventHandler {
         render: r.render,
         class: 'vertical'
       });
-      (<any>body.querySelector('div.player')).innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
-            <button data-player="play" class="btn btn-default fa fa-play" title="Play"></button>
-            <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
-      this.player = new player.Player(graph, body.querySelector('div.player'), {
+      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
         render: r.render
       });
 
