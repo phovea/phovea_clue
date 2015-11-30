@@ -236,7 +236,7 @@ export class CLUEWrapper extends events.EventHandler {
       provvis2.create(graph, body.querySelector('div.content'), {});
 
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
-        render: r.render,
+        render: r.render
       });
       d3.selectAll('aside.annotations button[data-ann]').on('click', function () {
         var create = this.dataset.ann;
