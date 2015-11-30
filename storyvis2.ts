@@ -525,12 +525,6 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
     </div>-->
-
-    <div class="btn-group" role="group" aria-label="annotations">
-      <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i></button>
-      <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i></button>
-      <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i></button>
-    </div>
     `);
 
     const that = this;
@@ -575,43 +569,15 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       that.story.update();
     });
 
-
-    $toolbar.selectAll('button[data-ann]').on('click', function() {
-      var create = this.dataset.ann;
-      var ann;
-      switch(create) {
-        case 'text':
-          ann = {
-            type: 'text',
-            pos: [10, 10],
-            text: ''
-          };
-          break;
-        case 'arrow':
-          ann = {
-            type: 'arrow',
-            pos: [10, 10],
-            at: [200,200]
-          };
-          //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
-          //this.actStory.addText();
-          break;
-        case 'frame':
-          ann = {
-            type: 'frame',
-            pos: [10, 10],
-            size: [20,20]
-          };
-          break;
-      }
-      if (that.story && ann) {
-        that.story.pushAnnotation(ann);
-      }
-    });
-
     $node.append('div').classed('stories', true);
     $node.append('div').classed('player', true);
     return $node;
+  }
+
+  pushAnnotation(ann: provenance.IStateAnnotation) {
+    if (this.story && ann) {
+      this.story.pushAnnotation(ann);
+    }
   }
 
   update() {

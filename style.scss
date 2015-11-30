@@ -61,7 +61,7 @@ aside {
   div h2 {
     text-align: center;
     margin-top: 0;
-    padding: 0.2em 0.2em;
+    padding: 0.2em .5em;
     font-size: 20px;
   }
   &.provenance-layout-vis {
@@ -71,12 +71,21 @@ aside {
     }
 
   }
-  &.provenance-multi-story-vis {
+  &.provenance-multi-story-vis, &.annotations {
     border-color: $presentation-stage;
     h2 {
       background-color: $presentation-stage;
     }
   }
+}
+
+aside.annotations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  padding-bottom: 0.5em;
+
 }
 
 
@@ -281,6 +290,10 @@ body {
     footer {
       display: none;
     }
+
+    aside.annotations {
+      display: none;
+    }
   }
 
   &[data-clue='P'] {
@@ -295,6 +308,10 @@ body {
       svg circle.anchor {
         display: none !important;
       }
+    }
+
+    aside.annotations {
+      display: none;
     }
 
     aside.provenance-multi-story-vis {

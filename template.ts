@@ -154,6 +154,7 @@ export class CLUEWrapper extends events.EventHandler {
 
   constructor(body:HTMLElement, options: any = {}) {
     super();
+    const that = this;
     C.mixin(this.options, options);
     body.innerHTML = template;
 
@@ -249,7 +250,38 @@ export class CLUEWrapper extends events.EventHandler {
 
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
         render: r.render,
-        class: 'vertical'
+      });
+      d3.selectAll('aside.annotations button[data-ann]').on('click', function () {
+        var create = this.dataset.ann;
+        var ann;
+        switch (create) {
+          case 'text':
+            ann = {
+              type: 'text',
+              pos: [10, 10],
+              text: ''
+            };
+            break;
+          case 'arrow':
+            ann = {
+              type: 'arrow',
+              pos: [10, 10],
+              at: [200, 200]
+            };
+            //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
+            //this.actStory.addText();
+            break;
+          case 'frame':
+            ann = {
+              type: 'frame',
+              pos: [10, 10],
+              size: [20, 20]
+            };
+            break;
+        }
+        if (that.storyvis && ann) {
+          that.storyvis.pushAnnotation(ann);
+        }
       });
       this.player = new player.Player(graph, body.querySelector('#player_controls'), {
         render: r.render
