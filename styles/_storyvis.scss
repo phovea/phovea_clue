@@ -67,6 +67,14 @@ $hover-color: #ffdd05;
       z-index: 101;
     }
   }
+
+  > div.player {
+    position: absolute;
+    text-align: center;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 }
 
 .provenance-story-vis {
@@ -121,6 +129,7 @@ $hover-color: #ffdd05;
 
     div.story {
       width: 5em;
+      margin: 2px;
 
       -webkit-flex-direction: column;
       flex-direction: column;
@@ -164,6 +173,7 @@ $hover-color: #ffdd05;
     position: relative;
     display: -webkit-flex;
     display: flex;
+    margin: 0 1em;
 
     border-radius: 2px;
 
@@ -171,8 +181,8 @@ $hover-color: #ffdd05;
     flex: 1 1 auto;
 
     &.placeholder {
-      border: 2px solid #efefef;
-      background-color: #efefef;
+      //border: 2px solid #efefef;
+      background-color: white;
 
       &.hover {
         background-color: #959595;
@@ -203,6 +213,8 @@ $hover-color: #ffdd05;
 
     &:not(.placeholder) {
       border: 2px solid gray;
+      background-color: #f0f0f0;
+      border-radius: 5px;
 
       &.select-selected {
         border-color: $select-color;

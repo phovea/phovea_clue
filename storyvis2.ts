@@ -47,7 +47,7 @@ enum LevelOfDetail {
 function getLevelOfDetail() {
   const mode = cmode.getMode();
   if (mode.presentation >= 0.8) {
-    return LevelOfDetail.Small;
+    return LevelOfDetail.Large;
   }
   if (mode.exploration > 0.3) {
     return LevelOfDetail.None;
@@ -338,6 +338,15 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       });
       return false;
     });
+
+    $toolbar_enter.append('i').attr('class', 'fa fa-copy').on('click', (d) => {
+      //remove me
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+      this.data.moveSlide(this.data.cloneSingleSlideNode(d), d, false);
+      this.update();
+      return false;
+    });
     $toolbar_enter.append('i').attr('class', 'fa fa-remove').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
@@ -491,7 +500,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       'class': 'provenance-multi-story-vis '+this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     const $helper = $node.append('div');
-    $helper.append('h2').text('Story Editor');
+    $helper.append('h2').text('Story');
     const $toolbar = $helper.append('div').classed('toolbar', true);
     $toolbar.html(`
     <div class="btn-group create_story" role="group" aria-label="create_story">
@@ -511,11 +520,11 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       </div>
     </div>
 
-    <div class="btn-group" role="group" aria-label="add_story">
+    <!--<div class="btn-group" role="group" aria-label="add_story">
       <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
       <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
-    </div>
+    </div>-->
 
     <div class="btn-group" role="group" aria-label="annotations">
       <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i></button>
@@ -601,6 +610,7 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     });
 
     $node.append('div').classed('stories', true);
+    $node.append('div').classed('player', true);
     return $node;
   }
 

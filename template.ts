@@ -176,7 +176,8 @@ export class CLUEWrapper extends events.EventHandler {
     }
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
-      app: this.options.app
+      app: this.options.app,
+      inverse: false
     });
 
     this.header.wait();
@@ -204,11 +205,19 @@ export class CLUEWrapper extends events.EventHandler {
     {
       let div = <HTMLElement>document.createElement('div');
       this.header.insertCustomRightMenu(div);
+      div.id = 'player_controls';
+      div.classList.add('nav', 'navbar-nav', 'navbar-right');
+
+    }
+
+    {
+      let div = <HTMLElement>document.createElement('div');
+      this.header.insertCustomRightMenu(div);
       div.classList.add('nav', 'navbar-nav', 'navbar-right');
       div.id = 'modeselector';
     }
 
-    cmode.create(body.querySelector('#modeselector'));
+    //cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('#modeselector'));
     //cmode.createSlider(body.querySelector('#modeselector'));
 
@@ -229,29 +238,23 @@ export class CLUEWrapper extends events.EventHandler {
 
       const r = renderer.create(<HTMLElement>this.$main.node(), graph);
 
+
       /*const seditor = storyeditor.create(graph, body.querySelector('#storyeditor'), {
         editor: r.edit
       });
       */
 
 
-      provvis2.create(graph, body.querySelector('#provenancevis'), {});
+      provvis2.create(graph, body.querySelector('div.content'), {});
 
-      this.storyvis = storyvis.create(graph, body.querySelector('div.box'), {
+      this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
         render: r.render,
-        class: 'horizontal'
+        class: 'vertical'
       });
-
-      //inject into the storyvis the player controls where h2 was
-      {
-        let h2 = <HTMLElement>this.storyvis.node.querySelector('h2');
-        h2.id = 'player_controls';
-        h2.innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
-            <button data-player="play" class="btn btn-primary fa fa-play" title="Play"></button>
+      (<any>body.querySelector('div.player')).innerHTML = `<button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></button>
+            <button data-player="play" class="btn btn-default fa fa-play" title="Play"></button>
             <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>`;
-      }
-
-      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
+      this.player = new player.Player(graph, body.querySelector('div.player'), {
         render: r.render
       });
 
@@ -263,13 +266,13 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
       {
-        const $right = $('aside.prov_right');
+        const $right = $('aside.provenance-layout-vis');
         const $right_story = $(this.storyvis.node);
         const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {
           $('body').attr('data-clue', new_.toString());
-          $('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
+          //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
           if (new_.presentation > 0.8) {
             $right.hide(); //({width: 'hide'});
           } else {

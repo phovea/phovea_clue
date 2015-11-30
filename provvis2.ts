@@ -427,7 +427,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
-      <h2>Provenance Graph</h2>
+      <div><h2>Provenance Graph</h2></div>
       <form class="form-inline toolbar" onsubmit="return false;">
       <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default btn-xs active" title="data actions">

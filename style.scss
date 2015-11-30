@@ -14,6 +14,68 @@ body, html {
   -webkit-print-color-adjust: exact;
 }
 
+$exploration-stage: #a6cee3;
+$exploration-stage-hover: #1f78b4;
+
+$authoring-stage: #b2df8a;
+$authoring-stage-hover: #33a02c;
+$presentation-stage: #fb9a99;
+$presentation-stage-hover: #e31a1c;
+
+label {
+  &.clue-E {
+    background-color: $exploration-stage;
+
+    &.active, :hover {
+      background-color: $exploration-stage-hover;
+    }
+  }
+  &.clue-A {
+    background-color: $authoring-stage;
+
+    &.active, :hover {
+      background-color: $authoring-stage-hover;
+    }
+  }
+  &.clue-P {
+    background-color: $presentation-stage;
+
+    &.active, :hover {
+      background-color: $presentation-stage-hover;
+    }
+  }
+}
+
+aside {
+  border: 2px solid black;
+  border-radius: 5px;
+  margin: 2px;
+
+  * {
+    border: none;
+  }
+
+  div h2 {
+    text-align: center;
+    margin-top: 0;
+    padding: 0.2em 0.2em;
+    font-size: 20px;
+  }
+  &.provenance-layout-vis {
+    border-color: $authoring-stage;
+    h2 {
+      background-color: $authoring-stage;
+    }
+
+  }
+  &.provenance-multi-story-vis {
+    border-color: $presentation-stage;
+    h2 {
+      background-color: $presentation-stage;
+    }
+  }
+}
+
 //main content
 body > div.box {
   display: -webkit-flex;
@@ -25,19 +87,17 @@ body > div.box {
   height: 100%;
 }
 
-
 body > div.box > div.content {
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: stretch;
   align-items: stretch;
-  -webkit-flex: 1 1 auto;          /* Chrome */
+  -webkit-flex: 1 1 auto; /* Chrome */
   flex: 1 1 auto;
 }
 
 aside {
   -webkit-print-color-adjust: exact;
-  background-color: #E5E5E5 !important;
 
   position: relative;
 }
@@ -58,7 +118,7 @@ footer {
 main {
   position: relative;
 
-  -webkit-flex: 1 1 auto;          /* Chrome */
+  -webkit-flex: 1 1 auto; /* Chrome */
   flex: 1 1 auto;
 
 }
@@ -104,6 +164,12 @@ $clue_triangle_width: 30px;
     }
   }
 
+  button {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    height: auto !important;
+  }
+
   .clue_trianglemodeselector {
     circle.point {
       fill: red;
@@ -143,8 +209,8 @@ $hover-color: #ffdd05;
 //if we render in headless mode
 body.headless {
   main {
-    width: 100vw  !important;
-    height: 100vh  !important;
+    width: 100vw !important;
+    height: 100vh !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -159,7 +225,6 @@ body.headless {
   max-width: 30em;
 }
 
-
 div.shortcuts {
   position: absolute;
   bottom: 0;
@@ -168,6 +233,11 @@ div.shortcuts {
 
 body {
   nav.navbar {
+    margin: 2px 2px 0px 2px;
+    //margin-bottom: 0px !important;
+    background-color: #cccccc;
+    border-radius: 5px;
+
     /*transition: top 1s ease;
     position: fixed;
     z-index: 100;
@@ -178,10 +248,14 @@ body {
     &:hover {
       top: 0px;
     }*/
+
+    a {
+      color: #5d5b5b;
+    }
   }
 
   div.content {
-    margin-top: 7px;
+    //margin-top: 7px;
   }
 
   &[data-clue='E'] main {
@@ -201,6 +275,15 @@ body {
       }
       svg circle.anchor {
         display: none !important;
+      }
+    }
+
+    aside.provenance-multi-story-vis {
+      > div div.toolbar {
+        display: none !important;
+      }
+      div.placeholder {
+        visibility: hidden;
       }
     }
   }
