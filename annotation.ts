@@ -16,7 +16,8 @@ export class Renderer {
   private options = {
     animation: true,
     duration: 100,
-    markdown: true
+    markdown: true,
+    renderSubtitle: true
   };
 
   private prev = Promise.resolve(null);
@@ -26,7 +27,7 @@ export class Renderer {
   constructor(private $main:d3.Selection<any>, private graph:prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
 
-    this.renderer = (d:string) => modeFeatures.isEditable() && d.length === 0 ? '<i>Enter Text by Clicking (MarkDown supported)</i>' : (this.options.markdown ? marked(d) : d);
+    this.renderer = (d:string) => modeFeatures.isEditable() && d.length === 0 ? '<i class="placeholder">Enter Text by Clicking (MarkDown supported)</i>' : (this.options.markdown ? marked(d) : d);
   }
 
   render(state:prov.SlideNode) {
@@ -42,7 +43,7 @@ export class Renderer {
       } else {
         next = this.graph.jumpTo(state.state);
       }
-      return Promise.all([takedown, next, this.renderAnnotations(state)]); //, this.renderArrows(state)]);
+      return Promise.all([takedown, next, this.options.renderSubtitle ? this.renderSubtitle(state) : Promise.resolve(null), this.renderAnnotations(state)]); //, this.renderArrows(state)]);
     });
     return this.prev;
   }
@@ -229,9 +230,11 @@ export class Renderer {
     });
   }
 
+
+
   hideOld() {
     return new Promise((resolve) => {
-      const $div = this.$main.classed('hide-all-non-annotations',false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation');
+      const $div = this.$main.classed('hide-all-non-annotations',false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
       if (this.options.animation && !$div.empty()) {
         $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
           resolve();
@@ -240,6 +243,13 @@ export class Renderer {
         $div.remove();
         resolve();
       }
+    });
+  }
+
+  renderSubtitle(overlay:prov.SlideNode) {
+    return new Promise((resolve) => {
+      this.$main.append('div').attr('class', 'subtitle-annotation').html(this.renderer(overlay.name));
+      resolve(this.$main.node());
     });
   }
 

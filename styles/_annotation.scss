@@ -25,7 +25,7 @@
   }
 }
 
-main.hide-all-non-annotations > *:not(.annotation) {
+main.hide-all-non-annotations > *:not(.annotation, .subtitle-annotation) {
   display: none !important;
 }
 
@@ -84,6 +84,14 @@ div.annotation {
       right: -1.2em;
     }
   }
+}
+
+.subtitle-annotation {
+  left: 0;
+  right: 0;
+  bottom: 4em;
+  text-align: center;
+  position: absolute;
 }
 
 .text-annotation {
