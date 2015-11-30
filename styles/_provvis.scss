@@ -142,7 +142,13 @@ $hover-color: darkgray;
 
   &.medium, &.small, &.xsmall {
 
-    form.toolbar, h2 {
+    form.toolbar {
+      display: none;
+    }
+  }
+
+  &.small, &.xsmall {
+    h2 {
       display: none;
     }
   }
