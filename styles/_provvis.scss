@@ -2,6 +2,9 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
+$select-color: black;
+$hover-color: darkgray;
+
 .provenance-layout-vis {
   position: relative;
   svg {
@@ -24,7 +27,7 @@
 
     &:hover {
       .slabel, .icon {
-        color: $hover-color;
+        font-weight:bold; //: $hover-color;
       }
     }
 

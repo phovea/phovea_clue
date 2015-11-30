@@ -27,21 +27,24 @@ label {
     background-color: $exploration-stage;
 
     &.active, :hover {
-      background-color: $exploration-stage-hover;
+      background-color: $exploration-stage; //$exploration-stage-hover;
+      font-weight: bold;
     }
   }
   &.clue-A {
     background-color: $authoring-stage;
 
     &.active, :hover {
-      background-color: $authoring-stage-hover;
+      background-color: $authoring-stage;
+      font-weight: bold;
     }
   }
   &.clue-P {
     background-color: $presentation-stage;
 
     &.active, :hover {
-      background-color: $presentation-stage-hover;
+      background-color: $presentation-stage;
+      font-weight: bold;
     }
   }
 }

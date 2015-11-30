@@ -33,7 +33,7 @@ interface ISlideNodeRepr {
 }
 
 function to_duration(d: number) {
-  var mm_ss = d3.time.format('%M:%S:%L');
+  var mm_ss = d3.time.format('%M:%S');
   return mm_ss(new Date(d));
 }
 
