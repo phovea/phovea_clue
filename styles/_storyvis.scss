@@ -96,10 +96,6 @@ $hover-color: #ffdd05;
         &:hover:not(.hover):not(:first-of-type) {
           cursor: ns-resize;
         }
-
-        &:last-of-type {
-          height: 3em;
-        }
       }
 
       div.preview {

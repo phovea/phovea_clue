@@ -81,7 +81,7 @@ aside {
 
 aside.annotations {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   text-align: center;
   padding-bottom: 0.5em;
@@ -115,6 +115,19 @@ aside {
   -webkit-print-color-adjust: exact;
 
   position: relative;
+}
+
+header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.2em;
+  text-align: center;
+
+  label {
+    padding: 1em 5px;
+    width: 10em;
+  }
 }
 
 footer {

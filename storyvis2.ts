@@ -27,6 +27,7 @@ interface ISlideNodeRepr {
   id: string;
   i: number;
   isPlaceholder?: boolean;
+  isLastPlaceholder?: boolean;
   name?: string;
   state?: provenance.StateNode;
   to?: provenance.SlideNode;
@@ -300,6 +301,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       story.push(s);
       story.push({ id: 'f'+i, i: i, isPlaceholder: true, to: s});
     });
+    //duplicate the last placeholder
+    story.push({ id: 'f'+(story_raw.length-1), i: story_raw.length-1, isPlaceholder: true, to: story_raw[story_raw.length-1], isLastPlaceholder: true});
 
     //this.$node.attr('width', (story.length * 70+4)*1.2);
 

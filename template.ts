@@ -203,23 +203,10 @@ export class CLUEWrapper extends events.EventHandler {
 
     this.createLogin();
 
-    {
-      let div = <HTMLElement>document.createElement('div');
-      this.header.insertCustomRightMenu(div);
-      div.id = 'player_controls';
-      div.classList.add('nav', 'navbar-nav', 'navbar-right');
-
-    }
-
-    {
-      let div = <HTMLElement>document.createElement('div');
-      this.header.insertCustomRightMenu(div);
-      div.classList.add('nav', 'navbar-nav', 'navbar-right');
-      div.id = 'modeselector';
-    }
-
     //cmode.create(body.querySelector('#modeselector'));
-    cmode.createButton(body.querySelector('#modeselector'));
+    cmode.createButton(body.querySelector('header'), {
+      size: 'sm'
+    });
     //cmode.createSlider(body.querySelector('#modeselector'));
 
     this.$main = d3.select(body).select('main');
