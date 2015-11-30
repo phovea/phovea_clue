@@ -427,58 +427,60 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
-      <div><h2>Provenance</h2></div>
-      <form class="form-inline toolbar" onsubmit="return false;">
-      <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default btn-xs active" title="data actions">
-          <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="visual actions">
-          <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="selection actions">
-          <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="layout actions">
-          <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="logic actions">
-          <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i>
-        </label>
-      </div>
+      <div>
+        <h2>Provenance <i class="fa fa-filter"></i></h2>
+        <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default btn-xs active" title="data actions">
+            <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="visual actions">
+            <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="selection actions">
+            <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="layout actions">
+            <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="logic actions">
+            <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i>
+          </label>
+        </div>
 
-      <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default btn-xs active" title="create actions">
-          <input type="checkbox" autocomplete="off" name="operation" value="create" checked="checked"> <i class="fa fa-plus"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="update actions">
-          <input type="checkbox" autocomplete="off" name="operation" value="update" checked="checked"> <i class="fa fa-refresh"></i>
-        </label>
-        <label class="btn btn-default btn-xs active" title="remove actions">
-          <input type="checkbox" autocomplete="off" name="operation" value="remove" checked="checked"> <i class="fa fa-remove"></i>
-        </label>
-      </div>
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default btn-xs active" title="create actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="create" checked="checked"> <i class="fa fa-plus"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="update actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="update" checked="checked"> <i class="fa fa-refresh"></i>
+          </label>
+          <label class="btn btn-default btn-xs active" title="remove actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="remove" checked="checked"> <i class="fa fa-remove"></i>
+          </label>
+        </div>
 
-      <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default btn-xs" title="bookmarked actions">
-          <input type="checkbox" autocomplete="off" name="bookmark"> <i class="fa fa-bookmark"></i>
-        </label>
-        <div class="form-group btn-group">
-          <div class="btn-group btn-group-xs" role="group">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
-              <i class="fa fa-tags"></i><span class="caret"></span>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right">
-              <div class="input-group input-group-sm">
-                <span class="input-group-addon" title="tagged states"><i class="fa fa-tags"></i></span>
-                <input name="tags" type="text" class="form-control input-sm" placeholder="tags">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default btn-xs" title="bookmarked actions">
+            <input type="checkbox" autocomplete="off" name="bookmark"> <i class="fa fa-bookmark"></i>
+          </label>
+          <div class="form-group btn-group">
+            <div class="btn-group btn-group-xs" role="group">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                <i class="fa fa-tags"></i><span class="caret"></span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-right">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon" title="tagged states"><i class="fa fa-tags"></i></span>
+                  <input name="tags" type="text" class="form-control input-sm" placeholder="tags">
+                </div>
               </div>
             </div>
           </div>
-        </div>
-       </div>
-      </form>
+         </div>
+        </form>
+      </div>
       <div style="position: relative">
         <svg>
           <g transform="translate(1,1)" class="storyhighlights"></g>
@@ -507,6 +509,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
     //initialize bootstrap
     (<any>jp.find('.btn-group[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
+
+    jp.find('h2 i').on('click', () => {
+      jp.find('form.toolbar').toggle('fast');
+    });
 
     return $p;
   }

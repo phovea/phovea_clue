@@ -35,45 +35,33 @@ $hover-color: #ffdd05;
     height: 22px;
   }
 
-  #story_list {
-    font-size: 85%;
+  .dropdown {
     padding: 0;
 
+    > a {
+      color: inherit;
+    }
+    ul {
+      font-size: 85%;
+    }
     a {
+      text-decoration: none;
       padding: 2px;
     }
   }
 
-  h2#player_controls {
-    margin-top: 10px;
-    text-align: center;
-  }
 
   &.medium {
 
-    div.toolbar, h2:not(#player_controls) {
+    div.toolbar {
       display: none;
     }
   }
 
   &.small {
-    div.toolbar, h2:not(#player_controls) {
+    div.toolbar {
       display: none;
     }
-
-    h2#player_controls {
-      margin: 0;
-      margin-top: -20px;
-      z-index: 101;
-    }
-  }
-
-  > div.player {
-    position: absolute;
-    text-align: center;
-    bottom: 0;
-    left: 0;
-    right: 0;
   }
 }
 
@@ -90,11 +78,19 @@ $hover-color: #ffdd05;
       -webkit-flex-direction: row;
       flex-direction: row;
 
-      &.placeholder {
+      &.placeholder:not(:last-of-type) {
         height: 5px;
 
         &:hover:not(.hover):not(:first-of-type) {
           cursor: ns-resize;
+        }
+      }
+
+      &.placeholder:last-of-type {
+        height: auto;
+        padding: 0.5em 1em;
+        > div {
+          width: 100%;
         }
       }
 
@@ -130,7 +126,7 @@ $hover-color: #ffdd05;
       -webkit-flex-direction: column;
       flex-direction: column;
 
-      &.placeholder {
+      &.placeholder:not(:last-of-type) {
         width: 5px;
 
         &:hover:not(.hover):not(:first-of-type) {
@@ -140,6 +136,11 @@ $hover-color: #ffdd05;
         &:last-of-type {
           width: 3em;
         }
+      }
+
+      &.placeholder:last-of-type {
+        width: auto;
+        padding: 1em 0.5em;
       }
 
       div.preview {
@@ -189,6 +190,9 @@ $hover-color: #ffdd05;
         border-radius: 1em;
         border-color: #b6b6b6;
         border-style: dashed;
+
+        text-align: center;
+
         background: repeating-linear-gradient(
           45deg,
             #dbdbdb,

@@ -62,18 +62,18 @@ aside {
     text-align: center;
     margin-top: 0;
     padding: 0.2em .5em;
-    font-size: 20px;
+    font-size: 18px;
   }
   &.provenance-layout-vis {
     border-color: $authoring-stage;
-    h2 {
+    > div:first-of-type {
       background-color: $authoring-stage;
     }
 
   }
   &.provenance-multi-story-vis, &.annotations {
     border-color: $presentation-stage;
-    h2 {
+    > div:first-of-type {
       background-color: $presentation-stage;
     }
   }

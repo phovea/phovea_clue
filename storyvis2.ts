@@ -296,13 +296,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const graph = this.data;
     const story_raw = toPath(this.story);
 
-    const story = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
+    const story : ISlideNodeRepr[] = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
     story_raw.forEach((s,i) => {
       story.push(s);
       story.push({ id: 'f'+i, i: i, isPlaceholder: true, to: s});
     });
     //duplicate the last placeholder
-    story.push({ id: 'f'+(story_raw.length-1), i: story_raw.length-1, isPlaceholder: true, to: story_raw[story_raw.length-1], isLastPlaceholder: true});
+    story.push({ id: 'l'+(story_raw.length-1), i: story_raw.length-1, isPlaceholder: true, to: story_raw[story_raw.length-1], isLastPlaceholder: true});
 
     //this.$node.attr('width', (story.length * 70+4)*1.2);
 
@@ -384,8 +384,37 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     };*/
 
     $placeholder_enter.call(this.dndSupport.bind(this));
-    $placeholder_enter.call(this.changeDuration.bind(this));
-
+    $placeholder_enter.filter((d) => !d.isLastPlaceholder).call(this.changeDuration.bind(this));
+    {
+      let that = this;
+      let p = $placeholder_enter.filter((d) => d.isLastPlaceholder);
+      p.html(`<div>
+       <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
+       </div>
+      `);
+      p.selectAll('button[data-add]').on('click', function() {
+        var create = this.dataset.add;
+        const path = toPath(that.story);
+        const last = path[path.length-1];
+        switch(create) {
+          case 'text':
+            that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
+            break;
+          case 'extract':
+            var state = that.data.selectedStates()[0] || that.data.act;
+            that.data.moveSlide(that.data.extractSlide([state], false), last, false);
+            break;
+          case 'clone':
+            if (last) {
+              that.data.moveSlide(that.data.cloneSingleSlideNode(last), last, false);
+            }
+            break;
+        }
+        that.update();
+      });
+    }
     $states.order();
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
@@ -503,35 +532,21 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
       'class': 'provenance-multi-story-vis '+this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     const $helper = $node.append('div');
-    $helper.append('h2').text('Story');
-    const $toolbar = $helper.append('div').classed('toolbar', true);
-    $toolbar.html(`
-    <div class="btn-group create_story" role="group" aria-label="create_story">
-      <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i></button>
-      <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i
-        class="fa fa-files-o"></i></button>
-      <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i
-        class="fa fa-bookmark"></i></button>
-      <div class="btn-group btn-group-xs" role="group">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-          Select<span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" id="story_list">
-          <!--<li><a href="#">A</a></li>-->
-        </ul>
-      </div>
-    </div>
-
-    <!--<div class="btn-group" role="group" aria-label="add_story">
-      <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
-      <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
-      <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
-    </div>-->
+    $helper.append('h2').html(`
+      <span class="dropdown">
+          <a class="dropdown-toggle" data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true"
+             aria-expanded="false">Story<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+              <li role="separator" class="divider"></li>
+              <li><a href="#" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> Empty</a></li>
+              <li><a href="#" data-create="clone" title="create a new story by extracting the current path"><i class="fa fa-files-o"></i> Copy current path</a></li>
+              <li><a href="#" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i class="fa fa-bookmark"></i> Bookmarked states</a></li>
+          </ul>
+      </a>
     `);
 
     const that = this;
-    $toolbar.selectAll('button[data-create]').on('click', function() {
+    $helper.selectAll('a[data-create]').on('click', function() {
       var create = this.dataset.create;
       var story;
       switch(create) {
@@ -548,29 +563,13 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
           break;
       }
       that.switchTo(story);
+      return false;
     });
-    $toolbar.selectAll('button[data-add]').on('click', function() {
-      var create = this.dataset.add;
-      if (!that.story) {
-        return null;
-      }
-      var current = that.data.selectedSlides()[0] || that.story.story;
-      switch(create) {
-        case 'text':
-          that.data.moveSlide(that.data.makeTextSlide('Unnamed'), current, false);
-          break;
-        case 'extract':
-          var state = that.data.selectedStates()[0] || that.data.act;
-          that.data.moveSlide(that.data.extractSlide([state], false), current, false);
-          break;
-        case 'clone':
-          if (current) {
-            that.data.moveSlide(that.data.cloneSingleSlideNode(current), current, false);
-          }
-          break;
-      }
-      that.story.update();
-    });
+    /*);
+    */
+
+    const t= (<any>$($helper.node()).find('.dropdown-toggle'));
+    t.dropdown();
 
     $node.append('div').classed('stories', true);
     $node.append('div').classed('player', true);
@@ -594,8 +593,8 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     const stories = this.data.getSlideChains();
     const colors = d3.scale.category10();
     {
-      const $stories = this.$node.select('#story_list').selectAll('li').data(stories);
-      const $stories_enter = $stories.enter().append('li').append('a');
+      const $stories = this.$node.select('.dropdown-menu').selectAll('li.s').data(stories);
+      const $stories_enter = $stories.enter().insert('li',':first-child').classed('s', true).append('a');
       $stories_enter.append('i').attr('class','fa fa-square');
       $stories_enter.append('span').attr('href', '#').on('click', (d) => {
         this.switchTo(d);
