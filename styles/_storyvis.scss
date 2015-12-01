@@ -139,6 +139,7 @@ $hover-color: #ffdd05;
       }
 
       &.placeholder:last-of-type {
+        border-width: 1px;
         width: auto;
         padding: 1em 0.5em;
       }
@@ -250,6 +251,10 @@ $hover-color: #ffdd05;
       top: 0;
       z-index: 10;
       display: none;
+      letter-spacing: 2px;
+      /*i {
+        margin: 0 0.1em;
+      }*/
 
       i:hover {
         font-weight: bold;
