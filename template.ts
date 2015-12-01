@@ -290,19 +290,19 @@ export class CLUEWrapper extends events.EventHandler {
           $('body').attr('data-clue', new_.toString());
           //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
           if (new_.presentation > 0.8) {
-            $right.hide(); //({width: 'hide'});
+            $right.animate({width: 'hide'},'fast');
           } else {
-            $right.show();
+            $right.animate({width: 'show'},'fast');
           }
           if (new_.exploration > 0.2) {
-            $footer.hide();
+            $footer.animate({width: 'hide'},'fast');
           } else {
-            $footer.show();
+            $footer.animate({width: 'show'},'fast');
           }
           if (new_.exploration > 0.8) {
-            $right_story.hide(); //({width: 'hide'});
+            $right_story.animate({width: 'hide'},'fast');
           } else {
-            $right_story.show();
+            $right_story.animate({width: 'show'},'fast');
           }
         };
         cmode.on('modeChanged', (event, new_) => update(new_));

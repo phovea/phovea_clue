@@ -20,10 +20,14 @@ $hover-color: darkgray;
   div.state {
     position: absolute;
 
-    max-width: 200px;
+    max-width: 220px;
     text-overflow: ellipsis;
-    //overflow-x: hidden;
+    overflow-x: hidden;
     white-space: nowrap;
+
+    .slabel {
+      font-size: 10pt;
+    }
 
     &:hover {
       .slabel, .icon {
@@ -68,10 +72,12 @@ $hover-color: darkgray;
       height: 10px;
 
       &.select-selected {
-        background-color: $select-color;
+        font-weight: bold;
+        //background-color: $select-color;
       }
-      &.select-hovered {
-        background-color: $hover-color;
+      &.select-hovered .icon {
+        font-weight: bold;
+        //background-color: $hover-color;
       }
     }
     &.doi-sm {
@@ -83,11 +89,13 @@ $hover-color: darkgray;
       font-size: 100%;
       padding-left: 5px;
 
-      &.select-selected .icon {
-        color: $select-color;
+      &.select-selected {
+        font-weight: bold;
+        //color: $select-color;
       }
       &.select-hovered .icon {
-        color: $hover-color;
+        font-weight: bold;
+        //color: $hover-color;
       }
     }
     &.doi {
@@ -100,10 +108,10 @@ $hover-color: darkgray;
       padding-left: 10px;
 
       &.select-selected {
-        color: $select-color;
+        font-weight: bold;
       }
-      &.select-hovered {
-        color: $hover-color;
+      &.select-hovered .icon {
+        font-weight: bold;
       }
     }
 
