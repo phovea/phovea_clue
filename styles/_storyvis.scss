@@ -200,7 +200,7 @@
     display: -webkit-flex;
     display: flex;
     margin: 0px 1em;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
 
     border-radius: 2px;
 
@@ -220,7 +220,8 @@
       background-color: white;
 
       &:last-of-type {
-        border-radius: 1em;
+        border-radius: 5px;
+        border-width: 1px;
         border-color: #b6b6b6;
         border-style: dashed;
 
@@ -245,7 +246,7 @@
     }
 
     &:not(.placeholder) {
-      border: 2px solid gray;
+      border: 1px solid gray;
       background-color: #f0f0f0;
       border-radius: 5px;
 
@@ -270,6 +271,10 @@
       background-color: white;
       background-clip: border-box;
       background-size: contain;
+
+      border-radius: 5px 0 0 5px;
+
+      margin-right: 2px;
     }
 
     div.slabel {

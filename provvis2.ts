@@ -240,7 +240,7 @@ class StateRepr {
 
     states.forEach((s) => {
       const xy = s.xy;
-      const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]]; // + (colwidths[xy[0]]);
+      const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]] + 5; // + (colwidths[xy[0]]);
       const y = accrowheights[xy[1]];
       s.xy = [x,y];
     });
@@ -663,7 +663,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         firstSlide = firstSlide.previous;
       }
       const line = provenance.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
-      $g.select('path').attr('d', this.line.interpolate('cardinal')(line));
+      $g.select('path').attr('d', this.line.interpolate('linear')(line));
       this.line.interpolate('step-after');
     } else {
       $g.style('display', 'none');
