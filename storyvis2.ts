@@ -182,31 +182,32 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private dndSupport(elem : d3.Selection<ISlideNodeRepr>) {
     const that = this;
     elem
-      .on('dragenter', function () {
+      .on('dragenter', function (d) {
         if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
           d3.select(this).classed('hover', true);
           return false;
         }
-      }).on('dragover', () => {
+      }).on('dragover', (d) => {
       if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
         d3.event.preventDefault();
         C.updateDropEffect(d3.event);
         return false;
       }
-    }).on('dragleave', function () {
+    }).on('dragleave', function (d) {
       d3.select(this).classed('hover', false);
     }).on('drop', function (d) {
       d3.select(this).classed('hover', false);
       var e = <DragEvent>(<any>d3.event);
       e.preventDefault();
       const full_story = toPath(that.story);
+      const d_story = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
       const insertIntoStory = (new_:provenance.SlideNode) => {
-        if (d.i < 0) {
+        if (d_story === null) { //at the beginning
           let bak = that.story;
           that.story = new_;
           that.data.insertIntoSlide(new_, bak, true);
         } else {
-          that.data.insertIntoSlide(new_, d.to, false);
+          that.data.insertIntoSlide(new_, d_story, false);
         }
         that.update();
       };
@@ -219,7 +220,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       } else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
         const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'), 10));
         if (full_story.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
-          if (d.i < 0) { //no self move
+          if (d_story === null) { //no self move
             if (story !== that.story) {
               let bak = that.story;
               that.story = story;
@@ -227,7 +228,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
               that.update();
             }
           } else {
-            let ref = d.to;
+            let ref = d_story;
             if (ref !== story) {
               //we might moved the first one
               if (story === that.story) {
@@ -245,21 +246,21 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
   }
 
-  private changeDuration($elem: d3.Selection<ISlideNodeRepr>) {
+  private changeDuration($elem: d3.Selection<provenance.SlideNode>) {
     const that = this;
     $elem.call(d3.behavior.drag()
       .origin(() => ({ x : 0, y : 0}))
-      .on('drag', function(d: ISlideNodeRepr) {
+      .on('drag', function(d: provenance.SlideNode) {
         //update the height of the slide node
         const e : any = d3.event;
-        const $elem = d3.select((<Element>this).previousSibling);
-        const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.to.duration)+e[that.options.xy]);
+        const $elem = d3.select((<Element>this).parentElement);
+        const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.duration)+e[that.options.xy]);
         $elem.style(that.options.wh, height+'px');
         $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
-      }).on('dragend', function(d: ISlideNodeRepr) {
+      }).on('dragend', function(d: provenance.SlideNode) {
         //update the stored duration just once
-        const h = parseInt(d3.select((<Element>this).previousSibling).style(that.options.wh),10);
-        d.to.duration = that.duration2pixel.invert(h);
+        const h = parseInt(d3.select((<Element>this).parentElement).style(that.options.wh),10);
+        d.duration = that.duration2pixel.invert(h);
       }));
   }
 
@@ -292,41 +293,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       });
   }
 
-  update() {
-    const graph = this.data;
-    const story_raw = toPath(this.story);
+  private createToolbar($elem: d3.Selection<provenance.SlideNode>) {
 
-    const story : ISlideNodeRepr[] = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
-    story_raw.forEach((s,i) => {
-      story.push(s);
-      story.push({ id: 'f'+i, i: i, isPlaceholder: true, to: s});
-    });
-    //duplicate the last placeholder
-    story.push({ id: 'l'+(story_raw.length-1), i: story_raw.length-1, isPlaceholder: true, to: story_raw[story_raw.length-1], isLastPlaceholder: true});
-
-    //this.$node.attr('width', (story.length * 70+4)*1.2);
-
-    const to_id = (d) => String(d.id);
-
-    const lod = getLevelOfDetail();
-    this.$node.classed('large', lod  === LevelOfDetail.Large);
-    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
-    this.$node.classed('small', lod  === LevelOfDetail.Small);
-
-    //var levelShift = [];
-    //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
-    //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
-
-    const $states = this.$node.selectAll('div.story').data(story, to_id);
-
-    const $states_enter = $states.enter().append('div').classed('story', true);
-    const $story_enter = $states_enter.filter((d) => !d.isPlaceholder);
-    const $placeholder_enter = $states_enter.filter((d) => d.isPlaceholder).classed('placeholder',true);
-
-    $story_enter.call(this.storyInteraction.bind(this));
-    $story_enter.append('div').classed('preview', true);
-    $story_enter.append('div').classed('slabel', true);
-    const $toolbar_enter = $story_enter.append('div').classed('toolbar', true);
+    const $toolbar_enter = $elem.append('div').classed('toolbar', true);
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
@@ -361,59 +330,87 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           return;
         }
       }
-      graph.removeSlideNode(d);
+      this.data.removeSlideNode(d);
       this.update();
     });
-    $story_enter.append('div').classed('duration', true);
+  }
 
-    /*$story_enter.attr('title', 'test');
-    (<any>$($story_enter[0][0])).tooltip({
-      placement: 'left'
-    });
-    var popover = {
-      html: true,
-      placement: 'left',
-      trigger: 'hover',
-      delay: { "show": 500, "hide": 100 },
-      content: function() {
-        const d : provenance.SlideNode = d3.select(this).datum();
-        const thumbnail = d.isTextOnly ? '/clue_demo/text.png' : utils.preview_thumbnail_url(this.data, d);
-        const text = d.name;
-        return `<img src="${thumbnail}"><div>${text}</div>`;
-      }
-    };*/
-
-    $placeholder_enter.call(this.dndSupport.bind(this));
-    $placeholder_enter.filter((d) => !d.isLastPlaceholder).call(this.changeDuration.bind(this));
-    {
-      let that = this;
-      let p = $placeholder_enter.filter((d) => d.isLastPlaceholder);
-      p.html(`<div>
+  private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
+    const that = this;
+    $p.html(`<div>
        <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
        </div>
       `);
-      p.selectAll('button[data-add]').on('click', function() {
-        var create = this.dataset.add;
-        const path = toPath(that.story);
-        const last = path[path.length-1];
-        switch(create) {
-          case 'text':
-            that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
-            break;
-          case 'extract':
-            var state = that.data.selectedStates()[0] || that.data.act;
-            that.data.moveSlide(that.data.extractSlide([state], false), last, false);
-            break;
-          case 'clone':
-            if (last) {
-              that.data.moveSlide(that.data.cloneSingleSlideNode(last), last, false);
-            }
-            break;
-        }
-        that.update();
-      });
+    $p.selectAll('button[data-add]').on('click', function() {
+      var create = this.dataset.add;
+      const path = toPath(that.story);
+      const last = path[path.length-1];
+      switch(create) {
+        case 'text':
+          that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
+          break;
+        case 'extract':
+          var state = that.data.selectedStates()[0] || that.data.act;
+          that.data.moveSlide(that.data.extractSlide([state], false), last, false);
+          break;
+        case 'clone':
+          if (last) {
+            that.data.moveSlide(that.data.cloneSingleSlideNode(last), last, false);
+          }
+          break;
+      }
+      that.update();
+    });
+  }
+
+  update() {
+    const graph = this.data;
+    const story_raw = toPath(this.story);
+
+
+    const story : ISlideNodeRepr[] = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
+    story_raw.forEach((s,i) => {
+      story.push(s);
+    });
+    //duplicate the last placeholder
+    story.push({ id: 'l'+(story_raw.length-1), i: story_raw.length-1, isPlaceholder: true, to: story_raw[story_raw.length-1], isLastPlaceholder: true});
+
+    //this.$node.attr('width', (story.length * 70+4)*1.2);
+
+    const to_id = (d) => String(d.id);
+
+    const lod = getLevelOfDetail();
+    this.$node.classed('large', lod  === LevelOfDetail.Large);
+    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
+    this.$node.classed('small', lod  === LevelOfDetail.Small);
+
+    //var levelShift = [];
+    //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
+    //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
+
+    const $states = this.$node.selectAll('div.story').data(story, to_id);
+
+    const $states_enter = $states.enter().append('div').classed('story', true);
+    const $story_enter = $states_enter.filter((d) => !d.isPlaceholder);
+    const $placeholder_enter = $states_enter.filter((d) => d.isPlaceholder).classed('placeholder',true);
+
+    $story_enter.call(this.storyInteraction.bind(this));
+    $story_enter.append('div').classed('preview', true);
+    $story_enter.append('div').classed('slabel', true);
+
+    $story_enter.call(this.createToolbar.bind(this));
+    $story_enter.append('div').classed('duration', true);
+    $story_enter.append('div').classed('dragger', true)
+      .call(this.changeDuration.bind(this))
+      .call(this.dndSupport.bind(this));
+
+    $placeholder_enter.call(this.dndSupport.bind(this));
+    {
+      let that = this;
+      let p = $placeholder_enter.filter((d) => d.isLastPlaceholder);
+      p.call(this.createLastPlaceholder.bind(this));
     }
     $states.order();
 

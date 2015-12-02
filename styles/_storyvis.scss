@@ -78,12 +78,22 @@ $hover-color: #ffdd05;
       -webkit-flex-direction: row;
       flex-direction: row;
 
+      div.dragger {
+        position: absolute;
+        bottom: -2px;
+        height: 5px;
+        left: 0;
+        right: 0;
+
+        &:hover:not(.hover) {
+          cursor: ns-resize;
+        }
+      }
+
       &.placeholder:not(:last-of-type) {
         height: 5px;
 
-        &:hover:not(.hover):not(:first-of-type) {
-          cursor: ns-resize;
-        }
+
       }
 
       &.placeholder:last-of-type {
@@ -178,14 +188,17 @@ $hover-color: #ffdd05;
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
 
-    &.placeholder {
+    &.placeholder, div.dragger {
       //border: 2px solid #efefef;
-      background-color: white;
 
       &.hover {
         background-color: #959595;
         border-color: #959595
       }
+    }
+    &.placeholder {
+
+      background-color: white;
 
       &:last-of-type {
         border-radius: 1em;
@@ -285,7 +298,7 @@ $hover-color: #ffdd05;
       div.slabel {
         display: none;
       }
-      &.placeholder {
+      &.placeholder, div.dragger {
         display: none;
       }
     }
@@ -293,7 +306,7 @@ $hover-color: #ffdd05;
 
   &.small {
     div.story {
-      div.preview, div.slabel, &.placeholder, div.duration {
+      div.preview, div.slabel, &.placeholder, div.duration, div.dragger {
         display: none;
       }
 
