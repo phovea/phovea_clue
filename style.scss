@@ -134,8 +134,8 @@ aside {
 
 header {
   position: absolute;
-  left: 35vw;
-  width: 30vw;
+  left: 30vw;
+  width: 40vw;
   top: 0.2em;
   text-align: center;
 
@@ -149,9 +149,9 @@ footer {
   //position: absolute;
   //left: 45vw;
   //width: 10vw;
-  bottom: 0.2em;
   text-align: center;
   flex: 0 0 auto;
+  height: auto;
 
   #player_controls {
     display: inline-block;
@@ -167,15 +167,57 @@ footer {
   }
 }
 
+div.mainhelper {
+  -webkit-flex: 1 1 auto; /* Chrome */
+  flex: 1 1 auto;
+
+  display: -webkit-flex;
+  display: flex;
+
+  -webkit-align-items: stretch;
+  align-items: stretch;
+  -webkit-flex-flow: column;
+  flex-flow: column;
+}
+
 main {
   position: relative;
 
   -webkit-flex: 1 1 auto; /* Chrome */
   flex: 1 1 auto;
+}
 
+aside.left {
+  border: 0;
+
+  display: -webkit-flex;
+  display: flex;
+
+  -webkit-align-items: stretch;
+  align-items: stretch;
+  -webkit-flex-flow: column;
+  flex-flow: column;
+
+  section {
+    -webkit-flex: 1 1 10vh; /* Chrome */
+    flex: 1 1 10vh;
+    overflow:auto;
+    position: relative;
+    text-overflow: ellipsis;
+    &:first-of-type {
+      -webkit-flex: 1 1 10vh; /* Chrome */
+      flex: 1 1 10vh;
+    }
+    border: 2px solid $exploration-stage;
+    border-radius: 5px;
+    > div:first-of-type {
+      background-color: $exploration-stage;
+    }
+  }
 }
 
 main.clue_demo {
+
   div.block {
     position: absolute;
 
@@ -357,3 +399,4 @@ body {
 @import "styles/annotation";
 @import "styles/provvis";
 @import "styles/storyvis";
+

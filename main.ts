@@ -14,10 +14,10 @@ const elems = template.create(document.body);
 {
   $(`<aside class="left" style="width: 12vw">
     <section id="selectioninfo">
-      <h2>Selection Info</h2>
+      <div><h2>Selection Info</h2></div>
     </section>
     <section id="databrowser">
-      <h2Data Browser</h2>
+      <div><h2>Data Browser</h2></div>
     </section>
     </aside>`).prependTo('div.content');
 
