@@ -2,13 +2,30 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-$select-color: #db8f00;
-$hover-color: #ffdd05;
-
 .provenance-multi-story-vis {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+
+  &:first-child {
+    -webkit-flex: 0 0 auto;
+    flex: 0 0 auto;
+  }
+
+  div.line {
+    position: absolute;
+    left: 3em;
+    border-left: 1px solid gray;
+    top: 0;
+    width: 1px;
+    bottom: 0;
+  }
 
   div.stories {
     position: relative;
+    -webkit-flex: 1 1 auto;
+    flex: 1 1 auto;
   }
 
   &.vertical {
@@ -75,6 +92,7 @@ $hover-color: #ffdd05;
 
     div.story {
       height: 5em;
+      margin-left: 3em;
       -webkit-flex-direction: row;
       flex-direction: row;
 
@@ -181,7 +199,8 @@ $hover-color: #ffdd05;
     position: relative;
     display: -webkit-flex;
     display: flex;
-    margin: 0 1em;
+    margin: 0px 1em;
+    margin-bottom: 1px;
 
     border-radius: 2px;
 
@@ -231,10 +250,16 @@ $hover-color: #ffdd05;
       border-radius: 5px;
 
       &.select-selected {
-        border-color: $select-color;
+        border-color: black;
+        div.duration {
+          font-weight: bold;
+        }
       }
       &.select-hovered {
-        border-color: $hover-color;
+        border-color: darkgray;
+        div.duration {
+          font-weight: bold;
+        }
       }
     }
 
@@ -276,9 +301,10 @@ $hover-color: #ffdd05;
 
     div.duration {
       position: absolute;
-      bottom: 0;
-      left: 0.2em;
+      top: -4px;
+      left: -26px;
       font-size: 60%;
+      text-align: right;
     }
   }
 

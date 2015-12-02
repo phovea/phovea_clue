@@ -38,6 +38,11 @@ function to_duration(d: number) {
   return mm_ss(new Date(d));
 }
 
+function to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
+  const i = story.indexOf(d);
+  return story.slice(0,i).reduce((a,b) => a+b.duration, 0);
+}
+
 enum LevelOfDetail {
   None = 0,
   Small = 1,
@@ -250,13 +255,18 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const that = this;
     $elem.call(d3.behavior.drag()
       .origin(() => ({ x : 0, y : 0}))
-      .on('drag', function(d: provenance.SlideNode) {
+      .on('drag', function(d: provenance.SlideNode, i) {
         //update the height of the slide node
         const e : any = d3.event;
         const $elem = d3.select((<Element>this).parentElement);
         const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.duration)+e[that.options.xy]);
         $elem.style(that.options.wh, height+'px');
-        $elem.select('div.duration').text(to_duration(that.duration2pixel.invert(height)));
+        const change = that.duration2pixel.invert(height) - d.duration;
+        const durations = that.$node.selectAll('div.duration span');
+        const stories = durations.data();
+        durations.text((k, j) => {
+          return to_duration(to_starting_time(k, stories) + (j > i ? change : 0));
+        });
       }).on('dragend', function(d: provenance.SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style(that.options.wh),10);
@@ -365,6 +375,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
   }
 
+
   update() {
     const graph = this.data;
     const story_raw = toPath(this.story);
@@ -420,7 +431,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
-    $stories.select('div.duration').text((d) => to_duration(d.duration));
+    $stories.select('div.duration').html((d, i) => `<span>${to_duration(to_starting_time(d,story_raw))}</span><i class="fa fa-circle"></i>`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
 
     //const $placeholders = $states.filter((d) => d.isPlaceholder);
@@ -568,8 +579,8 @@ export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
     const t= (<any>$($helper.node()).find('.dropdown-toggle'));
     t.dropdown();
 
-    $node.append('div').classed('stories', true);
-    $node.append('div').classed('player', true);
+    $node.append('div').classed('stories', true)
+      .append('div').classed('line', true);
     return $node;
   }
 
