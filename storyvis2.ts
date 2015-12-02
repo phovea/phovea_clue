@@ -262,9 +262,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const height = Math.max(that.duration2pixel.range()[0],that.duration2pixel(d.duration)+e[that.options.xy]);
         $elem.style(that.options.wh, height+'px');
         const change = that.duration2pixel.invert(height) - d.duration;
-        const durations = that.$node.selectAll('div.duration span');
+        const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
         const stories = durations.data();
-        durations.text((k, j) => {
+        durations.select('div.duration span').text((k, j) => {
           return to_duration(to_starting_time(k, stories) + (j > i ? change : 0));
         });
       }).on('dragend', function(d: provenance.SlideNode) {
