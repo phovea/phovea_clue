@@ -482,8 +482,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       </div>
       <div style="position: relative">
         <svg>
-          <g transform="translate(1,1)" class="storyhighlights"></g>
           <g transform="translate(1,1)" class="edges"></g>
+          <g transform="translate(1,1)" class="storyhighlights" style="display:none">
+            <path class="story"></path>
+          </g>
         </svg>
         <div class="states"></div>
       </div>
@@ -654,27 +656,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const states = this.$node.select('div.states').selectAll<StateRepr>('div.state').data();
     const lookup : any = {};
     states.forEach((s) => lookup[s.s.id] = s);
-    const areas = this.data.getSlides().map((story) => {
-      const reprs = story.map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
-      var r= [];
-      reprs.forEach((repr) => {
-        var xy = repr.xy,
-          size = repr.size;
-        r.push({ x0: xy[0], y0: xy[1]-2, x1: xy[0]+size[0], y1: xy[1]-2});
-        r.push({ x0: xy[0], y0: xy[1]+size[1]+2, x1: xy[0]+size[0], y1: xy[1]+size[1]+2});
-      });
-      return r;
-    });
-    const $areas = $g.selectAll('path.story').data(areas);
-    $areas.enter().append('path').classed('story', true);
-    const area = d3.svg.area<{ x0: number; y0: number; x1: number, y1: number}>().interpolate('basis')
-      .x0((d) => d.x0)
-      .x1((d) => d.x1)
-      .y0((d) => d.y0)
-      .y1((d) => d.y1);
-    const colors = d3.scale.category10();
-    $areas.transition().attr('d',area).style('fill', (d,i) => colors(String(i)));
-    $areas.exit().remove();
+    var firstSlide = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
+    if (firstSlide) {
+      $g.style('display', null);
+      while(firstSlide.previous) {
+        firstSlide = firstSlide.previous;
+      }
+      const line = provenance.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
+      $g.select('path').attr('d', this.line.interpolate('cardinal')(line));
+      this.line.interpolate('step-after');
+    } else {
+      $g.style('display', 'none');
+    }
   }
 }
 
