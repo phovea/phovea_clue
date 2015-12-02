@@ -84,11 +84,11 @@ class StateRepr {
   }
 
   get cx() {
-    return this.xy[0] + this.size[0]*0.5;
+    return this.xy[0] + 2;
   }
 
   get cy() {
-    return this.xy[1] + this.size[1]*0.5;
+    return this.xy[1] + 13;
   }
 
   get lod_local() {
@@ -117,7 +117,7 @@ class StateRepr {
       case LevelOfDetail.Medium:
         return [30, 30];
       case LevelOfDetail.Small:
-        return [20, 20];
+        return [30, 20];
       default:
         return [10, 10];
     }
@@ -150,7 +150,7 @@ class StateRepr {
       const is_selected = s === selected ? 3: 0;
       const inpath = selected_path.indexOf(s) >= 0 ? Math.max(0,4-selected_path.indexOf(s)) : -2;
       //combine to a doi value
-      const sum = 7 + category + operation + bookmark + tags + is_selected + inpath;
+      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath;
 
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
       r.selected = s === selected;
@@ -241,15 +241,15 @@ class StateRepr {
     states.forEach((s) => {
       const size = s.size;
       const xy = s.xy;
-      const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]] + (colwidths[xy[0]] - size[0]) * 0.5;
-      const y = accrowheights[xy[1]] + (rowheights[xy[1]] - size[1]) * 0.5;
+      const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]]; // + (colwidths[xy[0]]);
+      const y = accrowheights[xy[1]];
       s.xy = [x,y];
     });
   }
 
   static toIcon(repr: StateRepr) {
     if (!repr.a) {
-      return `<i class="fa fa-circle" title="${repr.s.name}"></i>`;
+      return ''; //`<i class="fa fa-circle" title="${repr.s.name}"></i>`;
     }
     const meta = repr.a.meta;
     const cat_icons = {
@@ -283,7 +283,7 @@ class StateRepr {
     $elem.select('div.sthumbnail')
       .style('background-image', (d) => d.lod === LevelOfDetail.Large ? d.thumbnail : null);
     $elem.transition().style({
-      left: (d) => d.xy[0]+'px',
+      'padding-left': (d) => (d.xy[0]+4)+'px',
       top: (d) => d.xy[1]+'px'
     });
   }
@@ -538,6 +538,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const $states_enter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
+      .append('div')
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) => graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType))
       .on('mouseleave', (d) => graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType))
@@ -571,8 +572,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
 
 
-    $states_enter.append('div').classed('sthumbnail', true);
-    $states_enter.append('span').classed('icon', true);
+    const $inner = $states_enter;
+    $inner.append('i').attr('class', 'fa fa-circle glyph');
+    $inner.append('span').classed('icon', true);
     /*$states_enter.append('span').attr('class','star fa').on('click', (d) => {
       d.s.setAttr('starred',!d.s.getAttr('starred',false));
       d3.event.stopPropagation();
@@ -586,7 +588,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });*/
-    $states_enter.append('span').classed('slabel',true);
+    $inner.append('span').classed('slabel',true);
+    $inner.append('div').classed('sthumbnail', true);
     const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
       d.showDialog();

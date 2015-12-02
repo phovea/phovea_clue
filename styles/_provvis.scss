@@ -17,27 +17,45 @@ $hover-color: darkgray;
     }
   }
 
+
   div.state {
     position: absolute;
 
-    max-width: 220px;
     text-overflow: ellipsis;
     overflow-x: hidden;
     white-space: nowrap;
+    width: 100%;
+
+    i.glyph {
+      font-size: 50%;
+      padding-right: 1px;
+      margin-left: -4px;
+      color: #949494;
+    }
 
     .slabel {
       font-size: 10pt;
     }
 
-    &:hover {
-      .slabel, .icon {
+    pointer-events: none;
+
+    > div:hover {
+      .slabel, .icon, .glyph {
         font-weight:bold; //: $hover-color;
+      }
+      .glyph {
+        color: black;
       }
     }
 
+    > div {
+      pointer-events: all;
+      position: relative;
+    }
 
     .sthumbnail {
-      width: 100%;
+      position: absolute;
+      right: 0;
       height: 100%;
       display: inline-block;
       border: 2px solid #989898;
@@ -61,82 +79,70 @@ $hover-color: darkgray;
     }
 
 
+    &.select-selected {
+      font-weight: bold;
+      //background-color: $select-color;
+
+      .glyph {
+        color: black;
+      }
+    }
+    &.select-hovered .icon {
+      font-weight: bold;
+      //background-color: $hover-color;
+
+
+    }
+
     &.doi-xs {
-      .sthumbnail, .s label, .icon {
+      .sthumbnail, .slabel, .icon {
         display: none;
       }
-      border-radius: 50%;
-      background-color: #b4b4b4;
-      border: 2px solid #989898;
-      width: 10px;
-      height: 10px;
 
-      &.select-selected {
-        font-weight: bold;
-        //background-color: $select-color;
-      }
-      &.select-hovered .icon {
-        font-weight: bold;
-        //background-color: $hover-color;
-      }
     }
     &.doi-sm {
       .sthumbnail, .slabel {
         display: none;
       }
-      width: 20px;
       height: 20px;
       font-size: 100%;
-      padding-left: 5px;
+      //padding-left: 13px;
 
-      &.select-selected {
-        font-weight: bold;
-        //color: $select-color;
-      }
-      &.select-hovered .icon {
-        font-weight: bold;
-        //color: $hover-color;
-      }
     }
     &.doi {
-      margin-left: 9px;
+      //margin-left: 8px;
      .sthumbnail {
        display: none;
      }
       height: 30px;
       font-size: 100%;
-      padding-left: 10px;
+      //padding-left: 10px;
 
-      &.select-selected {
-        font-weight: bold;
-      }
-      &.select-hovered .icon {
-        font-weight: bold;
+      .glyph {
+        padding-top: 12px;
       }
     }
 
     &.doi-lg {
-      margin-left: 26px;
+      //margin-left: 26px;
       margin-top: 3px;
       height: 44px;
       .sthumbnail {
-        width: 44px;
-      }
-      > span.icon {
-        position: absolute;
-        left: 44px;
+        width: 3em;
+        height: 100%;
       }
 
-      &.select-selected .sthumbnail {
-        border-color: $select-color;
-      }
-      &.select-hovered .sthumbnail {
-        border-color: $hover-color;
-      }
 
-      &:hover {
-        .toolbar {
-          display: block;
+
+      > div {
+        height: 3em;
+        border-radius: 5px 0 0 0;
+        border-top: 1px solid black;
+
+        &:hover {
+          .toolbar {
+            display: block;
+          }
         }
       }
     }
