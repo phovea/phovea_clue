@@ -377,7 +377,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
 
   update() {
-    const graph = this.data;
     const story_raw = toPath(this.story);
 
 
@@ -419,7 +418,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     $placeholder_enter.call(this.dndSupport.bind(this));
     {
-      let that = this;
       let p = $placeholder_enter.filter((d) => d.isLastPlaceholder);
       p.call(this.createLastPlaceholder.bind(this));
     }

@@ -239,7 +239,6 @@ class StateRepr {
     acccolwidths.shift();
 
     states.forEach((s) => {
-      const size = s.size;
       const xy = s.xy;
       const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]]; // + (colwidths[xy[0]]);
       const y = accrowheights[xy[1]];
