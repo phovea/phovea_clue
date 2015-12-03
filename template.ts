@@ -345,6 +345,16 @@ export class CLUEWrapper extends events.EventHandler {
           //ctrl-z
           k.preventDefault();
           graph.undo();
+        } else if (k.keyCode === 37 && k.ctrlKey) {
+          //left arrow 	37
+          cmode.setMode(cmode.modes.Exploration);
+        } else if ((k.keyCode === 38 || k.keyCode === 40) && k.ctrlKey) {
+          //up arrow 	38
+          //down arrow 	40
+          cmode.setMode(cmode.modes.Authoring);
+        } else if (k.keyCode === 39 && k.ctrlKey) {
+          //right arrow 	39
+          cmode.setMode(cmode.modes.Presentation);
         }
       });
 
