@@ -29,7 +29,7 @@ label {
     padding: 2px 10px;
     background-color: $exploration-stage;
 
-    &.active, :hover {
+    &.active, &:hover, &:active {
       background-color: $exploration-stage; //$exploration-stage-hover;
       font-weight: bold;
       box-shadow: none;
@@ -40,7 +40,7 @@ label {
     padding: 2px 10px;
     background-color: $authoring-stage;
 
-    &.active, :hover {
+    &.active, &:hover, &:active {
       background-color: $authoring-stage;
       font-weight: bold;
       box-shadow: none;
@@ -51,7 +51,7 @@ label {
     padding: 2px 10px;
     background-color: $presentation-stage;
 
-    &.active, :hover {
+    &.active, &:hover, &:active {
       background-color: $presentation-stage;
       font-weight: bold;
       box-shadow: none;
