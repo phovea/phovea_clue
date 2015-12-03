@@ -279,6 +279,10 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.name);
+    $elem.select('i.bookmark')
+      .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
+      .classed('fa-bookmark',(d) => d.s.getAttr('starred', false));
+
     $elem.select('div.sthumbnail')
       .style('background-image', (d) => d.lod === LevelOfDetail.Large ? d.thumbnail : null);
     $elem.transition().style({
@@ -592,6 +596,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $inner.append('span').classed('slabel',true);
     $inner.append('div').classed('sthumbnail', true);
     const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
+    $toolbar_enter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
+      const v= !d.s.getAttr('starred',false);
+      d.s.setAttr('starred', v);
+      d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+    });
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
       d.showDialog();
       d3.event.stopPropagation();

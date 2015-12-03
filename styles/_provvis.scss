@@ -76,6 +76,11 @@ $hover-color: darkgray;
       position: absolute;
       top: 0;
       right: 0.1em;
+      letter-spacing: 2px;
+
+      i:hover {
+        font-weight: bold;
+      }
     }
 
     .icon {
@@ -118,6 +123,8 @@ $hover-color: darkgray;
 
     }
     &.doi {
+      width: 100%;
+      padding-right: 4px;
       //margin-left: 8px;
      .sthumbnail {
        display: none;
@@ -128,6 +135,14 @@ $hover-color: darkgray;
 
       .glyph {
         padding-top: 12px;
+      }
+
+      > div {
+        &:hover {
+          .toolbar {
+            display: block;
+          }
+        }
       }
     }
 
