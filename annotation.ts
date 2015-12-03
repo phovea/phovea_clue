@@ -122,7 +122,7 @@ export class Renderer {
       $svg_enter.append('defs').append('marker').attr({
           id: (d,i) => 'clue_text_arrow_marker'+i,
           viewBox: '0 0 10 10',
-          refX: 0,
+          refX: 6,
           refY: 5,
           markerWidth: 4,
           markerHeight: 3,
@@ -147,7 +147,7 @@ export class Renderer {
       }
 
       if (editable) {
-        $svg_enter.select('g').append('circle').classed('anchor',true).attr('r', 10);
+        $svg_enter.select('g').append('circle').classed('anchor',true).attr('r', 5);
         $svg.select('circle').style({
           cx: (d) => d.at[0],
           cy: (d) => d.at[1]

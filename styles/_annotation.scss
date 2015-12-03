@@ -113,8 +113,9 @@ div.annotation {
   circle.anchor {
     fill: black;
     cursor: move;
+    opacity: 0.5;
     &:hover {
-      fill: darkgray;
+      opacity: 0.8;
     }
   }
 
