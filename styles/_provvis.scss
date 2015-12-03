@@ -16,7 +16,7 @@ $hover-color: darkgray;
       opacity: 1;
       stroke: #010101;
       stroke-width: 2;
-      stroke-dasharray: 5 2;
+      //stroke-dasharray: 5 2;
       fill: none;
     }
   }
@@ -33,6 +33,10 @@ $hover-color: darkgray;
       padding-right: 1px;
       margin-left: -4px;
       color: #949494;
+    }
+
+    &.story_member i.glyph {
+      color: black;
     }
 
     .slabel {

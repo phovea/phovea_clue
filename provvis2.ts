@@ -664,7 +664,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private updateStoryHighlight() {
     //TODO hide if not needed
     const $g = this.$node.select('svg g.storyhighlights');
-    const states = this.$node.select('div.states').selectAll<StateRepr>('div.state').data();
+    const $states = this.$node.select('div.states').selectAll<StateRepr>('div.state');
+    const states = $states.data();
     const lookup : any = {};
     states.forEach((s) => lookup[s.s.id] = s);
     var firstSlide = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
@@ -674,6 +675,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         firstSlide = firstSlide.previous;
       }
       const line = provenance.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
+      $states.classed('story_member', (d) => line.indexOf(d) >= 0);
       $g.select('path').attr('d', this.line.interpolate('linear')(line));
       this.line.interpolate('step-after');
     } else {
