@@ -139,7 +139,8 @@ export class CLUEWrapper extends events.EventHandler {
   private options = {
     app: 'CLUE',
     application: '/clue_demo',
-    id: 'clue_demo'
+    id: 'clue_demo',
+    recordSelectionTypes: 'selected'
   };
 
   private manager : prov.IProvenanceGraphManager;
@@ -150,7 +151,7 @@ export class CLUEWrapper extends events.EventHandler {
   $main_ref: prov.IObjectRef<d3.Selection<any>>;
 
   private player: player.Player;
-  private storyvis: storyvis.StoryManager;
+  private storyvis: storyvis.VerticalStoryVis;
 
   constructor(body:HTMLElement, options: any = {}) {
     super();
@@ -216,10 +217,10 @@ export class CLUEWrapper extends events.EventHandler {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
-      prov_sel.create(graph, 'selected', {
+      prov_sel.create(graph, this.options.recordSelectionTypes, {
         filter: function (idtype) {
           return idtype && idtype.name[0] !== '_';
-        }
+        },
       });
 
       this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
