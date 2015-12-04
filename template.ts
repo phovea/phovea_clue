@@ -279,10 +279,18 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
+       if (state) {
         C.hash.setInt('clue_state', state.id);
+       } else {
+         C.hash.removeProp('clue_state');
+       }
       });
      graph.on('select_slide', (event:any, state:prov.SlideNode) => {
+        if (state) {
         C.hash.setInt('clue_slide', state.id);
+       } else {
+         C.hash.removeProp('clue_slide');
+       }
       });
 
       {
