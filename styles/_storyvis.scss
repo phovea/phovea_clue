@@ -44,6 +44,8 @@
     position: relative;
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
+    overflow-x: auto;
+    max-height: 85vh;
   }
 
   &.vertical {

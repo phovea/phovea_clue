@@ -347,7 +347,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
-        //this.scrollIntoView();
+        this.scrollIntoView();
       }
       return isSelected;
     });

@@ -75,7 +75,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
-    this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,(d: provenance.SlideNode) => selectedStates.indexOf(d) >= 0);
+    this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,function (d: provenance.SlideNode) {
+      const isSelected = selectedStates.indexOf(d) >= 0;
+      if (isSelected && type === idtypes.defaultSelectionType) {
+        this.scrollIntoView();
+      }
+      return isSelected;
+    });;
   };
 
   private options = {
