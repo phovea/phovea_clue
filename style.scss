@@ -82,7 +82,7 @@ aside {
     }
 
   }
-  &.provenance-multi-story-vis, &.annotations {
+  &.provenance-story-vis, &.annotations {
     border-color: $presentation-stage;
     > div:first-of-type {
       background-color: $presentation-stage;
@@ -391,7 +391,7 @@ body {
       display: none;
     }
 
-    aside.provenance-vertical-story-vis {
+    aside.provenance-story-vis {
       > div div.toolbar {
         display: none !important;
       }

@@ -70,7 +70,7 @@ function isEditAble() {
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
-  //private trigger = C.bind(this.update, this);
+  private trigger = C.bind(this.update, this);
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
@@ -90,7 +90,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 220]);
 
-  constructor(public data:provenance.ProvenanceGraph, public story: provenance.SlideNode, public parent:Element, options:any= {}) {
+  story: provenance.SlideNode = null;
+
+  constructor(public data:provenance.ProvenanceGraph, public parent:Element, options:any= {}) {
     super();
     this.options = C.mixin(this.options,options);
     if (this.options.class === 'horizontal') {
@@ -101,18 +103,22 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     C.onDOMNodeRemoved(this.node, this.destroy, this);
     this.bind();
 
+    this.story = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
+
     this.update();
   }
 
   private bind() {
     this.data.on('select', this.onSelectionChanged);
-    //cmode.on('modeChanged', this.trigger);
+    this.data.on('start_slide,destroy_slide', this.trigger);
+    cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
     this.data.off('select', this.onSelectionChanged);
-    //cmode.off('modeChanged', this.trigger);
+    this.data.off('start_slide,destroy_slide', this.trigger);
+    cmode.off('modeChanged', this.trigger);
   }
 
   get rawSize():[number, number] {
@@ -162,11 +168,84 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return new_;
   }
 
+  switchTo(story: provenance.SlideNode) {
+    if (story) {
+      let story_start = story;
+      while(story_start.previous) {
+        story_start = story_start.previous;
+      }
+      this.story = story;
+      this.data.selectSlide(story);
+    } else {
+      this.story = null;
+    }
+    this.update();
+  }
+
 
   private build($parent:d3.Selection<any>) {
-    var $node = $parent.append('div').attr({
+    var $node = $parent.append('aside').attr({
       'class': 'provenance-story-vis '+this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
+    $node.html(`
+      <div>
+        <h2>Story <i class="fa fa-plus-circle"></i></h2>
+        <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
+        <div class="btn-group btn-group-xs" role="group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                  aria-expanded="false">
+            Select<span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" id="story_list">
+            <!--<li><a href="#">A</a></li>-->
+          </ul>
+        </div>
+        <div class="btn-group btn-group-xs" data-toggle="buttons">
+          <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> Empty</button>
+          <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i class="fa fa-files-o"></i> Extract</button>
+          <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i class="fa fa-bookmark"></i> Bookmarked</button>
+        </div>
+        </form>
+      </div>
+    `);
+
+    const that = this;
+
+    $node.selectAll('a[data-create]').on('click', function() {
+      var create = this.dataset.create;
+      var story;
+      switch(create) {
+        case 'plus':
+          story = that.data.startNewSlide('Welcome');
+          break;
+        case 'clone':
+          var state = that.data.selectedStates()[0] || that.data.act;
+          story = that.data.startNewSlide('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
+          break;
+        case 'bookmark':
+          var states = that.data.states.filter((d) => d.getAttr('starred',false));
+          story = that.data.startNewSlide('My favorite findings', states);
+          break;
+      }
+      that.switchTo(story);
+      return false;
+    });
+    /*);
+    */
+    const jp = $($node.node());
+    (<any>jp.find('.dropdown-toggle')).dropdown();
+    jp.find('h2 i').on('click', () => {
+      jp.find('form.toolbar').toggle('fast');
+    });
+
+
+
+    if (this.data.getSlideChains().length === 0) {
+      jp.find('form.toolbar').toggle('fast');
+    }
+
+    $node.append('div').classed('stories', true).classed(this.options.class, true)
+      .append('div').classed('line', true);
     return $node;
   }
 
@@ -359,11 +438,20 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       const last = path[path.length-1];
       switch(create) {
         case 'text':
-          that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
+          if (last) {
+            that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
+          } else {
+            that.story = that.data.startNewSlide('Welcome');
+          }
           break;
         case 'extract':
           var state = that.data.selectedStates()[0] || that.data.act;
-          that.data.moveSlide(that.data.extractSlide([state], false), last, false);
+          let new_ = that.data.extractSlide([state], false);
+          if (last) {
+            that.data.moveSlide(new_, last, false);
+          } else {
+            that.story = new_;
+          }
           break;
         case 'clone':
           if (last) {
@@ -375,8 +463,24 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
   }
 
+  private updateSelection() {
+    const stories = this.data.getSlideChains();
+    const $stories = this.$node.select('.dropdown-menu').selectAll('li').data(stories);
+    $stories.enter().insert('li').append('a')
+      .attr('href', '#').on('click', (d) => {
+      this.switchTo(d);
+      d3.event.preventDefault()
+    });
+    $stories.select('a').text((d) => d.name);
+
+    $stories.exit().remove();
+  }
+
 
   update() {
+    this.updateSelection();
+
+
     const story_raw = toPath(this.story);
 
 
@@ -392,15 +496,20 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const to_id = (d) => String(d.id);
 
     const lod = getLevelOfDetail();
-    this.$node.classed('large', lod  === LevelOfDetail.Large);
-    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
-    this.$node.classed('small', lod  === LevelOfDetail.Small);
+    this.$node
+      .classed('large', lod  === LevelOfDetail.Large)
+      .classed('medium', lod  === LevelOfDetail.Medium)
+      .classed('small', lod  === LevelOfDetail.Small);
+    this.$node.select('div.stories')
+      .classed('large', lod  === LevelOfDetail.Large)
+      .classed('medium', lod  === LevelOfDetail.Medium)
+      .classed('small', lod  === LevelOfDetail.Small);
 
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
     //nodes.forEach((n: any) => n.x -= levelShift[n.depth]);
 
-    const $states = this.$node.selectAll('div.story').data(story, to_id);
+    const $states = this.$node.select('div.stories').selectAll('div.story').data(story, to_id);
 
     const $states_enter = $states.enter().append('div').classed('story', true);
     const $story_enter = $states_enter.filter((d) => !d.isPlaceholder);
@@ -438,191 +547,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   }
 }
 
-export class StoryManager extends vis.AVisInstance implements vis.IVisInstance {
-  private $node:d3.Selection<any>;
-  private trigger = C.bind(this.update, this);
-
-  private options = {
-    scale: [1, 1],
-    rotate: 0,
-    class: 'vertical'
-  };
-
-  private story : VerticalStoryVis = null;
-
-  constructor(public data:provenance.ProvenanceGraph, public parent:Element, options:any = {}) {
-    super();
-    this.options = C.mixin(this.options,options);
-    this.$node = this.build(d3.select(parent));
-    C.onDOMNodeRemoved(this.node, this.destroy, this);
-
-    this.bind();
-
-    this.update();
-  }
-
-  private bind() {
-    this.data.on('start_slide,destroy_slide', this.trigger);
-    cmode.on('modeChanged', this.trigger);
-  }
-
-  destroy() {
-    super.destroy();
-    this.data.off('start_slide,destroy_slide', this.trigger);
-    cmode.off('modeChanged', this.trigger);
-  }
-
-  get rawSize():[number, number] {
-    return [200, 500];
-  }
-
-  get node() {
-    return <Element>this.$node.node();
-  }
-
-  option(name:string, val?:any) {
-    if (arguments.length === 1) {
-      return this.options[name];
-    } else {
-      this.fire('option.' + name, val, this.options[name]);
-      this.options[name] = val;
-    }
-  }
-
-  locateImpl(range:ranges.Range) {
-    return Promise.resolve(null);
-  }
-
-  transform(scale?:number[], rotate:number = 0) {
-    var bak = {
-      scale: this.options.scale || [1, 1],
-      rotate: this.options.rotate || 0
-    };
-    if (arguments.length === 0) {
-      return bak;
-    }
-    var dims = this.data.dim;
-    var width = 20, height = dims[0];
-    this.$node.attr({
-      width: width * scale[0],
-      height: height * scale[1]
-    }).style('transform', 'rotate(' + rotate + 'deg)');
-    //this.$node.select('g').attr('transform', 'scale(' + scale[0] + ',' + scale[1] + ')');
-    var new_ = {
-      scale: scale,
-      rotate: rotate
-    };
-    this.fire('transform', new_, bak);
-    this.options.scale = scale;
-    this.options.rotate = rotate;
-    return new_;
-  }
-
-  switchTo(story: provenance.SlideNode) {
-    if (this.story != null) {
-      this.story.destroy();
-      this.story = null;
-    }
-    if (story) {
-      let story_start = story;
-      while(story_start.previous) {
-        story_start = story_start.previous;
-      }
-      this.story = new VerticalStoryVis(this.data, story_start, <Element>this.$node.select('div.stories').node(), this.options);
-      this.data.selectSlide(story);
-    }
-  }
-
-  private build($parent:d3.Selection<any>) {
-    var $node = $parent.append('aside').attr({
-      'class': 'provenance-multi-story-vis '+this.options.class
-    }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
-    const $helper = $node.append('div');
-    $helper.append('h2').html(`
-      <span class="dropdown">
-          <a class="dropdown-toggle" data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true"
-             aria-expanded="false">Story<span class="caret"></span></a>
-          <ul class="dropdown-menu">
-              <li role="separator" class="divider"></li>
-              <li><a href="#" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> Empty</a></li>
-              <li><a href="#" data-create="clone" title="create a new story by extracting the current path"><i class="fa fa-files-o"></i> Copy current path</a></li>
-              <li><a href="#" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i class="fa fa-bookmark"></i> Bookmarked states</a></li>
-          </ul>
-      </a>
-    `);
-
-    const that = this;
-    $helper.selectAll('a[data-create]').on('click', function() {
-      var create = this.dataset.create;
-      var story;
-      switch(create) {
-        case 'plus':
-          story = that.data.startNewSlide('Welcome');
-          break;
-        case 'clone':
-          var state = that.data.selectedStates()[0] || that.data.act;
-          story = that.data.startNewSlide('My story to '+(state ? state.name : 'heaven'), state ? state.path : []);
-          break;
-        case 'bookmark':
-          var states = that.data.states.filter((d) => d.getAttr('starred',false));
-          story = that.data.startNewSlide('My favorite findings', states);
-          break;
-      }
-      that.switchTo(story);
-      return false;
-    });
-    /*);
-    */
-
-    const t= (<any>$($helper.node()).find('.dropdown-toggle'));
-    t.dropdown();
-
-    $node.append('div').classed('stories', true)
-      .append('div').classed('line', true);
-    return $node;
-  }
-
-  pushAnnotation(ann: provenance.IStateAnnotation) {
-    if (this.story && ann) {
-      this.story.pushAnnotation(ann);
-    }
-  }
-
-  update() {
-
-    const lod = getLevelOfDetail();
-    this.$node.classed('large', lod  === LevelOfDetail.Large);
-    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
-    this.$node.classed('small', lod  === LevelOfDetail.Small);
-
-
-    const stories = this.data.getSlideChains();
-    const colors = d3.scale.category10();
-    {
-      const $stories = this.$node.select('.dropdown-menu').selectAll('li.s').data(stories);
-      const $stories_enter = $stories.enter().insert('li',':first-child').classed('s', true).append('a');
-      $stories_enter.append('i').attr('class','fa fa-square');
-      $stories_enter.append('span').attr('href', '#').on('click', (d) => {
-        this.switchTo(d);
-      });
-      $stories.exit().remove();
-      $stories.select('i').style('color', (d, i) => colors(String(i)));
-      $stories.select('span').text((d) => d.name);
-    }
-
-    if (this.story === null && stories.length > 0) {
-      this.switchTo(stories[0]);
-    }
-    if (this.story) {
-      this.story.update();
-    }
-  }
-}
-
-export function createSingle(data:provenance.ProvenanceGraph, story: provenance.SlideNode, parent:Element, options = {}) {
-  return new VerticalStoryVis(data, story, parent, options);
-}
-
 export function create(data:provenance.ProvenanceGraph, parent: Element, options = {}) {
-  return new StoryManager(data, parent, options);
+  return new VerticalStoryVis(data, parent, options);
 }

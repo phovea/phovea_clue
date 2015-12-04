@@ -21,6 +21,14 @@ $hover-color: darkgray;
     }
   }
 
+  h2 i {
+    cursor: pointer;
+
+    &:hover {
+      font-weight: bold;
+    }
+  }
+
   div.state {
     position: absolute;
 

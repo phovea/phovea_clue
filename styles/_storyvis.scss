@@ -2,15 +2,25 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-.provenance-multi-story-vis {
+.provenance-story-vis {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
 
+  width: 20em;
+
   &:first-child {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
+  }
+
+  h2 i {
+    cursor: pointer;
+
+    &:hover {
+      font-weight: bold;
+    }
   }
 
   div.line {
@@ -82,13 +92,9 @@
   }
 }
 
-.provenance-story-vis {
-  display: -webkit-flex;
-  display: flex;
+div.stories {
 
-  &.vertical {
-    -webkit-flex-direction: column;
-    flex-direction: column;
+  &.vertical {;
 
     div.story {
       height: 5em;
@@ -117,9 +123,6 @@
       &.placeholder:last-of-type {
         height: auto;
         padding: 0.5em 1em;
-        > div {
-          width: 100%;
-        }
       }
 
       div.preview {
@@ -132,7 +135,7 @@
     }
 
     &.large {
-      width: 20em;
+      width: 100%;
     }
 
     &.medium {
@@ -144,8 +147,6 @@
     }
   }
   &.horizontal {
-    -webkit-flex-direction: row;
-    flex-direction: row;
 
     div.story {
       width: 5em;
@@ -209,6 +210,8 @@
 
     &.placeholder, div.dragger {
       //border: 2px solid #efefef;
+      -webkit-flex: 0 0 auto;
+      flex: 0 0 auto;
 
       &.hover {
         background-color: #959595;
@@ -219,28 +222,31 @@
 
       background-color: white;
 
+      > div {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
       &:last-of-type {
         border-radius: 5px;
         border-width: 1px;
         border-color: #b6b6b6;
         border-style: dashed;
 
-        text-align: center;
-
         background: repeating-linear-gradient(
-          45deg,
+            45deg,
             #dbdbdb,
-          #efefef 10px,
-          #d7d7d7 20px
+            #efefef 10px,
+            #d7d7d7 20px
         );
 
         &.hover {
           background: repeating-linear-gradient(
-          45deg,
-          #959595,
-          #efefef 10px,
-          #959595 15px
-        );
+              45deg,
+              #959595,
+              #efefef 10px,
+              #959595 15px
+          );
         }
       }
     }
@@ -253,12 +259,14 @@
       &.select-selected {
         border-color: black;
         div.duration {
+          color: black;
           font-weight: bold;
         }
       }
       &.select-hovered {
         border-color: darkgray;
         div.duration {
+          color: black;
           font-weight: bold;
         }
       }
@@ -307,8 +315,9 @@
     div.duration {
       position: absolute;
       top: -4px;
-      left: -26px;
-      font-size: 60%;
+      left: -32px;
+      font-size: 75%;
+      color: #949494;
       text-align: right;
     }
   }
