@@ -13,6 +13,7 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
 import marked = require('marked');
+import player = require('../caleydo_provenance/player');
 
 function toPath(s?: provenance.SlideNode) {
   var r = [];
@@ -92,6 +93,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   story: provenance.SlideNode = null;
 
+  player : player.Player = null;
+
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, options:any= {}) {
     super();
     this.options = C.mixin(this.options,options);
@@ -101,6 +104,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
+
+    this.player = new player.Player(data, this.node.querySelector('#player_controls'), {
+      render: this.options.render
+    });
+
     this.bind();
 
     this.story = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
@@ -207,6 +215,16 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         </div>
         </form>
       </div>
+      <div class="stories ${this.options.class}">
+        <div class="line"></div>
+      </div>
+      <div><div id="player_controls">
+        <button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward"
+                  title="Step Backward"></button>
+          <button data-player="play" class="btn btn-default btn fa fa-play" title="Play"></button>
+          <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>
+          </div>
+       </div>
     `);
 
     const that = this;
@@ -244,8 +262,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       jp.find('form.toolbar').toggle('fast');
     }
 
-    $node.append('div').classed('stories', true).classed(this.options.class, true)
-      .append('div').classed('line', true);
     return $node;
   }
 

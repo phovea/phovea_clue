@@ -18,7 +18,6 @@ import prov_sel = require('../caleydo_provenance/selection');
 import cmode = require('../caleydo_provenance/mode');
 import provvis2 = require('./provvis2');
 import storyvis = require('./storyvis2');
-import player = require('../caleydo_provenance/player');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
@@ -150,7 +149,6 @@ export class CLUEWrapper extends events.EventHandler {
   $main: d3.Selection<any>;
   $main_ref: prov.IObjectRef<d3.Selection<any>>;
 
-  private player: player.Player;
   private storyvis: storyvis.VerticalStoryVis;
 
   constructor(body:HTMLElement, options: any = {}) {
@@ -279,9 +277,6 @@ export class CLUEWrapper extends events.EventHandler {
           that.storyvis.pushAnnotation(ann);
         }
       });
-      this.player = new player.Player(graph, body.querySelector('#player_controls'), {
-        render: r.render
-      });
 
      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         C.hash.setInt('clue_state', state.id);
@@ -293,7 +288,6 @@ export class CLUEWrapper extends events.EventHandler {
       {
         const $right = $('aside.provenance-layout-vis');
         const $right_story = $(this.storyvis.node);
-        const $footer = $('#player_controls');
         this.propagate(cmode, 'modeChanged');
         let update = (new_: cmode.CLUEMode) => {
           $('body').attr('data-clue', new_.toString());
@@ -302,11 +296,6 @@ export class CLUEWrapper extends events.EventHandler {
             $right.animate({width: 'hide'},'fast');
           } else {
             $right.animate({width: 'show'},'fast');
-          }
-          if (new_.exploration > 0.2) {
-            $footer.animate({width: 'hide'},'fast');
-          } else {
-            $footer.animate({width: 'show'},'fast');
           }
           if (new_.exploration > 0.8) {
             $right_story.animate({width: 'hide'},'fast');
@@ -436,10 +425,10 @@ export class CLUEWrapper extends events.EventHandler {
         this.storyvis.switchTo(s);
         var next;
         if (C.hash.is('clue_autoplay')) {
-          this.player.start();
+          this.storyvis.player.start();
           next = Promise.resolve();
         } else {
-          next = this.player.render(s);
+          next = this.storyvis.player.render(s);
         }
         return next.then(() => {
           this.fire('jumped_to', s);

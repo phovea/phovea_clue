@@ -15,6 +15,14 @@
     flex: 0 0 auto;
   }
 
+  > div:last-of-type {
+    text-align: center;
+    div#player_controls {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   h2 i {
     cursor: pointer;
 
