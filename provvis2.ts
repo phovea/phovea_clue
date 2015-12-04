@@ -113,11 +113,11 @@ class StateRepr {
   get size() {
     switch (this.lod) {
       case LevelOfDetail.Large:
-        return [50, 50];
+        return [50, 40];
       case LevelOfDetail.Medium:
-        return [30, 30];
+        return [30, 18];
       case LevelOfDetail.Small:
-        return [30, 20];
+        return [30, 18];
       default:
         return [10, 10];
     }
