@@ -229,7 +229,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const that = this;
 
-    $node.selectAll('a[data-create]').on('click', function() {
+    $node.selectAll('button[data-create]').on('click', function() {
       var create = this.dataset.create;
       var story;
       switch(create) {
@@ -248,8 +248,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       that.switchTo(story);
       return false;
     });
-    /*);
-    */
     const jp = $($node.node());
     (<any>jp.find('.dropdown-toggle')).dropdown();
     jp.find('h2 i').on('click', () => {
