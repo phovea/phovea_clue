@@ -483,7 +483,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.enter().insert('li').append('a')
       .attr('href', '#').on('click', (d) => {
       this.switchTo(d);
-      d3.event.preventDefault()
+      d3.event.preventDefault();
     });
     $stories.select('a').text((d) => d.name);
 

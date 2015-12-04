@@ -218,7 +218,7 @@ export class CLUEWrapper extends events.EventHandler {
       prov_sel.create(graph, this.options.recordSelectionTypes, {
         filter: function (idtype) {
           return idtype && idtype.name[0] !== '_';
-        },
+        }
       });
 
       this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
