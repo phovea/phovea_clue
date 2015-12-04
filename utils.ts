@@ -49,8 +49,8 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
     width: 128,
     format: 'jpg'
   };
-  if (state.hasAttr('screnshot')) {
-    return state.getAttr('screnshot');
+  if (state.hasAttr('screenshot')) {
+    return state.getAttr('screenshot');
   }
 
   const d = (<any>graph.desc);
@@ -60,4 +60,9 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
     });
   }
   return '../clue_demo/assets/not_available.png';
+}
+
+export function areThumbnailsAvailable(graph: provenance.ProvenanceGraph) {
+  const d = (<any>graph.desc);
+  return (d.attrs && d.attrs.of && !(d.local));
 }

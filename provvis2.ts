@@ -92,7 +92,7 @@ class StateRepr {
   }
 
   get lod_local() {
-    if (this.doi >= 0.9) {
+    if (this.doi >= 0.9 && utils.areThumbnailsAvailable(this.graph)) {
       return LevelOfDetail.Large;
     }
     if (this.doi >= 0.7) {
