@@ -119,7 +119,7 @@ class StateRepr {
       case LevelOfDetail.Small:
         return [30, 18];
       default:
-        return [10, 10];
+        return [10, 7];
     }
   }
 
@@ -138,6 +138,8 @@ class StateRepr {
 
     const lod = getLevelOfDetail();
 
+    const size = graph.states.length;
+
     const toState = (s) => {
       var r = new StateRepr(s, graph);
       var a = s.creator;
@@ -148,9 +150,11 @@ class StateRepr {
       const bookmark = (filter.bookmark ? (s.getAttr('starred', false) ? 2: -2) : 0);
       const tags = (filter.tags.length > 0 ? (s.getAttr('tags', []).some((d) => filter.tags.indexOf(d) >= 0) ? 2: -2) : 0);
       const is_selected = s === selected ? 3: 0;
-      const inpath = selected_path.indexOf(s) >= 0 ? Math.max(0,4-selected_path.indexOf(s)) : -2;
+      const inpath = selected_path.indexOf(s) >= 0 ? Math.max(-2.5,6-selected_path.indexOf(s)) : -2.5;
+
+      const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
-      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath;
+      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath + sizePenality;
 
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
       r.selected = s === selected;
@@ -340,7 +344,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.State).filter(this.data.states);
-    this.$node.selectAll('div.state').classed('select-'+type,(d: StateRepr) => selectedStates.indexOf(d.s) >= 0);
+    this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
+      const isSelected = selectedStates.indexOf(d.s) >= 0;
+      if (isSelected && type === idtypes.defaultSelectionType) {
+        //this.scrollIntoView();
+      }
+      return isSelected;
+    });
   };
 
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);

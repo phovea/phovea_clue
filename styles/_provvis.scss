@@ -7,6 +7,23 @@ $hover-color: darkgray;
 
 .provenance-layout-vis {
   position: relative;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+
+  &:first-child {
+    -webkit-flex: 0 0 auto;
+    flex: 0 0 auto;
+  }
+
+  > div:nth-of-type(2) {
+    overflow-x: auto;
+    max-height: 93vh;
+    -webkit-flex: 1 1 auto;
+    flex: 1 1 auto;
+  }
+
   svg {
     g.edges path {
       fill: none;
