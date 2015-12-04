@@ -16,6 +16,10 @@
   }
 
   > div:last-of-type {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
     text-align: center;
     div#player_controls {
       margin-left: auto;
@@ -210,7 +214,7 @@ div.stories {
     position: relative;
     display: -webkit-flex;
     display: flex;
-    margin: 0px 1em;
+    margin: 0 2px;
     margin-bottom: 2px;
 
     border-radius: 2px;

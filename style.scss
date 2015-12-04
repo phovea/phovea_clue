@@ -368,11 +368,25 @@ body {
     }
 
     aside.provenance-story-vis {
+      width: 14em;
       > div div.toolbar {
         display: none !important;
       }
+      div.stories {
+        max-height: 88vh;
+      }
+      div.story {
+        margin-left: 2px;
+        &:not(.placeholder) {
+          transition: height 100ms;
+          height: 3em !important;
+        }
+      }
       div.placeholder, div.dragger {
         visibility: hidden;
+      }
+      h2 i, form, div.line, div.duration,div.placeholder:last-of-type {
+        display: none;
       }
     }
   }
