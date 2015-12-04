@@ -239,6 +239,14 @@ export class CLUEWrapper extends events.EventHandler {
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
         render: r.render
       });
+      d3.select('aside.annotations > div:first-of-type').call(d3.behavior.drag().on('drag', function() {
+        var mouse = d3.mouse(this.parentElement.parentElement);
+        d3.select(this.parentElement).style({
+          left: mouse[0] +'px',
+          top: mouse[1] +'px'
+        });
+      }));
+
       d3.selectAll('aside.annotations button[data-ann]').on('click', function () {
         var create = this.dataset.ann;
         var ann;

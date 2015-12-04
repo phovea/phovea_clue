@@ -92,12 +92,15 @@ aside {
 
 aside.annotations {
   position: absolute;
-  bottom: 0;
+  top: 80vh;
   left: 0.2em;
   text-align: center;
   padding-bottom: 0.1em;
   background-color: $presentation-stage;
 
+  > div:first-of-type {
+    cursor: move;
+  }
   h2 {
     font-size: 13px;
     margin-bottom: 0.1em;
@@ -388,7 +391,7 @@ body {
       display: none;
     }
 
-    aside.provenance-multi-story-vis {
+    aside.provenance-vertical-story-vis {
       > div div.toolbar {
         display: none !important;
       }
