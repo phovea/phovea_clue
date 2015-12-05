@@ -40,6 +40,9 @@ function to_duration(d: number) {
 }
 
 function to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
+  if (!d) {
+    return d3.sum(story, (d) => d.duration);
+  }
   const i = story.indexOf(d);
   return story.slice(0,i).reduce((a,b) => a+b.duration, 0);
 }
@@ -375,10 +378,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.style(that.options.wh, height+'px');
         const change = that.duration2pixel.invert(height) - d.duration;
         const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
-        const stories = durations.data();
-        durations.select('div.duration span').text((k, j) => {
-          return to_duration(to_starting_time(k, stories) + (j > i ? change : 0));
+        const stories = toPath(that.story);
+        durations.select('div.duration span').text((k) => {
+          let index = stories.indexOf(k);
+          return to_duration(to_starting_time(k, stories) + (index > i ? change : 0));
         });
+        that.$node.select('div.story.placeholder div.duration span').text(to_duration(to_starting_time(null, stories) + change));
       }).on('dragend', function(d: provenance.SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style(that.options.wh),10);
@@ -464,6 +469,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
        <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract_all" title="add path to current state"><i class="fa fa-files-o"></i></button>
        </div>
+       <div class="duration"><span>00:00</span><i class="fa fa-circle"></i></div>
       `);
     $p.selectAll('button[data-add]').on('click', function() {
       var create = this.dataset.add;
@@ -557,7 +563,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $story_enter.append('div').classed('slabel', true);
 
     $story_enter.call(this.createToolbar.bind(this));
-    $story_enter.append('div').classed('duration', true);
+    $story_enter.append('div').classed('duration', true).html('<span></span><i class="fa fa-circle"></i>');
     $story_enter.append('div').classed('dragger', true)
       .call(this.changeDuration.bind(this))
       .call(this.dndSupport.bind(this));
@@ -575,10 +581,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
-    $stories.select('div.duration').html((d, i) => `<span>${to_duration(to_starting_time(d,story_raw))}</span><i class="fa fa-circle"></i>`);
+    $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
 
     //const $placeholders = $states.filter((d) => d.isPlaceholder);
+
+    $states.filter((d) => d.isLastPlaceholder).select('div.duration span').text(to_duration(to_starting_time(null, story_raw)));
 
     $states.exit().remove();
   }
