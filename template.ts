@@ -23,7 +23,7 @@ import storyvis = require('./storyvis2');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
-import login = require('../caleydo_security_flask/login')
+import login = require('../caleydo_security_flask/login');
 import session = require('../caleydo_core/session');
 import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 
@@ -71,7 +71,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
         const ts = graph.ts ? new Date(graph.ts) : 'Unknown';
         const nnodes = graph.size[0];
         const nedges = graph.size[1];
-        const locked = false;
+        //const locked = false;
         const $elem = $(`
             <div class="container-fluid">
             <div class="row">

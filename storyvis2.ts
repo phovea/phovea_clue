@@ -503,8 +503,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           }
           break;
         case 'extract_all':
-          var state = that.data.selectedStates()[0] || that.data.act;
-          let new2_ = that.data.extractSlide(state.path, false);
+          var state2 = that.data.selectedStates()[0] || that.data.act;
+          let new2_ = that.data.extractSlide(state2.path, false);
           if (last) {
             that.data.moveSlide(new2_, last, false);
           } else {
