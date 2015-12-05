@@ -7,6 +7,7 @@ import prov = require('../caleydo_provenance/main');
 import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import marked = require('marked');
+import {defaultSelectionType} from '../caleydo_core/idtype';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -23,7 +24,7 @@ export class Renderer {
 
   private prev = Promise.resolve(null);
 
-  private l = (event, state) => this.render(state);
+  private l = (event, state, type) => type === defaultSelectionType ? this.render(state) : null;
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
 
   private act : prov.SlideNode = null;
