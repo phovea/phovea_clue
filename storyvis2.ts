@@ -447,7 +447,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
 
-    $toolbar_enter.append('i').attr('class', 'fa fa-camera').attr('title','force update of preview').on('click', (d) => {
+    /*$toolbar_enter.append('i').attr('class', 'fa fa-camera').attr('title','force update of preview').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
       d3.event.preventDefault();
@@ -455,6 +455,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       this.update();
       return false;
     });
+    */
     $toolbar_enter.append('i').attr('class', 'fa fa-remove').attr('title','remove slide').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
