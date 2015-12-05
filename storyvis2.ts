@@ -86,12 +86,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if (!state) {
       return;
     }
-    const slide = cmode.getMode().exploration > 0.8 ? this.findSlideForState(state) : null;
-    const selected = this.data.selectedSlides();
+    const slide = cmode.getMode().exploration < 0.8 ? this.findSlideForState(state) : null;
+    const selected = this.data.selectedSlides(type);
     if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
       return;
     }
-    this.data.selectSlide(slide);
+    this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);
   };
 
   private options = {
