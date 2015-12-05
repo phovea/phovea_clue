@@ -11,6 +11,8 @@ declare var template:string;
 
 import C = require('../caleydo_core/main');
 import header = require('../wrapper_bootstrap_fontawesome/header');
+import datas = require('../caleydo_core/data');
+import vis = require('../caleydo_core/vis');
 import prov = require('../caleydo_provenance/main');
 import d3 = require('d3');
 import $ = require('jquery');
@@ -195,6 +197,33 @@ export class CLUEWrapper extends events.EventHandler {
         </li>`);
 
       this.header.insertCustomMenu(ul);
+
+      this.header.addMainMenu('Dump', () => {
+        this.graph.then((g) => {
+          console.log(g);
+          console.log(g.persist());
+        });
+        return false;
+      });
+      this.header.addMainMenu('Show', () => {
+        this.graph.then((g: prov.ProvenanceGraph) => {
+          return datas.create({
+            id : g.desc.id,
+            name: g.desc.name,
+            fqname: g.desc.fqname,
+            type : 'graph',
+            storage: 'given',
+            graph: g.backend
+          });
+        })
+          .then((proxy) => vis.list(proxy)[0].load().then((force) => {
+            let p = dialogs.generateDialog('Provenance Graph');
+            force.factory(proxy,p.body);
+            p.show();
+          }));
+
+        return false;
+      });
 
       this.graph = chooseProvenanceGraph(this.manager, $ul);
     }

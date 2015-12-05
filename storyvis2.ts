@@ -462,7 +462,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $p.html(`<div>
        <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-copy"></i></button>
+       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-clone"></i></button>
        </div>
       `);
     $p.selectAll('button[data-add]').on('click', function() {
