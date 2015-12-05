@@ -17,26 +17,86 @@ export class Renderer {
     animation: true,
     duration: 100,
     markdown: true,
-    renderSubtitle: true
+    renderSubtitle: true,
+    subtitlePattern : '${name}'
   };
 
   private prev = Promise.resolve(null);
 
-  private renderer;
+  private l = (event, state) => this.render(state);
+  private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
+
+  private act : prov.SlideNode = null;
+
+  private renderer = this.rendererImpl.bind(this);
 
   constructor(private $main:d3.Selection<any>, private graph:prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
 
-    this.renderer = (d:string) => modeFeatures.isEditable() && d.length === 0 ? '<i class="placeholder">Enter Text by Clicking (MarkDown supported)</i>' : (this.options.markdown ? marked(d) : d);
+    this.graph.on('select_slide', this.l);
+
+    C.onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
+
+    cmode.on('modeChanged', this.updateAnnotations);
+  }
+
+  private rendererImpl(d: string) {
+    if (modeFeatures.isEditable() && d.length === 0) {
+      return `<i class="placeholder">Enter Text by Clicking (MarkDown supported)</i>`;
+    }
+    if (this.act) {
+      let vars : any = {
+        name : this.act.name,
+        duration: this.act.duration,
+        slide_number : this.act.slideIndex
+      };
+      let s = this.act.state;
+      if (s) {
+        vars.state_name = s.name;
+        vars.state_notes = s.getAttr('notes');
+        let a = s.creator;
+        if (a) {
+          let aa = a.meta;
+          vars.action_name = aa.name;
+          vars.action_category = aa.category;
+          vars.action_operation = aa.operation;
+          vars.action_user = aa.user;
+          vars.action_ts = new Date(aa.timestamp);
+        }
+      }
+      d = this.replaceVariables(d, vars);
+    }
+    return (this.options.markdown ? marked(d) : d);
+  }
+
+  private replaceVariables(d: string, vars: { [key: string] : string }) {
+    return d.replace(/\$\{([^}]+)\}/gi, function (match, variable) {
+      var r = vars[variable];
+      if (r) {
+        return r;
+      }
+      return "$variable$";
+    });
+  }
+
+  private destroy() {
+    this.graph.off('select_slide', this.l);
+
+    cmode.off('modeChanged', this.updateAnnotations);
   }
 
   render(state:prov.SlideNode) {
+    if (this.act) {
+      this.act.off('push-annotations,attr-name,attr-duration', this.updateAnnotations);
+    }
     //create full chain
     this.prev = this.prev.then(() => {
       var takedown = this.hideOld();
+      this.act = state;
       if (!state) {
         return takedown;
       }
+      this.act.on('push-annotations,attr-name,attr-duration', this.updateAnnotations);
       var next = Promise.resolve(null);
       if (state.isTextOnly) {
         next = this.renderText(state);
@@ -50,34 +110,28 @@ export class Renderer {
 
   private renderAnnotationsImpl(state:prov.SlideNode) {
     const that = this;
-    const editable = modeFeatures.isEditable();
+    const editable = modeFeatures.isEditable() && state != null;
 
-    const $anns = this.$main.selectAll('div.annotation').data(state.annotations);
+    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : []);
     const $anns_enter = $anns.enter().append('div')
-      .attr('class',(d) => d.type+'-annotation annotation')
-      .classed('editable',editable);
+      .attr('class',(d) => d.type+'-annotation annotation');
 
     const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
-    if (editable) {
-      //move
-      $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-arrows').call(d3.behavior.drag()
-        //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
-        .on('drag', function (d:prov.IStateAnnotation, i) {
-          var mouse = d3.mouse(this.parentNode.parentNode);
-          const bounds = C.bounds(this.parentNode.parentNode);
-          d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
-          state.setAnnotation(i, d);
-          d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
-        }))
-        .on('contextmenu',function (d:prov.IStateAnnotation, i) {
-          d3.select(this.parentNode).remove();
-          state.removeAnnotation(i);
-          d3.event.preventDefault();
-        });
-
-      //remove
-      //$anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-remove').on('click',
-    }
+    //move
+    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-arrows').call(d3.behavior.drag()
+      //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
+      .on('drag', function (d:prov.IStateAnnotation, i) {
+        var mouse = d3.mouse(this.parentNode.parentNode);
+        const bounds = C.bounds(this.parentNode.parentNode);
+        d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
+        state.setAnnotation(i, d);
+        d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
+      }))
+      .on('contextmenu',function (d:prov.IStateAnnotation, i) {
+        d3.select(this.parentNode).remove();
+        state.removeAnnotation(i);
+        d3.event.preventDefault();
+      });
 
 
     //Text
@@ -146,27 +200,25 @@ export class Renderer {
         $svg.select('g').attr('transform', (d) => `translate(${-Math.min(0,d.at[0])+15},${-Math.min(0,d.at[1])+15})`);
       }
 
-      if (editable) {
-        $svg_enter.select('g').append('circle').classed('anchor',true).attr('r', 5);
-        $svg.select('circle').style({
-          cx: (d) => d.at[0],
-          cy: (d) => d.at[1]
-        }).call(d3.behavior.drag()
-          .on('drag', function (d:prov.IArrowStateAnnotation, i) {
-            const e:any = d3.event;
-            d.at = [e.x, e.y];
-            state.setAnnotation(i, d);
-            d3.select(this).style({
-              cx: d.at[0],
-              cy: d.at[1]
-            });
-            $svg.select('line[data-index="'+i+'"]').attr({
-              x2: d.at[0],
-              y2: d.at[1]
-            });
-            updateShift();
-          }));
-      }
+      $svg_enter.select('g').append('circle').classed('anchor',true).attr('r', 5);
+      $svg.select('circle').style({
+        cx: (d) => d.at[0],
+        cy: (d) => d.at[1]
+      }).call(d3.behavior.drag()
+        .on('drag', function (d:prov.IArrowStateAnnotation, i) {
+          const e:any = d3.event;
+          d.at = [e.x, e.y];
+          state.setAnnotation(i, d);
+          d3.select(this).style({
+            cx: d.at[0],
+            cy: d.at[1]
+          });
+          $svg.select('line[data-index="'+i+'"]').attr({
+            x2: d.at[0],
+            y2: d.at[1]
+          });
+          updateShift();
+        }));
       updateShift();
       $svg.select('line').attr({
         'data-index': (d,i) => i,
@@ -209,7 +261,7 @@ export class Renderer {
     $anns.style({
       left: (d:prov.IStateAnnotation) => d.pos[0] + '%',
       top: (d:prov.IStateAnnotation) => d.pos[1] + '%'
-    });
+    }).classed('editable',editable);
 
     $anns.exit().remove();
 
@@ -248,7 +300,7 @@ export class Renderer {
 
   renderSubtitle(overlay:prov.SlideNode) {
     return new Promise((resolve) => {
-      this.$main.append('div').attr('class', 'subtitle-annotation').html(this.renderer(overlay.name));
+      this.$main.append('div').attr('class', 'subtitle-annotation').html(this.renderer(this.options.subtitlePattern));
       resolve(this.$main.node());
     });
   }

@@ -81,7 +81,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         this.scrollIntoView();
       }
       return isSelected;
-    });;
+    });
   };
 
   private options = {
@@ -273,13 +273,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     var selected = this.data.selectedSlides()[0];
     if (selected) {
       selected.pushAnnotation(ann);
-      this.options.render(selected);
     }
   }
 
   onSlideClick(d: provenance.SlideNode) {
     this.data.selectSlide(d);
-    this.options.render(d);
   }
 
 

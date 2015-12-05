@@ -336,7 +336,7 @@ body {
 
   &[data-clue='E'] {
     main {
-      div.annotation, div.add-text-annotation {
+      div.annotation, div.add-text-annotation, div.subtitle-annotation {
         display: none !important;
       }
     }
