@@ -68,33 +68,33 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
         const graph = d3.select(this).datum();
         const creator = graph.creator;
         const description = graph.description;
-        const ts = graph.ts;
+        const ts = graph.ts ? new Date(graph.ts) : 'Unknown';
         const nnodes = graph.size[0];
         const nedges = graph.size[1];
         const locked = false;
         const $elem = $(`
             <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-3">Creator:</div>
+                <div class="col-sm-3">creator:</div>
                 <div class="col-sm-9">${creator}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">Creationdate:</div>
+                <div class="col-sm-3">creation date:</div>
                 <div class="col-sm-9">${ts}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">Description:</div>
+                <div class="col-sm-3">description:</div>
                 <div class="col-sm-9">${description}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">Nodes/Edges:</div>
+                <div class="col-sm-3">nodes/edges:</div>
                 <div class="col-sm-9">${nnodes}/${nedges}</div>
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
                     <button class="btn btn-primary" ${session.retrieve('logged_in',false)===true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone"></span> Clone</button>
-                    <button class="btn btn-danger" data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in',false)===true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
                 </div>
             </div>
         </div>`);
@@ -103,16 +103,14 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
             if (deleteIt) {
               manager.delete(graph);
             }
-            return false;
           });
-          return false;
         });
         $elem.find('button.btn-primary').on('click', function() {
           const isSelect = this.dataset.action === 'select';
           if (isSelect) {
             loadGraph(graph);
           } else {
-            manager.cloneLocal(graph).then(loadGraph);
+            manager.cloneLocal(graph).then((graph) => loadGraph(graph.desc));
           }
           return false;
         });
