@@ -107,7 +107,7 @@ export class Renderer {
       if (state.isTextOnly) {
         next = this.renderText(state);
       } else {
-        next = this.graph.jumpTo(state.state);
+        next = this.graph.jumpTo(state.state, 2000);
       }
       return Promise.all([takedown, next, this.options.renderSubtitle ? this.renderSubtitle(state) : Promise.resolve(null), this.renderAnnotations(state)]); //, this.renderArrows(state)]);
     });

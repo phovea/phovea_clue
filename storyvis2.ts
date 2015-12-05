@@ -325,7 +325,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         if (d_story === null) { //at the beginning
           let bak = that.story;
           that.story = new_;
-          that.data.insertIntoSlide(new_, bak, true);
+          if (bak) {
+            that.data.insertIntoSlide(new_, bak, true);
+          }
         } else {
           that.data.insertIntoSlide(new_, d_story, false);
         }

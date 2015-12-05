@@ -169,7 +169,8 @@ export class CLUEWrapper extends events.EventHandler {
     app: 'CLUE',
     application: '/clue_demo',
     id: 'clue_demo',
-    recordSelectionTypes: 'selected'
+    recordSelectionTypes: 'selected',
+    animatedSelections: false
   };
 
   private manager : prov.MixedStorageProvenanceGraphManager;
@@ -269,7 +270,8 @@ export class CLUEWrapper extends events.EventHandler {
       prov_sel.create(graph, this.options.recordSelectionTypes, {
         filter: function (idtype) {
           return idtype && idtype.name[0] !== '_';
-        }
+        },
+        animated: this.options.animatedSelections
       });
 
       this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
