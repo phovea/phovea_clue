@@ -23,24 +23,39 @@ import storyvis = require('./storyvis2');
 import events = require('../caleydo_core/event');
 import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
-import login = require('../caleydo_security_flask/login');
+import login = require('../caleydo_security_flask/login')
+import session = require('../caleydo_core/session');
 import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 
-function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
+function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
   const graph = C.hash.getProp('clue_graph', null);
+  $ul.select('#provenancegraph_new_remote').on('click', () => {
+    d3.event.preventDefault();
+    if (session.retrieve('logged_in') === true) {
+      C.hash.removeProp('clue_slide', false);
+      C.hash.removeProp('clue_state', false);
+      C.hash.setProp('clue_graph', 'new_remote');
+      window.location.reload();
+    }
+  });
   $ul.select('#provenancegraph_new').on('click', () => {
     C.hash.removeProp('clue_slide', false);
     C.hash.removeProp('clue_state', false);
     C.hash.setProp('clue_graph', 'new');
     window.location.reload();
-      d3.event.preventDefault();
+    d3.event.preventDefault();
   });
+
+  function loadGraph(desc : any) {
+    C.hash.setProp('clue_graph', desc.id);
+    window.location.reload();
+  }
+
   return manager.list().then((list) => {
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
     $list.enter().insert('li', ':first-child').classed('graph',true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
-      C.hash.setProp('clue_graph', d.id);
-      window.location.reload();
       d3.event.preventDefault();
+      loadGraph(d);
     });
     (<any>$('#provenancegraph_list li.graph a')).popover({
       html: true,
@@ -77,8 +92,8 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" data-toggle="modal"><span class="fa fa-open"></span> Select</button>
-                    <button class="btn btn-warning" data-toggle="modal"><span class="fa fa-${locked ? 'unlock' : 'lock'}"></span> Lock</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in',false)===true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
+                    <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone"></span> Clone</button>
                     <button class="btn btn-danger" data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
                 </div>
             </div>
@@ -86,12 +101,20 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
         $elem.find('button.btn-danger').on('click', () => {
           dialogs.areyousure('Are you sure to delete: "'+graph.name+'"').then((deleteIt) => {
             if (deleteIt) {
-              //TODO
+              manager.delete(graph);
             }
+            return false;
           });
+          return false;
         });
-        $elem.find('button.btn-warning').on('click', () => {
-          //TODO lock
+        $elem.find('button.btn-primary').on('click', function() {
+          const isSelect = this.dataset.action === 'select';
+          if (isSelect) {
+            loadGraph(graph);
+          } else {
+            manager.cloneLocal(graph).then(loadGraph);
+          }
+          return false;
         });
         return $elem;
       }
@@ -104,12 +127,19 @@ function chooseProvenanceGraph(manager: prov.IProvenanceGraphManager, $ul: d3.Se
       }
     });
 
+    const loggedIn = session.retrieve('logged_in',false) === true;
+    if (graph === 'new_remote' && loggedIn) {
+      return manager.createRemote();
+    }
     if (graph === null || graph === 'new') {
-      return manager.create();
+      return manager.createLocal();
     }
     const desc = list.filter((d) => d.id === graph)[0];
     if (desc) {
-      return manager.get(desc);
+      if ((<any>desc).local || loggedIn) {
+        return manager.get(desc);
+      }
+      return manager.cloneLocal(desc);
     }
     return manager.create();
   }).then((graph) => {
@@ -144,7 +174,7 @@ export class CLUEWrapper extends events.EventHandler {
     recordSelectionTypes: 'selected'
   };
 
-  private manager : prov.IProvenanceGraphManager;
+  private manager : prov.MixedStorageProvenanceGraphManager;
 
   graph: Promise<prov.ProvenanceGraph>;
   header: header.AppHeader;
@@ -164,18 +194,11 @@ export class CLUEWrapper extends events.EventHandler {
       injectHeadlessSupport(this);
       d3.select('body').classed('headless', true);
     }
-
-    if (C.hash.getProp('clue_store','local') === 'local') {
-      this.manager = new prov.LocalStorageProvenanceGraphManager({
+    this.manager = new prov.MixedStorageProvenanceGraphManager({
         prefix: this.options.id,
         storage: sessionStorage,
         application: this.options.application
       });
-    } else {
-      this.manager = new prov.RemoteStorageProvenanceGraphManager({
-        application: this.options.application
-      });
-    }
 
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
       app: this.options.app,
@@ -193,6 +216,7 @@ export class CLUEWrapper extends events.EventHandler {
             <ul class="dropdown-menu" id="provenancegraph_list">
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="provenancegraph_new"><span class="glyphicon glyphicon-upload"></span> New ...</a></li>
+                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote"><span class="glyphicon glyphicon-upload"></span> New Remote...</a></li>
             </ul>
         </li>`);
 
@@ -429,13 +453,17 @@ export class CLUEWrapper extends events.EventHandler {
         $('#login_menu').hide();
         var $base = $('#user_menu').show();
 
+        session.store('logged_in', !error);
         if (!error) {
+          session.store('username', user.name);
+          session.store('user', user);
           $form.removeClass('has-error');
           $base.find('> a:first').text(user.name);
 
           (<any>$('#loginDialog')).modal('hide');
 
-          $('.login_required.disabled').removeClass('disabled');
+          $('.login_required.disabled').removeClass('disabled').attr('disabled',null);
+
         } else {
           that.header.ready();
           $form.addClass('has-error');
@@ -448,6 +476,7 @@ export class CLUEWrapper extends events.EventHandler {
   $('#logout_link').on('click', function () {
     this.header.wait();
     login.logout().then(function() {
+      session.store('logged_in', false);
       $('#user_menu').hide();
       $('#login_menu').show();
       $('.login_required').addClass('disabled');

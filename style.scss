@@ -318,6 +318,11 @@ body {
 
     a {
       color: #5d5b5b;
+
+      &.disabled {
+        color: #f4f2f2;
+        pointer-events: none;
+      }
     }
   }
 
