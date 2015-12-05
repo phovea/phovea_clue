@@ -2,6 +2,8 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
+@import "vars";
+
 .provenance-story-vis {
   display: -webkit-flex;
   display: flex;
@@ -272,16 +274,16 @@ div.stories {
       border-radius: 5px;
 
       &.select-selected {
-        border-color: black;
+        border-color: $select-color;
         div.duration {
-          color: black;
+          color: $select-color;
           font-weight: bold;
         }
       }
       &.select-hovered {
-        border-color: darkgray;
+        border-color: $hover-color;
         div.duration {
-          color: black;
+          color: $hover-color;
           font-weight: bold;
         }
       }

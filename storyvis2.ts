@@ -73,22 +73,30 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
 
-  private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
-    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.Slide).filter(this.data.stories);
+  private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string) => {
     this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,function (d: provenance.SlideNode) {
-      const isSelected = selectedStates.indexOf(d) >= 0;
+      const isSelected = d === slide;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
       }
       return isSelected;
     });
   };
+  private onStateSelectionChanged = (event: any, state: provenance.StateNode, type: string) => {
+    if (!state) {
+      return;
+    }
+    const slide = cmode.getMode().exploration > 0.8 ? this.findSlideForState(state) : null;
+    const selected = this.data.selectedSlides();
+    if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
+      return;
+    }
+    this.data.selectSlide(slide);
+  };
 
   private options = {
     scale: [1, 1],
     rotate: 0,
-    render: (state: provenance.SlideNode) => Promise.resolve(null),
-
 
     class: 'vertical',
     xy: 'y',
@@ -111,9 +119,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
 
-    this.player = new player.Player(data, this.node.querySelector('#player_controls'), {
-      render: this.options.render
-    });
+    this.player = new player.Player(data, this.node.querySelector('#player_controls'));
 
     this.bind();
 
@@ -122,15 +128,24 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.update();
   }
 
+  private findSlideForState(state: provenance.StateNode) {
+    if (!this.story) {
+      return null;
+    }
+    return C.search(toPath(this.story), (s) => s.state === state);
+  }
+
   private bind() {
-    this.data.on('select', this.onSelectionChanged);
+    this.data.on('select_slide', this.onSelectionChanged);
+    this.data.on('select_state', this.onStateSelectionChanged);
     this.data.on('start_slide,destroy_slide', this.trigger);
     cmode.on('modeChanged', this.trigger);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('select', this.onSelectionChanged);
+    this.data.off('select_slide', this.onSelectionChanged);
+    this.data.off('select_state', this.onStateSelectionChanged);
     this.data.off('start_slide,destroy_slide', this.trigger);
     cmode.off('modeChanged', this.trigger);
   }

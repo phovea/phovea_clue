@@ -14,13 +14,7 @@ body, html {
   -webkit-print-color-adjust: exact;
 }
 
-$exploration-stage: #e3e3e3;
-$exploration-stage-hover: #b3b3b3;
-
-$authoring-stage: #e3e3e3;
-$authoring-stage-hover: #b3b3b3;
-$presentation-stage: #e3e3e3;
-$presentation-stage-hover: #b3b3b3;
+@import "styles/vars";
 
 label {
 
@@ -259,9 +253,6 @@ $clue_triangle_width: 30px;
     }
   }
 }
-
-$select-color: #db8f00;
-$hover-color: #ffdd05;
 
 /*.select-selected {
   //svg variant
