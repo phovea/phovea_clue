@@ -9,6 +9,11 @@ body, html {
   height: 100%;
 }
 
+body {
+  overflow-y: hidden;
+
+}
+
 * {
   //print precisely
   -webkit-print-color-adjust: exact;
