@@ -77,7 +77,7 @@ export class Renderer {
       if (r) {
         return r;
       }
-      return "$variable$";
+      return '${'+variable+'}?';
     });
   }
 
