@@ -17,11 +17,13 @@ import utils = require('./utils');
 
 
 function extractTags(text: string) {
-  const matches = /\S*#(?:\[[^\]]+\]|\S+)/.exec(text);
-  if (matches && matches.length > 0) {
-    return matches.map((m) => m);
+  var regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
+  var match;
+  const matches = [];
+  while (match = regex.exec(text)) {
+    matches.push(match[1]);
   }
-  return [];
+  return matches;
 }
 
 enum LevelOfDetail {
@@ -315,13 +317,20 @@ class StateRepr {
       </div>
       <div class="form-group">
         <label>Notes</label>
-        <textarea class="form-control" placeholder="place for notes...">${notes}</textarea>
+        <textarea class="form-control" placeholder="place for notes... (#tags will be automatically extracted)">${notes}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Extracted Tags</label>
+        <input type="text" class="form-control readonly" readonly="readonly" value="${extractTags(notes).join(' ')}">
       </div>
     </form>`);
     $body.select('span.star').on('click', function() {
       d.s.setAttr('starred',!d.s.getAttr('starred',false));
       $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
       return false;
+    });
+    $body.select('textarea').on('input', function() {
+      $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
 
     dia.onHide(() => {
