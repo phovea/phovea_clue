@@ -77,26 +77,26 @@ def create_via_phantomjs(url, width, height, format):
   return obj
 
 
-def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080):
+def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
   url = generate_url(app, prov_id, state)
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
   obj = mc.get(key)
-  if not obj:
+  if not obj or force:
     print 'requesting url', url
     obj = create_via_selenium(url, width, height)
     # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
   return obj
 
-def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080):
+def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, force=False):
   url = generate_slide_url(app, prov_id, slide)
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
   obj = mc.get(key)
-  if not obj:
+  if not obj or force:
     print 'requesting url', url
     obj = create_via_selenium(url, width, height)
     # obj = create_via_phantomjs(url, width, height, format)
@@ -110,8 +110,9 @@ def fix_format(format):
 def create_screenshot(app, prov_id, state, format):
   width = flask.request.args.get('width', 1920)
   height = flask.request.args.get('height', 1080)
+  force = flask.request.args.get('force',None) is not None
 
-  s = _create_screenshot_impl(app, prov_id, state, format, width, height)
+  s = _create_screenshot_impl(app, prov_id, state, format, width, height, force)
   return flask.Response(s, mimetype='image/'+fix_format(format))
 
 
@@ -136,14 +137,15 @@ def to_thumbnail(s, width, format):
 def create_thumbnail(app, prov_id, state, format):
   format = fix_format(format)
   width = int(flask.request.args.get('width', 128))
+  force = flask.request.args.get('force',None) is not None
 
   url = generate_url(app, prov_id, state)
 
   key = mc_prefix + url + 't' + str(width)
 
   obj = mc.get(key)
-  if not obj:
-    s = _create_screenshot_impl(app, prov_id, state, format)
+  if not obj or force:
+    s = _create_screenshot_impl(app, prov_id, state, format, force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
@@ -153,22 +155,24 @@ def create_thumbnail(app, prov_id, state, format):
 def create_preview(app, prov_id, slide, format):
   width = flask.request.args.get('width', 1920)
   height = flask.request.args.get('height', 1080)
+  force = flask.request.args.get('force',None) is not None
 
-  s = _create_preview_impl(app, prov_id, slide, format, width, height)
+  s = _create_preview_impl(app, prov_id, slide, format, width, height, force)
   return flask.Response(s, mimetype='image/'+fix_format(format))
 
 @app.route('/preview_thumbnail/<app>/<prov_id>/<slide>.<format>')
 def create_preview_thumbnail(app, prov_id, slide, format):
   format = fix_format(format)
   width = int(flask.request.args.get('width', 128))
+  force = flask.request.args.get('force',None) is not None
 
   url = generate_slide_url(app, prov_id, slide)
 
   key = mc_prefix + url + 't' + str(width)
 
   obj = mc.get(key)
-  if not obj:
-    s = _create_preview_impl(app, prov_id, slide, format)
+  if not obj or force:
+    s = _create_preview_impl(app, prov_id, slide, format, force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
