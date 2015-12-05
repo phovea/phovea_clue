@@ -24,7 +24,7 @@ export class Renderer {
 
   private prev = Promise.resolve(null);
 
-  private l = (event, state, type) => type === defaultSelectionType ? this.render(state) : null;
+  private l = (event, state) => this.render(state);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
 
   private act : prov.SlideNode = null;
@@ -34,7 +34,7 @@ export class Renderer {
   constructor(private $main:d3.Selection<any>, private graph:prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
 
-    this.graph.on('select_slide', this.l);
+    this.graph.on('select_slide_'+defaultSelectionType, this.l);
 
     C.onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
 
@@ -81,7 +81,7 @@ export class Renderer {
   }
 
   private destroy() {
-    this.graph.off('select_slide', this.l);
+    this.graph.off('select_slide_'+defaultSelectionType, this.l);
 
     cmode.off('modeChanged', this.updateAnnotations);
   }
