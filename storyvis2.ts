@@ -438,7 +438,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
 
-    $toolbar_enter.append('i').attr('class', 'fa fa-copy').on('click', (d) => {
+    $toolbar_enter.append('i').attr('class', 'fa fa-copy').attr('title','clone slide').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
       d3.event.preventDefault();
@@ -446,7 +446,16 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       this.update();
       return false;
     });
-    $toolbar_enter.append('i').attr('class', 'fa fa-remove').on('click', (d) => {
+
+    $toolbar_enter.append('i').attr('class', 'fa fa-camera').attr('title','force update of preview').on('click', (d) => {
+      //remove me
+      d3.event.stopPropagation();
+      d3.event.preventDefault();
+      this.data.moveSlide(this.data.cloneSingleSlideNode(d), d, false);
+      this.update();
+      return false;
+    });
+    $toolbar_enter.append('i').attr('class', 'fa fa-remove').attr('title','remove slide').on('click', (d) => {
       //remove me
       d3.event.stopPropagation();
       d3.event.preventDefault();
@@ -579,7 +588,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.attr('title', (d) => `(${to_duration(d.duration)})\n${d.name}`);
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.preview_thumbnail_url(this.data, d)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
