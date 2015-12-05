@@ -462,7 +462,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $p.html(`<div>
        <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="clone" title="clone current slide"><i class="fa fa-clone"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract_all" title="add path to current state"><i class="fa fa-files-o"></i></button>
        </div>
       `);
     $p.selectAll('button[data-add]').on('click', function() {
@@ -486,9 +486,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
             that.story = new_;
           }
           break;
-        case 'clone':
+        case 'extract_all':
+          var state = that.data.selectedStates()[0] || that.data.act;
+          let new2_ = that.data.extractSlide(state.path, false);
           if (last) {
-            that.data.moveSlide(that.data.cloneSingleSlideNode(last), last, false);
+            that.data.moveSlide(new2_, last, false);
+          } else {
+            that.story = new2_;
           }
           break;
       }
