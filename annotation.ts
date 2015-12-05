@@ -314,9 +314,10 @@ export class Renderer {
   }
 
   renderText(overlay:prov.SlideNode) {
-    return new Promise((resolve) => {
+    const t= overlay.transition;
+    return C.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
-      resolve(this.$main.node());
+      return this.$main.node();
     });
   }
 }
