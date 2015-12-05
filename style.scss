@@ -283,7 +283,7 @@ body.headless {
     left: 0 !important;
   }
   nav, aside, footer, header {
-    display: none;
+    display: none !important;
   }
 }
 
