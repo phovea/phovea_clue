@@ -130,6 +130,17 @@ div.stories {
           cursor: ns-resize;
         }
       }
+      div.dragger-transition {
+        position: absolute;
+        top: -2px;
+        height: 5px;
+        left: 0;
+        right: 0;
+
+        &:hover:not(.hover) {
+          cursor: ns-resize;
+        }
+      }
 
       &.placeholder:not(:last-of-type) {
         height: 5px;
@@ -225,7 +236,7 @@ div.stories {
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
 
-    &.placeholder, div.dragger {
+    &.placeholder, div.dragger, div.dragger-transition {
       //border: 2px solid #efefef;
       -webkit-flex: 0 0 auto;
       flex: 0 0 auto;
@@ -355,7 +366,7 @@ div.stories {
       div.slabel {
         display: none;
       }
-      &.placeholder, div.dragger {
+      &.placeholder, div.dragger, div.dragger-transition {
         display: none;
       }
     }
@@ -363,7 +374,7 @@ div.stories {
 
   &.small {
     div.story {
-      div.preview, div.slabel, &.placeholder, div.duration, div.dragger {
+      div.preview, div.slabel, &.placeholder, div.duration, div.dragger, div.dragger-transition {
         display: none;
       }
 

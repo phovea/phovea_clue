@@ -41,10 +41,10 @@ function to_duration(d: number) {
 
 function to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
   if (!d) {
-    return d3.sum(story, (d) => d.duration);
+    return d3.sum(story, (d) => d.duration + d.transition);
   }
   const i = story.indexOf(d);
-  return story.slice(0,i).reduce((a,b) => a+b.duration, 0);
+  return story.slice(0,i).reduce((a,b) => a+b.duration+b.transition, 0);
 }
 
 enum LevelOfDetail {
@@ -103,10 +103,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     class: 'vertical',
     xy: 'y',
-    wh: 'height'
+    wh: 'height',
+    topleft: 'top'
   };
 
-  private duration2pixel = d3.scale.linear().domain([0,10000]).range([20, 220]);
+  static MIN_HEIGHT = 20;
+  private duration2pixel = d3.scale.linear().domain([0,10000]).range([VerticalStoryVis.MIN_HEIGHT, 220]);
 
   story: provenance.SlideNode = null;
 
@@ -118,6 +120,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if (this.options.class === 'horizontal') {
       this.options.xy = 'x';
       this.options.wh = 'width';
+      this.options.topleft = 'left';
     }
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
@@ -393,6 +396,31 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       }));
   }
 
+  private changeTransition($elem: d3.Selection<provenance.SlideNode>) {
+    const that = this;
+    $elem.call(d3.behavior.drag()
+      .origin(() => ({ x : 0, y : 0}))
+      .on('drag', function(d: provenance.SlideNode, i) {
+        //update the height of the slide node
+        const e : any = d3.event;
+        const $elem = d3.select((<Element>this).parentElement);
+        const offset = Math.max(0,that.duration2pixel(d.transition)-VerticalStoryVis.MIN_HEIGHT+e[that.options.xy]);
+        $elem.style('margin-'+that.options.topleft, offset+'px');
+        const change = that.duration2pixel.invert(offset+VerticalStoryVis.MIN_HEIGHT) - d.transition;
+        const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
+        const stories = toPath(that.story);
+        durations.select('div.duration span').text((k) => {
+          let index = stories.indexOf(k);
+          return to_duration(to_starting_time(k, stories) + (index >= i ? change : 0));
+        });
+        that.$node.select('div.story.placeholder div.duration span').text(to_duration(to_starting_time(null, stories) + change));
+      }).on('dragend', function(d: provenance.SlideNode) {
+        //update the stored duration just once
+        const h = parseInt(d3.select((<Element>this).parentElement).style('margin-'+that.options.topleft),10);
+        d.transition = that.duration2pixel.invert(h+VerticalStoryVis.MIN_HEIGHT);
+      }));
+  }
+
   private storyInteraction(elem: d3.Selection<ISlideNodeRepr>) {
     const graph = this.data;
 
@@ -579,6 +607,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $story_enter.append('div').classed('dragger', true)
       .call(this.changeDuration.bind(this))
       .call(this.dndSupport.bind(this));
+    $story_enter.append('div').classed('dragger-transition', true)
+      .call(this.changeTransition.bind(this));
 
     $placeholder_enter.call(this.dndSupport.bind(this));
     {
@@ -589,12 +619,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
-    $stories.attr('title', (d) => `(${to_duration(d.duration)})\n${d.name}`);
+    $stories.attr('title', (d) => d.name+'\n'+(d.transition > 0 ? '('+to_duration(d.transition)+')' : '')+'('+to_duration(d.duration)+')');
     //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
+    $stories.style('margin-'+this.options.topleft, (d) => this.duration2pixel(d.transition)-VerticalStoryVis.MIN_HEIGHT+'px');
 
     //const $placeholders = $states.filter((d) => d.isPlaceholder);
 

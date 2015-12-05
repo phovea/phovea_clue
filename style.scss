@@ -378,7 +378,7 @@ body {
           height: 3em !important;
         }
       }
-      div.placeholder, div.dragger {
+      div.placeholder, div.dragger, div.dragger-transition {
         visibility: hidden;
       }
       h2 i, form, div.line, div.duration,div.placeholder:last-of-type {
