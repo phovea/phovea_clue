@@ -206,7 +206,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       while(story_start.previous) {
         story_start = story_start.previous;
       }
-      this.story = story;
+      this.story = story_start;
       this.data.selectSlide(story);
     } else {
       this.story = null;
