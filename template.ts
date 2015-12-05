@@ -266,6 +266,9 @@ export class CLUEWrapper extends events.EventHandler {
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
         render: r.render
       });
+      graph.on('select_slide_selected', (event, state) => {
+        d3.select('aside.annotations').style('display', state ? null : 'none');
+      });
       d3.select('aside.annotations > div:first-of-type').call(d3.behavior.drag().on('drag', function() {
         var mouse = d3.mouse(this.parentElement.parentElement);
         d3.select(this.parentElement).style({
