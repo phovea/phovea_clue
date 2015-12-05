@@ -44,7 +44,7 @@ function to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]
     return d3.sum(story, (d) => d.duration + d.transition);
   }
   const i = story.indexOf(d);
-  return story.slice(0,i).reduce((a,b) => a+b.duration+b.transition, 0);
+  return story.slice(0,i).reduce((a,b) => a+b.duration+b.transition, d.transition);
 }
 
 enum LevelOfDetail {
