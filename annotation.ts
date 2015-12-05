@@ -26,6 +26,7 @@ export class Renderer {
 
   private l = (event, state) => this.render(state);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
+  private rerender = () => this.render(this.act);
 
   private act : prov.SlideNode = null;
 
@@ -38,7 +39,7 @@ export class Renderer {
 
     C.onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
 
-    cmode.on('modeChanged', this.updateAnnotations);
+    cmode.on('modeChanged', this.rerender);
   }
 
   private rendererImpl(d: string) {
@@ -83,7 +84,7 @@ export class Renderer {
   private destroy() {
     this.graph.off('select_slide_'+defaultSelectionType, this.l);
 
-    cmode.off('modeChanged', this.updateAnnotations);
+    cmode.off('modeChanged', this.rerender);
   }
 
   render(state:prov.SlideNode) {
@@ -98,6 +99,10 @@ export class Renderer {
         return takedown;
       }
       this.act.on('push-annotations,attr-name,attr-duration', this.updateAnnotations);
+
+      if (cmode.getMode().exploration > 0.8) {
+        return takedown;
+      }
       var next = Promise.resolve(null);
       if (state.isTextOnly) {
         next = this.renderText(state);
@@ -113,13 +118,13 @@ export class Renderer {
     const that = this;
     const editable = modeFeatures.isEditable() && state != null;
 
-    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : []);
+    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d,i) => d.type+i);
     const $anns_enter = $anns.enter().append('div')
       .attr('class',(d) => d.type+'-annotation annotation');
 
     const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
     //move
-    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default fa fa-arrows').call(d3.behavior.drag()
+    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
       //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
       .on('drag', function (d:prov.IStateAnnotation, i) {
         var mouse = d3.mouse(this.parentNode.parentNode);
@@ -127,8 +132,10 @@ export class Renderer {
         d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
         state.setAnnotation(i, d);
         d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
-      }))
-      .on('contextmenu',function (d:prov.IStateAnnotation, i) {
+      }));
+
+    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
+      .on('click', function (d:prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotation(i);
         d3.event.preventDefault();
@@ -244,7 +251,7 @@ export class Renderer {
       });
 
       //resize
-      $frames_enter.append('button').attr('tabindex',-1).attr('class', 'btn btn-default fa fa-expand fa-flip-horizontal')
+      $frames_enter.append('button').attr('tabindex',-1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
           .on('drag', function (d:prov.IFrameStateAnnotation, i) {
             var mouse = d3.mouse(this.parentNode.parentNode);

@@ -27,8 +27,13 @@
   }
 }
 
-main.hide-all-non-annotations > *:not(.annotation, .subtitle-annotation) {
-  display: none !important;
+main.hide-all-non-annotations {
+  > * {
+    visibility: hidden !important;
+  }
+  .annotation, .subtitle-annotation {
+    visibility: visible !important;
+  }
 }
 
 .text-overlay, .text-annotation {
@@ -76,6 +81,11 @@ div.annotation {
     &.fa-arrows {
       top: -1.2em;
       left: -1.2em;
+      cursor: move;
+    }
+    &.fa-times {
+      top: -1.2em;
+      left: 1.0em;
     }
     &.fa-rotate-right {
       bottom: -1.2em;
