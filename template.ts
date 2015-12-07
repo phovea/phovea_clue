@@ -221,30 +221,35 @@ export class CLUEWrapper extends events.EventHandler {
 
       this.header.insertCustomMenu(ul);
 
-      this.header.addMainMenu('Dump', () => {
+      d3.select(this.header.options).append('button').text('Dump').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g) => {
           console.log(g);
           console.log(g.persist());
         });
         return false;
       });
-      this.header.addMainMenu('Show', () => {
+      d3.select(this.header.options).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g: prov.ProvenanceGraph) => {
-          return datas.create({
-            id : g.desc.id,
-            name: g.desc.name,
-            fqname: g.desc.fqname,
-            type : 'graph',
-            storage: 'given',
-            graph: g.backend
+            return datas.create({
+              id : g.desc.id,
+              name: g.desc.name,
+              fqname: g.desc.fqname,
+              type : 'graph',
+              storage: 'given',
+              graph: g.backend
+            });
+          })
+          .then((proxy) => {
+            const l = vis.list(proxy);
+            if (l.length <= 0) {
+              return;
+            }
+            l[0].load().then((force) => {
+              let p = dialogs.generateDialog('Provenance Graph');
+              force.factory(proxy,p.body);
+              p.show();
+            });
           });
-        })
-          .then((proxy) => vis.list(proxy)[0].load().then((force) => {
-            let p = dialogs.generateDialog('Provenance Graph');
-            force.factory(proxy,p.body);
-            p.show();
-          }));
-
         return false;
       });
 
