@@ -76,7 +76,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
 
-  private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string) => {
+  private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string, op: any, extras) => {
     this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,function (d: provenance.SlideNode) {
       const isSelected = d === slide;
       if (isSelected && type === idtypes.defaultSelectionType) {
@@ -84,6 +84,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       }
       return isSelected;
     });
+    if (type == idtypes.defaultSelectionType) {
+      this.updateTimeIndicator(slide, extras.withTransition !== false);
+    }
   };
   private onStateSelectionChanged = (event: any, state: provenance.StateNode, type: string) => {
     if (!state) {
@@ -250,7 +253,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       </div>
       <div class="stories ${this.options.class}">
         <div class="line"></div>
-        <div class="time_marker"></div>
+        <div class="time_marker"><i class="fa fa-circle"></i></div>
       </div>
       <div><div id="player_controls">
         <button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward"
@@ -307,7 +310,6 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   onSlideClick(d: provenance.SlideNode) {
     this.data.selectSlide(d, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, { withTransition : false });
   }
-
 
   private dndSupport(elem : d3.Selection<ISlideNodeRepr>) {
     const that = this;
@@ -628,6 +630,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
+    $stories.attr('data-id', (d) => d.id);
     $stories.attr('title', (d) => d.name+'\n'+(d.transition > 0 ? '('+to_duration(d.transition)+')' : '')+'('+to_duration(d.duration)+')');
     //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(../clue/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
@@ -641,6 +644,27 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $states.filter((d) => d.isLastPlaceholder).select('div.duration span').text(to_duration(to_starting_time(null, story_raw)));
 
     $states.exit().remove();
+  }
+
+  private updateTimeIndicator(slide: provenance.SlideNode, withTransition : boolean) {
+    var $marker = this.$node.select('div.time_marker');
+    if (!slide) {
+      $marker.style('display','none');
+      return;
+    }
+    const bounds = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.story[data-id="'+slide.id+'"]'));
+    const base = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.stories'));
+    console.log(bounds, base, bounds.y - base.y);
+    var t : any = $marker
+      .transition().ease('linear')
+      .duration(slide.transition < 0 || !withTransition ? 0 : slide.transition)
+      .style('top', (bounds.y-base.y) + 'px');
+
+    t.transition().ease('linear')
+      .duration(slide.duration < 0 || !withTransition ? 0 : slide.duration)
+      .style('top', (bounds.y-base.y+bounds.h-4) + 'px');
+
+
   }
 }
 

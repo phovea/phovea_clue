@@ -362,7 +362,7 @@ body {
       div.placeholder, div.dragger, div.dragger-transition {
         visibility: hidden;
       }
-      h2 i, form, div.line, div.duration,div.placeholder:last-of-type {
+      h2 i, form, div.line, div.duration,div.placeholder:last-of-type, div.time_marker {
         display: none;
       }
     }

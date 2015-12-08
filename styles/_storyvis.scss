@@ -49,6 +49,10 @@
 
   div.time_marker {
     position: absolute;
+    z-index: 2;
+    left: 36px;
+    font-size: 50%;
+    color: red;
   }
 
   div.stories {
