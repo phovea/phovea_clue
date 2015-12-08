@@ -47,7 +47,6 @@ aside {
   }
 
   div h2 {
-    text-align: center;
     margin-top: 0;
     padding: 0.2em .5em;
     font-size: 18px;
@@ -288,6 +287,15 @@ body {
         color: #f4f2f2;
         pointer-events: none;
       }
+
+      &:hover, &:focus {
+        background-color: $header-menu-bg-color;
+        color: $header-menu-color;
+      }
+    }
+
+    .dropdown-menu a {
+      color: $core_color_almost_black;
     }
   }
 

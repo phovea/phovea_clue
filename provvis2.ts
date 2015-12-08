@@ -468,7 +468,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     $p.html(`
       <div>
-        <h2>Provenance <i class="fa fa-filter"></i></h2>
+        <h2><i class="fa fa-code-fork fa-rotate-180"></i> Provenance <i class="fa fa-filter"></i></h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs active" title="data actions">

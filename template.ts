@@ -207,12 +207,14 @@ export class CLUEWrapper extends events.EventHandler {
 
     this.header.wait();
 
+    this.createLogin();
+
     {
       let ul = document.createElement('ul');
-      let $ul = d3.select(ul).attr('class','nav navbar-nav').html(`
+      let $ul = d3.select(ul).attr('class','nav navbar-nav navbar-right').html(`
       <li class="dropdown">
             <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-               aria-expanded="false"><span id="provenancegraph_name">No Provenance Graph</span><span class="caret"></span></a>
+               aria-expanded="false"><i class="fa fa-code-fork fa-lg fa-rotate-180"></i></a>
             <ul class="dropdown-menu" id="provenancegraph_list">
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="provenancegraph_new"><span class="glyphicon glyphicon-upload"></span> New ...</a></li>
@@ -220,7 +222,7 @@ export class CLUEWrapper extends events.EventHandler {
             </ul>
         </li>`);
 
-      this.header.insertCustomMenu(ul);
+      this.header.insertCustomRightMenu(ul);
 
       d3.select(this.header.options).append('button').text('Dump').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g) => {
@@ -258,7 +260,6 @@ export class CLUEWrapper extends events.EventHandler {
     }
 
 
-    this.createLogin();
 
     //cmode.create(body.querySelector('#modeselector'));
     cmode.createButton(body.querySelector('header'), {

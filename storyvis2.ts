@@ -230,7 +230,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
       <div>
-        <h2>Story <i class="fa fa-plus-circle"></i></h2>
+        <h2><i class="fa fa-video-camera"></i> Story <i class="fa fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
