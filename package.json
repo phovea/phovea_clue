@@ -1,8 +1,8 @@
 {
-  "name": "clue_demo",
+  "name": "clue",
   "version": "0.0.1",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": "Caleydo/clue_demo",
+  "repository": "Caleydo/clue",
   "dependencies": {
   },
   "peerDependencies": {

@@ -167,8 +167,8 @@ function injectHeadlessSupport(wrapper: CLUEWrapper) {
 export class CLUEWrapper extends events.EventHandler {
   private options = {
     app: 'CLUE',
-    application: '/clue_demo',
-    id: 'clue_demo',
+    application: '/clue',
+    id: 'clue',
     recordSelectionTypes: 'selected',
     animatedSelections: false,
     thumbnails: true
