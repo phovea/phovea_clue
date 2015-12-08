@@ -233,7 +233,7 @@ class StateRepr {
     //boost all states that are on the left side to medium if they are small
     byLevel.forEach((level) => {
       let s = level[0];
-      if (s.lod === LevelOfDetail.Small) {
+      if (s && s.lod === LevelOfDetail.Small) {
         s.doi = 0.8; //boost to medium
       }
     });

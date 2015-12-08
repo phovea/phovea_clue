@@ -47,6 +47,10 @@
     bottom: 0;
   }
 
+  div.time_marker {
+    position: absolute;
+  }
+
   div.stories {
     position: relative;
     -webkit-flex: 1 1 auto;

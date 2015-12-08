@@ -250,6 +250,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       </div>
       <div class="stories ${this.options.class}">
         <div class="line"></div>
+        <div class="time_marker"></div>
       </div>
       <div><div id="player_controls">
         <button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward"

@@ -17,43 +17,22 @@ body, html {
 
 @import "styles/vars";
 
+
 label {
 
-  color:$core_colour_text;
-
-  &.clue-E {
+  &.clue-E, &.clue-A, &.clue-P {
     font-size: 17px;
-    padding: 2px 10px;
-    background-color: $exploration-stage;
+    padding: 0px 10px;
 
+    border-radius: 5px !important;
+    margin: 3px 3px 2px 3px;
+    background-color: $header-menu-bg-color;
+    color: $header-menu-color;
 
     &.active, &:hover, &:active {
-
       font-weight: bold;
-    }
-  }
-  &.clue-A {
-    font-size: 17px;
-    padding: 2px 10px;
-    background-color: $authoring-stage;
-
-    &.active, &:hover, &:active {
-      @extend .arrow_selected
-  /*    background-color: $authoring-stage;
-      font-weight: bold;
-      box-shadow: none;*/
-    }
-  }
-  &.clue-P {
-    font-size: 17px;
-    padding: 2px 10px;
-    background-color: $presentation-stage;
-
-    &.active, &:hover, &:active {
-      @extend .arrow_selected
-   /*   background-color: $presentation-stage;
-      font-weight: bold;
-      box-shadow: none;*/
+      box-shadow: none;
+      background-color: white;
     }
   }
 }
@@ -140,7 +119,7 @@ header {
   position: absolute;
   left: 30vw;
   width: 40vw;
-  top: 0.2em;
+  top: 2px;
   text-align: center;
 
   label {
@@ -286,7 +265,7 @@ div.shortcuts {
 
 body {
   nav.navbar {
-    margin: 2px 2px 0px 2px;
+    margin: 2px 2px 0 2px;
     //margin-bottom: 0px !important;
     background-color:$core_colour;
     border-radius: 5px;
