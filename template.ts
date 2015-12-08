@@ -170,7 +170,8 @@ export class CLUEWrapper extends events.EventHandler {
     application: '/clue_demo',
     id: 'clue_demo',
     recordSelectionTypes: 'selected',
-    animatedSelections: false
+    animatedSelections: false,
+    thumbnails: true
   };
 
   private manager : prov.MixedStorageProvenanceGraphManager;
@@ -290,10 +291,13 @@ export class CLUEWrapper extends events.EventHandler {
       */
 
 
-      provvis2.create(graph, body.querySelector('div.content'), {});
+      provvis2.create(graph, body.querySelector('div.content'), {
+        thumbnails: this.options.thumbnails
+      });
 
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {
-        render: r.render
+        render: r.render,
+        thumbnails: this.options.thumbnails
       });
       graph.on('select_slide_selected', (event, state) => {
         d3.select('aside.annotations').style('display', state ? null : 'none');

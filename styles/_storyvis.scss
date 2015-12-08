@@ -353,11 +353,18 @@ div.stories {
   &.large {
     div.story {
 
+
       &:hover {
         div.toolbar {
           display: block;
         }
       }
+    }
+  }
+
+  &.large.no-thumbnails {
+    div.story div.preview {
+      display: none;
     }
   }
 

@@ -94,7 +94,7 @@ class StateRepr {
   }
 
   get lod_local() {
-    if (this.doi >= 0.9 && utils.areThumbnailsAvailable(this.graph)) {
+    if (this.doi >= 0.9) {
       return LevelOfDetail.Large;
     }
     if (this.doi >= 0.7) {
@@ -130,7 +130,7 @@ class StateRepr {
   }
 
 
-  static toRepr(graph : provenance.ProvenanceGraph, filter: any) {
+  static toRepr(graph : provenance.ProvenanceGraph, filter: any, options : any = {}) {
     //assign doi
     const lookup : any = {};
 
@@ -159,6 +159,9 @@ class StateRepr {
       const sum = 6 + category + operation + bookmark + tags + is_selected + inpath + sizePenality;
 
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
+      if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
+        r.doi = Math.min(r.doi, 0.89); //border for switching to thumbnails
+      }
       r.selected = s === selected;
 
       lookup[s.id] = r;
@@ -387,7 +390,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
-    this.options = C.mixin({}, options);
+    this.options = C.mixin({
+      thumbnails: true
+    }, options);
     this.options.scale = [1, 1];
     this.options.rotate = 0;
     this.$node = this.build(d3.select(parent));
@@ -576,7 +581,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('small', lod  === LevelOfDetail.Small);
     this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
-    const states = StateRepr.toRepr(graph, this.filter);
+    const states = StateRepr.toRepr(graph, this.filter, { thunbnails: this.options.thumbnails });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $states_enter = $states.enter().append('div')
       .classed('state', true)

@@ -263,7 +263,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       var story;
       switch(create) {
         case 'plus':
-          story = that.data.startNewSlide('${name}');
+          story = that.data.startNewSlide('Welcome');
           break;
         case 'clone':
           var state = that.data.selectedStates()[0] || that.data.act;
@@ -581,6 +581,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const to_id = (d) => String(d.id);
 
     const lod = getLevelOfDetail();
+
     this.$node
       .classed('large', lod  === LevelOfDetail.Large)
       .classed('medium', lod  === LevelOfDetail.Medium)
@@ -588,7 +589,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.$node.select('div.stories')
       .classed('large', lod  === LevelOfDetail.Large)
       .classed('medium', lod  === LevelOfDetail.Medium)
-      .classed('small', lod  === LevelOfDetail.Small);
+      .classed('small', lod  === LevelOfDetail.Small)
+      .classed('no-thumbnails', !this.options.thumbnails);
 
     //var levelShift = [];
     //nodes.forEach((n: any) => levelShift[n.depth] = Math.min(levelShift[n.depth] || 10000, n.x));
@@ -623,7 +625,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.attr('title', (d) => d.name+'\n'+(d.transition > 0 ? '('+to_duration(d.transition)+')' : '')+'('+to_duration(d.duration)+')');
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(../clue_demo/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
