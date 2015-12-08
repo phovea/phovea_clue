@@ -362,6 +362,7 @@ body {
         &:not(.placeholder) {
           transition: height 100ms;
           height: 3em !important;
+          margin-top: 1px !important;
         }
       }
       div.placeholder, div.dragger, div.dragger-transition {
