@@ -515,19 +515,19 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       <div class="legend">
         <div class="btn-group-vertical" data-toggle="buttons">
           <label class="btn btn-default btn-xs active" title="data actions">
-            <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"> Data</i>
+            <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i> Data
           </label>
           <label class="btn btn-default btn-xs active" title="visual actions">
-            <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"> Visual</i>
+            <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i> Visual
           </label>
           <label class="btn btn-default btn-xs active" title="selection actions">
-            <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"> Selections</i>
+            <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i> Selections
           </label>
           <label class="btn btn-default btn-xs active" title="layout actions">
-            <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"> Layout</i>
+            <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i> Layout
           </label>
           <label class="btn btn-default btn-xs active" title="logic actions">
-            <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"> Analysis</i>
+            <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i> Analysis
           </label>
         </div>
       </div>
