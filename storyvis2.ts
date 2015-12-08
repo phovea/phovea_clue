@@ -114,7 +114,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   };
 
   static MIN_HEIGHT = 20;
-  private duration2pixel = d3.scale.linear().domain([0,10000]).range([VerticalStoryVis.MIN_HEIGHT, 220]);
+  private duration2pixel = d3.scale.linear().domain([0,10000]).range([VerticalStoryVis.MIN_HEIGHT, 200]);
 
   story: provenance.SlideNode = null;
 

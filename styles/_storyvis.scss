@@ -40,7 +40,7 @@
 
   div.line {
     position: absolute;
-    left: 3em;
+    left: 39px;
     border-left: 1px solid gray;
     top: 0;
     width: 1px;
@@ -119,7 +119,7 @@ div.stories {
 
     div.story {
       height: 5em;
-      margin-left: 3em;
+      margin-left: 43px;
       -webkit-flex-direction: row;
       flex-direction: row;
 
@@ -233,7 +233,7 @@ div.stories {
     display: -webkit-flex;
     display: flex;
     margin: 0 2px;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 
     border-radius: 2px;
 
@@ -284,12 +284,13 @@ div.stories {
     }
 
     &:not(.placeholder) {
-      border: 1px solid gray;
+      //border: 1px solid gray;
       background-color: #f0f0f0;
       border-radius: 5px;
 
       &.select-selected {
         border-color: $select-color;
+        background-color: $select-color-bright;
         div.duration {
           color: $select-color;
           font-weight: bold;
@@ -346,11 +347,16 @@ div.stories {
 
     div.duration {
       position: absolute;
-      top: -4px;
-      left: -32px;
+      top: -5px;
+      left: -36px;
       font-size: 75%;
       color: #949494;
       text-align: right;
+
+      i.fa {
+        padding-left: 2px;
+        font-size: 75%;
+      }
     }
   }
 
@@ -369,6 +375,10 @@ div.stories {
   &.large.no-thumbnails {
     div.story div.preview {
       display: none;
+    }
+
+    div.slabel {
+      margin-left: 2px;
     }
   }
 

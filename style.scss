@@ -38,7 +38,7 @@ label {
 }
 
 aside {
-  border: 2px solid black;
+  border: 2px solid $core_colour;
   border-radius: 5px;
   margin: 2px;
 
@@ -51,6 +51,13 @@ aside {
     padding: 0.2em .5em;
     font-size: 18px;
     margin-bottom: 0.1em;
+
+    color: $core_colour_text;
+    vertical-align: middle;
+
+    > i.fa {
+      font-size: 80%;
+    }
   }
   &.provenance-layout-vis {
     border-color:$core_border;
@@ -348,7 +355,7 @@ body {
         margin-left: 2px;
         &:not(.placeholder) {
           transition: height 100ms;
-          height: 3em !important;
+          height: 17pt !important;
           margin-top: 1px !important;
         }
       }
