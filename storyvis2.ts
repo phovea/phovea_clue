@@ -94,7 +94,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
       return;
     }
-    this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);
+    if (type == idtypes.defaultSelectionType) {
+      this.onSlideClick(slide);
+    } else {
+      this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);
+    }
   };
 
   private options = {
@@ -300,7 +304,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   }
 
   onSlideClick(d: provenance.SlideNode) {
-    this.data.selectSlide(d);
+    this.data.selectSlide(d, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, { withTransition : false });
   }
 
 
