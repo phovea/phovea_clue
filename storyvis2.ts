@@ -104,7 +104,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     class: 'vertical',
     xy: 'y',
     wh: 'height',
-    topleft: 'top'
+    topleft: 'top',
+
+    thumbnails: true
   };
 
   static MIN_HEIGHT = 20;
@@ -261,7 +263,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       var story;
       switch(create) {
         case 'plus':
-          story = that.data.startNewSlide('Welcome');
+          story = that.data.startNewSlide('${name}');
           break;
         case 'clone':
           var state = that.data.selectedStates()[0] || that.data.act;
