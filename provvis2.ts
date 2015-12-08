@@ -176,6 +176,9 @@ class StateRepr {
 
     this.layout(states, line);
 
+    //boost all on the right side if they are small to medium
+
+
     return states;
   }
 
@@ -189,6 +192,7 @@ class StateRepr {
     while(byLevel[byLevel.length-1].length > 0) {
       byLevel.push([].concat.apply([],byLevel[byLevel.length - 1].map((c) => c.children.slice())));
     }
+
     byLevel.forEach((level,i) => {
       if (i < line.length) {
         //resort such that the element will be at the first place
@@ -224,6 +228,15 @@ class StateRepr {
       });
 
     } while (changed && loop < 5 );
+
+    byLevel = byLevel.filter((d) => d.length > 0);
+    //boost all states that are on the left side to medium if they are small
+    byLevel.forEach((level) => {
+      let s = level[0];
+      if (s.lod === LevelOfDetail.Small) {
+        s.doi = 0.8; //boost to medium
+      }
+    });
 
 
 
