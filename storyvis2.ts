@@ -238,7 +238,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           </ul>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
-          <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> Empty</button>
+          <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> New Story</button>
           <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i class="fa fa-files-o"></i> Extract</button>
           <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i class="fa fa-bookmark"></i> Bookmarked</button>
         </div>
