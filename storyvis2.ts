@@ -84,7 +84,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       }
       return isSelected;
     });
-    if (type == idtypes.defaultSelectionType) {
+    if (type === idtypes.defaultSelectionType) {
       this.updateTimeIndicator(slide, extras.withTransition !== false);
     }
   };
@@ -97,7 +97,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
       return;
     }
-    if (type == idtypes.defaultSelectionType) {
+    if (type === idtypes.defaultSelectionType) {
       this.onSlideClick(slide);
     } else {
       this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);

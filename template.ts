@@ -351,7 +351,7 @@ export class CLUEWrapper extends events.EventHandler {
          C.hash.removeProp('clue_state');
        }
       });
-     graph.on('select_slide', (event:any, state:prov.SlideNode) => {
+     graph.on('select_slide_selected', (event:any, state:prov.SlideNode) => {
         if (state) {
         C.hash.setInt('clue_slide', state.id);
        } else {
