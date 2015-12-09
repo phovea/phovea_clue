@@ -33,6 +33,10 @@ enum LevelOfDetail {
   Large = 3
 }
 
+const DOI_LARGE = 0.9;
+const DOI_MEDIUM = 0.7;
+const DOI_SMALL = 0.4;
+
 function getLevelOfDetail() {
   const mode = cmode.getMode();
   //if (mode.exploration >= 0.8) {
@@ -94,13 +98,13 @@ class StateRepr {
   }
 
   get lod_local() {
-    if (this.doi >= 0.9) {
+    if (this.doi >= DOI_LARGE) {
       return LevelOfDetail.Large;
     }
-    if (this.doi >= 0.7) {
+    if (this.doi >= DOI_MEDIUM) {
       return LevelOfDetail.Medium;
     }
-    if (this.doi >= 0.4) {
+    if (this.doi >= DOI_SMALL) {
       return LevelOfDetail.Small;
     }
     return LevelOfDetail.ExtraSmall;
@@ -130,7 +134,7 @@ class StateRepr {
   }
 
 
-  static toRepr(graph : provenance.ProvenanceGraph, filter: any, options : any = {}) {
+  static toRepr(graph : provenance.ProvenanceGraph, highlight: any, options : any = {}) {
     //assign doi
     const lookup : any = {};
 
@@ -147,20 +151,25 @@ class StateRepr {
       var a = s.creator;
       var meta = a ? a.meta : provenance.meta('No','none','none');
 
-      const category = filter.category[meta.category] ? 0 : -1;
-      const operation = filter.operation[meta.operation] ? 0 : -1;
-      const bookmark = (filter.bookmark ? (s.getAttr('starred', false) ? 2: -2) : 0);
-      const tags = (filter.tags.length > 0 ? (s.getAttr('tags', []).some((d) => filter.tags.indexOf(d) >= 0) ? 2: -2) : 0);
+      const category = highlight.category[meta.category] ? 1 : 0;
+      const operation = highlight.operation[meta.operation] ? 1 : 0;
+      const bookmark = (s.getAttr('starred', false) ? 1: 0);
+      const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
       const is_selected = s === selected ? 3: 0;
       const inpath = selected_path.indexOf(s) >= 0 ? Math.max(-2.5,6-selected_path.indexOf(s)) : -2.5;
 
       const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
-      const sum = 6 + category + operation + bookmark + tags + is_selected + inpath + sizePenality;
-
+      const sum = 6 + is_selected + inpath + sizePenality;
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
+
+      if ((category + operation + bookmark + tags) > 0) {
+        //boost to next level if any of the filters apply
+        r.doi = Math.max(r.doi, DOI_SMALL);
+      }
+
       if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
-        r.doi = Math.min(r.doi, 0.89); //border for switching to thumbnails
+        r.doi = Math.min(r.doi, DOI_LARGE-0.01); //border for switching to thumbnails
       }
       r.selected = s === selected;
 
@@ -382,22 +391,21 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private dim : [number, number] = [200, 100];
 
-  private filter = {
+  private highlight = {
     category: {
-      data: true,
-      visual: true,
-      selection: true,
-      logic: true,
-      layout: true,
+      data: false,
+      visual: false,
+      selection: false,
+      logic: false,
+      layout: false,
       none: false
     },
     operation: {
-      create: true,
-      remove: true,
-      update: true,
+      create: false,
+      remove: false,
+      update: false,
       none: false
     },
-    bookmark: false,
     tags: []
   };
 
@@ -471,39 +479,36 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         <h2><i class="fa fa-code-fork fa-rotate-180"></i> Provenance <i class="fa fa-filter"></i></h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs active" title="data actions">
-            <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i>
+          <label class="btn btn-default btn-xs" title="data actions">
+            <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fa fa-database"></i>
           </label>
-          <label class="btn btn-default btn-xs active" title="visual actions">
-            <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i>
+          <label class="btn btn-default btn-xs" title="visual actions">
+            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i>
           </label>
-          <label class="btn btn-default btn-xs active" title="selection actions">
-            <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i>
+          <label class="btn btn-default btn-xs" title="selection actions">
+            <input type="checkbox" autocomplete="off" name="category" value="selection"> <i class="fa fa-pencil-square"></i>
           </label>
-          <label class="btn btn-default btn-xs active" title="layout actions">
-            <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i>
+          <label class="btn btn-default btn-xs" title="layout actions">
+            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i>
           </label>
-          <label class="btn btn-default btn-xs active" title="logic actions">
-            <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i>
-          </label>
-        </div>
-
-        <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs active" title="create actions">
-            <input type="checkbox" autocomplete="off" name="operation" value="create" checked="checked"> <i class="fa fa-plus"></i>
-          </label>
-          <label class="btn btn-default btn-xs active" title="update actions">
-            <input type="checkbox" autocomplete="off" name="operation" value="update" checked="checked"> <i class="fa fa-refresh"></i>
-          </label>
-          <label class="btn btn-default btn-xs active" title="remove actions">
-            <input type="checkbox" autocomplete="off" name="operation" value="remove" checked="checked"> <i class="fa fa-remove"></i>
+          <label class="btn btn-default btn-xs" title="logic actions">
+            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i>
           </label>
         </div>
 
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="bookmarked actions">
-            <input type="checkbox" autocomplete="off" name="bookmark"> <i class="fa fa-bookmark"></i>
+          <label class="btn btn-default btn-xs" title="create actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="create"> <i class="fa fa-plus"></i>
           </label>
+          <label class="btn btn-default btn-xs" title="update actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="update"> <i class="fa fa-refresh"></i>
+          </label>
+          <label class="btn btn-default btn-xs" title="remove actions">
+            <input type="checkbox" autocomplete="off" name="operation" value="remove"> <i class="fa fa-remove"></i>
+          </label>
+        </div>
+
+        <div class="btn-group" data-toggle="buttons">
           <div class="form-group btn-group">
             <div class="btn-group btn-group-xs" role="group">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -532,20 +537,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       </div>
       <div class="legend">
         <div class="btn-group-vertical" data-toggle="buttons">
-          <label class="btn btn-default btn-xs active" title="data actions">
-            <input type="checkbox" autocomplete="off" name="category" value="data" checked="checked"> <i class="fa fa-database"></i> Data
+          <label class="btn btn-default btn-xs" title="data actions">
+            <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> Data
           </label>
-          <label class="btn btn-default btn-xs active" title="visual actions">
-            <input type="checkbox" autocomplete="off" name="category" value="visual" checked="checked"> <i class="fa fa-bar-chart"></i> Visual
+          <label class="btn btn-default btn-xs" title="visual actions">
+            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> Visual
           </label>
-          <label class="btn btn-default btn-xs active" title="selection actions">
-            <input type="checkbox" autocomplete="off" name="category" value="selection" checked="checked"> <i class="fa fa-pencil-square"></i> Selections
+          <label class="btn btn-default btn-xs" title="selection actions">
+            <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> Selections
           </label>
-          <label class="btn btn-default btn-xs active" title="layout actions">
-            <input type="checkbox" autocomplete="off" name="category" value="layout" checked="checked"> <i class="fa fa-desktop"></i> Layout
+          <label class="btn btn-default btn-xs" title="layout actions">
+            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> Layout
           </label>
-          <label class="btn btn-default btn-xs active" title="logic actions">
-            <input type="checkbox" autocomplete="off" name="category" value="logic" checked="checked"> <i class="fa fa-gear"></i> Analysis
+          <label class="btn btn-default btn-xs" title="logic actions">
+            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> Analysis
           </label>
         </div>
       </div>
@@ -557,14 +562,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //must use bootstrap since they are manually triggered
     jp.find('form.toolbar input, .legend input').on('change', function() {
       if (this.type==='text') {
-        that.filter.tags = this.value.split(' ');
-        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.filter.tags.length > 0);
+        that.highlight.tags = this.value.split(' ');
+        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
       } else {
-        if (this.name === 'bookmark') {
-          that.filter.bookmark = this.checked;
-        } else {
-          that.filter[this.name][this.value] = this.checked;
-        }
+        that.highlight[this.name][this.value] = this.checked;
       }
       that.update();
     });
@@ -594,7 +595,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('small', lod  === LevelOfDetail.Small);
     this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
-    const states = StateRepr.toRepr(graph, this.filter, { thunbnails: this.options.thumbnails });
+    const states = StateRepr.toRepr(graph, this.highlight, { thunbnails: this.options.thumbnails });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $states_enter = $states.enter().append('div')
       .classed('state', true)
