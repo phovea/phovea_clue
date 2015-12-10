@@ -337,7 +337,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       const full_story = toPath(that.story);
       const d_story = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
       const insertIntoStory = (new_:provenance.SlideNode) => {
-        if (d_story === null) { //at the beginning
+        if (d_story == null) { //at the beginning
           let bak = that.story;
           that.story = new_;
           if (bak) {
@@ -357,7 +357,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       } else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
         const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'), 10));
         if (full_story.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
-          if (d_story === null) { //no self move
+          if (d_story == null) { //no self move
             if (story !== that.story) {
               let bak = that.story;
               that.story = story;
