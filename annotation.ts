@@ -130,14 +130,14 @@ export class Renderer {
         var mouse = d3.mouse(this.parentNode.parentNode);
         const bounds = C.bounds(this.parentNode.parentNode);
         d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
-        state.setAnnotation(i, d);
+        state.updateAnnotation(d);
         d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
       }));
 
     $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
       .on('click', function (d:prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
-        state.removeAnnotation(i);
+        state.removeAnnotationElem(d);
         d3.event.preventDefault();
       });
 
@@ -153,7 +153,7 @@ export class Renderer {
         $elem.on('click', null);
         $elem.append('textarea').property('value', d.text).on('blur', function () {
           d.text = this.value;
-          state.setAnnotation(i, d);
+          state.updateAnnotation(d);
           //update value and enable edit click handler again
           $elem.html(that.renderer(this.value)).on('click', onEdit);
         });
@@ -216,7 +216,7 @@ export class Renderer {
         .on('drag', function (d:prov.IArrowStateAnnotation, i) {
           const e:any = d3.event;
           d.at = [e.x, e.y];
-          state.setAnnotation(i, d);
+          state.updateAnnotation(d);
           d3.select(this).style({
             cx: d.at[0],
             cy: d.at[1]
@@ -257,7 +257,7 @@ export class Renderer {
             var mouse = d3.mouse(this.parentNode.parentNode);
             const bounds = C.bounds(this.parentNode.parentNode);
             d.size = [mouse[0]*100/bounds.w-d.pos[0], mouse[1]*100/bounds.h-d.pos[1]];
-            state.setAnnotation(i, d);
+            state.updateAnnotation(d);
             d3.select(this.parentNode).style({
               width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + '%' : null,
               height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + '%' : null
