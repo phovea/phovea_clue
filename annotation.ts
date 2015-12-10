@@ -283,10 +283,9 @@ export class Renderer {
   renderAnnotations(state:prov.SlideNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
-      if (this.options.animation && !$anns.empty()) {
-        $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1).each('end', () => {
-          resolve($anns.node());
-        });
+      if (this.options.animation && !$anns.empty() && this.options.duration > 0) {
+        $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1);
+        C.resolveIn(this.options.duration).then(() => resolve($anns.node()));
       } else {
         $anns.style('opacity', 1);
         resolve($anns.node());
@@ -299,10 +298,9 @@ export class Renderer {
   hideOld() {
     return new Promise((resolve) => {
       const $div = this.$main.classed('hide-all-non-annotations',false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
-      if (this.options.animation && !$div.empty()) {
-        $div.transition().duration(this.options.duration).style('opacity', 0).each('end', () => {
-          resolve();
-        }).remove();
+      if (this.options.animation && !$div.empty() && this.options.duration > 0) {
+        $div.transition().duration(this.options.duration).style('opacity', 0).remove();
+        C.resolveIn(this.options.duration).then(() => resolve());
       } else {
         $div.remove();
         resolve();
