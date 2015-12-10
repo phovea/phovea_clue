@@ -18,7 +18,7 @@ export class Renderer {
     animation: true,
     duration: 100,
     markdown: true,
-    renderSubtitle: true,
+    renderSubtitle: false,
     subtitlePattern : '${name}'
   };
 
@@ -109,7 +109,11 @@ export class Renderer {
       } else {
         next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? -1 : state.transition);
       }
-      return Promise.all([takedown, next, this.options.renderSubtitle ? this.renderSubtitle(state) : Promise.resolve(null), this.renderAnnotations(state)]); //, this.renderArrows(state)]);
+      const all = [takedown, next, this.renderAnnotations(state)];
+      if (this.options.renderSubtitle) {
+        all.push(this.renderSubtitle(state));
+      }
+      return Promise.all(all); //, this.renderArrows(state)]);
     });
     return this.prev;
   }
