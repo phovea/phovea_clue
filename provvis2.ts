@@ -377,7 +377,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     state.on('setAttr', this.trigger);
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
-    const selectedStates = act.dim(<number>provenance.ProvenanceGraphDim.State).filter(this.data.states);
+    const selectedStates = this.data.selectedStates(type);
     this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {

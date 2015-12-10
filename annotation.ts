@@ -18,7 +18,7 @@ export class Renderer {
     animation: true,
     duration: 100,
     markdown: true,
-    renderSubtitle: false,
+    renderSubtitle: true,
     subtitlePattern : '${name}'
   };
 

@@ -88,8 +88,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       this.updateTimeIndicator(slide, extras.withTransition !== false);
     }
   };
-  private onStateSelectionChanged = (event: any, state: provenance.StateNode, type: string) => {
-    if (!state) {
+  private onStateSelectionChanged = (event: any, state: provenance.StateNode, type: string, op, extras) => {
+    if (!state || extras.slideSelected === true) {
       return;
     }
     const slide = cmode.getMode().exploration < 0.8 ? this.findSlideForState(state) : null;
@@ -98,7 +98,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return;
     }
     if (type === idtypes.defaultSelectionType) {
-      this.onSlideClick(slide);
+      this.data.selectSlide(slide, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, { withTransition : false });
     } else {
       this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);
     }
@@ -309,6 +309,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   onSlideClick(d: provenance.SlideNode) {
     this.data.selectSlide(d, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, { withTransition : false });
+    if (d && d.state) {
+      this.data.selectState(d.state, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, {slideSelected: true});
+    }
   }
 
   private dndSupport(elem : d3.Selection<ISlideNodeRepr>) {
