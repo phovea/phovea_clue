@@ -227,7 +227,15 @@ export class CLUEWrapper extends events.EventHandler {
       d3.select(this.header.options).append('button').text('Dump').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g) => {
           console.log(g);
-          console.log(g.persist());
+          const r = g.persist();
+          console.log(r);
+
+          var str = JSON.stringify(r, null, '\t');
+          //create blob and save it
+          var blob = new Blob([str], {type: 'application/json;charset=utf-8'});
+          var a = new FileReader();
+          a.onload = (e)  => window.open((<any>e.target).result, '_blank');
+          a.readAsDataURL(blob);
         });
         return false;
       });
