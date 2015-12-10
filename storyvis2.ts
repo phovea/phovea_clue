@@ -15,14 +15,6 @@ import utils = require('./utils');
 import marked = require('marked');
 import player = require('../caleydo_provenance/player');
 
-function toPath(s?: provenance.SlideNode) {
-  var r = [];
-  while (s) {
-    r.push(s);
-    s = s.next;
-  }
-  return r;
-}
 
 interface ISlideNodeRepr {
   id: string;
@@ -147,7 +139,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if (!this.story) {
       return null;
     }
-    return C.search(toPath(this.story), (s) => s.state === state);
+    return C.search( provenance.toSlidePath(this.story), (s) => s.state === state);
   }
 
   private bind() {
@@ -334,7 +326,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       d3.select(this).classed('hover', false);
       var e = <DragEvent>(<any>d3.event);
       e.preventDefault();
-      const full_story = toPath(that.story);
+      const full_story =  provenance.toSlidePath(that.story);
       const d_story = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
       const insertIntoStory = (new_:provenance.SlideNode) => {
         if (d_story == null) { //at the beginning
@@ -395,7 +387,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.style(that.options.wh, height+'px');
         const change = that.duration2pixel.invert(height) - d.duration;
         const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
-        const stories = toPath(that.story);
+        const stories = provenance.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           let index = stories.indexOf(k);
           return to_duration(to_starting_time(k, stories) + (index > i ? change : 0));
@@ -420,7 +412,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.style('margin-'+that.options.topleft, offset+'px');
         const change = that.duration2pixel.invert(offset+VerticalStoryVis.MIN_HEIGHT) - d.transition;
         const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
-        const stories = toPath(that.story);
+        const stories =  provenance.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           let index = stories.indexOf(k);
           return to_duration(to_starting_time(k, stories) + (index >= i ? change : 0));
@@ -525,7 +517,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       `);
     $p.selectAll('button[data-add]').on('click', function() {
       var create = this.dataset.add;
-      const path = toPath(that.story);
+      const path =  provenance.toSlidePath(that.story);
       const last = path[path.length-1];
       switch(create) {
         case 'text':
@@ -576,7 +568,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.updateSelection();
 
 
-    const story_raw = toPath(this.story);
+    const story_raw =  provenance.toSlidePath(this.story);
 
 
     const story : ISlideNodeRepr[] = story_raw.length > 0 ? [{ id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
