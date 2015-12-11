@@ -357,6 +357,10 @@ body {
           transition: height 100ms;
           height: 17pt !important;
           margin-top: 1px !important;
+
+          .slabel {
+            word-break: break-all;
+          }
         }
       }
       div.placeholder, div.dragger, div.dragger-transition {

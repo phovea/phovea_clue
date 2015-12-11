@@ -652,16 +652,17 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     //console.log(bounds, base, bounds.y - base.y);
     var t : any = $marker
       .transition().ease('linear')
-      .duration(slide.transition < 0 || !withTransition ? 0 : slide.transition)
+      .duration(slide.transition < 0 || !withTransition ? player.MIN_TRANSITION : slide.transition*player.FACTOR)
       .style('top', (bounds.y-base.y) + 'px');
 
     t.transition().ease('linear')
-      .duration(slide.duration < 0 || !withTransition ? 0 : slide.duration)
+      .duration(slide.duration < 0 || !withTransition ? player.MIN_DURATION : slide.duration*player.FACTOR)
       .style('top', (bounds.y-base.y+bounds.h-4) + 'px');
 
 
   }
 }
+
 
 export function create(data:provenance.ProvenanceGraph, parent: Element, options = {}) {
   return new VerticalStoryVis(data, parent, options);

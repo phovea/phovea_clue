@@ -8,6 +8,7 @@ import cmode = require('../caleydo_provenance/mode');
 import d3 = require('d3');
 import marked = require('marked');
 import {defaultSelectionType} from '../caleydo_core/idtype';
+import player = require('../caleydo_provenance/player');
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -107,7 +108,7 @@ export class Renderer {
       if (state.isTextOnly) {
         next = this.renderText(state);
       } else {
-        next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? -1 : state.transition);
+        next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.MIN_TRANSITION : state.transition*player.FACTOR);
       }
       const all = [takedown, next, this.renderAnnotations(state)];
       if (this.options.renderSubtitle) {
@@ -316,7 +317,7 @@ export class Renderer {
   }
 
   renderText(overlay:prov.SlideNode) {
-    const t= overlay.transition;
+    const t= overlay.transition*player.FACTOR;
     return C.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
       return this.$main.node();
