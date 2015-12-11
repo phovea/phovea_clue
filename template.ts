@@ -51,6 +51,25 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
     window.location.reload();
   }
 
+  d3.select('#provenancegraph_import').on('click', () => {
+    const d = dialogs.generateDialog('Select File', 'Upload');
+    d.body.innerHTML = `<input type="file" placeholder="Select File to Upoad">`;
+    d3.select(d.body).select('input').on('change', function() {
+      var file = (<any>d3.event).target.files[0];
+      var reader = new FileReader();
+      reader.onload = function (e: any) {
+        var data_s = e.target.result;
+        var dump = JSON.parse(data_s);
+        manager.import(dump).then((graph) => {
+          loadGraph(graph.desc);
+        });
+      };
+      // Read in the image file as a data URL.
+      reader.readAsText(file);
+    });
+    d.show();
+  });
+
   return manager.list().then((list) => {
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
     $list.enter().insert('li', ':first-child').classed('graph',true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
@@ -217,6 +236,9 @@ export class CLUEWrapper extends events.EventHandler {
                aria-expanded="false"><i class="fa fa-code-fork fa-lg fa-rotate-180"></i></a>
             <ul class="dropdown-menu" id="provenancegraph_list">
                 <li role="separator" class="divider"></li>
+                <li><a href="#" id="provenancegraph_import"><span class="glyphicon glyphicon-import"></span> Import ...</a></li>
+                <li><a href="#" id="provenancegraph_export"><span class="glyphicon glyphicon-export"></span> Export ...</a></li>
+                <li role="separator" class="divider"></li>
                 <li><a href="#" id="provenancegraph_new"><span class="glyphicon glyphicon-upload"></span> New ...</a></li>
                 <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote"><span class="glyphicon glyphicon-upload"></span> New Remote...</a></li>
             </ul>
@@ -224,7 +246,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       this.header.insertCustomRightMenu(ul);
 
-      d3.select(this.header.options).append('button').text('Dump').attr('class', 'btn btn-default').on('click', () => {
+      d3.select('#provenancegraph_export').on('click', () => {
         this.graph.then((g) => {
           console.log(g);
           const r = g.persist();
@@ -239,6 +261,7 @@ export class CLUEWrapper extends events.EventHandler {
         });
         return false;
       });
+
       d3.select(this.header.options).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g: prov.ProvenanceGraph) => {
             return datas.create({
