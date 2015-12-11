@@ -649,7 +649,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
     const bounds = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.story[data-id="'+slide.id+'"]'));
     const base = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.stories'));
-    console.log(bounds, base, bounds.y - base.y);
+    //console.log(bounds, base, bounds.y - base.y);
     var t : any = $marker
       .transition().ease('linear')
       .duration(slide.transition < 0 || !withTransition ? 0 : slide.transition)
