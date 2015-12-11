@@ -51,7 +51,8 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
     window.location.reload();
   }
 
-  d3.select('#provenancegraph_import').on('click', () => {
+  d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function() {
+    var remote = this.id === 'provenancegraph_import_remote';
     const d = dialogs.generateDialog('Select File', 'Upload');
     d.body.innerHTML = `<input type="file" placeholder="Select File to Upoad">`;
     d3.select(d.body).select('input').on('change', function() {
@@ -60,7 +61,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       reader.onload = function (e: any) {
         var data_s = e.target.result;
         var dump = JSON.parse(data_s);
-        manager.import(dump).then((graph) => {
+        (remote ? manager.importRemote(dump) : manager.importLocal(dump)).then((graph) => {
           loadGraph(graph.desc);
         });
       };
@@ -237,6 +238,7 @@ export class CLUEWrapper extends events.EventHandler {
             <ul class="dropdown-menu" id="provenancegraph_list">
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="provenancegraph_import"><span class="glyphicon glyphicon-import"></span> Import ...</a></li>
+                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote"><span class="glyphicon glyphicon-import"></span> Import Remote ...</a></li>
                 <li><a href="#" id="provenancegraph_export"><span class="glyphicon glyphicon-export"></span> Export ...</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="provenancegraph_new"><span class="glyphicon glyphicon-upload"></span> New ...</a></li>
