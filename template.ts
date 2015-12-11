@@ -52,6 +52,8 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
   }
 
   d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function() {
+    d3.event.preventDefault();
+    d3.event.stopPropagation();
     var remote = this.id === 'provenancegraph_import_remote';
     const d = dialogs.generateDialog('Select File', 'Upload');
     d.body.innerHTML = `<input type="file" placeholder="Select File to Upoad">`;
@@ -249,6 +251,8 @@ export class CLUEWrapper extends events.EventHandler {
       this.header.insertCustomRightMenu(ul);
 
       d3.select('#provenancegraph_export').on('click', () => {
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
         this.graph.then((g) => {
           console.log(g);
           const r = g.persist();
