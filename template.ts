@@ -79,8 +79,10 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       d3.event.preventDefault();
       loadGraph(d);
     });
+    const format = d3.time.format.utc("%Y-%m-%dT%H:%M");
     (<any>$('#provenancegraph_list li.graph a')).popover({
       html: true,
+      placement: 'left',
       trigger: 'manual',
       title: function() {
         const graph = d3.select(this).datum();
@@ -90,7 +92,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
         const graph = d3.select(this).datum();
         const creator = graph.creator;
         const description = graph.description;
-        const ts = graph.ts ? new Date(graph.ts) : 'Unknown';
+        const ts = graph.ts ? format(new Date(graph.ts)) : 'Unknown';
         const nnodes = graph.size[0];
         const nedges = graph.size[1];
         //const locked = false;
@@ -101,7 +103,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
                 <div class="col-sm-9">${creator}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">creation date:</div>
+                <div class="col-sm-3">created:</div>
                 <div class="col-sm-9">${ts}</div>
             </div>
             <div class="row">
@@ -114,9 +116,9 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${session.retrieve('logged_in',false)===true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in',false)!==true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone"></span> Clone</button>
-                    <button class="btn btn-danger" ${session.retrieve('logged_in',false)===true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in',false)!==true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
                 </div>
             </div>
         </div>`);
