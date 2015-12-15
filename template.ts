@@ -91,7 +91,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       content: function() {
         const graph = d3.select(this).datum();
         const creator = graph.creator;
-        const description = graph.description;
+        const description = graph.description || '';
         const ts = graph.ts ? format(new Date(graph.ts)) : 'Unknown';
         const nnodes = graph.size[0];
         const nedges = graph.size[1];
