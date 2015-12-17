@@ -79,7 +79,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       d3.event.preventDefault();
       loadGraph(d);
     });
-    const format = d3.time.format.utc("%Y-%m-%dT%H:%M");
+    const format = d3.time.format.utc('%Y-%m-%dT%H:%M');
     (<any>$('#provenancegraph_list li.graph a')).popover({
       html: true,
       placement: 'left',
