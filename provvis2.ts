@@ -14,6 +14,8 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
+import {ProvenanceGraph} from "../caleydo_provenance/main";
+import {StateNode} from "../caleydo_provenance/main";
 
 
 function extractTags(text: string) {
@@ -64,6 +66,19 @@ class StateRepr {
   constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
     this.doi = 0.1;
     this.a = s.creator;
+  }
+
+  get opacity():number {
+    console.log(this.graph.compareMode);
+    if(this.graph.compareMode) {
+      //console.log(this.graph);
+
+      //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
+      var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
+      if (selState.length==0) return 1;
+      return selState[0].getSimilarityTo(this.s);
+    }
+    return 1;
   }
 
   get thumbnail() {
@@ -132,6 +147,7 @@ class StateRepr {
   get name() {
     return this.s.name;
   }
+
 
 
   static toRepr(graph : provenance.ProvenanceGraph, highlight: any, options : any = {}) {
@@ -305,6 +321,7 @@ class StateRepr {
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
       .classed('select-selected', (d) => d.selected)
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
+      .style('opacity', (d) => d.opacity)
       .attr('data-doi',(d) => d.doi)
       .attr('title', (d) => d.name);
 
@@ -376,8 +393,22 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   };
+
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
+
+    if (this.data.compareMode) {
+      var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+      $elem.call(StateRepr.render);
+      //d3.select($elem).style('opacity', (d) => d.opacity);
+      //console.log($elem);
+      //$elem.each(function(el,i,array) {
+      //  el.style('opacity', (d) => d.opacity);
+      //})
+      console.log("CompareMode=ON");
+    } else {
+      console.log("CompareMode=OFF");
+    }
     this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
@@ -628,10 +659,26 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'), 10));
         that.data.fork(state.creator, d.s);
         return false;
-    });
+      });
+
+    d3.select("body").on("keydown", function() {
+      console.log("Keydown Event");
+      if(d3.event.ctrlKey) {
+        //console.log(this);
+        this.compareMode=true;
+
+      }
+    }.bind(graph))
+      .on("keyup", function() {
+      console.log("Keyup Event");
+      // console.log(this);
+      this.compareMode=false;
+    }.bind(graph));
+
+
 
 
     const $inner = $states_enter;
