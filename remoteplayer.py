@@ -63,7 +63,7 @@ def create_via_phantomjs(url, width, height, format):
 
   name = tempfile.mkstemp('.' + format)
 
-  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue_demo/phantom2_rasterize.js'), '' + url + '',
+  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
           '2' + name[1], str(width), str(height)]
   print ' '.join(args)
   proc = subprocess.Popen(args)
