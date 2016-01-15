@@ -43,6 +43,9 @@
         "memcached": ""
       }
     },
+    "scripts": {
+      "pre_start": "sudo service memcached start"
+    },
     "requirejs-config": {
       "paths": {
       },
