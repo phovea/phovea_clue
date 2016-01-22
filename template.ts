@@ -21,7 +21,6 @@ import cmode = require('../caleydo_provenance/mode');
 import provvis2 = require('./provvis2');
 import storyvis = require('./storyvis2');
 import events = require('../caleydo_core/event');
-import screenshot = require('../caleydo_screenshot/main');
 import renderer = require('./annotation');
 import login = require('../caleydo_security_flask/login');
 import session = require('../caleydo_core/session');
@@ -421,18 +420,18 @@ export class CLUEWrapper extends events.EventHandler {
         update(cmode.getMode());
       }
 
-      d3.select('#attachScreenshot').on('click', () => {
-        const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
-        const bounds = C.bounds(main);
-        this.header.wait();
-        screenshot.takeCanvas(main, [bounds.w/2, bounds.h/2]).then((canvas) => {
-          this.header.ready();
-          graph.act.setAttr('screenshot', screenshot.toString(canvas));
-          graph.act.setAttr('thumbnail', screenshot.toString(screenshot.createThumbnailCanvas(canvas, 128)));
-        }).catch((error) => {
-          console.log(error);
-        });
-      });
+      //d3.select('#attachScreenshot').on('click', () => {
+      //  const main = <HTMLElement>(document.querySelector('main *[data-main]') || document.querySelector('main'));
+      //  const bounds = C.bounds(main);
+      //  this.header.wait();
+      //  screenshot.takeCanvas(main, [bounds.w/2, bounds.h/2]).then((canvas) => {
+      //    this.header.ready();
+      //    graph.act.setAttr('screenshot', screenshot.toString(canvas));
+      //    graph.act.setAttr('thumbnail', screenshot.toString(screenshot.createThumbnailCanvas(canvas, 128)));
+      //  }).catch((error) => {
+      //    console.log(error);
+      //  });
+      //});
       d3.select('#bookmarkState').on('click', () => {
         graph.act.setAttr('starred', true);
       });
