@@ -69,14 +69,14 @@ class StateRepr {
   }
 
   get opacity():number {
-    console.log(this.graph.compareMode);
+    //console.log(this.graph.compareMode);
     if(this.graph.compareMode) {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
-      return selState[0].getSimilarityTo(this.s);
+      return Math.pow(selState[0].getSimilarityTo(this.s),2);
     }
     return 1;
   }
@@ -403,9 +403,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       //$elem.each(function(el,i,array) {
       //  el.style('opacity', (d) => d.opacity);
       //})
-      console.log("CompareMode=ON");
+      //console.log("CompareMode=ON");
     } else {
-      console.log("CompareMode=OFF");
+      //console.log("CompareMode=OFF");
     }
     this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
@@ -667,7 +667,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       });
 
     d3.select("body").on("keydown", function() {
-      console.log("Keydown Event");
+      //console.log("Keydown Event");
       if(d3.event.ctrlKey) {
         //console.log(this);
         this.compareMode=true;
@@ -675,7 +675,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
     }.bind(graph))
       .on("keyup", function() {
-      console.log("Keyup Event");
+      //console.log("Keyup Event");
       // console.log(this);
       this.compareMode=false;
     }.bind(graph));
@@ -793,3 +793,5 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 export function create(data:provenance.ProvenanceGraph, parent:Element, options = {}) {
   return new LayoutedProvVis(data, parent, options);
 }
+
+
