@@ -6,7 +6,7 @@
 /// <amd-dependency path='css!./style' />
 
 
-/// <amd-dependency path="text!./template.html" name="template"/>
+/// <amd-dependency path="text!./_template.html" name="template"/>
 declare var template:string;
 
 import C = require('../caleydo_core/main');
