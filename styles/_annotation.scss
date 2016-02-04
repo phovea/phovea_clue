@@ -31,7 +31,7 @@ main.hide-all-non-annotations {
   > * {
     visibility: hidden !important;
   }
-  .annotation, .subtitle-annotation {
+  .annotation, .subtitle-annotation, .annotation-anchor {
     visibility: visible !important;
   }
 }

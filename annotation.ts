@@ -115,7 +115,7 @@ export class Renderer {
 
   private l = (event, state, type, op, extras) => this.render(state, extras.withTransition !== false);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
-  private rerender = () => setTimeout(this.render.bind(this, this.act), 400);
+  private rerender = () => this.render(this.act, true, true);
 
   private act : prov.SlideNode = null;
 
@@ -176,7 +176,7 @@ export class Renderer {
     cmode.off('modeChanged', this.rerender);
   }
 
-  render(state:prov.SlideNode, withTransition = true) {
+  render(state:prov.SlideNode, withTransition = true, waitBetweenTakeDown = false) {
     if (this.act) {
       this.act.off('push-annotations,attr-name,attr-duration', this.updateAnnotations);
     }
@@ -192,17 +192,22 @@ export class Renderer {
       if (cmode.getMode().exploration > 0.8) {
         return takedown;
       }
-      var next = Promise.resolve(null);
-      if (state.isTextOnly) {
-        next = this.renderText(state);
-      } else {
-        next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.MIN_TRANSITION : state.transition*player.FACTOR);
-      }
-      const all = [takedown, next, this.renderAnnotations(state)];
-      if (this.options.renderSubtitle) {
-        all.push(this.renderSubtitle(state));
-      }
-      return Promise.all(all); //, this.renderArrows(state)]);
+      return takedown.then(() => C.resolveIn(waitBetweenTakeDown ? 1000 : 0)).then(() => {
+          var next = Promise.resolve(null);
+          if (state.isTextOnly) {
+            next = this.renderText(state);
+          } else {
+            next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.MIN_TRANSITION : state.transition*player.FACTOR);
+          }
+          //wait till next is done before rendering annotations
+          return next.then(() => {
+            const all = [this.renderAnnotations(state)];
+            if (this.options.renderSubtitle) {
+              all.push(this.renderSubtitle(state));
+            }
+            return Promise.all(all);
+          });
+        });
     });
     return this.prev;
   }
