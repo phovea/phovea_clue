@@ -64,25 +64,27 @@ class Anchor {
 
   compute(): [number, number] {
     var o = C.bounds(this.elem);
+    o.x += window.pageXOffset;
+    o.y += window.pageYOffset;
     switch (this.anchor) {
       case EAnchorDirection.EAST:
-        return [o.x, o.y + o.h / 2];
+        return [o.x, o.y + o.h / 2 - 3];
       case EAnchorDirection.NORTH:
-        return [o.x + o.w / 2, o.y];
+        return [o.x + o.w / 2 - 3, o.y];
       case EAnchorDirection.WEST:
-        return [o.x + o.w, o.y + o.h / 2];
+        return [o.x + o.w - 5, o.y + o.h / 2 -3];
       case EAnchorDirection.SOUTH:
-        return [o.x + o.w / 2, o.y + o.h / 2];
+        return [o.x + o.w / 2 - 3, o.y + o.h -5];
       case EAnchorDirection.NORTH_EAST:
         return [o.x, o.y];
       case EAnchorDirection.NORTH_WEST:
-        return [o.x + o.w, o.y];
+        return [o.x + o.w - 6, o.y];
       case EAnchorDirection.SOUTH_EAST:
-        return [o.x, o.y + o.h];
+        return [o.x, o.y + o.h - 5];
       case EAnchorDirection.SOUTH_WEST:
-        return [o.x + o.w, o.y + o.h];
+        return [o.x + o.w - 5, o.y + o.h - 5];
       default:
-        return [o.x + o.w / 2, o.y + o.h / 2];
+        return [o.x + o.w / 2 - 3, o.y + o.h / 2 - 3];
     }
   }
 
@@ -206,7 +208,12 @@ export class Renderer {
   }
 
   private renderAnchors(bounds: { x: number, y: number, w: number, h: number}) {
-    const anchorElements : HTMLElement[] = [].slice.apply((<Element>this.$main.node()).querySelectorAll('*[data-anchor]'));
+    const mainNode = <Element>this.$main.node();
+    const anchorElements : Element[] = [].slice.apply(mainNode.querySelectorAll('*[data-anchor]'));
+    if (mainNode.getAttribute('data-anchor') != null) {
+      anchorElements.push(mainNode);
+    }
+
     const anchors : Anchor[] = [];
     //create anchors
     anchorElements.forEach((a) => {
