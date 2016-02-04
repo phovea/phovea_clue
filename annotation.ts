@@ -283,9 +283,23 @@ export class Renderer {
         elem.style.top = p[1]+'%';
       } else { //anchor based
         const base = Anchor.fromString(p.anchor).pos;
-        console.log(base, bounds, p.offset);
         elem.style.left = (base[0]-bounds.x)+ p.offset[0]+'px';
         elem.style.top = (base[1]-bounds.y)+ p.offset[1]+'px';
+      }
+    }
+
+    function updateSize(d: prov.IFrameStateAnnotation) {
+      const elem = <HTMLElement>this;
+      const p : any = d.pos2;
+      if (p) { //anchor based
+        const base = Anchor.fromString(p.anchor).pos;
+        const pos =  Anchor.fromString((<any>d.pos).anchor).pos;
+        elem.style.width = (base[0] + p.offset[0] - pos[0] - (<any>d.pos).offset[0]) + 'px';
+        elem.style.height = (base[1] + p.offset[1] - pos[1] - (<any>d.pos).offset[1]) + 'px';
+      } else {
+        const size = d.size;
+        elem.style.width = size[0]+'%';
+        elem.style.height = size[1]+'%';
       }
     }
 
@@ -409,10 +423,8 @@ export class Renderer {
 
     //FRAME
     $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<prov.IFrameStateAnnotation>, $frames_enter: d3.selection.Update<prov.IFrameStateAnnotation>) => {
-      $frames.style({
-        width: (d) => d.size[0] + '%',
-        height: (d) => d.size[1] + '%'
-      }).each(function (d) {
+      $frames.each(function (d) {
+        updateSize.call(this, d);
         if (d.styles) {
           d3.select(this).style(d.styles);
         }
@@ -421,15 +433,15 @@ export class Renderer {
       //resize
       $frames_enter.append('button').attr('tabindex',-1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
+          .on('dragstart', function (d:prov.IStateAnnotation, i) {
+            that.renderAnchors(bounds);
+          })
+          .on('dragend', that.removeAnchors.bind(that))
           .on('drag', function (d:prov.IFrameStateAnnotation, i) {
             var mouse = d3.mouse(this.parentNode.parentNode);
-            const bounds = C.bounds(this.parentNode.parentNode);
-            d.size = [mouse[0]*100/bounds.w-d.pos[0], mouse[1]*100/bounds.h-d.pos[1]];
+            d.pos2 = that.updateAnchor(mouse, bounds);
             state.updateAnnotation(d);
-            d3.select(this.parentNode).style({
-              width: (d:prov.IFrameStateAnnotation) => d.size ? d.size[0] + '%' : null,
-              height: (d:prov.IFrameStateAnnotation) => d.size ? d.size[1] + '%' : null
-            });
+            d3.select(this.parentNode).each(updateSize);
         }));
 
     }, $anns_enter.filter((d) => d.type === 'frame'));
