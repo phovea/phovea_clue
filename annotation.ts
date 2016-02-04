@@ -14,6 +14,92 @@ const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
 };
 
+enum EAnchorDirection {
+  EAST, NORTH, WEST, SOUTH, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST, CENTER
+}
+
+const anchor2string = (() => {
+  var r = [];
+  r[EAnchorDirection.EAST] = 'e';
+  r[EAnchorDirection.NORTH] = 'n';
+  r[EAnchorDirection.WEST] = 'w';
+  r[EAnchorDirection.SOUTH] = 's';
+  r[EAnchorDirection.NORTH_EAST] = 'ne';
+  r[EAnchorDirection.NORTH_WEST] = 'nw';
+  r[EAnchorDirection.SOUTH_EAST] = 'se';
+  r[EAnchorDirection.SOUTH_WEST] = 'sw';
+  r[EAnchorDirection.CENTER] = 'c';
+  return r;
+})();
+const string2anchor = {
+  e: EAnchorDirection.EAST,
+  n: EAnchorDirection.NORTH,
+  w: EAnchorDirection.WEST,
+  s: EAnchorDirection.SOUTH,
+  ne: EAnchorDirection.NORTH_EAST,
+  nw: EAnchorDirection.NORTH_WEST,
+  se: EAnchorDirection.SOUTH_EAST,
+  sw: EAnchorDirection.SOUTH_WEST,
+  c: EAnchorDirection.CENTER
+};
+
+class Anchor {
+  private pos_: [number, number] = null;
+  constructor(private elem: Element, private anchor: EAnchorDirection, lazy = false) {
+    if (!lazy) {
+      this.pos_ = this.compute();
+    }
+  }
+
+  distance(pos: [number, number]) {
+    const p = this.pos;
+    const dx = pos[0]-p[0];
+    const dy = pos[1]-p[1];
+    return dx *dx + dy*dy;
+  }
+
+  get pos() {
+    return this.pos_ !== null ? this.pos_ : this.compute();
+  }
+
+  compute(): [number, number] {
+    var o = C.bounds(this.elem);
+    switch (this.anchor) {
+      case EAnchorDirection.EAST:
+        return [o.x, o.y + o.h / 2];
+      case EAnchorDirection.NORTH:
+        return [o.x + o.w / 2, o.y];
+      case EAnchorDirection.WEST:
+        return [o.x + o.w, o.y + o.h / 2];
+      case EAnchorDirection.SOUTH:
+        return [o.x + o.w / 2, o.y + o.h / 2];
+      case EAnchorDirection.NORTH_EAST:
+        return [o.x, o.y];
+      case EAnchorDirection.NORTH_WEST:
+        return [o.x + o.w, o.y];
+      case EAnchorDirection.SOUTH_EAST:
+        return [o.x, o.y + o.h];
+      case EAnchorDirection.SOUTH_WEST:
+        return [o.x + o.w, o.y + o.h];
+      default:
+        return [o.x + o.w / 2, o.y + o.h / 2];
+    }
+  }
+
+  toString() {
+    return this.elem.getAttribute('data-anchor') + '@' + anchor2string[this.anchor];
+  }
+
+  static fromString(s: string) {
+    const parts = s.split('@');
+    const elem = <Element>document.querySelector('*[data-anchor="'+parts[0]+'"]');
+    const anchor = string2anchor[parts[1]];
+    return new Anchor(elem, anchor, true);
+  }
+}
+
+
+
 export class Renderer {
   private options = {
     animation: true,
@@ -27,7 +113,7 @@ export class Renderer {
 
   private l = (event, state, type, op, extras) => this.render(state, extras.withTransition !== false);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
-  private rerender = () => this.render(this.act);
+  private rerender = () => setTimeout(this.render.bind(this, this.act), 400);
 
   private act : prov.SlideNode = null;
 
@@ -119,6 +205,59 @@ export class Renderer {
     return this.prev;
   }
 
+  private renderAnchors(bounds: { x: number, y: number, w: number, h: number}) {
+    const anchorElements : HTMLElement[] = [].slice.apply((<Element>this.$main.node()).querySelectorAll('*[data-anchor]'));
+    const anchors : Anchor[] = [];
+    //create anchors
+    anchorElements.forEach((a) => {
+      const b = C.bounds(a);
+      if (b.w * b.h < 50 * 50) { //area to small for higher details
+        anchors.push(new Anchor(a, EAnchorDirection.CENTER));
+      } else {
+        anchors.push.apply(anchors, Object.keys(string2anchor).map((s) => new Anchor(a, string2anchor[s])));
+      }
+    });
+    const $anchors = this.$main.selectAll('div.annotation-anchor').data(anchors);
+    $anchors.enter().append('div').classed('annotation-anchor', true);
+
+    $anchors.style({
+      display: null,
+      left: (d) => (d.pos[0]+-bounds.x)+'px',
+      top: (d) => (d.pos[1]-bounds.y)+'px',
+    });
+    $anchors.exit().remove();
+  }
+
+  private updateAnchor(pos: [number, number], bounds: { x: number, y: number, w: number, h: number}) : any {
+    const $anchors = this.$main.selectAll<Anchor>('div.annotation-anchor');
+    if ($anchors.empty()) {
+      return;
+    }
+    const abspos : [number, number] = [pos[0] + bounds.x, pos[1] + bounds.y];
+    var min_v = Number.POSITIVE_INFINITY,
+      min_a : Anchor = null;
+    $anchors.each((d) => {
+      const distance = d.distance(abspos);
+      if (distance < min_v) {
+        min_a = d;
+        min_v = distance;
+      }
+    });
+    $anchors.classed('closest', (d,i) => d === min_a);
+    if (min_a) {
+      return {
+        anchor: min_a.toString(),
+        offset: [abspos[0] - min_a.pos[0], abspos[1] - min_a.pos[1]]
+      };
+    }
+    //no anchor relative version
+    return [pos[0] * 100 / bounds.w, pos[1] * 100 / bounds.h];
+  }
+
+  private removeAnchors() {
+    this.$main.selectAll('div.annotation-anchor').style('display','none').remove();
+  }
+
   private renderAnnotationsImpl(state:prov.SlideNode) {
     const that = this;
     const editable = modeFeatures.isEditable() && state != null;
@@ -127,16 +266,34 @@ export class Renderer {
     const $anns_enter = $anns.enter().append('div')
       .attr('class',(d) => d.type+'-annotation annotation');
 
-    const updateTransform = (d:prov.IStateAnnotation) => `translate(${d.pos[0]},${d.pos[1]})rotate(${(<any>d).rotation || 0}deg)`;
+    const bounds = C.bounds(<Element>this.$main.node());
+
+    function updatePos(d: prov.IStateAnnotation) {
+      const elem = <HTMLElement>this;
+      const p : any = d.pos;
+      if (Array.isArray(p)) { //relative
+        elem.style.left = p[0]+'%';
+        elem.style.top = p[1]+'%';
+      } else { //anchor based
+        const base = Anchor.fromString(p.anchor).pos;
+        console.log(base, bounds, p.offset);
+        elem.style.left = (base[0]-bounds.x)+ p.offset[0]+'px';
+        elem.style.top = (base[1]-bounds.y)+ p.offset[1]+'px';
+      }
+    }
+
     //move
     $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
       //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
+      .on('dragstart', function (d:prov.IStateAnnotation, i) {
+        that.renderAnchors(bounds);
+      })
+      .on('dragend', that.removeAnchors.bind(that))
       .on('drag', function (d:prov.IStateAnnotation, i) {
         var mouse = d3.mouse(this.parentNode.parentNode);
-        const bounds = C.bounds(this.parentNode.parentNode);
-        d.pos = [mouse[0]*100/bounds.w,mouse[1]*100/bounds.h]; //[d.x, d.y];
+        d.pos = that.updateAnchor(mouse, bounds);
         state.updateAnnotation(d);
-        d3.select(this.parentNode).style('left', d.pos[0] + '%').style('top', d.pos[1] + '%');
+        d3.select(this.parentNode).each(updatePos);
       }));
 
     $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
@@ -168,7 +325,6 @@ export class Renderer {
       $texts.select('div.text').html((d) => this.renderer(d.text)).style({
         width: (d:prov.ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
         height: (d:prov.ITextStateAnnotation) => d.size ? d.size[1] + 'px' : null,
-        transform: updateTransform
       }).each(function (d) {
         if (d.styles) {
           d3.select(this).style(d.styles);
@@ -271,10 +427,7 @@ export class Renderer {
 
     }, $anns_enter.filter((d) => d.type === 'frame'));
 
-    $anns.style({
-      left: (d:prov.IStateAnnotation) => d.pos[0] + '%',
-      top: (d:prov.IStateAnnotation) => d.pos[1] + '%'
-    }).classed('editable',editable);
+    $anns.each(updatePos).classed('editable',editable);
 
     $anns.exit().remove();
 

@@ -148,3 +148,12 @@ div.annotation {
     border: 5px solid #b8000b;
   }
 }
+.annotation-anchor {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: darkred;
+  &.closest {
+    background-color: red;
+  }
+}
