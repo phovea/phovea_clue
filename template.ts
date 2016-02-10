@@ -492,9 +492,9 @@ export class CLUEWrapper extends events.EventHandler {
       this.header.insertCustomRightMenu(ul);
     }
     const that = this;
-    $('#loginDialog div.modal-body').load('../caleydo_security_flask/_login_form.html', function () {
-      var $form = $(this).find('form'),
-        $alert = $form.parent().find('div.alert');
+    {
+      let $form = $('#loginDialog div.modal-body').html(login.form).find('form');
+      let $alert = $form.parent().find('div.alert');
 
       $alert.hide();
       login.bindLoginForm(<HTMLFormElement>$form[0], (error, user) => {
@@ -510,7 +510,7 @@ export class CLUEWrapper extends events.EventHandler {
 
           (<any>$('#loginDialog')).modal('hide');
 
-          $('.login_required.disabled').removeClass('disabled').attr('disabled',null);
+          $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
 
         } else {
           that.header.ready();
@@ -518,19 +518,19 @@ export class CLUEWrapper extends events.EventHandler {
           $alert.html(error).show();
         }
       });
-  });
+    }
 
 
-  $('#logout_link').on('click', function () {
-    this.header.wait();
-    login.logout().then(function() {
-      session.store('logged_in', false);
-      $('#user_menu').hide();
-      $('#login_menu').show();
-      $('.login_required').addClass('disabled');
-      //TODO
+    $('#logout_link').on('click', function () {
+      this.header.wait();
+      login.logout().then(function() {
+        session.store('logged_in', false);
+        $('#user_menu').hide();
+        $('#login_menu').show();
+        $('.login_required').addClass('disabled');
+        //TODO
+      });
     });
-  });
   }
 
   private jumpToStory(story: number) {
