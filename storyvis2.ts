@@ -7,13 +7,13 @@ import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
 import provenance = require('../caleydo_provenance/main');
 import idtypes = require('../caleydo_core/idtype');
-import cmode = require('../caleydo_provenance/mode');
+import cmode = require('./mode');
 import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
 import marked = require('marked');
-import player = require('../caleydo_provenance/player');
+import player = require('./player');
 
 
 interface ISlideNodeRepr {

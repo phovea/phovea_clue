@@ -4,11 +4,11 @@
 
 import C = require('../caleydo_core/main');
 import prov = require('../caleydo_provenance/main');
-import cmode = require('../caleydo_provenance/mode');
+import cmode = require('./mode');
 import d3 = require('d3');
 import marked = require('marked');
 import {defaultSelectionType} from '../caleydo_core/idtype';
-import player = require('../caleydo_provenance/player');
+import player = require('./player');
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
