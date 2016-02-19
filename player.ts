@@ -10,10 +10,14 @@ export const FACTOR = 1;
 export const MIN_DURATION = -1;
 export const MIN_TRANSITION = -1;
 
+/**
+ * story player interface and logic
+ */
 export class Player {
   private anim = -1;
 
   private options = {
+    //default animation step duration
     step: 1000
   };
 
@@ -50,7 +54,7 @@ export class Player {
       //pause key
       if (k.keyCode === 19) {
         k.preventDefault();
-
+        //fake a click event
         var event = <MouseEvent>document.createEvent('MouseEvents');
         event.initMouseEvent('click', /* type */
           true, /* canBubble */
@@ -75,10 +79,10 @@ export class Player {
 
   start() {
     const l = this.graph.getSlideChains();
-    const act = this.graph.selectedSlides()[0] || l[l.length-1];
+    const act = this.graph.selectedSlides()[0] || l[l.length - 1];
     if (act) {
       this.render(act).then(() => {
-        this.anim = setTimeout(this.next.bind(this), act.duration*FACTOR);
+        this.anim = setTimeout(this.next.bind(this), act.duration * FACTOR);
       });
       return true;
     } else {
@@ -86,7 +90,8 @@ export class Player {
     }
   }
 
-  render(story: provenance.SlideNode) {
+  render(story:provenance.SlideNode) {
+    //render by selecting the slide
     this.graph.selectSlide(story);
     //TODO transition time
     return Promise.resolve(story);
@@ -110,15 +115,22 @@ export class Player {
     this.stopAnim();
   }
 
+  /**
+   * renders the next slide in an animated fashion
+   */
   private next() {
     var r = this.forward();
     if (r) {
       r.then((act) => {
-        this.anim = setTimeout(this.next.bind(this), act.duration*FACTOR);
+        this.anim = setTimeout(this.next.bind(this), act.duration * FACTOR);
       });
     }
   }
 
+  /**
+   * jumps to the next slide
+   * @returns {any}
+   */
   forward() {
     this.stopAnim();
     const current = this.graph.selectedSlides()[0];
@@ -131,6 +143,10 @@ export class Player {
     }
   }
 
+  /**
+   * jumps to the previous slide
+   * @returns {any}
+   */
   backward() {
     this.stopAnim();
     const current = this.graph.selectedSlides()[0];

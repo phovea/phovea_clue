@@ -1,4 +1,6 @@
 /**
+ * provides a template wrapper around an application for including CLUE. Includes the common frame for switching modes, provenance, and story visualizations
+ *
  * Created by Samuel Gratzl on 27.08.2015.
  */
 /// <amd-dependency path='font-awesome' />
@@ -26,8 +28,17 @@ import login = require('../caleydo_security_flask/login');
 import session = require('../caleydo_core/session');
 import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
 
-function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
+/**
+ * create the provenance graph selection dropdown and handles the graph selection
+ * @param manager
+ * @param $ul
+ * @returns {Promise<U>}
+ */
+function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, $ul:d3.Selection<any>):Promise<prov.ProvenanceGraph> {
+  //selected by url
   const graph = C.hash.getProp('clue_graph', null);
+
+  //new button
   $ul.select('#provenancegraph_new_remote').on('click', () => {
     d3.event.preventDefault();
     if (session.retrieve('logged_in') === true) {
@@ -37,6 +48,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       window.location.reload();
     }
   });
+  //new local
   $ul.select('#provenancegraph_new').on('click', () => {
     C.hash.removeProp('clue_slide', false);
     C.hash.removeProp('clue_state', false);
@@ -45,21 +57,22 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
     d3.event.preventDefault();
   });
 
-  function loadGraph(desc : any) {
+  function loadGraph(desc:any) {
     C.hash.setProp('clue_graph', desc.id);
     window.location.reload();
   }
 
-  d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function() {
+  d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function () {
     d3.event.preventDefault();
     d3.event.stopPropagation();
     var remote = this.id === 'provenancegraph_import_remote';
+    //import dialog
     const d = dialogs.generateDialog('Select File', 'Upload');
     d.body.innerHTML = `<input type="file" placeholder="Select File to Upoad">`;
-    d3.select(d.body).select('input').on('change', function() {
+    d3.select(d.body).select('input').on('change', function () {
       var file = (<any>d3.event).target.files[0];
       var reader = new FileReader();
-      reader.onload = function (e: any) {
+      reader.onload = function (e:any) {
         var data_s = e.target.result;
         var dump = JSON.parse(data_s);
         (remote ? manager.importRemote(dump) : manager.importLocal(dump)).then((graph) => {
@@ -74,7 +87,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
 
   return manager.list().then((list) => {
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
-    $list.enter().insert('li', ':first-child').classed('graph',true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
+    $list.enter().insert('li', ':first-child').classed('graph', true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
       d3.event.preventDefault();
       loadGraph(d);
     });
@@ -83,11 +96,11 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       html: true,
       placement: 'left',
       trigger: 'manual',
-      title: function() {
+      title: function () {
         const graph = d3.select(this).datum();
         return `${graph.name}`;
       },
-      content: function() {
+      content: function () {
         const graph = d3.select(this).datum();
         const creator = graph.creator;
         const description = graph.description || '';
@@ -115,20 +128,20 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${session.retrieve('logged_in',false)!==true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone"></span> Clone</button>
-                    <button class="btn btn-danger" ${session.retrieve('logged_in',false)!==true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
                 </div>
             </div>
         </div>`);
         $elem.find('button.btn-danger').on('click', () => {
-          dialogs.areyousure('Are you sure to delete: "'+graph.name+'"').then((deleteIt) => {
+          dialogs.areyousure('Are you sure to delete: "' + graph.name + '"').then((deleteIt) => {
             if (deleteIt) {
               manager.delete(graph);
             }
           });
         });
-        $elem.find('button.btn-primary').on('click', function() {
+        $elem.find('button.btn-primary').on('click', function () {
           const isSelect = this.dataset.action === 'select';
           if (isSelect) {
             loadGraph(graph);
@@ -148,7 +161,7 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
       }
     });
 
-    const loggedIn = session.retrieve('logged_in',false) === true;
+    const loggedIn = session.retrieve('logged_in', false) === true;
     if (graph === 'new_remote' && loggedIn) {
       return manager.createRemote();
     }
@@ -174,55 +187,77 @@ function chooseProvenanceGraph(manager: prov.MixedStorageProvenanceGraphManager,
  * injection for headless support
  * @param wrapper
  */
-function injectHeadlessSupport(wrapper: CLUEWrapper) {
-  var w : any = window;
+function injectHeadlessSupport(wrapper:CLUEWrapper) {
+  var w:any = window;
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   wrapper.on('jumped_to', () => {
     setTimeout(() => {
       document.body.classList.add('clue_jumped');
-      prompt('clue_done_magic_key','test');
-    },5000);
+      prompt('clue_done_magic_key', 'test');
+    }, 5000);
 
   });
 }
 
 export class CLUEWrapper extends events.EventHandler {
   private options = {
+    /**
+     * the name of the application
+     */
     app: 'CLUE',
+    /**
+     * the URL of the application, used e.g., for generating screenshots
+     */
     application: '/clue',
+    /**
+     * the id of the application, for differentiating provenance graphs
+     */
     id: 'clue',
+    /**
+     * the selection type to record
+     */
     recordSelectionTypes: 'selected',
+    /**
+     * whether selection replays should be animated
+     */
     animatedSelections: false,
+    /**
+     * whether thumbnails should be shown in the provenance or story vis
+     */
     thumbnails: true
   };
 
-  private manager : prov.MixedStorageProvenanceGraphManager;
+  private manager:prov.MixedStorageProvenanceGraphManager;
 
-  graph: Promise<prov.ProvenanceGraph>;
-  header: header.AppHeader;
-  $main: d3.Selection<any>;
-  $main_ref: prov.IObjectRef<d3.Selection<any>>;
+  graph:Promise<prov.ProvenanceGraph>;
+  header:header.AppHeader;
+  $main:d3.Selection<any>;
+  $main_ref:prov.IObjectRef<d3.Selection<any>>;
 
-  private storyvis: storyvis.VerticalStoryVis;
+  private storyvis:storyvis.VerticalStoryVis;
 
-  constructor(body:HTMLElement, options: any = {}) {
+  constructor(body:HTMLElement, options:any = {}) {
     super();
     const that = this;
     C.mixin(this.options, options);
+    //replace content with the template
     body.innerHTML = template;
 
+    //special flag for rendering server side screenshots
     if (C.hash.is('clue_headless')) {
       console.log('init headless mode');
       injectHeadlessSupport(this);
       d3.select('body').classed('headless', true);
     }
+    //load all available provenance graphs
     this.manager = new prov.MixedStorageProvenanceGraphManager({
-        prefix: this.options.id,
-        storage: sessionStorage,
-        application: this.options.application
-      });
+      prefix: this.options.id,
+      storage: sessionStorage,
+      application: this.options.application
+    });
 
+    //create the common header
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
       app: this.options.app,
       inverse: false
@@ -233,8 +268,9 @@ export class CLUEWrapper extends events.EventHandler {
     this.createLogin();
 
     {
+      //add provenance graph management menu entry
       let ul = document.createElement('ul');
-      let $ul = d3.select(ul).attr('class','nav navbar-nav navbar-right').html(`
+      let $ul = d3.select(ul).attr('class', 'nav navbar-nav navbar-right').html(`
       <li class="dropdown">
             <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                aria-expanded="false"><i class="fa fa-code-fork fa-lg fa-rotate-180"></i></a>
@@ -263,19 +299,19 @@ export class CLUEWrapper extends events.EventHandler {
           //create blob and save it
           var blob = new Blob([str], {type: 'application/json;charset=utf-8'});
           var a = new FileReader();
-          a.onload = (e)  => window.open((<any>e.target).result, '_blank');
+          a.onload = (e) => window.open((<any>e.target).result, '_blank');
           a.readAsDataURL(blob);
         });
         return false;
       });
 
       d3.select(this.header.options).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
-        this.graph.then((g: prov.ProvenanceGraph) => {
+        this.graph.then((g:prov.ProvenanceGraph) => {
             return datas.create({
-              id : g.desc.id,
+              id: g.desc.id,
               name: g.desc.name,
               fqname: g.desc.fqname,
-              type : 'graph',
+              type: 'graph',
               storage: 'given',
               graph: g.backend
             });
@@ -287,7 +323,7 @@ export class CLUEWrapper extends events.EventHandler {
             }
             l[0].load().then((force) => {
               let p = dialogs.generateDialog('Provenance Graph');
-              force.factory(proxy,p.body);
+              force.factory(proxy, p.body);
               p.show();
             });
           });
@@ -296,7 +332,6 @@ export class CLUEWrapper extends events.EventHandler {
 
       this.graph = chooseProvenanceGraph(this.manager, $ul);
     }
-
 
 
     //cmode.create(body.querySelector('#modeselector'));
@@ -308,7 +343,7 @@ export class CLUEWrapper extends events.EventHandler {
     this.$main = d3.select(body).select('main');
 
     this.graph.then((graph) => {
-      graph.on('sync_start,sync', (event: events.IEvent) => {
+      graph.on('sync_start,sync', (event:events.IEvent) => {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
@@ -325,9 +360,9 @@ export class CLUEWrapper extends events.EventHandler {
 
 
       /*const seditor = storyeditor.create(graph, body.querySelector('#storyeditor'), {
-        editor: r.edit
-      });
-      */
+       editor: r.edit
+       });
+       */
 
 
       provvis2.create(graph, body.querySelector('div.content'), {
@@ -341,11 +376,11 @@ export class CLUEWrapper extends events.EventHandler {
       graph.on('select_slide_selected', (event, state) => {
         d3.select('aside.annotations').style('display', state ? null : 'none');
       });
-      d3.select('aside.annotations > div:first-of-type').call(d3.behavior.drag().on('drag', function() {
+      d3.select('aside.annotations > div:first-of-type').call(d3.behavior.drag().on('drag', function () {
         var mouse = d3.mouse(this.parentElement.parentElement);
         d3.select(this.parentElement).style({
-          left: mouse[0] +'px',
-          top: mouse[1] +'px'
+          left: mouse[0] + 'px',
+          top: mouse[1] + 'px'
         });
       }));
 
@@ -382,37 +417,37 @@ export class CLUEWrapper extends events.EventHandler {
         }
       });
 
-     graph.on('switch_state', (event:any, state:prov.StateNode) => {
-       if (state) {
-        C.hash.setInt('clue_state', state.id);
-       } else {
-         C.hash.removeProp('clue_state');
-       }
-      });
-     graph.on('select_slide_selected', (event:any, state:prov.SlideNode) => {
+      graph.on('switch_state', (event:any, state:prov.StateNode) => {
         if (state) {
-        C.hash.setInt('clue_slide', state.id);
-       } else {
-         C.hash.removeProp('clue_slide');
-       }
+          C.hash.setInt('clue_state', state.id);
+        } else {
+          C.hash.removeProp('clue_state');
+        }
+      });
+      graph.on('select_slide_selected', (event:any, state:prov.SlideNode) => {
+        if (state) {
+          C.hash.setInt('clue_slide', state.id);
+        } else {
+          C.hash.removeProp('clue_slide');
+        }
       });
 
       {
         const $right = $('aside.provenance-layout-vis');
         const $right_story = $(this.storyvis.node);
         this.propagate(cmode, 'modeChanged');
-        let update = (new_: cmode.CLUEMode) => {
+        let update = (new_:cmode.CLUEMode) => {
           $('body').attr('data-clue', new_.toString());
           //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
           if (new_.presentation > 0.8) {
-            $right.animate({width: 'hide'},'fast');
+            $right.animate({width: 'hide'}, 'fast');
           } else {
-            $right.animate({width: 'show'},'fast');
+            $right.animate({width: 'show'}, 'fast');
           }
           if (new_.exploration > 0.8) {
-            $right_story.animate({width: 'hide'},'fast');
+            $right_story.animate({width: 'hide'}, 'fast');
           } else {
-            $right_story.animate({width: 'show'},'fast');
+            $right_story.animate({width: 'show'}, 'fast');
           }
         };
         cmode.on('modeChanged', (event, new_) => update(new_));
@@ -470,14 +505,14 @@ export class CLUEWrapper extends events.EventHandler {
 
       this.fire('loaded_graph', graph);
 
-    this.header.ready();
+      this.header.ready();
     });
   }
 
   private createLogin() {
     {
       let ul = document.createElement('ul');
-      ul.classList.add('nav','navbar-nav','navbar-right');
+      ul.classList.add('nav', 'navbar-nav', 'navbar-right');
       ul.innerHTML = `
       <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><span class="glyphicon glyphicon-user"></span></a></li>
         <li style="display: none" class="dropdown" id="user_menu">
@@ -523,7 +558,7 @@ export class CLUEWrapper extends events.EventHandler {
 
     $('#logout_link').on('click', function () {
       this.header.wait();
-      login.logout().then(function() {
+      login.logout().then(function () {
         session.store('logged_in', false);
         $('#user_menu').hide();
         $('#login_menu').show();
@@ -533,7 +568,7 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  private jumpToStory(story: number) {
+  private jumpToStory(story:number) {
     console.log('jump to stored story', story);
     return this.graph.then((graph) => {
       const s = graph.getSlideById(story);
@@ -559,14 +594,14 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  private jumpToState(state: number) {
+  private jumpToState(state:number) {
     console.log('jump to stored state', state);
     return this.graph.then((graph) => {
       let s = graph.getStateById(state);
       if (s) {
         console.log('jump to stored', s.id);
         return graph.jumpTo(s).then(() => {
-        console.log('jumped to stored', s.id);
+          console.log('jumped to stored', s.id);
           this.fire('jumped_to', s);
           this.header.ready();
           return this;
@@ -604,6 +639,13 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 }
-export function create(body:HTMLElement, options: any = {}) {
+
+/**
+ * factory method creating a CLUEWrapper instance
+ * @param body
+ * @param options
+ * @returns {CLUEWrapper}
+ */
+export function create(body:HTMLElement, options:any = {}) {
   return new CLUEWrapper(body, options);
 }
