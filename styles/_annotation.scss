@@ -29,10 +29,12 @@
 
 main.hide-all-non-annotations {
   > * {
-    visibility: hidden !important;
+    //visibility: hidden !important;
+    opacity: 0.1 !important;
   }
   .annotation, .subtitle-annotation, .annotation-anchor {
-    visibility: visible !important;
+    //visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
