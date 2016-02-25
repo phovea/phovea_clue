@@ -200,6 +200,46 @@ function injectHeadlessSupport(wrapper:CLUEWrapper) {
   });
 }
 
+function injectParentWindowSupport(wrapper: CLUEWrapper) {
+  var w:any = window;
+  w.__caleydo = w.__caleydo || {};
+  w.__caleydo.clue = wrapper;
+  //initial jump
+  var jump_listener = (s) => {
+    window.top.postMessage({ type: 'caleydo', clue: 'jumped_to_initial'}, '*');
+    wrapper.off('jumped_to', jump_listener)
+  };
+  wrapper.on('jumped_to', jump_listener);
+  window.addEventListener('message', (event: MessageEvent) => {
+    const s = event.source,
+      d = event.data;
+    if (d.type !== 'caleydo' || !d.clue) {
+      return;
+    }
+    if (d.clue === 'jump_to') {
+        wrapper.jumpToState(d.state).then(() => {
+          s.postMessage({ type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
+        }).catch(() => {
+          s.postMessage({ type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
+        });
+    } else if (d.clue === 'show_slide') {
+        wrapper.jumpToStory(d.slide).then(() => {
+          s.postMessage({ type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
+        }).catch(() => {
+          s.postMessage({ type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
+        });
+    } else if (d.clue === 'next_slide') {
+      wrapper.nextSlide().then(() => {
+        s.postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
+      });
+    } else if (d.clue === 'previous_slide') {
+      wrapper.previousSlide().then(() => {
+        s.postMessage({type: 'caleydo', clue: 'previous_slide', ref: d.ref}, '*');
+      });
+    }
+  });
+}
+
 export class CLUEWrapper extends events.EventHandler {
   private options = {
     /**
@@ -248,6 +288,11 @@ export class CLUEWrapper extends events.EventHandler {
     if (C.hash.is('clue_headless')) {
       console.log('init headless mode');
       injectHeadlessSupport(this);
+      d3.select('body').classed('headless', true);
+    }
+    if (C.hash.is('clue_contained')) {
+      console.log('init contained mode');
+      injectParentWindowSupport(this);
       d3.select('body').classed('headless', true);
     }
     //load all available provenance graphs
@@ -568,7 +613,19 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  private jumpToStory(story:number) {
+  nextSlide() {
+    return this.graph.then((graph) => {
+      return this.storyvis.player.forward();
+    })
+  }
+
+  previousSlide() {
+    return this.graph.then((graph) => {
+      return this.storyvis.player.backward();
+    })
+  }
+
+  jumpToStory(story:number) {
     console.log('jump to stored story', story);
     return this.graph.then((graph) => {
       const s = graph.getSlideById(story);
@@ -594,7 +651,7 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  private jumpToState(state:number) {
+  jumpToState(state:number) {
     console.log('jump to stored state', state);
     return this.graph.then((graph) => {
       let s = graph.getStateById(state);

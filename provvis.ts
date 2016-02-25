@@ -602,8 +602,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .attr('data-id', (d) => d.s.id)
       .append('div')
       .on('click', this.onStateClick.bind(this))
-      .on('mouseenter', (d) => graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType))
-      .on('mouseleave', (d) => graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType))
+      .on('mouseenter', (d) => {
+        graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+      })
+      .on('mouseleave', (d) => {
+        graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+      })
       .attr('draggable',true)
       .on('dragstart', (d) => {
         const e = <DragEvent>(<any>d3.event);
