@@ -10,7 +10,7 @@ function clue_random_id(length = 8) {
   return id.substr(0, length);
 }
 
-class EmbeddedCLUE {
+export class EmbeddedCLUE {
   private iframe:HTMLIFrameElement;
 
   private l = this.onMessage.bind(this);
@@ -81,9 +81,9 @@ class EmbeddedCLUE {
   }
 }
 
-function embedCLUE(parent:HTMLElement, server:string, app:string, provenanceGraph:string) {
+export function embedCLUE(parent:HTMLElement, server:string, app:string, provenanceGraph:string) {
   const url = `${server}/${app}/#clue_graph=${provenanceGraph}&clue_contained=T&clue=P`;
   return new Promise((resolve) => {
-    var r = new EmbeddedCLUE(parent, url, resolve);
+    return new EmbeddedCLUE(parent, url, resolve);
   });
 }

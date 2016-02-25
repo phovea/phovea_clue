@@ -207,7 +207,7 @@ function injectParentWindowSupport(wrapper: CLUEWrapper) {
   //initial jump
   var jump_listener = (s) => {
     window.top.postMessage({ type: 'caleydo', clue: 'jumped_to_initial'}, '*');
-    wrapper.off('jumped_to', jump_listener)
+    wrapper.off('jumped_to', jump_listener);
   };
   wrapper.on('jumped_to', jump_listener);
   window.addEventListener('message', (event: MessageEvent) => {
@@ -616,13 +616,13 @@ export class CLUEWrapper extends events.EventHandler {
   nextSlide() {
     return this.graph.then((graph) => {
       return this.storyvis.player.forward();
-    })
+    });
   }
 
   previousSlide() {
     return this.graph.then((graph) => {
       return this.storyvis.player.backward();
-    })
+    });
   }
 
   jumpToStory(story:number) {
