@@ -9,7 +9,7 @@ import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
 import provenance = require('./prov');
 import cmode = require('./mode');
-import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
+import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 

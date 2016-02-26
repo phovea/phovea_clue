@@ -10,7 +10,7 @@
     "caleydo_d3": "*",
     "caleydo_window": "*",
     "caleydo_vis": "*",
-    "wrapper_bootstrap_fontawesome": "*",
+    "caleydo_bootstrap_fontawesome": "*",
     "caleydo_security_flask": "*"
   },
   "caleydo": {

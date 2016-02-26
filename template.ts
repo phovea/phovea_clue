@@ -12,7 +12,7 @@
 declare var template:string;
 
 import C = require('../caleydo_core/main');
-import header = require('../wrapper_bootstrap_fontawesome/header');
+import header = require('../caleydo_bootstrap_fontawesome/header');
 import datas = require('../caleydo_core/data');
 import vis = require('../caleydo_core/vis');
 import prov = require('./prov');
@@ -26,7 +26,7 @@ import events = require('../caleydo_core/event');
 import renderer = require('./annotation');
 import login = require('../caleydo_security_flask/login');
 import session = require('../caleydo_core/session');
-import dialogs = require('../wrapper_bootstrap_fontawesome/dialogs');
+import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
 
 /**
  * create the provenance graph selection dropdown and handles the graph selection
