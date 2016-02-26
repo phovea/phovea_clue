@@ -5,7 +5,7 @@
 
 import C = require('../caleydo_core/main');
 import ajax = require('../caleydo_core/ajax');
-import provenance = require('../caleydo_provenance/main');
+import provenance = require('./prov');
 
 export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
   var o = {

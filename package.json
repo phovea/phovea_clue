@@ -8,7 +8,6 @@
   "peerDependencies": {
     "caleydo_core": "*",
     "caleydo_d3": "*",
-    "caleydo_provenance": "*",
     "caleydo_window": "*",
     "caleydo_vis": "*",
     "wrapper_bootstrap_fontawesome": "*",
@@ -16,6 +15,28 @@
   },
   "caleydo": {
     "plugins": {
+      "web": [
+        {
+          "type": "actionFactory",
+          "id": "idtype-selection",
+          "file": "selection",
+          "factory": "createCmd",
+          "creates": "select"
+        },
+        {
+          "type": "actionCompressor",
+          "id": "idtype-selection",
+          "file": "selection",
+          "factory": "compressSelection"
+        },
+        {
+          "type": "actionFactory",
+          "id": "multiform",
+          "file": "multiform",
+          "factory": "createCmd",
+          "creates": "(transform|changeVis|setOption)"
+        }
+      ],
       "python": [
         {
           "type": "namespace",

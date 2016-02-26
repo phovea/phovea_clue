@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import provenance = require('../caleydo_provenance/main');
+import provenance = require('./prov');
 import C = require('../caleydo_core/main');
 import d3 = require('d3');
 
