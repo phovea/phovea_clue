@@ -23,7 +23,7 @@ export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenan
       width: o.width
     });
   }
-  return '../clue/assets/not_available.png';
+  return '../caleydo_clue/assets/not_available.png';
 }
 
 export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode, options= {}) {
@@ -41,7 +41,7 @@ export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: 
       width: o.width
     });
   }
-  return '../clue/assets/not_available.png';
+  return '../caleydo_clue/assets/not_available.png';
 }
 
 export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
@@ -59,7 +59,7 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
       width: o.width
     });
   }
-  return '../clue/assets/not_available.png';
+  return '../caleydo_clue/assets/not_available.png';
 }
 
 export function areThumbnailsAvailable(graph: provenance.ProvenanceGraph) {

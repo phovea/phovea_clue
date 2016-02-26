@@ -69,7 +69,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private trigger = C.bind(this.update, this);
 
   private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string, op: any, extras) => {
-    this.$node.selectAll('div.story:not(.placeholder)').classed('select-'+type,function (d: provenance.SlideNode) {
+    this.$node.selectAll('div.story:not(.placeholder)').classed('caleydo-select-'+type,function (d: provenance.SlideNode) {
       const isSelected = d === slide;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -628,7 +628,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.attr('data-id', (d) => d.id);
     $stories.attr('title', (d) => d.name+'\n'+(d.transition > 0 ? '('+to_duration(d.transition)+')' : '')+'('+to_duration(d.duration)+')');
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(../clue/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(../caleydo_clue/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');

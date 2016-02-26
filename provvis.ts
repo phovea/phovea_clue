@@ -303,7 +303,7 @@ class StateRepr {
       .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
-      .classed('select-selected', (d) => d.selected)
+      .classed('caleydo-select-selected', (d) => d.selected)
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .attr('data-doi',(d) => d.doi)
       .attr('title', (d) => d.name);
@@ -378,7 +378,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
-    this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
+    this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();

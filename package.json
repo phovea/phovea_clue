@@ -1,14 +1,13 @@
 {
-  "name": "clue",
+  "name": "caleydo_clue",
   "version": "0.0.1",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": "Caleydo/clue",
+  "repository": "Caleydo/caleydo_clue",
   "dependencies": {
   },
   "peerDependencies": {
     "caleydo_core": "*",
     "caleydo_d3": "*",
-    "caleydo_window": "*",
     "caleydo_vis": "*",
     "caleydo_bootstrap_fontawesome": "*",
     "caleydo_security_flask": "*"
