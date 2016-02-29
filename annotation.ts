@@ -401,7 +401,7 @@ export class Renderer {
     const that = this;
     const editable = modeFeatures.isEditable() && state != null;
 
-    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d, i) => d.type + i);
+    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d, i) => state.id+'@'+d.type + i);
     const $anns_enter = $anns.enter().append('div')
       .attr('class', (d) => d.type + '-annotation annotation');
 
@@ -608,7 +608,7 @@ export class Renderer {
       const $anns = this.renderAnnotationsImpl(state);
       if (this.options.animation && !$anns.empty() && this.options.duration > 0) {
         $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1);
-        C.resolveIn(this.options.duration).then(() => resolve($anns.node()));
+        C.resolveIn(this.options.duration+10).then(() => resolve($anns.node()));
       } else {
         $anns.style('opacity', 1);
         resolve($anns.node());
@@ -623,7 +623,7 @@ export class Renderer {
       const $div = this.$main.classed('hide-all-non-annotations', false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
       if (this.options.animation && !$div.empty() && this.options.duration > 0) {
         $div.transition().duration(this.options.duration).style('opacity', 0).remove();
-        C.resolveIn(this.options.duration).then(() => resolve());
+        C.resolveIn(this.options.duration+10).then(() => resolve());
       } else {
         $div.remove();
         resolve();
