@@ -138,6 +138,14 @@
         display: none;
       }
 
+      &.caleydo-select-hovered {
+        .glyph {
+          transition: font-size 200ms;
+          transition: margin-left 100ms;
+          font-size: 100%;
+          margin-left: -7px;
+        }
+      }
     }
     &.doi-sm {
       .sthumbnail, .slabel {
