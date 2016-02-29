@@ -80,6 +80,16 @@ class Anchor {
     return this.pos_ !== null ? this.pos_ : this.compute();
   }
 
+  /**
+   * checks wether the anchor position has changed and updates its position accordingly
+   * @returns {boolean} true if there was a change
+   */
+  checkForPositionChange() {
+    const old = this.pos;
+    const new_ = this.pos_ = this.compute();
+    return Math.abs(old[0] - new_[0]) > 1 || Math.abs(old[1] - new_[1]) > 1;
+  }
+
   compute():[number, number] {
     //start with the bounds
     var o = C.bounds(this.elem);
@@ -123,11 +133,45 @@ class Anchor {
    * @param s
    * @returns {Anchor}
    */
-  static fromString(s:string) {
+  static fromString(s:string, lazy = true) {
     const parts = s.split('@');
     const elem = <Element>document.querySelector('*[data-anchor="' + parts[0] + '"]');
     const anchor = string2anchor[parts[1]];
-    return new Anchor(elem, anchor, true);
+    return new Anchor(elem, anchor, lazy);
+  }
+}
+
+class AnchorWatcher {
+  private static UPDATE_INTERVALL = 100;
+
+  private anchors : { anchor: Anchor, callback: () => void }[] = [];
+  private intervall = -1;
+
+  add(anchor: string, callback: () => void) {
+    this.anchors.push({ anchor: Anchor.fromString(anchor, false), callback: callback});
+    if (this.intervall < 0) {
+      this.watch();
+    }
+  }
+
+  private check() {
+    this.anchors.forEach((entry) => {
+      if (entry.anchor.checkForPositionChange()) {
+        entry.callback();
+      }
+    });
+  }
+
+  private watch() {
+    this.intervall = setInterval(this.check.bind(this), AnchorWatcher.UPDATE_INTERVALL);
+  }
+
+  clear() {
+    if (this.intervall >= 0) {
+      clearInterval(this.intervall);
+      this.intervall = -1;
+    }
+    this.anchors = []
   }
 }
 
@@ -165,6 +209,7 @@ export class Renderer {
   private act:prov.SlideNode = null;
 
   private renderer = this.rendererImpl.bind(this);
+  private anchorWatcher = new AnchorWatcher();
 
   constructor(private $main:d3.Selection<any>, private graph:prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
@@ -181,7 +226,7 @@ export class Renderer {
    *
    * variables: usage: `${variable_name}`
    *  * name ... current slide name
-   *  * duration ... current slide duraton
+   *  * duration ... current slide duration
    *  * slide_number ... current slide Index
    *  * state_name ... if the slide is associated with a state: its name
    *  * state_notes ... if the slide is associated with a state: its notes
@@ -369,9 +414,19 @@ export class Renderer {
         elem.style.left = p[0] + '%';
         elem.style.top = p[1] + '%';
       } else { //anchor based
-        const base = Anchor.fromString(p.anchor).pos;
+        const anchor = Anchor.fromString(p.anchor);
+        const base = anchor.pos;
         elem.style.left = (base[0] - bounds.x) + p.offset[0] + 'px';
         elem.style.top = (base[1] - bounds.y) + p.offset[1] + 'px';
+      }
+    }
+
+    this.anchorWatcher.clear();
+
+    function watchAnchor(d: prov.IStateAnnotation) {
+      const p: any = d.pos;
+      if (!Array.isArray(p)) {
+        that.anchorWatcher.add(p.anchor, () => updatePos.call(this, d));
       }
     }
 
@@ -387,6 +442,12 @@ export class Renderer {
         const size = d.size;
         elem.style.width = size[0] + '%';
         elem.style.height = size[1] + '%';
+      }
+    }
+    function watchSizeAnchor(d: prov.IFrameStateAnnotation) {
+      const p:any = d.pos2;
+      if (p) {
+        that.anchorWatcher.add(p.anchor, () => updateSize.call(this, d));
       }
     }
 
@@ -513,6 +574,7 @@ export class Renderer {
     $anns.filter((d) => d.type === 'frame').call(($frames:d3.selection.Update<prov.IFrameStateAnnotation>, $frames_enter:d3.selection.Update<prov.IFrameStateAnnotation>) => {
       $frames.each(function (d) {
         updateSize.call(this, d);
+        watchSizeAnchor.call(this, d);
         if (d.styles) {
           d3.select(this).style(d.styles);
         }
@@ -534,7 +596,7 @@ export class Renderer {
 
     }, $anns_enter.filter((d) => d.type === 'frame'));
 
-    $anns.each(updatePos).classed('editable', editable);
+    $anns.each(updatePos).each(watchAnchor).classed('editable', editable);
 
     $anns.exit().remove();
 
@@ -557,6 +619,7 @@ export class Renderer {
 
   hideOld() {
     return new Promise((resolve) => {
+      this.anchorWatcher.clear();
       const $div = this.$main.classed('hide-all-non-annotations', false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
       if (this.options.animation && !$div.empty() && this.options.duration > 0) {
         $div.transition().duration(this.options.duration).style('opacity', 0).remove();
