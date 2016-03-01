@@ -171,7 +171,7 @@ class AnchorWatcher {
       clearInterval(this.intervall);
       this.intervall = -1;
     }
-    this.anchors = []
+    this.anchors = [];
   }
 }
 
