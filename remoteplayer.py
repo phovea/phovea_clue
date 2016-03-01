@@ -6,7 +6,7 @@ app = flask.Flask(__name__)
 
 import caleydo_server.config
 
-conf = caleydo_server.config.view('clue')
+conf = caleydo_server.config.view('caleydo_clue')
 
 import memcache
 
