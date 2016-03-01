@@ -63,6 +63,20 @@ class StateRepr {
 
   a : provenance.ActionNode = null;
 
+
+  get similarityToSelectedState():number {
+    //console.log(this.graph.compareMode);
+    if(this.graph.compareMode) {
+      //console.log(this.graph);
+
+      //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
+      var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
+      if (selState.length==0) return 1;
+      return selState[0].getSimilarityTo(this.s);
+    }
+    return 1;
+  }
+
   constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
     this.doi = 0.1;
     this.a = s.creator;
@@ -147,6 +161,12 @@ class StateRepr {
   get name() {
     return this.s.name;
   }
+
+
+  get compareMode() {
+    return this.graph.compareMode;
+  }
+
 
 
   static toRepr(graph : provenance.ProvenanceGraph, highlight: any, options : any = {}) {
@@ -326,6 +346,8 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.name);
+    $elem.select('span.slabel').text((d) => d.name + (d.compareMode ? ": " + Math.round(d.similarityToSelectedState*100) + "%" : ""));
+
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
       .classed('fa-bookmark',(d) => d.s.getAttr('starred', false));
@@ -392,21 +414,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   };
+
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
 
-    if (this.data.compareMode) {
-      var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
-      $elem.call(StateRepr.render);
-      //d3.select($elem).style('opacity', (d) => d.opacity);
-      //console.log($elem);
-      //$elem.each(function(el,i,array) {
-      //  el.style('opacity', (d) => d.opacity);
-      //})
-      //console.log("CompareMode=ON");
-    } else {
-      //console.log("CompareMode=OFF");
-    }
+    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    $elem.call(StateRepr.render);
     this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
@@ -667,17 +680,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       });
 
     d3.select("body").on("keydown", function() {
-      //console.log("Keydown Event");
       if(d3.event.ctrlKey) {
-        //console.log(this);
-        this.compareMode=true;
-
+        this.comparing=true;
       }
     }.bind(graph))
       .on("keyup", function() {
-      //console.log("Keyup Event");
-      // console.log(this);
-      this.compareMode=false;
+      this.comparing=false;
     }.bind(graph));
 
 
