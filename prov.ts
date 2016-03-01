@@ -10,9 +10,6 @@ import ranges = require('../caleydo_core/range');
 import datatypes = require('../caleydo_core/datatype');
 import session = require('../caleydo_core/session');
 
-import statetoken = require('../caleydo_core/statetoken');
-import {SimHash} from "./simhash";
-
 /**
  * reexport the edge type
  */
@@ -182,15 +179,6 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
     super.setAttr('category', category);
     super.setAttr('hash', hash);
     super.setAttr('description', description);
-  }
-
-
-   get stateTokens() {
-    //if (this._v.hasOwnProperty("stateTokens")) {
-      return (<any>this._v).stateTokens;
-    //} else {
-    //  return this.hash;
-    //}
   }
 
   get value() {
@@ -522,35 +510,6 @@ export class StateNode extends graph.GraphNode {
     super.setAttr('name', name);
     super.setAttr('description', description);
   }
-
-  //<author>: Michael Gillhofer
-  get simHash(): number{
-    var simHash:number = super.getAttr('simHash');
-    if (simHash === null) {
-      var allTokens: statetoken.IStateToken[] = [];
-      for (var oN of this.consistsOf) {
-        if (!(typeof oN.stateTokens === 'undefined')) {
-          allTokens = allTokens.concat(oN.stateTokens);
-        }
-      }
-      simHash = SimHash.hasher.calcHash(allTokens)
-      super.setAttr('simHash', simHash);
-    }
-    return simHash;
-  }
-
-  getSimilarityTo(otherState:StateNode): number{
-    return 1-this.numberOfSetBits(this.simHash ^ otherState.simHash)/32
-  }
-
-
-  numberOfSetBits(i:number):number{
-    i = i - ((i >> 1) & 0x55555555);
-    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-    return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
-  }
-  //</author>
-
 
   get name():string {
     return super.getAttr('name');
@@ -1194,13 +1153,6 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   act:StateNode = null;
   private lastAction:ActionNode = null;
 
-  public comparing:boolean = false;
-
-  get compareMode():boolean {
-    return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
-  }
-
-
   //currently executing promise
   private currentlyRunning = false;
   executeCurrentActionWithin = -1;
@@ -1238,8 +1190,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   selectState(state:StateNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
-    this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
     this.fire('select_state,select_state_' + type, state, type, op, extras);
+    this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
   }
 
   selectSlide(state:SlideNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
@@ -1573,7 +1525,6 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
           objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
         }
         this.fire('executed_first', action, next);
-        action.resultsIn.simHash;
       } else {
         //update creates reference values
         action.creates.forEach((c, i) => {
