@@ -652,6 +652,14 @@ export class SlideNode extends graph.GraphNode {
     super.setAttr('name', value);
   }
 
+  get description():string {
+    return super.getAttr('description', '');
+  }
+
+  set description(value:string) {
+    super.setAttr('description', value);
+  }
+
   get isTextOnly() {
     return !this.outgoing.some(graph.isType('jumpTo'));
   }

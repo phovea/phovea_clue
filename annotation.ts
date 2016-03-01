@@ -197,7 +197,7 @@ export class Renderer {
     /**
      * subtitle content
      */
-    subtitlePattern: '${name}'
+    subtitlePattern: '${description}'
   };
 
   private prev = Promise.resolve(null);
@@ -222,10 +222,11 @@ export class Renderer {
   }
 
   /**
-   * renders the given text by replacing variables and rendering markddown, then return the HTML code to display
+   * renders the given text by replacing variables and rendering markdown, then return the HTML code to display
    *
    * variables: usage: `${variable_name}`
    *  * name ... current slide name
+   *  * description ... current slide description
    *  * duration ... current slide duration
    *  * slide_number ... current slide Index
    *  * state_name ... if the slide is associated with a state: its name
@@ -249,6 +250,7 @@ export class Renderer {
       //vars contains all possible variables
       let vars:any = {
         name: this.act.name,
+        description: this.act.description,
         duration: this.act.duration,
         slide_number: this.act.slideIndex
       };
