@@ -76,7 +76,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       }
       return isSelected;
     });
+
     if (type === idtypes.defaultSelectionType) {
+      this.updateInfo(slide);
       this.updateTimeIndicator(slide, extras.withTransition !== false);
     }
   };
@@ -225,7 +227,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
       <div>
-        <h2><i class="fa fa-video-camera"></i> Story <i class="fa fa-plus-circle"></i></h2>
+        <h2><i class="fa fa-video-camera"></i> Story <span id="player_controls">
+            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></i>
+            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="Play"></i>
+            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></i>
+          </span>
+          <i class="fa fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -243,17 +250,16 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         </div>
         </form>
       </div>
+      <div class="current">
+        <input type="text" class="form-control" placeholder="slide name" disabled="disabled">
+        <div class="name"></div>
+        <textarea class="form-control" placeholder="slide description" disabled="disabled"></textarea>
+        <div class="description"></div>
+      </div>
       <div class="stories ${this.options.class}">
         <div class="line"></div>
         <div class="time_marker"><i class="fa fa-circle"></i></div>
       </div>
-      <div><div id="player_controls">
-        <button data-player="backward" class="btn btn-xs btn-default fa fa-step-backward"
-                  title="Step Backward"></button>
-          <button data-player="play" class="btn btn-default btn fa fa-play" title="Play"></button>
-          <button data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></button>
-          </div>
-       </div>
     `);
 
     const that = this;
@@ -283,6 +289,25 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       jp.find('form.toolbar').toggle('fast');
     });
 
+    {
+      let $base = $node.select('div.current');
+      $base.select('input').on('change', function() {
+        const d = that.data.selectedSlides()[0];
+        if (d) {
+          d.name = this.value;
+        }
+        $base.select('div.name').html(marked(d.name));
+        that.update();
+      });
+      $base.select('textarea').on('change', function() {
+        const d = that.data.selectedSlides()[0];
+        if (d) {
+          d.description = this.value;
+        }
+        $base.select('div.description').html(marked(d.description));
+        //that.update();
+      });
+    }
 
 
     if (this.data.getSlideChains().length === 0) {
@@ -290,6 +315,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
 
     return $node;
+  }
+
+  private updateInfo(slide: provenance.SlideNode) {
+    const $base = this.$node.select('div.current').datum(slide);
+    $base.select('input').property('value', slide ? slide.name : '').attr('disabled', slide ? null : 'disabled');
+    $base.select('div.name').html(slide ? marked(slide.name) : '');
+    $base.select('textarea').property('value', slide ? slide.description: '').attr('disabled', slide ? null : 'disabled');
+    $base.select('div.description').html(slide ? marked(slide.description) : '');
   }
 
   pushAnnotation(ann: provenance.IStateAnnotation) {
@@ -468,6 +501,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       }).then((text) => {
         d.name = text;
         this.update();
+        this.updateInfo(d);
       });
       return false;
     });

@@ -29,7 +29,7 @@
     }
   }
 
-  h2 i:last-of-type {
+  h2 > i:last-of-type {
     float: right;
     cursor: pointer;
 
@@ -55,12 +55,33 @@
     color: red;
   }
 
+  div.current {
+    -webkit-flex: 0 1 auto;
+    flex: 0 1 auto;
+    height: 20vh;
+
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+
+    border-bottom: 2px solid $core_border;
+    margin-bottom: 2px;
+
+    input, textarea, div {
+      display: block;
+    }
+    textarea, div.description {
+      -webkit-flex: 1 1 auto;
+      flex: 1 1 auto;
+    }
+  }
+
   div.stories {
     position: relative;
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
     overflow-x: auto;
-    max-height: 85vh;
   }
 
   &.vertical {

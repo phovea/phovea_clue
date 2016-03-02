@@ -55,8 +55,9 @@ aside {
     color: $core_colour_text;
     vertical-align: middle;
 
-    > i.fa {
+    i.fa {
       font-size: 80%;
+      line-height: 1;
     }
   }
   &.provenance-layout-vis {
@@ -132,13 +133,6 @@ header {
     padding: 1em 5px;
     width: 10em;
   }
-}
-
-#player_controls {
-  display: inline-block;
-  padding: 5px 2em;
-  background-color: $core_player;
-  border-radius: 10px 10px;
 }
 
 // #player_duration{
@@ -325,6 +319,17 @@ body {
     }
   }
 
+  &[data-clue='A'] {
+
+    aside.provenance-story-vis {
+      div.current {
+        div {
+          display: none;
+        }
+      }
+    }
+  }
+
   &[data-clue='P'] {
 
     main {
@@ -344,9 +349,14 @@ body {
     }
 
     aside.provenance-story-vis {
-      width: 14em;
+      width: 17em;
       > div div.toolbar {
         display: none !important;
+      }
+      div.current {
+        textarea, input {
+          display: none;
+        }
       }
       div.stories {
         max-height: 88vh;
@@ -366,7 +376,7 @@ body {
       div.placeholder, div.dragger, div.dragger-transition {
         visibility: hidden;
       }
-      h2 i, form, div.line, div.duration,div.placeholder:last-of-type, div.time_marker {
+      h2 > i:last-of-type, form, div.line, div.duration,div.placeholder:last-of-type, div.time_marker {
         display: none;
       }
     }
