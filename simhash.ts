@@ -1,9 +1,8 @@
 import {IDType} from "../caleydo_core/idtype";
 import statetoken = require('../caleydo_core/statetoken');
 import idtype = require('../caleydo_core/idtype')
-import {idtypes} from "../caleydo_core/wrapper";
-import {SelectionIDType} from "../caleydo_d3/selectioninfo";
 import {isUndefined} from "../caleydo_core/main";
+import Color = d3.Color;
 
 
 
@@ -68,6 +67,7 @@ class HashTable {
     }
     this.hashes = []
     this.probs = []
+    HashColor.getColor(hash)
     return hash;
   }
 }
@@ -183,6 +183,24 @@ export class SimHash {
 
     return this.hashTable.toHash(nrBits);
   }
+}
+
+export class HashColor {
+  static colorMap:Color[] = []
+  static size:number = 0;
+
+  public static getColor(hash:number):Color {
+    let col:Color = this.colorMap[String(hash)];
+    if (col==null) {
+      let color = d3.scale.category10().range()[this.size % 10]
+      this.size += 1
+      col=new Color(color);
+      this.colorMap[String(hash)] = col
+    }
+    return col
+  }
+
+
 }
 
 
