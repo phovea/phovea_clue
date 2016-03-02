@@ -14,8 +14,8 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
-import {ProvenanceGraph} from "../caleydo_provenance/main";
-import {StateNode} from "../caleydo_provenance/main";
+import {ProvenanceGraph} from "../caleydo_clue/prov";
+import {StateNode} from "../caleydo_clue/prov";
 
 
 function extractTags(text: string) {
@@ -420,6 +420,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
+
     this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
@@ -674,10 +675,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'), 10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
-      });
+    });
 
     d3.select("body").on("keydown", function() {
       if(d3.event.ctrlKey) {
@@ -801,5 +802,3 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 export function create(data:provenance.ProvenanceGraph, parent:Element, options = {}) {
   return new LayoutedProvVis(data, parent, options);
 }
-
-
