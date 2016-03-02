@@ -14,8 +14,8 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
-import {ProvenanceGraph} from "../caleydo_provenance/main";
-import {StateNode} from "../caleydo_provenance/main";
+import {ProvenanceGraph} from "../caleydo_clue/prov";
+import {StateNode} from "../caleydo_clue/prov";
 
 
 function extractTags(text: string) {
@@ -338,7 +338,7 @@ class StateRepr {
       .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
-      .classed('select-selected', (d) => d.selected)
+      .classed('caleydo-select-selected', (d) => d.selected)
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .style('opacity', (d) => d.opacity)
       .attr('data-doi',(d) => d.doi)
@@ -419,7 +419,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
-    this.$node.selectAll('div.state').classed('select-'+type, function (d: StateRepr) {
+
+    this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -636,15 +637,19 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('small', lod  === LevelOfDetail.Small);
     this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
-    const states = StateRepr.toRepr(graph, this.highlight, { thunbnails: this.options.thumbnails });
+    const states = StateRepr.toRepr(graph, this.highlight, { thumbnails: this.options.thumbnails });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $states_enter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
       .append('div')
       .on('click', this.onStateClick.bind(this))
-      .on('mouseenter', (d) => graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType))
-      .on('mouseleave', (d) => graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType))
+      .on('mouseenter', (d) => {
+        graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+      })
+      .on('mouseleave', (d) => {
+        graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+      })
       .attr('draggable',true)
       .on('dragstart', (d) => {
         const e = <DragEvent>(<any>d3.event);
@@ -669,10 +674,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'), 10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
-      });
+    });
 
     d3.select("body").on("keydown", function() {
       if(d3.event.ctrlKey) {
