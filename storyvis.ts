@@ -285,7 +285,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
     const jp = $($node.node());
     (<any>jp.find('.dropdown-toggle')).dropdown();
-    jp.find('h2 i').on('click', () => {
+    jp.find('h2 i.fa-plus-circle').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
     });
 
