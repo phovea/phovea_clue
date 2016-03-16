@@ -152,22 +152,37 @@ export class SimHash {
       this.hashTable["default"] = new HashTable(this._HashTableSize)
     }
 
+    let ordinalTokens: statetoken.IStateToken[] = splitTokens[1];
+    if (ordinalTokens !== undefined) {
+      for (let i:number=0; i < ordinalTokens.length; i++) {
+        this.hashTable["default"].push(
+          ordinalTokens[i].name,
+          ordinalTokens[i].importance,
+          ordinalHash(
+            ordinalTokens[i].value[0],
+            ordinalTokens[i].value[1],
+            ordinalTokens[i].value[2],
+            this._nrBits
+          )
+        )
+      }
+    }
 
-     let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
-     if (ordidTypeTokens !== undefined) {
-       for (let i:number=0; i < ordidTypeTokens.length; i++) {
-         this.hashTable["default"].push(
-           ordidTypeTokens[i].name,
-           ordidTypeTokens[i].importance,
-           this.getHashOfOrdinalIDTypeSelection(
-             ordidTypeTokens[i].value[0],
-             ordidTypeTokens[i].value[1],
-             ordidTypeTokens[i].value[2],
-             idtype.defaultSelectionType
-           )
-         )
-       }
-     }
+    let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
+    if (ordidTypeTokens !== undefined) {
+      for (let i:number=0; i < ordidTypeTokens.length; i++) {
+        this.hashTable["default"].push(
+          ordidTypeTokens[i].name,
+          ordidTypeTokens[i].importance,
+          this.getHashOfOrdinalIDTypeSelection(
+            ordidTypeTokens[i].value[0],
+            ordidTypeTokens[i].value[1],
+            ordidTypeTokens[i].value[2],
+            idtype.defaultSelectionType
+          )
+        )
+      }
+    }
 
 
     let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
