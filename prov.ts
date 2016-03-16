@@ -182,6 +182,13 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
     super.setAttr('description', description);
   }
 
+
+   get stateTokens() {
+     let value = <any>this.value
+     if (value ===null) return "undefined"
+     return (<any>this.value).stateTokens;
+  }
+
   get value() {
     this.checkPersisted();
     return this._v;
@@ -511,6 +518,54 @@ export class StateNode extends graph.GraphNode {
     super.setAttr('name', name);
     super.setAttr('description', description);
   }
+
+  //<author>: Michael Gillhofer
+
+  calcSimHash():number {
+    console.log("Recalc Hash of " + this.id)
+    var allTokens: statetoken.IStateToken[] = [];
+    for (var oN of this.consistsOf) {
+      if (!(typeof oN.stateTokens === 'undefined')) {
+        allTokens = allTokens.concat(oN.stateTokens);
+      }
+    }
+    let hash = SimHash.hasher.calcHash(allTokens)
+    super.setAttr('simHash', hash);
+    console.log(hash)
+    return hash
+  }
+
+  get simHash(): number{
+    var simHash:number = super.getAttr('simHash');
+    if (simHash === null) {
+      console.log("Sim Hash Was null")
+      simHash = this.calcSimHash()
+    }
+    return simHash;
+  }
+
+  getSimilarityTo(otherState:StateNode): number{
+    return 1-this.numberOfSetBits(this.simHash ^ otherState.simHash)/32
+  }
+
+
+  numberOfSetBits(i:number):number{
+    i = i - ((i >> 1) & 0x55555555);
+    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+    return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+  }
+
+  public duplicates:StateNode[] = [];
+
+  //checkduplicate() {
+
+    //if (this.simHash == ){
+     // this.duplicates[this.duplicates.length] = state;
+   // }
+ // }
+
+  //</author>
+
 
   get name():string {
     return super.getAttr('name');
@@ -1162,6 +1217,13 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   act:StateNode = null;
   private lastAction:ActionNode = null;
 
+  public comparing:boolean = false;
+
+  get compareMode():boolean {
+    return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
+  }
+
+
   //currently executing promise
   private currentlyRunning = false;
   executeCurrentActionWithin = -1;
@@ -1203,8 +1265,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   }
 
   selectState(state:StateNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
-    this.fire('select_state,select_state_' + type, state, type, op, extras);
     this.select(ProvenanceGraphDim.State, type, state ? [this._states.indexOf(state)] : [], op);
+    this.fire('select_state,select_state_' + type, state, type, op, extras);
   }
 
   selectSlide(state:SlideNode, op:idtypes.SelectOperation = idtypes.SelectOperation.SET, type = idtypes.defaultSelectionType, extras = {}) {
@@ -1271,6 +1333,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
 
     this.fire('clear');
   }
+
 
   get states() {
     return this._states;
@@ -1538,6 +1601,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
           objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
         }
         this.fire('executed_first', action, next);
+        //action.resultsIn.checkduplicate()
+
       } else {
         //update creates reference values
         action.creates.forEach((c, i) => {
@@ -1545,6 +1610,9 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         });
         action.removes.forEach((c) => c.value = null);
       }
+      let hash = next.calcSimHash();
+      console.log("recalculated hash of " + next.id +" is " + hash);
+
       result.inverse = asFunction(result.inverse);
       action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
