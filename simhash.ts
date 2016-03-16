@@ -96,7 +96,6 @@ export class SimHash {
       }
       allTokens = allTokens.concat(t);
     }
-    ;
     if (this.hashTable[type.id] == null) {
       this.hashTable[type.id] = new HashTable(this._HashTableSize)
     }
@@ -106,20 +105,18 @@ export class SimHash {
     return this.hashTable[type.id].toHash(this._nrBits)
   }
 
-  getHashOfOrdinalIDTypeSelection(token:statetoken.IStateToken, selectionType):number {
-    let selection:number[] = token.value.type.selections(selectionType).dim(0).asList(0);
-    let allTokens:statetoken.IStateToken[] = [];
-    for (var sel of selection) {
-      var t = {
-        name: "dummy",
-        value: sel.toString(),
-        type: statetoken.TokenType.string,
-        importance: 1
-      }
-      allTokens = allTokens.concat(t);
+  getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):number {
+    if (this.hashTable[type.id] == null) {
+      this.hashTable[type.id] = new HashTable(this._HashTableSize)
     }
-    ;
-    return this.calcHash(allTokens);
+    let selection:number[] = type.selections(selectionType).dim(0).asList(0);
+    for (var sel of selection) {
+      this.hashTable[type.id].push(
+        String(sel),
+        1,
+        ordinalHash(min, max, sel, this._nrBits))
+    }
+    return this.hashTable[type.id].toHash(this._nrBits)
   }
 
 
@@ -155,18 +152,23 @@ export class SimHash {
       this.hashTable["default"] = new HashTable(this._HashTableSize)
     }
 
-    /*
+
      let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
      if (ordidTypeTokens !== undefined) {
+       for (let i:number=0; i < ordidTypeTokens.length; i++) {
+         this.hashTable["default"].push(
+           ordidTypeTokens[i].name,
+           ordidTypeTokens[i].importance,
+           this.getHashOfOrdinalIDTypeSelection(
+             ordidTypeTokens[i].value[0],
+             ordidTypeTokens[i].value[1],
+             ordidTypeTokens[i].value[2],
+             idtype.defaultSelectionType
+           )
+         )
+       }
+     }
 
-     for (let i:number=0; i < idtypeTokens.length; i++) {
-     hashDict[<any>idtypeTokens[i]] =this.getHashOfOrdinalIDTypeSelection(
-     idtypeTokens[i].value,
-     idtype.defaultSelectionType
-     )
-     }
-     }
-     */
 
     let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
     if (idtypeTokens !== undefined) {
@@ -180,18 +182,17 @@ export class SimHash {
           )
         )
       }
-
-      let regularTokens:statetoken.IStateToken[] = splitTokens[0];
-      if (regularTokens !== undefined) {
-
-        for (let i:number = 0; i < regularTokens.length; i++) {
-          this.hashTable["default"].push(regularTokens[i].value, regularTokens[i].importance, null)
-        }
-      }
-
-
-      return this.hashTable["default"].toHash(this._nrBits);
     }
+
+    let regularTokens:statetoken.IStateToken[] = splitTokens[0];
+    if (regularTokens !== undefined) {
+      for (let i:number = 0; i < regularTokens.length; i++) {
+        this.hashTable["default"].push(regularTokens[i].value, regularTokens[i].importance, null)
+      }
+    }
+
+
+    return this.hashTable["default"].toHash(this._nrBits);
   }
 }
 
@@ -285,6 +286,25 @@ export class HashColor {
     h ^= h >>> 15;
 
     return h >>> 0;
+  }
+
+  function ordinalHash(min:number, max:number, value:number, nrBits:number):number {
+    let pct = (value-min)/(max-min)
+    let minH = hashFnv32a(String(min), 0)
+    let maxH = hashFnv32a(String(max), 0)
+    let rng = new RNG(1);
+
+    let hash = 0
+    for (let i = 0; i < nrBits; i++) {
+      if (rng.nextDouble() > pct) {
+        hash = (hash << 1) + (minH % 2)
+      } else {
+        hash = (hash << 1) + (maxH % 2)
+      }
+      minH = minH >>1
+      maxH = maxH >>1
+    }
+    return hash;
   }
 
 
