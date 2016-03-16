@@ -16,6 +16,8 @@ import vis = require('../caleydo_core/vis');
 import utils = require('./utils');
 import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
+import Color = d3.Color;
+import {HashColor} from "./simhash";
 
 
 function extractTags(text: string) {
@@ -93,6 +95,14 @@ class StateRepr {
       return Math.pow(selState[0].getSimilarityTo(this.s),2);
     }
     return 1;
+  }
+
+  get hashColor():Color {
+    return HashColor.getColor(this.s.simHash);
+  }
+
+  get hasDuplicates():boolean{
+    return this.s.duplicates.length > 0
   }
 
   get thumbnail() {
@@ -345,7 +355,7 @@ class StateRepr {
       .attr('title', (d) => d.name);
 
     $elem.select('span.icon').html(StateRepr.toIcon);
-    $elem.select('span.slabel').text((d) => d.name);
+    //$elem.select('span.slabel').text((d) => d.name);
     $elem.select('span.slabel').text((d) => d.name + (d.compareMode ? ": " + Math.round(d.similarityToSelectedState*100) + "%" : ""));
 
     $elem.select('i.bookmark')
@@ -414,6 +424,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   };
+
+
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
 
@@ -677,7 +689,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
-    });
+    })//.on('duplicate', $states.transition().attr("fill", "pink"));
 
     d3.select("body").on("keydown", function() {
       if(d3.event.ctrlKey) {

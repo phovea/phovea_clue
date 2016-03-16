@@ -74,23 +74,19 @@ class HashTable {
 
 export class SimHash {
 
-  private static _instance: SimHash = new SimHash();
-
+  private static _instance:SimHash = new SimHash();
+  private _nrBits:number = 50;
 
   public static get hasher():SimHash {
     return this._instance;
   }
 
-  private hashTable: HashTable;
-  private _HashTableSize:number = 500;
-
-  constructor() {
-    this.hashTable = new HashTable(this._HashTableSize);
-  }
+  private hashTable:HashTable[] =  [];
+  private _HashTableSize:number = 1000;
 
   getHashOfIDTypeSelection(type:IDType, selectionType):number {
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
-    let allTokens: statetoken.IStateToken[] = [];
+    let allTokens:statetoken.IStateToken[] = [];
     for (var sel of selection) {
       var t = {
         name: "dummy",
@@ -99,13 +95,20 @@ export class SimHash {
         importance: 1
       }
       allTokens = allTokens.concat(t);
-    };
-    return this.calcHash(allTokens);
+    }
+    ;
+    if (this.hashTable[type.id] == null) {
+      this.hashTable[type.id] = new HashTable(this._HashTableSize)
+    }
+    for (let i:number = 0; i < allTokens.length; i++) {
+      this.hashTable[type.id].push(allTokens[i].value, allTokens[i].importance, null)
+    }
+    return this.hashTable[type.id].toHash(this._nrBits)
   }
 
   getHashOfOrdinalIDTypeSelection(token:statetoken.IStateToken, selectionType):number {
     let selection:number[] = token.value.type.selections(selectionType).dim(0).asList(0);
-    let allTokens: statetoken.IStateToken[] = [];
+    let allTokens:statetoken.IStateToken[] = [];
     for (var sel of selection) {
       var t = {
         name: "dummy",
@@ -114,87 +117,95 @@ export class SimHash {
         importance: 1
       }
       allTokens = allTokens.concat(t);
-    };
+    }
+    ;
     return this.calcHash(allTokens);
   }
 
-  public calcHash(tokens:statetoken.IStateToken[]): number{
-    let nrBits:number =50;
-    let b:number = 0;
 
-    function groupBy(arr: statetoken.IStateToken[]){
-      return arr.reduce(function(memo, x: statetoken.IStateToken) {
-        if (!memo[x.type]){
-          memo[x.type] = []
-        }
-        memo[x.type].push(x);
-        return memo;
-      },{}
+  private prepHashCalc(tokens:statetoken.IStateToken[], needsNormalization:boolean = true) {
+    function groupBy(arr:statetoken.IStateToken[]) {
+      return arr.reduce(function (memo, x:statetoken.IStateToken) {
+          if (!memo[x.type]) {
+            memo[x.type] = []
+          }
+          memo[x.type].push(x);
+          return memo;
+        }, {}
       );
     }
 
-    let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev+ a.importance,0)
-    for (let i: number=0; i < tokens.length; i++) {
-      tokens[i].importance /= totalImportance
-    }
-
-    let splitTokens = groupBy(tokens)
-    let hashDict:number[] = []
-
-    /*
-    let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
-    if (ordidTypeTokens !== undefined) {
-
-      for (let i:number=0; i < idtypeTokens.length; i++) {
-        hashDict[<any>idtypeTokens[i]] =this.getHashOfOrdinalIDTypeSelection(
-            idtypeTokens[i].value,
-            idtype.defaultSelectionType
-          )
+    if (needsNormalization) {
+      let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
+      for (let i:number = 0; i < tokens.length; i++) {
+        tokens[i].importance /= totalImportance
       }
     }
-    */
+
+    return groupBy(tokens)
+  }
+
+
+  public calcHash(tokens:statetoken.IStateToken[]):number {
+
+    let b:number = 0;
+
+    let splitTokens = this.prepHashCalc(tokens)
+    if (this.hashTable["default"] == null) {
+      this.hashTable["default"] = new HashTable(this._HashTableSize)
+    }
+
+    /*
+     let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
+     if (ordidTypeTokens !== undefined) {
+
+     for (let i:number=0; i < idtypeTokens.length; i++) {
+     hashDict[<any>idtypeTokens[i]] =this.getHashOfOrdinalIDTypeSelection(
+     idtypeTokens[i].value,
+     idtype.defaultSelectionType
+     )
+     }
+     }
+     */
 
     let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
     if (idtypeTokens !== undefined) {
-
-      for (let i:number=0; i < idtypeTokens.length; i++) {
-        hashDict[<any>idtypeTokens[i]] =this.getHashOfIDTypeSelection(
+      for (let i:number = 0; i < idtypeTokens.length; i++) {
+        this.hashTable["default"].push(
+          idtypeTokens[i].value,
+          idtypeTokens[i].importance,
+          this.getHashOfIDTypeSelection(
             idtypeTokens[i].value,
             idtype.defaultSelectionType
           )
-      }
-      for (let i =0; i < idtypeTokens.length; i++) {
-        this.hashTable.push(
-          idtypeTokens[i].value,
-          idtypeTokens[i].importance,
-          hashDict[<any>idtypeTokens[i]]
         )
       }
-    }
 
-    let regularTokens:statetoken.IStateToken[] = splitTokens[0];
-    if (regularTokens !== undefined) {
-      for (let i:number=0; i < regularTokens.length; i++) {
-        this.hashTable.push(regularTokens[i].value,regularTokens[i].importance, null)
+      let regularTokens:statetoken.IStateToken[] = splitTokens[0];
+      if (regularTokens !== undefined) {
+
+        for (let i:number = 0; i < regularTokens.length; i++) {
+          this.hashTable["default"].push(regularTokens[i].value, regularTokens[i].importance, null)
+        }
       }
+
+
+      return this.hashTable["default"].toHash(this._nrBits);
     }
-
-
-
-    return this.hashTable.toHash(nrBits);
   }
 }
 
+
 export class HashColor {
-  static colorMap:Color[] = []
+
+  static colorMap = []
   static size:number = 0;
 
   public static getColor(hash:number):Color {
-    let col:Color = this.colorMap[String(hash)];
+    let col = this.colorMap[String(hash)];
     if (col==null) {
-      let color = d3.scale.category10().range()[this.size % 10]
+      col = d3.scale.category10().range()[this.size % 10]
       this.size += 1
-      col=new Color(color);
       this.colorMap[String(hash)] = col
     }
     return col
@@ -202,6 +213,7 @@ export class HashColor {
 
 
 }
+
 
 
 /**

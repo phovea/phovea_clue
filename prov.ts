@@ -186,11 +186,9 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
 
 
    get stateTokens() {
-    //if (this._v.hasOwnProperty("stateTokens")) {
-      return (<any>this._v).stateTokens;
-    //} else {
-    //  return this.hash;
-    //}
+     let value = <any>this.value
+     if (value ===null) return "undefined"
+     return (<any>this.value).stateTokens;
   }
 
   get value() {
@@ -524,17 +522,26 @@ export class StateNode extends graph.GraphNode {
   }
 
   //<author>: Michael Gillhofer
+
+  calcSimHash():number {
+    console.log("Recalc Hash of " + this.id)
+    var allTokens: statetoken.IStateToken[] = [];
+    for (var oN of this.consistsOf) {
+      if (!(typeof oN.stateTokens === 'undefined')) {
+        allTokens = allTokens.concat(oN.stateTokens);
+      }
+    }
+    let hash = SimHash.hasher.calcHash(allTokens)
+    super.setAttr('simHash', hash);
+    console.log(hash)
+    return hash
+  }
+
   get simHash(): number{
     var simHash:number = super.getAttr('simHash');
     if (simHash === null) {
-      var allTokens: statetoken.IStateToken[] = [];
-      for (var oN of this.consistsOf) {
-        if (!(typeof oN.stateTokens === 'undefined')) {
-          allTokens = allTokens.concat(oN.stateTokens);
-        }
-      }
-      simHash = SimHash.hasher.calcHash(allTokens)
-      super.setAttr('simHash', simHash);
+      console.log("Sim Hash Was null")
+      simHash = this.calcSimHash()
     }
     return simHash;
   }
@@ -549,6 +556,16 @@ export class StateNode extends graph.GraphNode {
     i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
   }
+
+  public duplicates:StateNode[] = [];
+
+  //checkduplicate() {
+
+    //if (this.simHash == ){
+     // this.duplicates[this.duplicates.length] = state;
+   // }
+ // }
+
   //</author>
 
 
@@ -1307,6 +1324,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     this.fire('clear');
   }
 
+
   get states() {
     return this._states;
   }
@@ -1573,7 +1591,8 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
           objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
         }
         this.fire('executed_first', action, next);
-        action.resultsIn.simHash;
+        //action.resultsIn.checkduplicate()
+
       } else {
         //update creates reference values
         action.creates.forEach((c, i) => {
@@ -1581,6 +1600,9 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         });
         action.removes.forEach((c) => c.value = null);
       }
+      let hash = next.calcSimHash();
+      console.log("recalculated hash of " + next.id +" is " + hash);
+
       result.inverse = asFunction(result.inverse);
       action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
