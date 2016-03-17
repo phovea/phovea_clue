@@ -523,7 +523,7 @@ export class StateNode extends graph.GraphNode {
 
   //<author>: Michael Gillhofer
 
-  calcSimHash():number {
+  calcSimHash():string {
     console.log("Recalc Hash of " + this.id)
     var allTokens: statetoken.IStateToken[] = [];
     for (var oN of this.consistsOf) {
@@ -537,8 +537,8 @@ export class StateNode extends graph.GraphNode {
     return hash
   }
 
-  get simHash(): number{
-    var simHash:number = super.getAttr('simHash');
+  get simHash(): string{
+    var simHash:string = super.getAttr('simHash');
     if (simHash === null) {
       console.log("Sim Hash Was null")
       simHash = this.calcSimHash()
@@ -546,8 +546,21 @@ export class StateNode extends graph.GraphNode {
     return simHash;
   }
 
+  /*
   getSimilarityTo(otherState:StateNode): number{
     return 1-this.numberOfSetBits(this.simHash ^ otherState.simHash)/32
+  }
+  */
+
+  getSimilarityTo(otherState:StateNode): number{
+    let thisH:string = this.simHash
+    let otherH:string = otherState.simHash
+    let len = Math.min(thisH.length, otherH.length);
+    let nrEqu = 0;
+    for(let i=0; i<len; i++) {
+      if( thisH.charAt(i) == otherH.charAt(i)) nrEqu++;
+    }
+    return nrEqu/len
   }
 
 
