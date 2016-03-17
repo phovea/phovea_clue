@@ -15,7 +15,6 @@ class HashTable {
   dict:string[] = [];
   hashes:string[] = [];
   probs:number[] = []
-  size = 0;
   maxSize:number;
 
 
@@ -23,17 +22,15 @@ class HashTable {
     if (hash == null) hash = String(murmurhash2_32_gc(value, 0))
     let index = this.dict.indexOf(value)
     if (index < 0) {
-      index = this.size
+      index = this.dict.length
     }
     this.dict[index] = value
     this.probs[value] = prob;
     this.hashes[value] = hash;
-    this.size += 1
-
   }
 
   toHash(n:number):string {
-    if (this.dict.length==0) {
+    if (Object.keys(this.probs).length==0) {
       let st: string = "";
       for (let i:number = 0; i < n; i++) {
         st = st + "0"
