@@ -526,6 +526,7 @@ export class StateNode extends graph.GraphNode {
     var allTokens: statetoken.IStateToken[] = [];
     for (var oN of this.consistsOf) {
       if (!(typeof oN.stateTokens === 'undefined')) {
+        if (oN.category == "data") continue
         allTokens = allTokens.concat(oN.stateTokens);
       }
     }
