@@ -13,14 +13,14 @@ class HashTable {
   }
 
   dict:string[] = [];
-  hashes:number[] = [];
+  hashes:string[] = [];
   probs:number[] = []
   size = 0;
   maxSize:number;
 
 
-  push(value:string, prob:number, hash:number) {
-    if (hash == null) hash = murmurhash2_32_gc(value, 0)
+  push(value:string, prob:number, hash:string) {
+    if (hash == null) hash = String(murmurhash2_32_gc(value, 0))
     let index = this.dict.indexOf(value)
     if (index < 0) {
       index = this.size
@@ -32,7 +32,15 @@ class HashTable {
 
   }
 
-  toHash(n:number) {
+  toHash(n:number):string {
+    if (this.dict.length==0) {
+      let st: string = "";
+      for (let i:number = 0; i < n; i++) {
+        st = st + "0"
+      }
+      return st;
+    }
+
     let cdf:number[] = [];
     let lastElement = this.probs[this.dict[this.dict.length - 1]]
     if (lastElement == null) lastElement=0
@@ -61,9 +69,11 @@ class HashTable {
       }
     }
 
-    var hash:number = 0;
+    var hash:string = "";
     for (var i:number=0; i < n; i++) {
-      hash = (this.hashes[this.dict[samples[i]]] >>i) % 2 == 0  ? hash << 1 : (hash << 1) +1
+      let hashPart = this.hashes[this.dict[samples[i]]]
+      let bitToUse  = hashPart.charAt(i % hashPart.length) // use the "bitToUse" bit of "hashPart"
+      hash = hash + bitToUse
     }
     this.hashes = []
     this.probs = []
@@ -75,7 +85,7 @@ class HashTable {
 export class SimHash {
 
   private static _instance:SimHash = new SimHash();
-  private _nrBits:number = 50;
+  private _nrBits:number = 100;
 
   public static get hasher():SimHash {
     return this._instance;
@@ -84,7 +94,7 @@ export class SimHash {
   private hashTable:HashTable[] =  [];
   private _HashTableSize:number = 1000;
 
-  getHashOfIDTypeSelection(type:IDType, selectionType):number {
+  getHashOfIDTypeSelection(type:IDType, selectionType):string {
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
     let allTokens:statetoken.IStateToken[] = [];
     for (var sel of selection) {
@@ -105,7 +115,7 @@ export class SimHash {
     return this.hashTable[type.id].toHash(this._nrBits)
   }
 
-  getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):number {
+  getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
     if (this.hashTable[type.id] == null) {
       this.hashTable[type.id] = new HashTable(this._HashTableSize)
     }
@@ -143,7 +153,7 @@ export class SimHash {
   }
 
 
-  public calcHash(tokens:statetoken.IStateToken[]):number {
+  public calcHash(tokens:statetoken.IStateToken[]):string {
 
     let b:number = 0;
 
@@ -217,7 +227,7 @@ export class HashColor {
   static colorMap = []
   static size:number = 0;
 
-  public static getColor(hash:number):Color {
+  public static getColor(hash:string):Color {
     let col = this.colorMap[String(hash)];
     if (col==null) {
       col = d3.scale.category10().range()[this.size % 10]
@@ -241,7 +251,7 @@ export class HashColor {
    * @param {integer} [seed] optionally pass the hash of the previous chunk
    * @returns {integer}
    */
-   function hashFnv32a(str: string, seed:number) {
+   function hashFnv32a(str: string, seed:number):string {
       /*jshint bitwise:false */
       var i, l,
         hval = (typeof seed != 'undefined') ? 0x811c9dc5 : seed;
@@ -249,7 +259,7 @@ export class HashColor {
           hval ^= str.charCodeAt(i);
           hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
       }
-      return hval >>> 0;
+      return (hval >>> 0).toString(2);
   }
 
 
@@ -300,28 +310,29 @@ export class HashColor {
     h = (((h & 0xffff) * 0x5bd1e995) + ((((h >>> 16) * 0x5bd1e995) & 0xffff) << 16));
     h ^= h >>> 15;
 
-    return h >>> 0;
+    return (h >>> 0).toString(2);
   }
 
-  function ordinalHash(min:number, max:number, value:number, nrBits:number):number {
+  function ordinalHash(min:number, max:number, value:number, nrBits:number):string {
     let pct = (value-min)/(max-min)
-    let minH = hashFnv32a(String(min), 0)
-    let maxH = hashFnv32a(String(max), 0)
+    let minH:string = hashFnv32a(String(min), 0)
+    let maxH:string = hashFnv32a(String(max), 0)
     let rng = new RNG(1);
 
-    let hash = 0
+    let hash:string = ""
     for (let i = 0; i < nrBits; i++) {
       if (rng.nextDouble() > pct) {
-        hash = (hash << 1) + (minH % 2)
+        hash = hash + minH.charAt(i % minH.length)
       } else {
-        hash = (hash << 1) + (maxH % 2)
+        hash = hash + maxH.charAt(i%maxH.length)
       }
-      minH = minH >>1
-      maxH = maxH >>1
     }
     return hash;
   }
 
+  function dec2bin(dec:number):string{
+    return (dec >>> 0).toString(2);
+  }
 
 
 class RNG {
