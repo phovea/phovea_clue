@@ -356,7 +356,7 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     //$elem.select('span.slabel').text((d) => d.name);
-    $elem.select('span.slabel').text((d) => d.name + (d.compareMode ? ": " + Math.round(d.similarityToSelectedState*100) + "%" : ""));
+    $elem.select('span.slabel').text((d) => (d.compareMode ? ": " + Math.round(d.similarityToSelectedState*100) + "%" : "")+ " " + d.name );
 
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
