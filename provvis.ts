@@ -92,7 +92,7 @@ class StateRepr {
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
-      return Math.pow(selState[0].getSimilarityTo(this.s),2);
+      return selState[0].getSimilarityTo(this.s)
     }
     return 1;
   }
