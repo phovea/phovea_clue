@@ -561,7 +561,7 @@ export class StateNode extends graph.GraphNode {
     for(let i=0; i<len; i++) {
       if( thisH.charAt(i) == otherH.charAt(i)) nrEqu++;
     }
-    return nrEqu/len
+    return (nrEqu/len - 0.5)*2
   }
 
 
