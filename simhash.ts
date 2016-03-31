@@ -82,7 +82,7 @@ class HashTable {
 export class SimHash {
 
   private static _instance:SimHash = new SimHash();
-  private _nrBits:number = 100;
+  private _nrBits:number = 200;
 
   public static get hasher():SimHash {
     return this._instance;
