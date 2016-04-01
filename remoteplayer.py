@@ -51,7 +51,7 @@ def create_via_selenium(url, width, height):
     # finally:
     #    driver.quit()
     # obj = main_elem.screenshot_as_png()
-  except Exception, e:
+  except Exception as e:
     print 'cant fullfil query', e
   obj = driver.get_screenshot_as_png()
   driver.quit()
