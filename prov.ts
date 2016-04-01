@@ -14,6 +14,7 @@ import session = require('../caleydo_core/session');
  * reexport the edge type
  */
 export type GraphEdge = graph.GraphEdge;
+export const graphModule = graph;
 
 /**
  * list of categories for actions and objects
@@ -1946,3 +1947,12 @@ export function findLatestPath(state:StateNode) {
   return path;
 }
 
+export function createDummy() {
+  const desc = {
+    type: 'provenance_graph',
+    id: 'dummy',
+    name: 'dummy',
+    fqname: 'dummy'
+  };
+  return new ProvenanceGraph(desc, new graph.MemoryGraph(desc, [], [], provenanceGraphFactory()));
+}
