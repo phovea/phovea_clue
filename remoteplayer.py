@@ -14,7 +14,7 @@ mc = memcache.Client(conf.get('memcached'), debug=0)
 mc_prefix = 'clue_'
 
 import logging
-_log = logging.getLogger('caleydo_clue.' + __name__)
+_log = logging.getLogger(__name__)
 
 def generate_url(app, prov_id, state):
   base = '{0}{1}/#clue_graph={2}&clue_state={3}&clue=P&clue_store=remote&clue_headless=Y'
