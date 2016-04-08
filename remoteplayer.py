@@ -13,6 +13,8 @@ import memcache
 mc = memcache.Client(conf.get('memcached'), debug=0)
 mc_prefix = 'clue_'
 
+import logging
+_log = logging.getLogger('caleydo_clue.' + __name__)
 
 def generate_url(app, prov_id, state):
   base = '{0}{1}/#clue_graph={2}&clue_state={3}&clue=P&clue_store=remote&clue_headless=Y'
@@ -34,12 +36,12 @@ def create_via_selenium(url, width, height):
   driver = webdriver.PhantomJS(executable_path=conf.phantomjs2)  # or add to your PATH
   driver.implicitly_wait(20) #wait at most 20 seconds
   driver.set_window_size(width, height)  # optional
-  print url
+  _log.debug('url %s', url)
   driver.get(url)
   try:
     main_elem = driver.find_element_by_css_selector('main')
     for entry in driver.get_log('browser'):
-      print entry
+      _log.debug(entry)
     check = driver.find_element_by_css_selector('body.clue_jumped')
     # try:
     # we have to wait for the page to refresh, the last thing that seems to be updated is the title
@@ -52,7 +54,7 @@ def create_via_selenium(url, width, height):
     #    driver.quit()
     # obj = main_elem.screenshot_as_png()
   except Exception as e:
-    print 'cant fullfil query', e
+    _log.exception('cant fullfil query %s', e)
   obj = driver.get_screenshot_as_png()
   driver.quit()
   return obj
@@ -65,11 +67,11 @@ def create_via_phantomjs(url, width, height, format):
 
   args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
           '2' + name[1], str(width), str(height)]
-  print ' '.join(args)
+  _log.debug(' '.join(args))
   proc = subprocess.Popen(args)
-  print 'pre wait'
+  _log.debug('pre wait')
   proc.wait()
-  print 'here'
+  _log.debug('here')
 
   with open('2' + name[1], 'rb') as f:
     obj = f.readall()
@@ -84,7 +86,7 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
 
   obj = mc.get(key)
   if not obj or force:
-    print 'requesting url', url
+    _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
     # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
@@ -97,7 +99,7 @@ def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, f
 
   obj = mc.get(key)
   if not obj or force:
-    print 'requesting url', url
+    _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
     # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
