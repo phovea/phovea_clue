@@ -3,6 +3,7 @@ import statetoken = require('../caleydo_core/statetoken');
 import idtype = require('../caleydo_core/idtype')
 import {isUndefined} from "../caleydo_core/main";
 import Color = d3.Color;
+import {IStateToken} from "../caleydo_core/statetoken";
 
 
 
@@ -99,7 +100,8 @@ export class SimHash {
         name: "dummy",
         value: sel.toString(),
         type: statetoken.TokenType.string,
-        importance: 1
+        importance: 1,
+        childs:[]
       }
       allTokens = allTokens.concat(t);
     }
@@ -152,6 +154,8 @@ export class SimHash {
 
   public calcHash(tokens:statetoken.IStateToken[]):string {
 
+    tokens = this.normalizeTokenPriority(tokens,1)
+    tokens = this.serializeTokens(tokens)
     let b:number = 0;
 
     let splitTokens = this.prepHashCalc(tokens)
@@ -216,6 +220,29 @@ export class SimHash {
 
     return this.hashTable["default"].toHash(this._nrBits);
   }
+
+  private normalizeTokenPriority(tokens:IStateToken[], baseLevel:number):IStateToken[] {
+    let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
+    for (let i:number = 0; i < tokens.length; i++) {
+      tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
+      tokens[i].childs = this.normalizeTokenPriority(tokens[i].childs, tokens[i].importance)
+    }
+    return tokens
+  }
+
+  private serializeTokens(tokens:IStateToken[]) {
+    let childs:IStateToken[] = []
+    for (let i =0; i < tokens.length; i++) {
+      let sub:IStateToken[] = this.serializeTokens(tokens[i].childs)
+      if (sub.length == 0) {
+        childs = childs.concat(tokens[i])
+      } else {
+        childs = childs.concat(sub)
+      }
+    }
+    return childs;
+  }
+
 }
 
 
