@@ -66,7 +66,16 @@ class StateRepr {
   a : provenance.ActionNode = null;
 
 
-  get similarityToSelectedState():number {
+  constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
+    this.doi = 0.1
+    /*if (this.similarityToActiveState >= 0) {
+      this.doi = this.doi*this.similarityToActiveState;
+    }
+    */
+    this.a = s.creator;
+  }
+
+  get similarityToHoveredState():number {
     //console.log(this.graph.compareMode);
     if(this.graph.compareMode) {
       //console.log(this.graph);
@@ -79,9 +88,11 @@ class StateRepr {
     return 1;
   }
 
-  constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
-    this.doi = 0.1;
-    this.a = s.creator;
+  get similarityToActiveState():number {
+    if (this.graph.act==null) {
+      return -1;
+    }
+    return this.graph.act.getSimilarityTo(this.s)
   }
 
   get opacity():number {
@@ -202,6 +213,7 @@ class StateRepr {
       const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
       const is_selected = s === selected ? 3: 0;
       const inpath = selected_path.indexOf(s) >= 0 ? Math.max(-2.5,6-selected_path.indexOf(s)) : -2.5;
+      const similar = r.similarityToActiveState > 0.95 ? 1:0;
 
       const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
@@ -211,6 +223,11 @@ class StateRepr {
       if ((category + operation + bookmark + tags) > 0) {
         //boost to next level if any of the filters apply
         r.doi = Math.max(r.doi, DOI_SMALL);
+      }
+
+      if ((similar) > 0) {
+        //boost to next level if any of the filters apply
+        r.doi = Math.max(r.doi, DOI_MEDIUM);
       }
 
       if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
@@ -356,7 +373,7 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     //$elem.select('span.slabel').text((d) => d.name);
-    $elem.select('span.slabel').text((d) => (d.compareMode ? ": " + Math.round(d.similarityToSelectedState*100) + "%" : "")+ " " + d.name );
+    $elem.select('span.slabel').text((d) => (d.compareMode ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
 
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
