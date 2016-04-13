@@ -524,7 +524,7 @@ export class StateNode extends graph.GraphNode {
   //<author>: Michael Gillhofer
 
   calcSimHash():string {
-    console.log("Recalc Hash of " + this.id)
+    //console.log("Recalc Hash of " + this.id)
     var allTokens: statetoken.IStateToken[] = [];
     for (var oN of this.consistsOf) {
       if (!(typeof oN.stateTokens === 'undefined')) {
@@ -534,7 +534,7 @@ export class StateNode extends graph.GraphNode {
     }
     let hash = SimHash.hasher.calcHash(allTokens)
     super.setAttr('simHash', hash);
-    console.log(hash)
+    //console.log(hash)
     return hash
   }
 
@@ -1615,7 +1615,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         action.removes.forEach((c) => c.value = null);
       }
       let hash = next.calcSimHash();
-      console.log("recalculated hash of " + next.id +" is " + hash);
+      //console.log("recalculated hash of " + next.id +" is " + hash);
 
       result.inverse = asFunction(result.inverse);
       action.updateInverse(this, <IInverseActionCreator>result.inverse);
