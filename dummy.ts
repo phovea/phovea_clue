@@ -16,7 +16,7 @@ import d3 = require('d3');
  * @returns {CLUEWrapper}
  */
 export function create(body:HTMLElement, options:any = {}) {
-  const h = header.create(body, {
+  header.create(body, {
       app: options.app || 'Caleydo',
       inverse: true
     });
