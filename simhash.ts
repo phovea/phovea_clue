@@ -82,6 +82,7 @@ class HashTable {
 
 export class SimHash {
 
+  private static categoryWeighting:number[] = [15,25,15,30,20]
   private static _instance:SimHash = new SimHash();
   private _nrBits:number = 200;
 
@@ -91,6 +92,14 @@ export class SimHash {
 
   private hashTable:HashTable[] =  [];
   private _HashTableSize:number = 1000;
+
+  get categoryWeighting() {
+    return this.categoryWeighting;
+  }
+
+  set categoryWeighting(weighting) {
+    this.categoryWeighting = weighting;
+  }
 
   getHashOfIDTypeSelection(type:IDType, selectionType):string {
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
