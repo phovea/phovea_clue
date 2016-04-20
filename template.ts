@@ -14,6 +14,7 @@ declare var template:string;
 import C = require('../caleydo_core/main');
 import header = require('../caleydo_bootstrap_fontawesome/header');
 import datas = require('../caleydo_core/data');
+import datatypes = require('../caleydo_core/datatype');
 import vis = require('../caleydo_core/vis');
 import prov = require('./prov');
 import d3 = require('d3');
@@ -28,39 +29,123 @@ import login = require('../caleydo_security_flask/login');
 import session = require('../caleydo_core/session');
 import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
 
-/**
- * create the provenance graph selection dropdown and handles the graph selection
- * @param manager
- * @param $ul
- * @returns {Promise<U>}
- */
-function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, $ul:d3.Selection<any>):Promise<prov.ProvenanceGraph> {
-  //selected by url
-  const graph = C.hash.getProp('clue_graph', null);
+export class CLUEGraphManager {
+  constructor(private manager: prov.MixedStorageProvenanceGraphManager) {
+    //selected by url
+  }
 
-  //new button
-  $ul.select('#provenancegraph_new_remote').on('click', () => {
-    d3.event.preventDefault();
+  newRemoteGraph() {
     if (session.retrieve('logged_in') === true) {
       C.hash.removeProp('clue_slide', false);
       C.hash.removeProp('clue_state', false);
       C.hash.setProp('clue_graph', 'new_remote');
       window.location.reload();
     }
-  });
-  //new local
-  $ul.select('#provenancegraph_new').on('click', () => {
+  }
+
+  newGraph() {
     C.hash.removeProp('clue_slide', false);
     C.hash.removeProp('clue_state', false);
     C.hash.setProp('clue_graph', 'new');
     window.location.reload();
-    d3.event.preventDefault();
-  });
+  }
 
-  function loadGraph(desc:any) {
+  loadGraph(desc:any) {
     C.hash.setProp('clue_graph', desc.id);
     window.location.reload();
   }
+
+  get storedSlide() {
+    return C.hash.getInt('clue_slide', null);
+  }
+
+  set storedSlide(value: number) {
+    if (value !== null) {
+      C.hash.setInt('clue_slide', value);
+    } else {
+      C.hash.removeProp('clue_slide');
+    }
+  }
+
+  get storedState() {
+    return C.hash.getInt('clue_state', null);
+  }
+
+  set storedState(value: number) {
+    if (value !== null) {
+      C.hash.setInt('clue_state', value);
+    } else {
+      C.hash.removeProp('clue_state');
+    }
+  }
+
+  get isAutoPlay() {
+    return C.hash.is('clue_autoplay');
+  }
+
+  list() {
+    return this.manager.list();
+  }
+
+  delete(graph: datatypes.IDataDescription) {
+    return this.manager.delete(graph);
+  }
+
+  importGraph(dump: any, remote = false) {
+    (remote ? this.manager.importRemote(dump) : this.manager.importLocal(dump)).then((graph) => {
+      this.loadGraph(graph.desc);
+    });
+  }
+
+  setGraph(graph: prov.ProvenanceGraph) {
+    C.hash.setProp('clue_graph', graph.desc.id);
+  }
+
+  choose(list: datatypes.IDataDescription[]) {
+    const loggedIn = session.retrieve('logged_in', false) === true;
+    const graph = C.hash.getProp('clue_graph', null);
+    if (graph === 'new_remote' && loggedIn) {
+      return this.manager.createRemote();
+    }
+    if (graph === null || graph === 'new') {
+      return this.manager.createLocal();
+    }
+    const desc = list.filter((d) => d.id === graph)[0];
+    if (desc) {
+      if ((<any>desc).local || loggedIn) {
+        return this.manager.get(desc);
+      }
+      return this.manager.cloneLocal(desc);
+    }
+    return this.manager.create();
+  }
+
+  loadOrClone(graph: datatypes.IDataDescription, isSelect: boolean) {
+    if (isSelect) {
+      this.loadGraph(graph);
+    } else {
+      this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
+    }
+  }
+}
+/**
+ * create the provenance graph selection dropdown and handles the graph selection
+ * @param manager
+ * @param $ul
+ * @returns {Promise<U>}
+ */
+function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):Promise<prov.ProvenanceGraph> {
+
+  //new button
+  $ul.select('#provenancegraph_new_remote').on('click', () => {
+    d3.event.preventDefault();
+    manager.newRemoteGraph();
+  });
+  //new local
+  $ul.select('#provenancegraph_new').on('click', () => {
+    d3.event.preventDefault();
+    manager.newGraph();
+  });
 
   d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function () {
     d3.event.preventDefault();
@@ -75,9 +160,7 @@ function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, 
       reader.onload = function (e:any) {
         var data_s = e.target.result;
         var dump = JSON.parse(data_s);
-        (remote ? manager.importRemote(dump) : manager.importLocal(dump)).then((graph) => {
-          loadGraph(graph.desc);
-        });
+        manager.importGraph(dump, remote);
       };
       // Read in the image file as a data URL.
       reader.readAsText(file);
@@ -89,7 +172,7 @@ function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, 
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
     $list.enter().insert('li', ':first-child').classed('graph', true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
       d3.event.preventDefault();
-      loadGraph(d);
+      manager.loadGraph(d);
     });
     const format = d3.time.format.utc('%Y-%m-%dT%H:%M');
     (<any>$('#provenancegraph_list li.graph a')).popover({
@@ -143,11 +226,7 @@ function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, 
         });
         $elem.find('button.btn-primary').on('click', function () {
           const isSelect = this.dataset.action === 'select';
-          if (isSelect) {
-            loadGraph(graph);
-          } else {
-            manager.cloneLocal(graph).then((graph) => loadGraph(graph.desc));
-          }
+          manager.loadOrClone(graph, isSelect);
           return false;
         });
         return $elem;
@@ -160,24 +239,9 @@ function chooseProvenanceGraph(manager:prov.MixedStorageProvenanceGraphManager, 
         (<any>$(this).find('a')).popover('hide');
       }
     });
-
-    const loggedIn = session.retrieve('logged_in', false) === true;
-    if (graph === 'new_remote' && loggedIn) {
-      return manager.createRemote();
-    }
-    if (graph === null || graph === 'new') {
-      return manager.createLocal();
-    }
-    const desc = list.filter((d) => d.id === graph)[0];
-    if (desc) {
-      if ((<any>desc).local || loggedIn) {
-        return manager.get(desc);
-      }
-      return manager.cloneLocal(desc);
-    }
-    return manager.create();
+    return manager.choose(list);
   }).then((graph) => {
-    C.hash.setProp('clue_graph', graph.desc.id);
+    manager.setGraph(graph);
     $ul.select('#provenancegraph_name').text(graph.desc.name);
     return graph;
   });
@@ -269,6 +333,7 @@ export class CLUEWrapper extends events.EventHandler {
   };
 
   private manager:prov.MixedStorageProvenanceGraphManager;
+  clueManager:CLUEGraphManager;
 
   graph:Promise<prov.ProvenanceGraph>;
   header:header.AppHeader;
@@ -284,6 +349,8 @@ export class CLUEWrapper extends events.EventHandler {
     //replace content with the template
     body.innerHTML = template;
 
+
+
     //special flag for rendering server side screenshots
     if (C.hash.is('clue_headless')) {
       console.log('init headless mode');
@@ -295,12 +362,14 @@ export class CLUEWrapper extends events.EventHandler {
       injectParentWindowSupport(this);
       d3.select('body').classed('headless', true);
     }
+
     //load all available provenance graphs
     this.manager = new prov.MixedStorageProvenanceGraphManager({
       prefix: this.options.id,
       storage: sessionStorage,
       application: this.options.application
     });
+    this.clueManager = new CLUEGraphManager(this.manager);
 
     //create the common header
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
@@ -375,7 +444,7 @@ export class CLUEWrapper extends events.EventHandler {
         return false;
       });
 
-      this.graph = chooseProvenanceGraph(this.manager, $ul);
+      this.graph = chooseProvenanceGraph(this.clueManager, $ul);
     }
 
 
@@ -463,18 +532,10 @@ export class CLUEWrapper extends events.EventHandler {
       });
 
       graph.on('switch_state', (event:any, state:prov.StateNode) => {
-        if (state) {
-          C.hash.setInt('clue_state', state.id);
-        } else {
-          C.hash.removeProp('clue_state');
-        }
+        this.clueManager.storedState = state ? state.id : null;
       });
       graph.on('select_slide_selected', (event:any, state:prov.SlideNode) => {
-        if (state) {
-          C.hash.setInt('clue_slide', state.id);
-        } else {
-          C.hash.removeProp('clue_slide');
-        }
+        this.clueManager.storedSlide = state ? state.id : null;
       });
 
       {
@@ -633,7 +694,7 @@ export class CLUEWrapper extends events.EventHandler {
         console.log('jump to stored story', s.id);
         this.storyvis.switchTo(s);
         var next;
-        if (C.hash.is('clue_autoplay')) {
+        if (this.clueManager.isAutoPlay) {
           this.storyvis.player.start();
           next = Promise.resolve();
         } else {
@@ -672,11 +733,11 @@ export class CLUEWrapper extends events.EventHandler {
 
   jumpToStored() {
     //jump to stored state
-    const target_story = C.hash.getInt('clue_slide', null);
+    const target_story = this.clueManager.storedSlide;
     if (target_story !== null) {
       return this.jumpToStory(target_story);
     }
-    const target_state = C.hash.getInt('clue_state', null);
+    const target_state = this.clueManager.storedState;
     if (target_state !== null) {
       return this.jumpToState(target_state);
     }
