@@ -17,7 +17,7 @@ import utils = require('./utils');
 import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
-import {HashColor} from "./simhash";
+import {HashColor, SimHash} from "./simhash";
 
 
 function extractTags(text: string) {
@@ -596,7 +596,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
             </div>
           </div>
          </div>
+         
+         <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-default btn-xs" title="Change category weighting">
+            <i id="catWeight" class="fa fa-balance-scale" aria-hidden="true"></i>
+          </label>
+        </div>
         </form>
+        
       </div>
       <div style="position: relative">
         <svg>
@@ -644,9 +651,96 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
+
+    let dialog = dialogs.generateDialog("Category weighting")
+    dialog.body.innerHTML = `
+      <div id="compChart" style="margin-top: 10px; margin-bottom: 50px"> <div class = "container" id="handles">
+          <div class="chart_handle" id="dv" style="left:72px">
+            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
+          </div><!--
+          --><div class="chart_handle" id="vs" style="left:154px">
+            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
+          </div><!--
+          --><div class="chart_handle" id="sl" style="left:196px">
+            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
+          </div><!--
+          --><div class="chart_handle" id="la" style="left:258px">
+            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
+          </div>
+        </div>
+        <div class = "container" id="bars">
+          <div class="chart_bar" id="data" style="width: 80px;" active=true>15</div><!--
+          --><div class="chart_bar" id="visual" style="width: 80px;" active=true>25</div><!--
+          --><div class="chart_bar" id="selection" style="width: 40px;" active=true>35</div><!--
+          --><div class="chart_bar" id="layout" style="width: 60px;" active=true>40</div><!--
+          --><div class="chart_bar" id="analysis" style="width: 60px;" active=true>40</div>
+        </div>
+        <div class="container", id="descriptions">
+          <div class="bar_description">data</div>
+          <div class="bar_description">visual</div>
+          <div class="bar_description">selection</div>
+          <div class="bar_description">layout</div>
+          <div class="bar_description">analysis</div>
+        </div>
+      </div>`
+
+    $('#catWeight').click( function () {
+
+      dialog.show();
+
+      var data = SimHash.hasher.categoryWeighting;
+      var handlePos  = [72,154,196,258]
+      var cats = ["data", "visual", "selection", "layout", "analysis"]
+      var handlerIds:string[] = ["dv", "vs", "sl", "la"]
+      var background_col = d3.scale.linear()
+        .domain([5,25])
+        .interpolate(<any>d3.interpolateRgb)
+        .range(<any>[d3.rgb('#ece7f2'), d3.rgb('#2b8cbe')])
+      var bars = d3.selectAll(".chart_bar");
+      bars.style("width", function(d,i) { return 5*data[i] + "px"; })
+        .style("background-color", function(d,i) {return background_col(data[i]);})
+        .text(function(d,i) { return data[i] + "%"})
+      handlePos[0] = data[0]*5 + 10
+      for (var i = 1; i <= handlerIds.length; i++) {
+        handlePos[i] = handlePos[i-1]+ data[i]*5 +2
+      }
+      var handles = d3.selectAll(".chart_handle")
+        .style("left", function(d,i) {
+          return handlePos[i] + "px"; })
+      var descrs = d3.selectAll(".bar_description")
+        .style("left", function(d,i) {
+          return handlePos[i] + "px"; })
+      var dragResize = d3.behavior.drag()
+          .on('drag', function() {
+            let x = d3.mouse(this.parentNode)[0]-10;
+            let id = handlerIds.indexOf($(this).attr("id"))
+                  x = Math.max(10, x);
+            handlePos[id] = x
+            data[0] = Math.round((handlePos[0] -10 ) / 5)
+            data[1] = Math.round((handlePos[1] - handlePos[0] - 2) / 5)
+            data[2] = Math.round((handlePos[2] - handlePos[1] - 2) / 5)
+            data[3] = Math.round((handlePos[3] - handlePos[2] - 2) / 5)
+            data[4] = Math.round((handlePos[4] - handlePos[3] - 2) / 5)
+            bars.style("width", function(d,i) { return 5*data[i] + "px"; })
+              .style("background-color", function(d,i) {return background_col(data[i]);})
+              .text(function(d,i) { return data[i] + "%"})
+            handles.style("left", function(d,i) {
+              return handlePos[i] + "px"; })
+            descrs = d3.selectAll(".bar_description")
+              .style("left", function(d,i) {
+                return handlePos[i] + "px"; })
+          })
+
+      handles.call(dragResize);
+      dialog.onHide(function() {
+        SimHash.hasher.categoryWeighting = data;
+      })
+    })
+
     jp.find('h2 i').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
     });
+
 
     return $p;
   }
@@ -655,6 +749,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     d3.event.stopPropagation();
     this.data.selectState(d.s, idtypes.toSelectOperation(d3.event));
     this.data.jumpTo(d.s);
+  }
+
+  changeCategoryWeighting() {
+    console.log("test")
   }
 
   update() {
