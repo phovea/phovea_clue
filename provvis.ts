@@ -699,7 +699,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       var bars = d3.selectAll(".chart_bar");
       bars.style("width", function(d,i) { return 5*data[i] + "px"; })
         .style("background-color", function(d,i) {return background_col(data[i]);})
-        .text(function(d,i) { return data[i] + "%"})
+        .text(function(d,i) { return Math.round(data[i]) + "%"})
       handlePos[0] = data[0]*5 + 10
       for (var i = 1; i <= handlerIds.length; i++) {
         handlePos[i] = handlePos[i-1]+ data[i]*5 +2
@@ -716,14 +716,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
             let id = handlerIds.indexOf($(this).attr("id"))
                   x = Math.max(10, x);
             handlePos[id] = x
-            data[0] = Math.round((handlePos[0] -10 ) / 5)
-            data[1] = Math.round((handlePos[1] - handlePos[0] - 2) / 5)
-            data[2] = Math.round((handlePos[2] - handlePos[1] - 2) / 5)
-            data[3] = Math.round((handlePos[3] - handlePos[2] - 2) / 5)
-            data[4] = Math.round((handlePos[4] - handlePos[3] - 2) / 5)
+            data[0] = (handlePos[0] -10 ) / 5
+            data[1] = (handlePos[1] - handlePos[0] - 2) / 5
+            data[2] = (handlePos[2] - handlePos[1] - 2) / 5
+            data[3] = (handlePos[3] - handlePos[2] - 2) / 5
+            data[4] = (handlePos[4] - handlePos[3] - 2) / 5
+            console.log(data)
             bars.style("width", function(d,i) { return 5*data[i] + "px"; })
               .style("background-color", function(d,i) {return background_col(data[i]);})
-              .text(function(d,i) { return data[i] + "%"})
+              .text(function(d,i) { return Math.round(data[i]) + "%"})
             handles.style("left", function(d,i) {
               return handlePos[i] + "px"; })
             descrs = d3.selectAll(".bar_description")
