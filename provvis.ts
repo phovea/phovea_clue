@@ -17,7 +17,7 @@ import utils = require('./utils');
 import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
-import {HashColor, SimHash} from "./simhash";
+import {SimHash} from "./simhash";
 
 
 function extractTags(text: string) {
@@ -103,14 +103,15 @@ class StateRepr {
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
-      return selState[0].getSimilarityTo(this.s)
+      let sim =selState[0].getSimilarityTo(this.s)
+      return sim >=0 ? sim : 1
     }
     return 1;
   }
 
-  get hashColor():Color {
+/*  get hashColor():Color {
     return HashColor.getColor(this.s.simHash);
-  }
+  }*/
 
   get hasDuplicates():boolean{
     return this.s.duplicates.length > 0
@@ -373,7 +374,7 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     //$elem.select('span.slabel').text((d) => d.name);
-    $elem.select('span.slabel').text((d) => (d.compareMode ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
+    $elem.select('span.slabel').text((d) => ((d.compareMode && (d.similarityToHoveredState >=0)) ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
 
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
