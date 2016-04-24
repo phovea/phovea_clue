@@ -185,7 +185,7 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
 
    get stateTokens() {
      let value = <any>this.value
-     if (value ===null) return "undefined"
+     if (value ===null) return 'undefined'
      return (<any>this.value).stateTokens;
   }
 
@@ -521,7 +521,7 @@ export class StateNode extends graph.GraphNode {
 
   //<author>: Michael Gillhofer
 
-  calcSimHash():string {
+  calcSimHash():string[] {
     //console.log("Recalc Hash of " + this.id)
     var allTokens: statetoken.IStateToken[] = [];
     for (var oN of this.consistsOf) {
@@ -530,14 +530,14 @@ export class StateNode extends graph.GraphNode {
         allTokens = allTokens.concat(oN.stateTokens);
       }
     }
-    let hash = SimHash.hasher.calcHash(allTokens)
+    let hash:string[] = SimHash.hasher.calcHash(allTokens)
     super.setAttr('simHash', hash);
     //console.log(hash)
     return hash
   }
 
-  get simHash(): string{
-    var simHash:string = super.getAttr('simHash');
+  get simHash(): string[]{
+    var simHash:string[] = super.getAttr('simHash');
     if (simHash === null) {
       console.log("Sim Hash Was null")
       simHash = this.calcSimHash()
@@ -552,14 +552,20 @@ export class StateNode extends graph.GraphNode {
   */
 
   getSimilarityTo(otherState:StateNode): number{
-    let thisH:string = this.simHash
-    let otherH:string = otherState.simHash
-    let len = Math.min(thisH.length, otherH.length);
-    let nrEqu = 0;
-    for(let i=0; i<len; i++) {
-      if( thisH.charAt(i) == otherH.charAt(i)) nrEqu++;
+    let thisH:string[] = this.simHash
+    let otherH:string[] = otherState.simHash
+    if (thisH[0] == "invalid" || otherH[0] == "invalid") return -1
+    let weighting = SimHash.hasher.categoryWeighting
+    let similarity:number = 0 ;
+    for (let j = 0; j < 5; j++) {
+      let len = Math.min(thisH[j].length, otherH[j].length);
+      let nrEqu = 0;
+      for(let i=0; i<len; i++) {
+        if( thisH[j].charAt(i) == otherH[j].charAt(i)) nrEqu++;
+      }
+      similarity += (nrEqu/len - 0.5)*2*weighting[j]/100
     }
-    return (nrEqu/len - 0.5)*2
+    return similarity
   }
 
 

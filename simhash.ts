@@ -75,7 +75,6 @@ class HashTable {
     }
     this.hashes = []
     this.probs = []
-    HashColor.getColor(hash)
     return hash;
   }
 }
@@ -112,7 +111,8 @@ export class SimHash {
         value: sel.toString(),
         type: statetoken.TokenType.string,
         importance: 1,
-        childs:[]
+        childs:[],
+        category: "",
       }
       allTokens = allTokens.concat(t);
     }
@@ -152,7 +152,7 @@ export class SimHash {
       );
     }
 
-    if (needsNormalization) {
+    if (needsNormalization && typeof tokens != 'undefined') {
       let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
       for (let i:number = 0; i < tokens.length; i++) {
         tokens[i].importance /= totalImportance
@@ -163,74 +163,98 @@ export class SimHash {
   }
 
 
-  public calcHash(tokens:statetoken.IStateToken[]):string {
-
+  public calcHash(tokens:statetoken.IStateToken[]):string[] {
+    if (tokens.length == 0) {
+      return ["invalid","invalid","invalid","invalid","invalid"]}
     tokens = this.normalizeTokenPriority(tokens,1)
     tokens = this.serializeTokens(tokens)
-    let b:number = 0;
 
-    let splitTokens = this.prepHashCalc(tokens)
-    if (this.hashTable["default"] == null) {
-      this.hashTable["default"] = new HashTable(this._HashTableSize)
+    function groupBy(arr:statetoken.IStateToken[]) {
+      return arr.reduce(function (memo, x:statetoken.IStateToken) {
+          if (!memo[x.category]) {
+            memo[x.category] = []
+          }
+          memo[x.category].push(x);
+          return memo;
+        }, {}
+      );
     }
+    let categories = ["data","visual","selection","layout","analysis"]
 
-    let ordinalTokens: statetoken.IStateToken[] = splitTokens[1];
-    if (ordinalTokens !== undefined) {
-      for (let i:number=0; i < ordinalTokens.length; i++) {
-        this.hashTable["default"].push(
-          ordinalTokens[i].name,
-          ordinalTokens[i].importance,
-          ordinalHash(
-            ordinalTokens[i].value[0],
-            ordinalTokens[i].value[1],
-            ordinalTokens[i].value[2],
-            this._nrBits
-          )
-        )
-      }
+    let hashes:string[] = []
+    let groupedTokens = groupBy(tokens)
+    for (let i = 0; i < 5; i++) {
+      hashes[i] = this.calcHashOfCat(groupedTokens[categories[i]],categories[i])
     }
-
-    let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
-    if (ordidTypeTokens !== undefined) {
-      for (let i:number=0; i < ordidTypeTokens.length; i++) {
-        this.hashTable["default"].push(
-          ordidTypeTokens[i].name,
-          ordidTypeTokens[i].importance,
-          this.getHashOfOrdinalIDTypeSelection(
-            ordidTypeTokens[i].value[0],
-            ordidTypeTokens[i].value[1],
-            ordidTypeTokens[i].value[2],
-            idtype.defaultSelectionType
-          )
-        )
-      }
-    }
-
-
-    let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
-    if (idtypeTokens !== undefined) {
-      for (let i:number = 0; i < idtypeTokens.length; i++) {
-        this.hashTable["default"].push(
-          idtypeTokens[i].value,
-          idtypeTokens[i].importance,
-          this.getHashOfIDTypeSelection(
-            idtypeTokens[i].value,
-            idtype.defaultSelectionType
-          )
-        )
-      }
-    }
-
-    let regularTokens:statetoken.IStateToken[] = splitTokens[0];
-    if (regularTokens !== undefined) {
-      for (let i:number = 0; i < regularTokens.length; i++) {
-        this.hashTable["default"].push(regularTokens[i].value, regularTokens[i].importance, null)
-      }
-    }
-
-
-    return this.hashTable["default"].toHash(this._nrBits);
+    return hashes
   }
+
+  private calcHashOfCat(tokens:IStateToken[], cat:string){
+      if (!(typeof tokens != 'undefined')) return Array(this._nrBits+1).join("0")
+
+      let b:number = 0;
+      let splitTokens = this.prepHashCalc(tokens)
+      if (this.hashTable[cat] == null) {
+        this.hashTable[cat] = new HashTable(this._HashTableSize)
+      }
+
+      let ordinalTokens: statetoken.IStateToken[] = splitTokens[1];
+      if (ordinalTokens !== undefined) {
+        for (let i:number=0; i < ordinalTokens.length; i++) {
+          this.hashTable[cat].push(
+            ordinalTokens[i].name,
+            ordinalTokens[i].importance,
+            ordinalHash(
+              ordinalTokens[i].value[0],
+              ordinalTokens[i].value[1],
+              ordinalTokens[i].value[2],
+              this._nrBits
+            )
+          )
+        }
+      }
+
+      let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
+      if (ordidTypeTokens !== undefined) {
+        for (let i:number=0; i < ordidTypeTokens.length; i++) {
+          this.hashTable[cat].push(
+            ordidTypeTokens[i].name,
+            ordidTypeTokens[i].importance,
+            this.getHashOfOrdinalIDTypeSelection(
+              ordidTypeTokens[i].value[0],
+              ordidTypeTokens[i].value[1],
+              ordidTypeTokens[i].value[2],
+              idtype.defaultSelectionType
+            )
+          )
+        }
+      }
+
+
+      let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
+      if (idtypeTokens !== undefined) {
+        for (let i:number = 0; i < idtypeTokens.length; i++) {
+          this.hashTable[cat].push(
+            idtypeTokens[i].value,
+            idtypeTokens[i].importance,
+            this.getHashOfIDTypeSelection(
+              idtypeTokens[i].value,
+              idtype.defaultSelectionType
+            )
+                  )
+              }
+          }
+
+          let regularTokens:statetoken.IStateToken[] = splitTokens[0];
+          if (regularTokens !== undefined) {
+              for (let i:number = 0; i < regularTokens.length; i++) {
+                  this.hashTable[cat].push(regularTokens[i].value, regularTokens[i].importance, null)
+              }
+          }
+
+
+          return this.hashTable[cat].toHash(this._nrBits);
+      };
 
   private normalizeTokenPriority(tokens:IStateToken[], baseLevel:number):IStateToken[] {
     let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
@@ -257,12 +281,12 @@ export class SimHash {
 }
 
 
-export class HashColor {
+/*export class HashColor {
 
   static colorMap = []
   static size:number = 0;
 
-  public static getColor(hash:string):Color {
+  public static getColor(hash:string[]):Color {
     let col = this.colorMap[String(hash)];
     if (col==null) {
       col = d3.scale.category10().range()[this.size % 10]
@@ -273,7 +297,7 @@ export class HashColor {
   }
 
 
-}
+}*/
 
 
 
