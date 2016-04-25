@@ -185,9 +185,15 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
   }
 
 
-   get stateTokens() {
+  get stateTokenPropertyExists() {
      let value = <any>this.value
-     if (value ===null) return 'undefined'
+     if (value ===null) return false
+     if(!("stateTokens" in value)) return false
+     return true
+  }
+
+  get stateTokens() {
+     if (!this.stateTokenPropertyExists) return "undefined"
      return (<any>this.value).stateTokens;
   }
 
@@ -527,7 +533,7 @@ export class StateNode extends graph.GraphNode {
     //console.log("Recalc Hash of " + this.id)
     var allTokens: statetoken.IStateToken[] = [];
     for (var oN of this.consistsOf) {
-      if (!(typeof oN.stateTokens === 'undefined')) {
+      if (oN.stateTokenPropertyExists) {
         if (oN.category == "data") continue
         allTokens = allTokens.concat(oN.stateTokens);
       }
