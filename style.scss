@@ -377,3 +377,39 @@ body {
 @import "styles/provvis";
 @import "styles/storyvis";
 
+
+.chart_bar {
+	font: 14px sans-serif;
+	height: 22px;
+	line-height: 22px;
+	text-align: right;
+	margin: 1px;
+	border: 0px;
+	padding: 0px;
+	margin-top: 15px;
+	display: inline-block;
+	color: white;
+
+}
+
+div .chart_handle{
+	display: inline-block;
+	position: absolute;
+	cursor: pointer;
+	z-index:4;
+}
+
+.container{
+	position: relative;
+
+}
+
+.bar_description{
+	display: inline-block;
+	position: absolute;
+	transform-origin: left;
+	transform: rotate(45deg);
+	margin-top: -2px;
+	//font-weight: bold;
+	font: 14px sans-serif;
+}
