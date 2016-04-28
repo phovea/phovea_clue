@@ -187,7 +187,7 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
 
   get stateTokenPropertyExists() {
      let value = <any>this.value
-     if (value ===null) return false
+     if (value ===null || value == "") return false
      if(!("stateTokens" in value)) return false
      return true
   }
