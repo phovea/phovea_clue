@@ -1185,6 +1185,10 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     }
   }
 
+  get isEmpty() {
+    return this._states.length <= 1;
+  }
+
   get dim() {
     return [this._actions.length, this._objects.length, this._states.length, this._slides.length];
   }
