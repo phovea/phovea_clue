@@ -3,7 +3,7 @@ import statetoken = require('../caleydo_core/statetoken');
 import idtype = require('../caleydo_core/idtype')
 import {isUndefined} from "../caleydo_core/main";
 import Color = d3.Color;
-import {IStateToken} from "../caleydo_core/statetoken";
+import {IStateToken, StateTokenLeaf, StateTokenNode} from "../caleydo_core/statetoken";
 
 
 
@@ -83,14 +83,14 @@ export class SimHash {
 
   private static _instance:SimHash = new SimHash();
 
-  private _catWeighting:number[] = [30,20,25,20,5];
+  private _catWeighting:number[] = [30, 20, 25, 20, 5];
   private _nrBits:number = 200;
 
   public static get hasher():SimHash {
     return this._instance;
   }
 
-  private hashTable:HashTable[] =  [];
+  private hashTable:HashTable[] = [];
   private _HashTableSize:number = 1000;
 
   get categoryWeighting() {
@@ -104,16 +104,15 @@ export class SimHash {
 
   getHashOfIDTypeSelection(type:IDType, selectionType):string {
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
-    let allTokens:statetoken.IStateToken[] = [];
+    let allTokens:statetoken.StateTokenLeaf[] = [];
     for (var sel of selection) {
-      var t = {
-        name: "dummy",
-        value: sel.toString(),
-        type: statetoken.TokenType.string,
-        importance: 1,
-        childs:[],
-        category: "",
-      }
+      var t = new StateTokenLeaf(
+        "dummy",
+        1,
+        statetoken.TokenType.string,
+        sel.toString(),
+        ""
+      )
       allTokens = allTokens.concat(t);
     }
     if (this.hashTable[type.id] == null) {
@@ -140,9 +139,9 @@ export class SimHash {
   }
 
 
-  private prepHashCalc(tokens:statetoken.IStateToken[], needsNormalization:boolean = true) {
-    function groupBy(arr:statetoken.IStateToken[]) {
-      return arr.reduce(function (memo, x:statetoken.IStateToken) {
+  private prepHashCalc(tokens:statetoken.StateTokenLeaf[], needsNormalization:boolean = true) {
+    function groupBy(arr:statetoken.StateTokenLeaf[]) {
+      return arr.reduce(function (memo, x:statetoken.StateTokenLeaf) {
           if (!memo[x.type]) {
             memo[x.type] = []
           }
@@ -165,12 +164,13 @@ export class SimHash {
 
   public calcHash(tokens:statetoken.IStateToken[]):string[] {
     if (tokens.length == 0) {
-      return ["invalid","invalid","invalid","invalid","invalid"]}
-    tokens = this.normalizeTokenPriority(tokens,1)
-    tokens = this.serializeTokens(tokens)
+      return ["invalid", "invalid", "invalid", "invalid", "invalid"]
+    }
+    tokens = this.normalizeTokenPriority(tokens, 1)
+    let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens)
 
-    function groupBy(arr:statetoken.IStateToken[]) {
-      return arr.reduce(function (memo, x:statetoken.IStateToken) {
+    function groupBy(arr:statetoken.StateTokenLeaf[]) {
+      return arr.reduce(function (memo, x:statetoken.StateTokenLeaf) {
           if (!memo[x.category]) {
             memo[x.category] = []
           }
@@ -179,100 +179,104 @@ export class SimHash {
         }, {}
       );
     }
-    let categories = ["data","visual","selection","layout","analysis"]
+
+    let categories = ["data", "visual", "selection", "layout", "analysis"]
 
     let hashes:string[] = []
-    let groupedTokens = groupBy(tokens)
+    let groupedTokens = groupBy(leafs)
     for (let i = 0; i < 5; i++) {
-      hashes[i] = this.calcHashOfCat(groupedTokens[categories[i]],categories[i])
+      hashes[i] = this.calcHashOfCat(groupedTokens[categories[i]], categories[i])
     }
     return hashes
   }
 
-  private calcHashOfCat(tokens:IStateToken[], cat:string){
-      if (!(typeof tokens != 'undefined')) return Array(this._nrBits+1).join("0")
+  private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
+    if (!(typeof tokens != 'undefined')) return Array(this._nrBits + 1).join("0")
 
-      let b:number = 0;
-      let splitTokens = this.prepHashCalc(tokens)
-      if (this.hashTable[cat] == null) {
-        this.hashTable[cat] = new HashTable(this._HashTableSize)
-      }
+    let b:number = 0;
+    let splitTokens = this.prepHashCalc(tokens)
+    if (this.hashTable[cat] == null) {
+      this.hashTable[cat] = new HashTable(this._HashTableSize)
+    }
 
-      let ordinalTokens: statetoken.IStateToken[] = splitTokens[1];
-      if (ordinalTokens !== undefined) {
-        for (let i:number=0; i < ordinalTokens.length; i++) {
-          this.hashTable[cat].push(
-            ordinalTokens[i].name,
-            ordinalTokens[i].importance,
-            ordinalHash(
-              ordinalTokens[i].value[0],
-              ordinalTokens[i].value[1],
-              ordinalTokens[i].value[2],
-              this._nrBits
-            )
+    let ordinalTokens:statetoken.StateTokenLeaf[] = splitTokens[1];
+    if (ordinalTokens !== undefined) {
+      for (let i:number = 0; i < ordinalTokens.length; i++) {
+        this.hashTable[cat].push(
+          ordinalTokens[i].name,
+          ordinalTokens[i].importance,
+          ordinalHash(
+            ordinalTokens[i].value[0],
+            ordinalTokens[i].value[1],
+            ordinalTokens[i].value[2],
+            this._nrBits
           )
-        }
+        )
       }
+    }
 
-      let ordidTypeTokens:statetoken.IStateToken[] = splitTokens[2];
-      if (ordidTypeTokens !== undefined) {
-        for (let i:number=0; i < ordidTypeTokens.length; i++) {
-          this.hashTable[cat].push(
-            ordidTypeTokens[i].name,
-            ordidTypeTokens[i].importance,
-            this.getHashOfOrdinalIDTypeSelection(
-              ordidTypeTokens[i].value[0],
-              ordidTypeTokens[i].value[1],
-              ordidTypeTokens[i].value[2],
-              idtype.defaultSelectionType
-            )
+    let ordidTypeTokens:statetoken.StateTokenLeaf[] = splitTokens[2];
+    if (ordidTypeTokens !== undefined) {
+      for (let i:number = 0; i < ordidTypeTokens.length; i++) {
+        this.hashTable[cat].push(
+          ordidTypeTokens[i].name,
+          ordidTypeTokens[i].importance,
+          this.getHashOfOrdinalIDTypeSelection(
+            ordidTypeTokens[i].value[0],
+            ordidTypeTokens[i].value[1],
+            ordidTypeTokens[i].value[2],
+            idtype.defaultSelectionType
           )
-        }
+        )
       }
+    }
 
 
-      let idtypeTokens:statetoken.IStateToken[] = splitTokens[3];
-      if (idtypeTokens !== undefined) {
-        for (let i:number = 0; i < idtypeTokens.length; i++) {
-          this.hashTable[cat].push(
+    let idtypeTokens:statetoken.StateTokenLeaf[] = splitTokens[3];
+    if (idtypeTokens !== undefined) {
+      for (let i:number = 0; i < idtypeTokens.length; i++) {
+        this.hashTable[cat].push(
+          idtypeTokens[i].value,
+          idtypeTokens[i].importance,
+          this.getHashOfIDTypeSelection(
             idtypeTokens[i].value,
-            idtypeTokens[i].importance,
-            this.getHashOfIDTypeSelection(
-              idtypeTokens[i].value,
-              idtype.defaultSelectionType
-            )
-                  )
-              }
-          }
+            idtype.defaultSelectionType
+          )
+        )
+      }
+    }
 
-          let regularTokens:statetoken.IStateToken[] = splitTokens[0];
-          if (regularTokens !== undefined) {
-              for (let i:number = 0; i < regularTokens.length; i++) {
-                  this.hashTable[cat].push(regularTokens[i].value, regularTokens[i].importance, null)
-              }
-          }
+    let regularTokens:statetoken.StateTokenLeaf[] = splitTokens[0];
+    if (regularTokens !== undefined) {
+      for (let i:number = 0; i < regularTokens.length; i++) {
+        this.hashTable[cat].push(regularTokens[i].value, regularTokens[i].importance, null)
+      }
+    }
 
 
-          return this.hashTable[cat].toHash(this._nrBits);
-      };
+    return this.hashTable[cat].toHash(this._nrBits);
+  };
 
   private normalizeTokenPriority(tokens:IStateToken[], baseLevel:number):IStateToken[] {
     let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
     for (let i:number = 0; i < tokens.length; i++) {
       tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
-      tokens[i].childs = this.normalizeTokenPriority(tokens[i].childs, tokens[i].importance)
+      if (!(tokens[i] instanceof StateTokenLeaf)) {
+        (<StateTokenNode>tokens[i]).childs = this.normalizeTokenPriority((<StateTokenNode>tokens[i]).childs, tokens[i].importance)
+      }
     }
     return tokens
   }
 
-  private serializeTokens(tokens:IStateToken[]) {
-    let childs:IStateToken[] = []
-    for (let i =0; i < tokens.length; i++) {
-      let sub:IStateToken[] = this.serializeTokens(tokens[i].childs)
-      if (sub.length == 0) {
-        childs = childs.concat(tokens[i])
+  private filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
+    let childs:StateTokenLeaf[] = []
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i] instanceof StateTokenLeaf) {
+        childs = childs.concat(<StateTokenLeaf>tokens[i])
       } else {
-        childs = childs.concat(sub)
+        childs = childs.concat(
+          this.filterLeafsAndSerialize((<StateTokenNode>tokens[i]).childs)
+        )
       }
     }
     return childs;
