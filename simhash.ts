@@ -1,9 +1,8 @@
 import {IDType} from "../caleydo_core/idtype";
-import statetoken = require('../caleydo_core/statetoken');
-import idtype = require('../caleydo_core/idtype')
 import {isUndefined} from "../caleydo_core/main";
 import Color = d3.Color;
-import {IStateToken, StateTokenLeaf, StateTokenNode} from "../caleydo_core/statetoken";
+import idtype = require('../caleydo_core/idtype')
+import {IStateToken, StateTokenLeaf, StateTokenNode,TokenType} from "./statetoken";
 
 
 
@@ -104,12 +103,12 @@ export class SimHash {
 
   getHashOfIDTypeSelection(type:IDType, selectionType):string {
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
-    let allTokens:statetoken.StateTokenLeaf[] = [];
+    let allTokens:StateTokenLeaf[] = [];
     for (var sel of selection) {
       var t = new StateTokenLeaf(
         "dummy",
         1,
-        statetoken.TokenType.string,
+        TokenType.string,
         sel.toString(),
         ""
       )
@@ -139,9 +138,9 @@ export class SimHash {
   }
 
 
-  private prepHashCalc(tokens:statetoken.StateTokenLeaf[], needsNormalization:boolean = true) {
-    function groupBy(arr:statetoken.StateTokenLeaf[]) {
-      return arr.reduce(function (memo, x:statetoken.StateTokenLeaf) {
+  private prepHashCalc(tokens:StateTokenLeaf[], needsNormalization:boolean = true) {
+    function groupBy(arr:StateTokenLeaf[]) {
+      return arr.reduce(function (memo, x:StateTokenLeaf) {
           if (!memo[x.type]) {
             memo[x.type] = []
           }
@@ -152,7 +151,7 @@ export class SimHash {
     }
 
     if (needsNormalization && typeof tokens != 'undefined') {
-      let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
+      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
       for (let i:number = 0; i < tokens.length; i++) {
         tokens[i].importance /= totalImportance
       }
@@ -162,15 +161,15 @@ export class SimHash {
   }
 
 
-  public calcHash(tokens:statetoken.IStateToken[]):string[] {
+  public calcHash(tokens:IStateToken[]):string[] {
     if (tokens.length == 0) {
       return ["invalid", "invalid", "invalid", "invalid", "invalid"]
     }
     tokens = this.normalizeTokenPriority(tokens, 1)
     let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens)
 
-    function groupBy(arr:statetoken.StateTokenLeaf[]) {
-      return arr.reduce(function (memo, x:statetoken.StateTokenLeaf) {
+    function groupBy(arr:StateTokenLeaf[]) {
+      return arr.reduce(function (memo, x:StateTokenLeaf) {
           if (!memo[x.category]) {
             memo[x.category] = []
           }
@@ -199,7 +198,7 @@ export class SimHash {
       this.hashTable[cat] = new HashTable(this._HashTableSize)
     }
 
-    let ordinalTokens:statetoken.StateTokenLeaf[] = splitTokens[1];
+    let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
     if (ordinalTokens !== undefined) {
       for (let i:number = 0; i < ordinalTokens.length; i++) {
         this.hashTable[cat].push(
@@ -215,7 +214,7 @@ export class SimHash {
       }
     }
 
-    let ordidTypeTokens:statetoken.StateTokenLeaf[] = splitTokens[2];
+    let ordidTypeTokens:StateTokenLeaf[] = splitTokens[2];
     if (ordidTypeTokens !== undefined) {
       for (let i:number = 0; i < ordidTypeTokens.length; i++) {
         this.hashTable[cat].push(
@@ -232,7 +231,7 @@ export class SimHash {
     }
 
 
-    let idtypeTokens:statetoken.StateTokenLeaf[] = splitTokens[3];
+    let idtypeTokens:StateTokenLeaf[] = splitTokens[3];
     if (idtypeTokens !== undefined) {
       for (let i:number = 0; i < idtypeTokens.length; i++) {
         this.hashTable[cat].push(
@@ -246,7 +245,7 @@ export class SimHash {
       }
     }
 
-    let regularTokens:statetoken.StateTokenLeaf[] = splitTokens[0];
+    let regularTokens:StateTokenLeaf[] = splitTokens[0];
     if (regularTokens !== undefined) {
       for (let i:number = 0; i < regularTokens.length; i++) {
         this.hashTable[cat].push(regularTokens[i].value, regularTokens[i].importance, null)
@@ -258,7 +257,7 @@ export class SimHash {
   };
 
   private normalizeTokenPriority(tokens:IStateToken[], baseLevel:number):IStateToken[] {
-    let totalImportance = tokens.reduce((prev, a:statetoken.IStateToken) => prev + a.importance, 0)
+    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
     for (let i:number = 0; i < tokens.length; i++) {
       tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
       if (!(tokens[i] instanceof StateTokenLeaf)) {

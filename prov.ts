@@ -10,8 +10,8 @@ import ranges = require('../caleydo_core/range');
 import datatypes = require('../caleydo_core/datatype');
 import session = require('../caleydo_core/session');
 
-import statetoken = require('../caleydo_core/statetoken');
 import {SimHash} from "./simhash";
+import {IStateToken} from "./statetoken";
 
 /**
  * reexport the edge type
@@ -531,7 +531,7 @@ export class StateNode extends graph.GraphNode {
 
   calcSimHash():string[] {
     //console.log("Recalc Hash of " + this.id)
-    var allTokens: statetoken.IStateToken[] = [];
+    var allTokens: IStateToken[] = [];
     for (var oN of this.consistsOf) {
       if (oN.stateTokenPropertyExists) {
         if (oN.category == "data") continue
@@ -540,6 +540,7 @@ export class StateNode extends graph.GraphNode {
     }
     let hash:string[] = SimHash.hasher.calcHash(allTokens)
     super.setAttr('simHash', hash);
+    super.setAttr('simTokens', allTokens)
     //console.log(hash)
     return hash
   }
