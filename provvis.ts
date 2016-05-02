@@ -460,6 +460,19 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
   };
 
+/*  private onWeightingChanged = (event: any, type: string, act: ranges.Range) => {
+    const selectedStates = this.data.selectedStates(type);
+
+    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    $elem.call(StateRepr.render);
+  };*/
+
+  private onWeightingChanged (){
+    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    $elem.call(StateRepr.render);
+  }
+
+
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
 
   private dim : [number, number] = [200, 100];
@@ -501,6 +514,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
+    //this.data.on('weighting_change', this.onWeightingChanged)
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
     });
@@ -731,12 +745,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
             descrs = d3.selectAll(".bar_description")
               .style("left", function(d,i) {
                 return handlePos[i] + "px"; })
+            SimHash.hasher.categoryWeighting = data
+            that.update()
+            that.onWeightingChanged()
           })
 
       handles.call(dragResize);
-      dialog.onHide(function() {
-        SimHash.hasher.categoryWeighting = data;
-      })
     })
 
     jp.find('h2 i').on('click', () => {
@@ -751,10 +765,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     d3.event.stopPropagation();
     this.data.selectState(d.s, idtypes.toSelectOperation(d3.event));
     this.data.jumpTo(d.s);
-  }
-
-  changeCategoryWeighting() {
-    console.log("test")
   }
 
   update() {
