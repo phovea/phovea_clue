@@ -98,7 +98,7 @@ export class SimHash {
 
   set categoryWeighting(weighting) {
     this._catWeighting = weighting;
-    console.log("set weighting to " + weighting)
+    //this.fire('weighting_change');
   }
 
   getHashOfIDTypeSelection(type:IDType, selectionType):string {
