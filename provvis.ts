@@ -228,7 +228,7 @@ class StateRepr {
 
       if ((similar) > 0) {
         //boost to next level if any of the filters apply
-        r.doi = Math.max(r.doi, DOI_MEDIUM);
+        r.doi = Math.max(r.doi, DOI_SMALL);
       }
 
       if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
