@@ -74,6 +74,14 @@ aside {
       background-color: $presentation-stage;
     }
   }
+
+  &.provenance-similarity-vis, &.annotations {
+    border-color: $core_border;
+    > div:first-of-type {
+      background-color: $presentation-stage;
+    }
+  }
+
 }
 
 aside.annotations {

@@ -14,10 +14,12 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
+//import events = require('../caleydo_core/events');
 import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
+import {isUndefined} from "../caleydo_core/main";
 
 
 function extractTags(text: string) {
@@ -613,8 +615,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
          </div>
          
          <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="Change category weighting">
-            <i id="catWeight" class="fa fa-balance-scale" aria-hidden="true"></i>
+          <label class="btn btn-default btn-xs" title="Compare states">
+            <input type="checkbox" autocomplete="off" id="compareStatesBtn"> <i class="fa fa-balance-scale"></i>
           </label>
         </div>
         </form>
@@ -651,6 +653,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     `);
 
     //init the toolbar filter options
+    let simAreaIsActive:boolean= false;
     const jp = $($p.node());
     const that = this;
     //must use bootstrap since they are manually triggered
@@ -658,14 +661,19 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       if (this.type==='text') {
         that.highlight.tags = this.value.split(' ');
         jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
-      } else {
-        that.highlight[this.name][this.value] = this.checked;
+        that.update();
       }
-      that.update();
+      else if (this.id === "compareStatesBtn") {
+        let b = $('.provenance-similarity-vis')
+        b.toggle('fast')
+        simAreaIsActive = !simAreaIsActive
+      } else {
+          that.highlight[this.name][this.value] = this.checked;
+          that.update()
+      };
     });
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
-
 
     let dialog = dialogs.generateDialog("Category weighting")
     dialog.body.innerHTML = `
@@ -699,7 +707,22 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         </div>
       </div>`
 
-    $('#catWeight').click( function () {
+    let $simArea:d3.Selection<any> = null;
+    $simArea = d3.selectAll('.content').append('aside')
+      .attr({'class': 'provenance-similarity-vis'})
+      .style('transform', 'rotate(' + that.options.rotate + 'deg)')
+
+    $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>')
+    $('.provenance-similarity-vis').hide();
+
+    cmode.on('modeChanged', function () {
+      if (simAreaIsActive) {
+        $('input#compareStatesBtn').trigger('click')
+      }
+    });
+
+
+    /*$('#catWeight').click( function () {
 
       dialog.show();
 
@@ -751,7 +774,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
           })
 
       handles.call(dragResize);
-    })
+    })*/
 
     jp.find('h2 i').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
