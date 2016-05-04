@@ -662,7 +662,7 @@ export class CLUEWrapper extends events.EventHandler {
     }
 
 
-    $('#logout_link').on('click', function () {
+    $('#logout_link').on('click', () => {
       this.header.wait();
       login.logout().then(function () {
         session.store('logged_in', false);
