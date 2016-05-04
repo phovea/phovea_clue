@@ -34,3 +34,84 @@ div .chart_handle{
 	//font-weight: bold;
 	font: 14px sans-serif;
 }
+
+
+.provenance-similarity-vis {
+  position: relative;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+
+
+  &:first-child {
+    -webkit-flex: 0 0 auto;
+    flex: 0 0 auto;
+  }
+
+  > div:nth-of-type(2) {
+    overflow-x: auto;
+    max-height: 93vh;
+    -webkit-flex: 1 1 auto;
+    flex: 1 1 auto;
+  }
+
+  /*
+  h2 i:last-of-type {
+    float: right;
+    cursor: pointer;
+
+    &:hover {
+      font-weight: bold;
+    }
+  }
+
+  */
+
+  &.medium, &.small, &.xsmall {
+
+    form.toolbar {
+      display: none;
+    }
+  }
+
+  &.small, &.xsmall {
+    h2 {
+      display: none;
+    }
+  }
+}
+
+
+.provenance-similarity-vis {
+  position: relative;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  /*
+  h2 i:last-of-type {
+    float: right;
+    cursor: pointer;
+
+    &:hover {
+      font-weight: bold;
+    }
+  }
+
+  */
+}
+
+.provenance-similarity-vis:first-child {
+    -webkit-flex: 0 0 auto;
+    flex: 0 0 auto; }
+  .provenance-similarity-vis > div:nth-of-type(2) {
+    overflow-x: auto;
+    max-height: 93vh;
+    -webkit-flex: 1 1 auto;
+    flex: 1 1 auto; }
+  .provenance-similarity-vis.medium form.toolbar, .provenance-similarity-vis.small form.toolbar, .provenance-similarity-vis.xsmall form.toolbar {
+    display: none; }
+  .provenance-similarity-vis.small h2, .provenance-similarity-vis.xsmall h2 {
+    display: none; }
+
