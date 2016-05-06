@@ -1,17 +1,5 @@
 
-.chart_bar {
-	font: 14px sans-serif;
-	height: 22px;
-	line-height: 22px;
-	text-align: right;
-	margin: 1px;
-	border: 0px;
-	padding: 0px;
-	margin-top: 15px;
-	display: inline-block;
-	color: white;
 
-}
 
 div .chart_handle{
 	display: inline-block;
@@ -31,87 +19,93 @@ div .chart_handle{
 	transform-origin: left;
 	transform: rotate(45deg);
 	margin-top: -2px;
-	//font-weight: bold;
 	font: 14px sans-serif;
 }
 
 
+
 .provenance-similarity-vis {
   position: relative;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
+  width: 300px;
 
-
-  &:first-child {
+    &:first-child {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
+      color: $core_colour_text;
   }
 
-  > div:nth-of-type(2) {
-    overflow-x: auto;
-    max-height: 93vh;
-    -webkit-flex: 1 1 auto;
-    flex: 1 1 auto;
-  }
+  .catWeightContainer {
+    position: relative;
+    background-color: $core_colour;
+    border-color: $core_colour;
+    transition: all 300ms;
+    max-width: 100%;
 
-  /*
-  h2 i:last-of-type {
-    float: right;
-    cursor: pointer;
-
-    &:hover {
-      font-weight: bold;
+    .barContainer {
+      padding: 0px;
+      border: 0px;
+      border-radius: $default_border_radius;
+      position: absolute;
+      height: 100%;
+      top: 0%;
+      left: 0%;
+      max-width: 100%;
     }
-  }
 
-  */
-
-  &.medium, &.small, &.xsmall {
-
-    form.toolbar {
-      display: none;
+    .barContainer:hover {
+      .bar.compact {
+        border: 1px;
+        border-color: black;
+        border-radius: 6px;
+        transition: all 100ms;
+      }
     }
+
   }
 
-  &.small, &.xsmall {
-    h2 {
-      display: none;
-    }
+  .catWeightContainer:hover{
+    background-color: white;
+    transition: background-color 100ms;
+
+
   }
+
+  .catWeightContainer.closed{
+    cursor: move;
+  }
+
+  .bar {
+    font: 12px sans-serif;
+    text-align: center;
+    position: absolute;
+    border-radius: $default_border_radius;
+    border-color: black;
+  }
+
+
+  .bar.compact {
+    overflow: hidden;
+    line-height: 22px;
+    max-height: 22px ;
+  }
+
+
+   .bar.adjusting {
+     //text-align: left;
+     //margin-top: 4px;
+  }
+
+
+  .stateLinupView{
+    margin: 5px;
+    padding: 2px;
+    vertical-align: middle;
+
+  }
+
+
 }
-
-
-.provenance-similarity-vis {
-  position: relative;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  /*
-  h2 i:last-of-type {
-    float: right;
-    cursor: pointer;
-
-    &:hover {
-      font-weight: bold;
-    }
-  }
-
-  */
-}
-
-.provenance-similarity-vis:first-child {
-    -webkit-flex: 0 0 auto;
-    flex: 0 0 auto; }
-  .provenance-similarity-vis > div:nth-of-type(2) {
-    overflow-x: auto;
-    max-height: 93vh;
-    -webkit-flex: 1 1 auto;
-    flex: 1 1 auto; }
-  .provenance-similarity-vis.medium form.toolbar, .provenance-similarity-vis.small form.toolbar, .provenance-similarity-vis.xsmall form.toolbar {
-    display: none; }
-  .provenance-similarity-vis.small h2, .provenance-similarity-vis.xsmall h2 {
-    display: none; }
-

@@ -711,7 +711,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .attr({'class': 'provenance-similarity-vis'})
       .style('transform', 'rotate(' + that.options.rotate + 'deg)')
 
-    $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>')
+    $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
+      '<div class="catWeightContainer closed"><div class="barContainer"></div></div>'+
+        '<div class="stateLinupView"></div>'+
+        '<div class="stateCompareView"></div>'
+    )
+
     $('.provenance-similarity-vis').hide();
 
     cmode.on('modeChanged', function () {
@@ -720,6 +725,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
     });
 
+    this.addWeightInterface()
 
     /*$('#catWeight').click( function () {
 
@@ -781,6 +787,87 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
     return $p;
+  }
+
+  private addWeightInterface = function() {
+
+    var weights = SimHash.hasher.categoryWeighting;
+    var cumSum:number[] = []
+    cumSum[0] = 0
+    for (var i = 1; i <= weights.length; i++) {
+      cumSum[i] = cumSum[i-1]+ weights[i-1]
+    }
+
+    var cats = ["data", "visual", "selection", "layout", "analysis"]
+    var cols = ['#e41a1c','#377eb8','#984ea3','#ffff33','#ff7f00']
+    let catContainer = d3.select(".catWeightContainer");
+    let barContainer = d3.select(".barContainer")
+
+    barContainer.selectAll("div")
+      .data(weights)
+      .enter()
+      .append("div")
+      .classed("bar", true)
+      .classed("adjustable", true)
+    let scalefactor:number = (300-4)/100
+
+
+    let closeWeightSelection = function() {
+      barContainer.style("width", "290px")
+        .transition()
+        .style("left", "0px")
+        .style("top", "0px")
+        .style("width", "300px")
+      catContainer.transition()
+        .delay(300)
+        .style("background-color", "#60AA85").each(function () {
+          catContainer.classed("closed", true)
+            .classed("open", false)
+      })
+      catContainer.transition()
+        .delay(75)
+        .style("height", "22px")
+        //.duration(2500)
+      barContainer.selectAll(".adjustable").transition()
+        .text(function(d,i) {return (cats[i] + " " + d + "%");})
+        .style("top", "0px")
+        .style("left", function(d,i){return cumSum[i]*scalefactor + "px"})
+        .style("width", function (d) {return d*scalefactor+"px";})
+        .style("height", "22px")
+        .style("background-color",  function(d,i) {return cols[i];})
+        //.style("opacity", 0.8)
+        .style("color", function(d,i){return i >= 3 ? "black" : "white"})
+        //.duration(2500)
+      barContainer.selectAll(".adjustable")
+        .classed("compact", true)
+        .classed("adjustable", false)
+
+    }
+
+    let openWeightSelection = function() {
+      barContainer.style("width", "30px")
+        .transition()
+        .style("left", "10px")
+        .style("top", "10px")
+      catContainer.transition()
+        .style("height", "320px")
+      barContainer.selectAll(".compact").transition()
+        .style("left", "0px")
+        .style("height", function (d) { return d*scalefactor+"px";})
+        .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
+        .style("width", "30px")
+        .text("")
+        //.duration(1500)
+      barContainer.selectAll(".compact")
+        .classed("compact", false)
+        .classed("adjustable", true)
+      catContainer.classed("closed", false)
+        .classed("open", true)
+    }
+
+    closeWeightSelection()
+    catContainer.on('click', openWeightSelection)
+    catContainer.on('mouseleave', closeWeightSelection)
   }
 
   private onStateClick(d: StateRepr) {
