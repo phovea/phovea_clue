@@ -19,7 +19,7 @@ import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
-import {isUndefined} from "../caleydo_core/main";
+import {isUndefined, indexOf} from "../caleydo_core/main";
 
 
 function extractTags(text: string) {
@@ -613,7 +613,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
             </div>
           </div>
          </div>
-         
+        
          <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs" title="Compare states">
             <input type="checkbox" autocomplete="off" id="compareStatesBtn"> <i class="fa fa-balance-scale"></i>
@@ -675,50 +675,16 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
-    let dialog = dialogs.generateDialog("Category weighting")
-    dialog.body.innerHTML = `
-      <div id="compChart" style="margin-top: 10px; margin-bottom: 50px"> <div class = "container" id="handles">
-          <div class="chart_handle" id="dv" style="left:72px">
-            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
-          </div><!--
-          --><div class="chart_handle" id="vs" style="left:154px">
-            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
-          </div><!--
-          --><div class="chart_handle" id="sl" style="left:196px">
-            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
-          </div><!--
-          --><div class="chart_handle" id="la" style="left:258px">
-            <i class="fa fa-arrow-down" aria-hidden="true"></i>	
-          </div>
-        </div>
-        <div class = "container" id="bars">
-          <div class="chart_bar" id="data" style="width: 80px;" active=true>15</div><!--
-          --><div class="chart_bar" id="visual" style="width: 80px;" active=true>25</div><!--
-          --><div class="chart_bar" id="selection" style="width: 40px;" active=true>35</div><!--
-          --><div class="chart_bar" id="layout" style="width: 60px;" active=true>40</div><!--
-          --><div class="chart_bar" id="analysis" style="width: 60px;" active=true>40</div>
-        </div>
-        <div class="container", id="descriptions">
-          <div class="bar_description">data</div>
-          <div class="bar_description">visual</div>
-          <div class="bar_description">selection</div>
-          <div class="bar_description">layout</div>
-          <div class="bar_description">analysis</div>
-        </div>
-      </div>`
-
     let $simArea:d3.Selection<any> = null;
     $simArea = d3.selectAll('.content').append('aside')
       .attr({'class': 'provenance-similarity-vis'})
       .style('transform', 'rotate(' + that.options.rotate + 'deg)')
 
     $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
-      '<div class="catWeightContainer closed"><div class="barContainer"></div></div>'+
+      '<div class="catWeightContainer closed"><div class="barContainer"></div><div class="controlContainer"></div></div>'+
         '<div class="stateLinupView"></div>'+
         '<div class="stateCompareView"></div>'
     )
-
-    $('.provenance-similarity-vis').hide();
 
     cmode.on('modeChanged', function () {
       if (simAreaIsActive) {
@@ -727,60 +693,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
 
     this.addWeightInterface()
-
-    /*$('#catWeight').click( function () {
-
-      dialog.show();
-
-      var data = SimHash.hasher.categoryWeighting;
-      var handlePos  = [72,154,196,258]
-      var cats = ["data", "visual", "selection", "layout", "analysis"]
-      var handlerIds:string[] = ["dv", "vs", "sl", "la"]
-      var background_col = d3.scale.linear()
-        .domain([5,25])
-        .interpolate(<any>d3.interpolateRgb)
-        .range(<any>[d3.rgb('#ece7f2'), d3.rgb('#2b8cbe')])
-      var bars = d3.selectAll(".chart_bar");
-      bars.style("width", function(d,i) { return 5*data[i] + "px"; })
-        .style("background-color", function(d,i) {return background_col(data[i]);})
-        .text(function(d,i) { return Math.round(data[i]) + "%"})
-      handlePos[0] = data[0]*5 + 10
-      for (var i = 1; i <= handlerIds.length; i++) {
-        handlePos[i] = handlePos[i-1]+ data[i]*5 +2
-      }
-      var handles = d3.selectAll(".chart_handle")
-        .style("left", function(d,i) {
-          return handlePos[i] + "px"; })
-      var descrs = d3.selectAll(".bar_description")
-        .style("left", function(d,i) {
-          return handlePos[i] + "px"; })
-      var dragResize = d3.behavior.drag()
-          .on('drag', function() {
-            let x = d3.mouse(this.parentNode)[0]-10;
-            let id = handlerIds.indexOf($(this).attr("id"))
-                  x = Math.max(10, x);
-            handlePos[id] = x
-            data[0] = (handlePos[0] -10 ) / 5
-            data[1] = (handlePos[1] - handlePos[0] - 2) / 5
-            data[2] = (handlePos[2] - handlePos[1] - 2) / 5
-            data[3] = (handlePos[3] - handlePos[2] - 2) / 5
-            data[4] = (handlePos[4] - handlePos[3] - 2) / 5
-            console.log(data)
-            bars.style("width", function(d,i) { return 5*data[i] + "px"; })
-              .style("background-color", function(d,i) {return background_col(data[i]);})
-              .text(function(d,i) { return Math.round(data[i]) + "%"})
-            handles.style("left", function(d,i) {
-              return handlePos[i] + "px"; })
-            descrs = d3.selectAll(".bar_description")
-              .style("left", function(d,i) {
-                return handlePos[i] + "px"; })
-            SimHash.hasher.categoryWeighting = data
-            that.update()
-            that.onWeightingChanged()
-          })
-
-      handles.call(dragResize);
-    })*/
 
     jp.find('h2 i').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
@@ -792,48 +704,208 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private addWeightInterface = function() {
 
-    var weights = SimHash.hasher.categoryWeighting;
-    var cumSum:number[] = []
+    var rawWeights = SimHash.hasher.categoryWeighting;
+    let cats = ["data", "visual", "selection", "layout", "analysis"]
+    let cumSum:number[] = []
     cumSum[0] = 0
-    for (var i = 1; i <= weights.length; i++) {
-      cumSum[i] = cumSum[i-1]+ weights[i-1]
+    for (var i = 1; i <= rawWeights.length; i++) {
+      cumSum[i] = cumSum[i-1]+ rawWeights[i-1]
+    }
+    let scalefactor:number = (300-4)/100
+
+    let mod = function(n,m){
+      return ((n % m) + m) % m;
     }
 
-    var cats = ["data", "visual", "selection", "layout", "analysis"]
+
+    let catsWeightMap = function(name) {
+      weights[cats.indexOf(name)]
+    }
     var cols = ['#e41a1c','#377eb8','#984ea3','#ffff33','#ff7f00']
+    let weights = [
+      {name: cats[0], value: rawWeights[0], color: cols[0], active: true},
+      {name: cats[1], value: rawWeights[1], color: cols[1], active: true},
+      {name: cats[2], value: rawWeights[2], color: cols[2], active: true},
+      {name: cats[3], value: rawWeights[3], color: cols[3], active: true},
+      {name: cats[4], value: rawWeights[4], color: cols[4], active: true}
+    ]
     let catContainer = d3.select(".catWeightContainer");
     let barContainer = d3.select(".barContainer")
 
-    barContainer.selectAll("div")
-      .data(weights)
-      .enter()
-      .append("div")
-      .classed("bar", true)
-      .classed("adjustable", true)
-    let scalefactor:number = (300-4)/100
+    let getNextActive = function(index) {
+      let nextIndex = -1
+      for (var i = 1; i < weights.length; i++) {
+        if (weights[mod(index+i,5)].active) {
+          nextIndex = mod(index+i,5)
+          break;
+        }
+      }
+      return nextIndex
+    }
+
+    let getPreviousActive = function(index) {
+      let nextIndex = -1
+      for (var i = 1; i < weights.length; i++) {
+        if (weights[mod(index-i,5)].active) {
+          nextIndex = mod(index-i,5)
+          break;
+        }
+      }
+      return nextIndex
+    }
+
+
+    let update = function(transitions:boolean) {
+      let transitionDuration = 300;
+      let bars = barContainer.selectAll("div")
+        .data(weights, function(d) { return d.name; })
+
+      //update
+
+      //enter
+      bars.enter()
+        .append("div")
+        .classed("bar", true)
+        .classed("adjustable", true)
+
+      //update+enter
+      let b = <any>bars
+      if (transitions) b=<any>bars.transition().duration(transitionDuration)
+      b.style("left", "0px")
+        .style("height", function (d) { return d.value*scalefactor+"px";})
+        .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
+        .style("width", "30px")
+        .text("")
+
+      //set weights
+      let w = [0,0,0,0,0]
+      w[cats.indexOf(weights[0].name)] = weights[0].value
+      w[cats.indexOf(weights[1].name)] = weights[1].value
+      w[cats.indexOf(weights[2].name)] = weights[2].value
+      w[cats.indexOf(weights[3].name)] = weights[3].value
+      w[cats.indexOf(weights[4].name)] = weights[4].value
+      SimHash.hasher.categoryWeighting = w
+
+      //update handlePos
+      let handles = catContainer.selectAll(".chart_handle")
+      let h = <any>handles
+      if (transitions) h=<any>handles.transition().duration(transitionDuration)
+      h.style("left", "10px")
+        .style("top", function(d,i) {return cumSum[i+1]*scalefactor + "px"})
+        .style("opacity", function (d) {
+          let setActive = weights[cats.indexOf($(this).attr('id'))].active;
+          let index = cats.indexOf($(this).attr('id'))
+          if (getNextActive(index) <= index) setActive=false;
+          return setActive ? 1:0;
+        })
+        .style("z-index",function (d) {
+          return weights[cats.indexOf($(this).attr('id'))].active ? 4:-4;
+        })
+
+      //update textfields
+      d3.selectAll(".categoryUnit input.catValue")
+          .attr("value", function () {
+              return Math.round(weights[cats.indexOf($(this).attr('id'))].value) / 100
+        })
+
+    }
+
+    update(false);
+
+
+    let faString:string[] =["fa-database","fa-bar-chart","fa-pencil-square","fa-desktop","fa-gear"]
+    let categoryUnit = function(catName:string, defaultWeight:number, faString:string):string {
+      let capitalizeFirstLetter=function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+      return (
+        "<div class='categoryUnit' id='" + catName + "'>" +
+          "<input class='catValue' type='number' min='0' max='1' value='" + defaultWeight/100 + "' id='" + catName + "'></input>" +
+          "<label class='btn btn-default btn-xs' title='" + catName + " actions'>" +
+            "<input type='checkbox' autocomplete='off' name='category' value='" + catName + "'> <i class='fa " + faString + "'></i>" + capitalizeFirstLetter(catName) +
+          "</label>" +
+        "</div>")
+      }
+
+    $(".controlContainer").append(categoryUnit(weights[0].name, weights[0].value, faString[0]))
+    $(".controlContainer").append(categoryUnit(weights[1].name, weights[1].value,faString[1]))
+    $(".controlContainer").append(categoryUnit(weights[2].name, weights[2].value,faString[2]))
+    $(".controlContainer").append(categoryUnit(weights[3].name, weights[3].value,faString[3]))
+    $(".controlContainer").append(categoryUnit(weights[4].name, weights[4].value,faString[4]))
+    $('.provenance-similarity-vis').hide();
+
+    $('.categoryUnit label input[type=checkbox]').prop('checked', true);
+
+    let handleHtml = function(id:string) {
+      return(
+        "<div class='chart_handle' id='" + id + "'>" +
+            "<i class='fa fa-arrow-right' aria-hidden='true'></i>" +
+        "</div>")
+    }
+
+    $(".catWeightContainer").append(handleHtml(cats[0]))
+    $(".catWeightContainer").append(handleHtml(cats[1]))
+    $(".catWeightContainer").append(handleHtml(cats[2]))
+    $(".catWeightContainer").append(handleHtml(cats[3]))
+
+
+
+    var dragResize = d3.behavior.drag()
+      .on('drag', function() {
+        let x = d3.mouse(barContainer.node())[1] / scalefactor ;
+        let id = cats.indexOf($(this).attr("id"))
+        let diff = cumSum[id+1] -x
+        weights[id].value -= diff
+        let next = getNextActive(id)
+        let prev = getPreviousActive(id)
+        let isLast = next <= id
+        if (next <=id) {
+          weights[prev].value +=diff
+        } else {
+          weights[next].value +=diff
+        }
+
+        cumSum[0] = 0
+        for (var i = 1; i <= weights.length; i++) {
+          cumSum[i] = cumSum[i-1]+ weights[i-1].value
+        }
+        update(false)});
+    d3.selectAll(".chart_handle").call(dragResize);
 
 
     let closeWeightSelection = function() {
-      barContainer.style("width", "290px")
+      $(".controlContainer").hide()
+      d3.select(".controlContainer").transition()
+        .duration(100)
+        .style("opacity", 0)
+      barContainer.style("width", "280px")
         .transition()
         .style("left", "0px")
         .style("top", "0px")
         .style("width", "300px")
       catContainer.transition()
         .delay(300)
+        .duration(400)
         .style("background-color", "#60AA85").each(function () {
           catContainer.classed("closed", true)
             .classed("open", false)
       })
       catContainer.transition()
         .delay(75)
+        .duration(100)
         .style("height", "22px")
-        //.duration(2500)
+      catContainer.selectAll(".chart_handle")
+        .transition()
+        .style("opacity", 0)
+        .duration(100)
+        .each(function () {
+          $(".chart_handle").hide()
+        })
       barContainer.selectAll(".adjustable").transition()
-        .text(function(d,i) {return (cats[i] + " " + d + "%");})
+        .text(function(d,i) {return (cats[i] + " " + Math.round(d.value) + "%");})
         .style("top", "0px")
         .style("left", function(d,i){return cumSum[i]*scalefactor + "px"})
-        .style("width", function (d) {return d*scalefactor+"px";})
+        .style("width", function (d) {return d.value*scalefactor+"px";})
         .style("height", "22px")
         .style("background-color",  function(d,i) {return cols[i];})
         //.style("opacity", 0.8)
@@ -846,15 +918,26 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
 
     let openWeightSelection = function() {
+      $(".controlContainer").show()
+      d3.select(".controlContainer").transition()
+        .delay(150)
+        .duration(150)
+        .style("opacity", 1)
+      $(".chart_handle").show()
+       catContainer.selectAll(".chart_handle")
+        .transition()
+        .style("opacity", 1)
+        .delay(150)
+        .duration(150)
       barContainer.style("width", "30px")
         .transition()
-        .style("left", "10px")
+        .style("left", "20px")
         .style("top", "10px")
       catContainer.transition()
         .style("height", "320px")
       barContainer.selectAll(".compact").transition()
         .style("left", "0px")
-        .style("height", function (d) { return d*scalefactor+"px";})
+        .style("height", function (d) { return d.value*scalefactor+"px";})
         .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
         .style("width", "30px")
         .text("")
@@ -867,8 +950,35 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
 
     closeWeightSelection()
+    update(false)
     catContainer.on('click', openWeightSelection)
     catContainer.on('mouseleave', closeWeightSelection)
+
+    d3.selectAll(".categoryUnit label input").on('change', function () {
+      let index = cats.indexOf($(this).attr("value"))
+      if (weights[index].active) {
+        //deactivate
+        weights[getNextActive(index)].value +=weights[index].value
+        weights[index].value = 0
+      } else {
+        //activate
+        let nextIndex = getNextActive(index)
+        if (nextIndex < 0){
+          weights[index].value = 100
+        } else {
+          let val = weights[nextIndex].value
+          weights[index].value = val/2
+          weights[nextIndex].value = val/2
+        }
+      }
+      weights[index].active = !weights[index].active
+      cumSum[0] = 0
+      for (var i = 1; i <= weights.length; i++) {
+        cumSum[i] = cumSum[i-1]+ weights[i-1].value
+      }
+
+      update(true)
+    })
   }
 
   private onStateClick(d: StateRepr) {
