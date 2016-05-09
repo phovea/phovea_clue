@@ -1,13 +1,6 @@
 
 
 
-div .chart_handle{
-	display: inline-block;
-	position: absolute;
-	cursor: pointer;
-	z-index:4;
-}
-
 .container{
 	position: relative;
 
@@ -94,18 +87,72 @@ div .chart_handle{
   }
 
 
-   .bar.adjusting {
-     //text-align: left;
-     //margin-top: 4px;
+  .controlContainer {
+    position: absolute;
+    height: 150px;
+    width: 180px;
+    top: 90px;
+    left: 120px;
+
+
+    .categoryUnit{
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        //margin: 0;
+      }
+
+      input[type="number"] {
+        display: block;
+        margin: 0;
+        width: 35px;
+        font-family: sans-serif;
+        font-size: 14px;
+        appearance: none;
+        box-shadow: none;
+        border-radius: 2px;
+        padding: 2px;
+        border: solid 1px #dcdcdc;
+        transition: box-shadow 0.3s, border 0.3s;
+        display: inline-block;
+
+      }
+      input[type="number"]:focus,
+      input[type="number"].focus {
+        outline: none;
+        border: solid 1px #707070;
+        box-shadow: 0 0 5px 1px #969696;
+      }
+
+
+
+
+      label{
+        width: 90px;
+        text-align: left;
+        display: inline-block;
+        input[type="checkbox"]{
+        }
+      }
+    }
+
   }
+    div .chart_handle{
+      display: inline-block;
+      position: absolute;
+      cursor: pointer;
+    	z-index:4;
+    }
 
 
   .stateLinupView{
     margin: 5px;
     padding: 2px;
     vertical-align: middle;
-
   }
+
 
 
 }
