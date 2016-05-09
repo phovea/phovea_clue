@@ -87,6 +87,11 @@
   }
 
 
+  .lineContainer{
+    position: absolute;
+  }
+
+
   .controlContainer {
     position: absolute;
     height: 150px;
@@ -139,12 +144,18 @@
     }
 
   }
+
+  line {
+    stroke-width:5;
+  }
+
     div .chart_handle{
       display: inline-block;
       position: absolute;
       cursor: pointer;
     	z-index:4;
     }
+
 
 
   .stateLinupView{
