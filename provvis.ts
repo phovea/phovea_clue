@@ -681,7 +681,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .style('transform', 'rotate(' + that.options.rotate + 'deg)')
 
     $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
-      '<div class="catWeightContainer closed"><div class="barContainer"></div><div class="controlContainer"></div></div>'+
+      '<div class="catWeightContainer closed"><div class="barContainer"></div><svg class="lineContainer"></svg><div class="controlContainer"></div></div>'+
         '<div class="stateLinupView"></div>'+
         '<div class="stateCompareView"></div>'
     )
@@ -760,13 +760,24 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       let bars = barContainer.selectAll("div")
         .data(weights, function(d) { return d.name; })
 
+      let lines = d3.selectAll("svg.lineContainer").selectAll("line")
+        .data(weights, function(d) { return d.name;})
+
+
       //update
+      let shadeColor= function(color, percent) {  // deprecated. See below.
+        var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+        return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+      }
 
       //enter
       bars.enter()
         .append("div")
         .classed("bar", true)
         .classed("adjustable", true)
+      lines.enter()
+        .append("line")
+        .style("stroke", function (d) {return d.color})
 
       //update+enter
       let b = <any>bars
@@ -776,6 +787,33 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
         .style("width", "30px")
         .text("")
+
+
+      let l = <any>lines
+      if (transitions) l = <any>lines.transition().duration(transitionDuration)
+      l.style("stroke", function (d) {
+          return d.color
+        })
+        .attr("y1", function (d,i) {
+          return (cumSum[i]+cumSum[i+1])/2 * scalefactor + 10})
+        .attr("y2", function (d,i) {
+          return i*26 + 90+13
+        })
+        .attr("x1", "50")
+        .attr("x2", "120")
+        .style("opacity", function (d) {
+          return d.active ? 1: 0
+        })
+
+
+      d3.selectAll('.categoryUnit label').transition()
+        .delay(transitionDuration)
+        .style("background-color", function () {
+          let index = cats.indexOf($(this).attr("title"))
+          return shadeColor(weights[index].color, 0.3)
+        })
+
+
 
       //set weights
       let w = [0,0,0,0,0]
@@ -803,8 +841,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         })
 
       //update textfields
-      d3.selectAll(".categoryUnit input.catValue")
-          .attr("value", function () {
+      let label = <any>d3.selectAll(".categoryUnit input.catValue")
+      if (transitions) label = label.transition().duration(transitionDuration)
+      label.attr("value", function () {
               return Math.round(weights[cats.indexOf($(this).attr('id'))].value) / 100
         })
 
@@ -821,7 +860,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       return (
         "<div class='categoryUnit' id='" + catName + "'>" +
           "<input class='catValue' type='number' min='0' max='1' value='" + defaultWeight/100 + "' id='" + catName + "'></input>" +
-          "<label class='btn btn-default btn-xs' title='" + catName + " actions'>" +
+          "<label class='btn btn-default btn-xs' title='" + catName + "'>" +
             "<input type='checkbox' autocomplete='off' name='category' value='" + catName + "'> <i class='fa " + faString + "'></i>" + capitalizeFirstLetter(catName) +
           "</label>" +
         "</div>")
@@ -876,7 +915,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     let closeWeightSelection = function() {
       $(".controlContainer").hide()
       d3.select(".controlContainer").transition()
-        .duration(100)
+        .duration(150)
         .style("opacity", 0)
       barContainer.style("width", "280px")
         .transition()
@@ -889,18 +928,27 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         .style("background-color", "#60AA85").each(function () {
           catContainer.classed("closed", true)
             .classed("open", false)
-      })
+          })
       catContainer.transition()
         .delay(75)
         .duration(100)
         .style("height", "22px")
-      catContainer.selectAll(".chart_handle")
-        .transition()
+      catContainer.selectAll(".chart_handle").transition()
         .style("opacity", 0)
         .duration(100)
         .each(function () {
           $(".chart_handle").hide()
         })
+      d3.select(".lineContainer").transition()
+        .duration(100)
+        .style("opacity", 0)
+        .each(function () {
+          $("lineContainer").hide()
+        })
+      d3.select(".lineContainer").transition()
+        .delay(75)
+        .duration(100)
+        .style("height", "22px")
       barContainer.selectAll(".adjustable").transition()
         .text(function(d,i) {return (cats[i] + " " + Math.round(d.value) + "%");})
         .style("top", "0px")
@@ -914,11 +962,16 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       barContainer.selectAll(".adjustable")
         .classed("compact", true)
         .classed("adjustable", false)
-
     }
 
     let openWeightSelection = function() {
       $(".controlContainer").show()
+      $(".lineContainer").show()
+      d3.select(".lineContainer").transition()
+        .delay(150)
+        .duration(150)
+        .style("height", "300px")
+        .style("opacity", 1)
       d3.select(".controlContainer").transition()
         .delay(150)
         .duration(150)
