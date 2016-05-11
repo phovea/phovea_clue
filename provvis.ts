@@ -980,7 +980,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       $(".chart_handle").show()
        catContainer.selectAll(".chart_handle")
         .transition()
-        .style("opacity", 1)
         .delay(150)
         .duration(150)
       barContainer.style("width", "30px")
@@ -1001,6 +1000,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         .classed("adjustable", true)
       catContainer.classed("closed", false)
         .classed("open", true)
+      update(true)
     }
 
     closeWeightSelection()
