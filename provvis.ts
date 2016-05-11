@@ -907,8 +907,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         for (var i = 1; i <= weights.length; i++) {
           cumSum[i] = cumSum[i-1]+ weights[i-1].value
         }
-        that.update()
-        update(false)});
+        update(false)
+        that.update()});
     d3.selectAll(".chart_handle").call(dragResize);
 
 
@@ -1029,8 +1029,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       for (var i = 1; i <= weights.length; i++) {
         cumSum[i] = cumSum[i-1]+ weights[i-1].value
       }
-      that.update();
       update(true)
+      that.update();
     })
   }
 
