@@ -1091,7 +1091,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
-    });
+    })//.on('duplicate', $states.transition().attr("fill", "pink"));
+
+    d3.select("body").on("keydown", function() {
+      if(d3.event.ctrlKey) {
+        this.comparing=true;
+      }
+    }.bind(graph))
+      .on("keyup", function() {
+      this.comparing=false;
+    }.bind(graph));
+
+
 
     d3.select("body").on("keydown", function() {
       if(d3.event.ctrlKey) {
