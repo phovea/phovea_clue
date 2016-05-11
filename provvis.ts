@@ -691,7 +691,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
     });
 
-    this.addWeightInterface()
+    this.addWeightInterface(that)
 
     jp.find('h2 i').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
@@ -701,7 +701,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     return $p;
   }
 
-  private addWeightInterface = function() {
+  private addWeightInterface = function(that) {
 
     var rawWeights = SimHash.hasher.categoryWeighting;
     let cats = ["data", "visual", "selection", "layout", "analysis"]
@@ -907,6 +907,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         for (var i = 1; i <= weights.length; i++) {
           cumSum[i] = cumSum[i-1]+ weights[i-1].value
         }
+        that.update()
         update(false)});
     d3.selectAll(".chart_handle").call(dragResize);
 
@@ -1028,7 +1029,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       for (var i = 1; i <= weights.length; i++) {
         cumSum[i] = cumSum[i-1]+ weights[i-1].value
       }
-
+      that.update();
       update(true)
     })
   }
