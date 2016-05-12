@@ -3,6 +3,7 @@ import {isUndefined} from "../caleydo_core/main";
 import Color = d3.Color;
 import idtype = require('../caleydo_core/idtype')
 import {IStateToken, StateTokenLeaf, StateTokenNode,TokenType} from "./statetoken";
+import events = require('../caleydo_core/event');
 
 
 
@@ -78,7 +79,7 @@ class HashTable {
   }
 }
 
-export class SimHash {
+export class SimHash extends events.EventHandler{
 
   private static _instance:SimHash = new SimHash();
 

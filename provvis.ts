@@ -467,14 +467,16 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
-  };*/
+  };
 
   private onWeightingChanged (){
+
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
   }
 
-
+*/
+  
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
 
   private dim : [number, number] = [200, 100];
@@ -520,6 +522,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
     });
+    SimHash.hasher.on('weights_changed', this.trigger)
     cmode.on('modeChanged', this.trigger);
   }
 
@@ -532,6 +535,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.states.forEach((s) => {
       s.off('setAttr', this.trigger);
     });
+    SimHash.hasher.off('weights_changed', this.trigger)
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -892,6 +896,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     var dragResize = d3.behavior.drag()
       .on('drag', function() {
         let x = d3.mouse(barContainer.node())[1] / scalefactor ;
+        if (x>100) x= 100
         let id = cats.indexOf($(this).attr("id"))
         let diff = cumSum[id+1] -x
         weights[id].value -= diff
@@ -909,7 +914,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
           cumSum[i] = cumSum[i-1]+ weights[i-1].value
         }
         update(false)
-        that.update()});
+        SimHash.hasher.fire("weights_changed")
+        //that.update()
+      });
     d3.selectAll(".chart_handle").call(dragResize);
 
 
@@ -1031,7 +1038,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         cumSum[i] = cumSum[i-1]+ weights[i-1].value
       }
       update(true)
-      that.update();
+      SimHash.hasher.fire("weights_changed")
+      //that.update();
     })
   }
 
