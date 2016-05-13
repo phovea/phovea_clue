@@ -85,9 +85,7 @@ class StateRepr {
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
-      let score = selState[0].getSimilarityTo(this.s);
-      score = Math.max(0, score)
-      return score
+      return selState[0].getSimilarityTo(this.s);
     }
     return 1;
   }
@@ -96,9 +94,7 @@ class StateRepr {
     if (this.graph.act==null) {
       return -1;
     }
-    let score = this.graph.act.getSimilarityTo(this.s)
-    score = Math.max(0, score)
-    return score;
+    return this.graph.act.getSimilarityTo(this.s);
   }
 
   get opacity():number {

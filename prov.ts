@@ -575,7 +575,7 @@ export class StateNode extends graph.GraphNode {
       }
       similarity += (nrEqu/len - 0.5)*2*weighting[j]/100
     }
-    return similarity
+    return similarity >=0 ? similarity : 0;
   }
 
 
