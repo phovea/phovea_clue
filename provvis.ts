@@ -85,7 +85,9 @@ class StateRepr {
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
-      return selState[0].getSimilarityTo(this.s);
+      let score = selState[0].getSimilarityTo(this.s);
+      score = Math.max(0, score)
+      return score
     }
     return 1;
   }
@@ -94,7 +96,9 @@ class StateRepr {
     if (this.graph.act==null) {
       return -1;
     }
-    return this.graph.act.getSimilarityTo(this.s)
+    let score = this.graph.act.getSimilarityTo(this.s)
+    score = Math.max(0, score)
+    return score;
   }
 
   get opacity():number {
@@ -106,7 +110,8 @@ class StateRepr {
       var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
       if (selState.length==0) return 1;
       let sim =selState[0].getSimilarityTo(this.s)
-      return sim >=0 ? sim : 1
+      sim = Math.max(0.25, sim)
+      return sim
     }
     return 1;
   }
@@ -476,7 +481,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
 */
-  
+
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
 
   private dim : [number, number] = [200, 100];
