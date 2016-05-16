@@ -2,6 +2,7 @@
  * Created by sam on 09.02.2015.
  */
 /// <reference path="../../tsd.d.ts" />
+/// <reference path="../targid2/tsd.d.ts" />
 
 import C = require('../caleydo_core/main');
 import $ = require('jquery');
@@ -19,7 +20,9 @@ import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
+import {WeightInterface} from "./simvis"
 import {isUndefined, indexOf} from "../caleydo_core/main";
+import lineup = require('lineupjs')
 
 
 function extractTags(text: string) {
@@ -657,28 +660,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       </div>
     `);
 
-    //init the toolbar filter options
-    let simAreaIsActive:boolean= false;
     const jp = $($p.node());
     const that = this;
-    //must use bootstrap since they are manually triggered
-    jp.find('form.toolbar input, .legend input').on('change', function() {
-      if (this.type==='text') {
-        that.highlight.tags = this.value.split(' ');
-        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
-        that.update();
-      }
-      else if (this.id === "compareStatesBtn") {
-        let b = $('.provenance-similarity-vis')
-        b.toggle('fast')
-        simAreaIsActive = !simAreaIsActive
-      } else {
-          that.highlight[this.name][this.value] = this.checked;
-          that.update()
-      };
-    });
-    //initialize bootstrap
-    (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
+
+    let simAreaIsActive:boolean= false;
 
     let $simArea:d3.Selection<any> = null;
     $simArea = d3.selectAll('.content').append('aside')
@@ -697,7 +682,29 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
     });
 
-    this.addWeightInterface(that)
+    let weightContainer = new WeightInterface($simArea.select(".catWeightContainer"))
+
+    //init the toolbar filter options
+
+    //must use bootstrap since they are manually triggered
+    jp.find('form.toolbar input, .legend input').on('change', function() {
+      if (this.type==='text') {
+        that.highlight.tags = this.value.split(' ');
+        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
+        that.update();
+      }
+      else if (this.id === "compareStatesBtn") {
+        let b = $('.provenance-similarity-vis')
+        b.toggle('fast')
+        weightContainer.close();
+        simAreaIsActive = !simAreaIsActive
+      } else {
+          that.highlight[this.name][this.value] = this.checked;
+          that.update()
+      };
+    });
+    //initialize bootstrap
+    (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
     jp.find('h2 i').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
@@ -707,342 +714,27 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     return $p;
   }
 
-  private addWeightInterface = function(that) {
-
-    var rawWeights = SimHash.hasher.categoryWeighting;
-    let cats = ["data", "visual", "selection", "layout", "analysis"]
-    let cumSum:number[] = []
-    cumSum[0] = 0
-    for (var i = 1; i <= rawWeights.length; i++) {
-      cumSum[i] = cumSum[i-1]+ rawWeights[i-1]
-    }
-    let scalefactor:number = (300-4)/100
-
-    let mod = function(n,m){
-      return ((n % m) + m) % m;
-    }
-
-
-    let catsWeightMap = function(name) {
-      weights[cats.indexOf(name)]
-    }
-    var cols = ['#e41a1c','#377eb8','#984ea3','#ffff33','#ff7f00']
-    let weights = [
-      {name: cats[0], value: rawWeights[0], color: cols[0], active: true},
-      {name: cats[1], value: rawWeights[1], color: cols[1], active: true},
-      {name: cats[2], value: rawWeights[2], color: cols[2], active: true},
-      {name: cats[3], value: rawWeights[3], color: cols[3], active: true},
-      {name: cats[4], value: rawWeights[4], color: cols[4], active: true}
-    ]
-    let catContainer = d3.select(".catWeightContainer");
-    let barContainer = d3.select(".barContainer")
-
-    let getNextActive = function(index) {
-      let nextIndex = -1
-      for (var i = 1; i < weights.length; i++) {
-        if (weights[mod(index+i,5)].active) {
-          nextIndex = mod(index+i,5)
-          break;
-        }
+  /*
+  private addLineupInterface() {
+    let config = {
+      renderingoptions: {
+        histogram: true
+      },
+      body: {
+        freezeCols:2
       }
-      return nextIndex
-    }
+    };
+    let columns = ["One", "Two", "Three"]
+    let rows =  [[1,2,3],[4,5,6],[7,8,9]]
+    lineup.deriveColors(columns)
+    const storage = lineup.createLocalStorage(rows, columns);
+    let lu = lineup.create(storage, $('.stateLinupView')[0], config);
+    lu.update()
 
-    let getPreviousActive = function(index) {
-      let nextIndex = -1
-      for (var i = 1; i < weights.length; i++) {
-        if (weights[mod(index-i,5)].active) {
-          nextIndex = mod(index-i,5)
-          break;
-        }
-      }
-      return nextIndex
-    }
-
-
-    let update = function(transitions:boolean) {
-      let transitionDuration = 300;
-      let bars = barContainer.selectAll("div")
-        .data(weights, function(d) { return d.name; })
-
-      let lines = d3.selectAll("svg.lineContainer").selectAll("line")
-        .data(weights, function(d) { return d.name;})
-
-
-      //update
-      let shadeColor= function(color, percent) {  // deprecated. See below.
-        var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
-        return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
-      }
-
-      //enter
-      bars.enter()
-        .append("div")
-        .classed("bar", true)
-        .classed("adjustable", true)
-      lines.enter()
-        .append("line")
-        .style("stroke", function (d) {return d.color})
-
-      //update+enter
-      let b = <any>bars
-      if (transitions) b=<any>bars.transition().duration(transitionDuration)
-      b.style("left", "0px")
-        .style("height", function (d) { return d.value*scalefactor+"px";})
-        .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
-        .style("width", "30px")
-        .text("")
-
-
-      let l = <any>lines
-      if (transitions) l = <any>lines.transition().duration(transitionDuration)
-      l.style("stroke", function (d) {
-          return d.color
-        })
-        .attr("y1", function (d,i) {
-          return (cumSum[i]+cumSum[i+1])/2 * scalefactor + 10})
-        .attr("y2", function (d,i) {
-          return i*26 + 90+13
-        })
-        .attr("x1", "50")
-        .attr("x2", "120")
-        .style("opacity", function (d) {
-          return d.active ? 1: 0
-        })
-
-
-      d3.selectAll('.categoryUnit label').transition()
-        .delay(transitionDuration)
-        .style("background-color", function () {
-          let index = cats.indexOf($(this).attr("title"))
-          return shadeColor(weights[index].color, 0.3)
-        })
-
-
-
-      //set weights
-      let w = [0,0,0,0,0]
-      w[cats.indexOf(weights[0].name)] = weights[0].value
-      w[cats.indexOf(weights[1].name)] = weights[1].value
-      w[cats.indexOf(weights[2].name)] = weights[2].value
-      w[cats.indexOf(weights[3].name)] = weights[3].value
-      w[cats.indexOf(weights[4].name)] = weights[4].value
-      SimHash.hasher.categoryWeighting = w
-
-      //update handlePos
-      let handles = catContainer.selectAll(".chart_handle")
-      let h = <any>handles
-      if (transitions) h=<any>handles.transition().duration(transitionDuration)
-      h.style("left", "10px")
-        .style("top", function(d,i) {return cumSum[i+1]*scalefactor + "px"})
-        .style("opacity", function (d) {
-          let setActive = weights[cats.indexOf($(this).attr('id'))].active;
-          let index = cats.indexOf($(this).attr('id'))
-          if (getNextActive(index) <= index) setActive=false;
-          return setActive ? 1:0;
-        })
-        .style("z-index",function (d) {
-          return weights[cats.indexOf($(this).attr('id'))].active ? 4:-4;
-        })
-
-      //update textfields
-      let label = <any>d3.selectAll(".categoryUnit input.catValue")
-      if (transitions) label = label.transition().duration(transitionDuration)
-      label.attr("value", function () {
-              return Math.round(weights[cats.indexOf($(this).attr('id'))].value) / 100
-        })
-
-    }
-
-    update(false);
-
-
-    let faString:string[] =["fa-database","fa-bar-chart","fa-pencil-square","fa-desktop","fa-gear"]
-    let categoryUnit = function(catName:string, defaultWeight:number, faString:string):string {
-      let capitalizeFirstLetter=function(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-      }
-      return (
-        "<div class='categoryUnit' id='" + catName + "'>" +
-          "<input class='catValue' type='number' min='0' max='1' value='" + defaultWeight/100 + "' id='" + catName + "'></input>" +
-          "<label class='btn btn-default btn-xs' title='" + catName + "'>" +
-            "<input type='checkbox' autocomplete='off' name='category' value='" + catName + "'> <i class='fa " + faString + "'></i>" + capitalizeFirstLetter(catName) +
-          "</label>" +
-        "</div>")
-      }
-
-    $(".controlContainer").append(categoryUnit(weights[0].name, weights[0].value, faString[0]))
-    $(".controlContainer").append(categoryUnit(weights[1].name, weights[1].value,faString[1]))
-    $(".controlContainer").append(categoryUnit(weights[2].name, weights[2].value,faString[2]))
-    $(".controlContainer").append(categoryUnit(weights[3].name, weights[3].value,faString[3]))
-    $(".controlContainer").append(categoryUnit(weights[4].name, weights[4].value,faString[4]))
-    $('.provenance-similarity-vis').hide();
-
-    $('.categoryUnit label input[type=checkbox]').prop('checked', true);
-
-    let handleHtml = function(id:string) {
-      return(
-        "<div class='chart_handle' id='" + id + "'>" +
-            "<i class='fa fa-arrow-right' aria-hidden='true'></i>" +
-        "</div>")
-    }
-
-    $(".catWeightContainer").append(handleHtml(cats[0]))
-    $(".catWeightContainer").append(handleHtml(cats[1]))
-    $(".catWeightContainer").append(handleHtml(cats[2]))
-    $(".catWeightContainer").append(handleHtml(cats[3]))
-
-
-
-    var dragResize = d3.behavior.drag()
-      .on('drag', function() {
-        let x = d3.mouse(barContainer.node())[1] / scalefactor ;
-        if (x>100) x= 100
-        let id = cats.indexOf($(this).attr("id"))
-        let diff = cumSum[id+1] -x
-        weights[id].value -= diff
-        let next = getNextActive(id)
-        let prev = getPreviousActive(id)
-        let isLast = next <= id
-        if (next <=id) {
-          weights[prev].value +=diff
-        } else {
-          weights[next].value +=diff
-        }
-
-        cumSum[0] = 0
-        for (var i = 1; i <= weights.length; i++) {
-          cumSum[i] = cumSum[i-1]+ weights[i-1].value
-        }
-        update(false)
-        SimHash.hasher.fire("weights_changed")
-        //that.update()
-      });
-    d3.selectAll(".chart_handle").call(dragResize);
-
-
-    let closeWeightSelection = function() {
-      $(".controlContainer").hide()
-      d3.select(".controlContainer").transition()
-        .duration(150)
-        .style("opacity", 0)
-      barContainer.style("width", "280px")
-        .transition()
-        .style("left", "0px")
-        .style("top", "0px")
-        .style("width", "300px")
-      catContainer.transition()
-        .delay(300)
-        .duration(400)
-        .style("background-color", "#60AA85").each(function () {
-          catContainer.classed("closed", true)
-            .classed("open", false)
-          })
-      catContainer.transition()
-        .delay(75)
-        .duration(100)
-        .style("height", "22px")
-      catContainer.selectAll(".chart_handle").transition()
-        .style("opacity", 0)
-        .duration(100)
-        .each(function () {
-          $(".chart_handle").hide()
-        })
-      d3.select(".lineContainer").transition()
-        .duration(100)
-        .style("opacity", 0)
-        .each(function () {
-          $("lineContainer").hide()
-        })
-      d3.select(".lineContainer").transition()
-        .delay(75)
-        .duration(100)
-        .style("height", "22px")
-      barContainer.selectAll(".adjustable").transition()
-        .text(function(d,i) {return (cats[i] + " " + Math.round(d.value) + "%");})
-        .style("top", "0px")
-        .style("left", function(d,i){return cumSum[i]*scalefactor + "px"})
-        .style("width", function (d) {return d.value*scalefactor+"px";})
-        .style("height", "22px")
-        .style("background-color",  function(d,i) {return cols[i];})
-        //.style("opacity", 0.8)
-        .style("color", function(d,i){return i >= 3 ? "black" : "white"})
-        //.duration(2500)
-      barContainer.selectAll(".adjustable")
-        .classed("compact", true)
-        .classed("adjustable", false)
-    }
-
-    let openWeightSelection = function() {
-      $(".controlContainer").show()
-      $(".lineContainer").show()
-      d3.select(".lineContainer").transition()
-        .delay(150)
-        .duration(150)
-        .style("height", "300px")
-        .style("opacity", 1)
-      d3.select(".controlContainer").transition()
-        .delay(150)
-        .duration(150)
-        .style("opacity", 1)
-      $(".chart_handle").show()
-       catContainer.selectAll(".chart_handle")
-        .transition()
-        .delay(150)
-        .duration(150)
-      barContainer.style("width", "30px")
-        .transition()
-        .style("left", "20px")
-        .style("top", "10px")
-      catContainer.transition()
-        .style("height", "320px")
-      barContainer.selectAll(".compact").transition()
-        .style("left", "0px")
-        .style("height", function (d) { return d.value*scalefactor+"px";})
-        .style("top", function(d,i){return cumSum[i]*scalefactor + "px"})
-        .style("width", "30px")
-        .text("")
-        //.duration(1500)
-      barContainer.selectAll(".compact")
-        .classed("compact", false)
-        .classed("adjustable", true)
-      catContainer.classed("closed", false)
-        .classed("open", true)
-      update(true)
-    }
-
-    closeWeightSelection()
-    update(false)
-    catContainer.on('click', openWeightSelection)
-    catContainer.on('mouseleave', closeWeightSelection)
-
-    d3.selectAll(".categoryUnit label input").on('change', function () {
-      let index = cats.indexOf($(this).attr("value"))
-      if (weights[index].active) {
-        //deactivate
-        weights[getNextActive(index)].value +=weights[index].value
-        weights[index].value = 0
-      } else {
-        //activate
-        let nextIndex = getNextActive(index)
-        if (nextIndex < 0){
-          weights[index].value = 100
-        } else {
-          let val = weights[nextIndex].value
-          weights[index].value = val/2
-          weights[nextIndex].value = val/2
-        }
-      }
-      weights[index].active = !weights[index].active
-      cumSum[0] = 0
-      for (var i = 1; i <= weights.length; i++) {
-        cumSum[i] = cumSum[i-1]+ weights[i-1].value
-      }
-      update(true)
-      SimHash.hasher.fire("weights_changed")
-      //that.update();
-    })
   }
+
+*/
+
 
   private onStateClick(d: StateRepr) {
     d3.event.stopPropagation();
