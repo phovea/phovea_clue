@@ -13,6 +13,24 @@ interface Weight {
   active;
 }
 
+
+export class LinupStateView {
+  protected container;
+
+  constructor(container) {
+    this.container = container;
+    this.initialize()
+
+    return this;
+  }
+
+  initialize() {
+    
+  }
+
+
+}
+
 export class WeightInterface {
 
   protected weights:Weight[] = [];

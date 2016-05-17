@@ -32,6 +32,7 @@
   }
 
   .catWeightContainer {
+    order: 1;
     position: relative;
     background-color: $core_colour;
     border-color: $core_colour;
@@ -159,12 +160,27 @@
 
 
   .stateLinupView{
-    margin: 5px;
-    padding: 2px;
-    position: fixed;
+    //margin: 5px;
+    //padding: 2px;
+    //position: absolute;
+
+    order:2;
     width: 100%;
+    background-color: "grey";
+    flex-grow: 20;
+    //height: 100%;
+    //margin-bottom: 60px;
   }
 
+
+  .stateCompareView {
+    order:3;
+    height: 60px;
+    //position: absolute;
+    //bottom:0
+    width: 100%;
+
+  }
 
 
 }

@@ -20,7 +20,7 @@ import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
-import {WeightInterface} from "./simvis"
+import {WeightInterface,LinupStateView} from "./simvis"
 import {isUndefined, indexOf} from "../caleydo_core/main";
 import lineup = require('lineupjs')
 
@@ -683,6 +683,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
 
     let weightContainer = new WeightInterface($simArea.select(".catWeightContainer"))
+    let luContainer = new LinupStateView($simArea.select(".stateLinupView"))
 
     //init the toolbar filter options
 
