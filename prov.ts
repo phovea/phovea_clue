@@ -1367,11 +1367,18 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
   push(arg:any, f_id:string = '', f:ICmdFunction = null, inputs:IObjectRef<any>[] = [], parameter:any = {}) {
     return this.inOrder(() => {
       if (arg instanceof ActionMetaData) {
-        return this.run(this.createAction(<ActionMetaData>arg, f_id, f, inputs, parameter));
+        return this.run(this.createAction(<ActionMetaData>arg, f_id, f, inputs, parameter), null);
       } else {
         var a = <IAction>arg;
-        return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}));
+        return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}), null);
       }
+    });
+  }
+
+  pushWithResult(action:IAction, result: ICmdResult) {
+    return this.inOrder(() => {
+      const a = this.createAction(action.meta, action.id, action.f, action.inputs || [], action.parameter || {});
+      return this.run(a, result);
     });
   }
 
@@ -1484,13 +1491,68 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     }
   }
 
-  private run(action:ActionNode, withinMilliseconds:number | (() => number) = -1) {
-    var current = this.act,
-      next:StateNode = action.resultsIn,
+  private executedAction(action: ActionNode, newState: boolean, result) {
+    const current = this.act;
+    const next = action.resultsIn;
+    result = C.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
+    this.fire('executed', action, result);
+
+    var firstTime = !action.onceExecuted;
+    action.onceExecuted = true;
+
+    if (firstTime) {
+      //create an link outputs
+      //
+      var created = this.resolve(result.created);
+      created.forEach((c, i) => {
+        this.addEdge(action, 'creates', c, {index: i});
+      });
+      // a removed one should be part of the inputs
+      const requires = action.requires;
+      var removed = result.removed.map((r) => this.findInArray(requires, r));
+      removed.forEach((c) => {
+        c.value = null; //free reference
+        this.addEdge(action, 'removes', c);
+      });
+
+      //update new state
+      if (newState) {
+        var objs = current.consistsOf;
+        objs.push.apply(objs, created);
+        removed.forEach((r) => {
+          var i = objs.indexOf(r);
+          objs.splice(i, 1);
+        });
+        objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
+      }
+      this.fire('executed_first', action, next);
+    } else {
+      //update creates reference values
+      action.creates.forEach((c, i) => {
+        c.value = result.created[i].value;
+      });
+      action.removes.forEach((c) => c.value = null);
+    }
+    result.inverse = asFunction(result.inverse);
+    action.updateInverse(this, <IInverseActionCreator>result.inverse);
+
+    this.switchToImpl(action, next);
+
+    return {
+      action: action,
+      state: next,
+      created: created,
+      removed: removed,
+      consumed: result.consumed
+    };
+  }
+
+  private run(action:ActionNode, result: ICmdResult, withinMilliseconds:number | (() => number) = -1) {
+    var next:StateNode = action.resultsIn,
       newState = false;
     if (!next) { //create a new state
       newState = true;
-      this.addEdge(current, 'next', action);
+      this.addEdge(this.act, 'next', action);
       next = this.makeState(action.meta.name);
       this.addEdge(action, 'resultsIn', next);
     }
@@ -1505,59 +1567,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     }
     this.executeCurrentActionWithin = <number>withinMilliseconds;
 
-    const runningAction = action.execute(this, this.executeCurrentActionWithin).then((result) => {
-      result = C.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
-      this.fire('executed', action, result);
-
-      var firstTime = !action.onceExecuted;
-      action.onceExecuted = true;
-
-      if (firstTime) {
-        //create an link outputs
-        //
-        var created = this.resolve(result.created);
-        created.forEach((c, i) => {
-          this.addEdge(action, 'creates', c, {index: i});
-        });
-        // a removed one should be part of the inputs
-        const requires = action.requires;
-        var removed = result.removed.map((r) => this.findInArray(requires, r));
-        removed.forEach((c) => {
-          c.value = null; //free reference
-          this.addEdge(action, 'removes', c);
-        });
-
-        //update new state
-        if (newState) {
-          var objs = current.consistsOf;
-          objs.push.apply(objs, created);
-          removed.forEach((r) => {
-            var i = objs.indexOf(r);
-            objs.splice(i, 1);
-          });
-          objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
-        }
-        this.fire('executed_first', action, next);
-      } else {
-        //update creates reference values
-        action.creates.forEach((c, i) => {
-          c.value = result.created[i].value;
-        });
-        action.removes.forEach((c) => c.value = null);
-      }
-      result.inverse = asFunction(result.inverse);
-      action.updateInverse(this, <IInverseActionCreator>result.inverse);
-
-      this.switchToImpl(action, next);
-
-      return {
-        action: action,
-        state: next,
-        created: created,
-        removed: removed,
-        consumed: result.consumed
-      };
-    });
+    const runningAction = (result ? Promise.resolve(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
 
     runningAction.then((result) => {
       const q = this.nextQueue.shift();
@@ -1610,7 +1620,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       }
 
       torun.forEach((action, i) => {
-        r = r.then((results) => this.run(action, withinMilliseconds < 0 ? -1 : guessTime(i)).then((result) => {
+        r = r.then((results) => this.run(action, null, withinMilliseconds < 0 ? -1 : guessTime(i)).then((result: any) => {
           results.push(result);
           updateTime(result.consumed);
           return results;
@@ -1634,7 +1644,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       //undo and undoing should still go one up
       return this.jumpTo(this.act.previousState);
     } else {
-      return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this)));
+      return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this), null));
     }
   }
 
