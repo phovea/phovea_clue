@@ -7,6 +7,7 @@
  * Created by michael gillhofer
  */
 'use strict';
+import {isUndefined} from "../caleydo_core/main";
 
 
 export enum TokenType {
@@ -21,14 +22,15 @@ export abstract class IStateToken {
   name: string;
   importance: number;
 
+
+  protected catImpOfChilds:number[];
+
   constructor(name:string, importance:number) {
     this.name = name;
     this.importance = importance;
   }
 
-  //calculates the total importance of all Leaf tokens for each category.
-  abstract categoryImportanceOfChilds():number[];
-
+  public isLeaf:boolean;
 }
 
 export class StateTokenNode extends IStateToken {
@@ -38,23 +40,9 @@ export class StateTokenNode extends IStateToken {
   constructor(name:string, importance:number, childs:IStateToken[]) {
     super(name,importance)
     this.childs = childs
+    this.isLeaf = false;
   }
-
-  //calculates the total importance of all Leaf tokens for each category.
-
-  categoryImportanceOfChilds():number[] {
-    let weight:number[] = [0,0,0,0,0];
-    let sum:number[] = [];
-    for (let i = 0; i < this.childs.length; i++) {
-      let w = this.childs[i].categoryImportanceOfChilds()
-      weight[0] += w[0]
-      weight[1] += w[1]
-      weight[2] += w[2]
-      weight[3] += w[3]
-      weight[4] += w[4]
-    }
-    return weight;
-  }
+  
 }
 
 export class StateTokenLeaf extends IStateToken{
@@ -70,13 +58,7 @@ export class StateTokenLeaf extends IStateToken{
     this.type = type;;
     this.value = value;;
     this.category = category;
-  }
-
-    //calculates the total importance of all Leaf tokens for each category.
-  categoryImportanceOfChilds():number[] {
-    let weight:number[] = [0,0,0,0,0];
-    weight[StateTokenLeaf.categories.indexOf(this.category)] = this.importance;
-    return weight;
+    this.isLeaf = true;
   }
 
 }

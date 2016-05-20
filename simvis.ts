@@ -5,6 +5,9 @@
 import {AVisInstance} from "../caleydo_core/vis";
 import {SimHash} from "./simhash"
 import {isUndefined, indexOf, mod} from "../caleydo_core/main";
+import lineup = require('lineupjs')
+import tables = require('../caleydo_core/table');
+import {numberCol2} from "../targid2/LineUpView";
 
 interface Weight {
   name;
@@ -15,17 +18,43 @@ interface Weight {
 
 
 export class LinupStateView {
-  protected container;
+  protected node;
+  private config;
+  private lineup;
+  
 
   constructor(container) {
-    this.container = container;
+    this.node = container;
     this.initialize()
 
     return this;
   }
 
+
+
   initialize() {
-    
+    this.config = {
+      renderingOptions: {
+        histograms: true
+      },
+      body: {
+        freezeCols: 2
+      }
+    };
+    let columns = []
+    let rows = [{"first":0, "second": 5},
+      {"first":1, "second": 6},
+    {"first":2, "second": 7},
+    {"first":3, "second": 8},
+    {"first":4, "second": 9}]
+    columns[0] = numberCol2("first", 0,4);
+    columns[1] = numberCol2("second", 5,9);
+
+    lineup.deriveColors(columns);
+    const storage = lineup.createLocalStorage(rows, columns);
+    storage.deriveDefault()
+    this.lineup = lineup.create(storage, this.node,  this.config);
+    this.lineup.update();
   }
 
 

@@ -10,8 +10,8 @@ import ranges = require('../caleydo_core/range');
 import datatypes = require('../caleydo_core/datatype');
 import session = require('../caleydo_core/session');
 
-import {SimHash} from "./simhash";
-import {IStateToken} from "./statetoken";
+import {SimHash, MatchedTokenTree} from "./simhash";
+import {IStateToken, StateTokenNode} from "./statetoken";
 
 /**
  * reexport the edge type
@@ -522,6 +522,7 @@ export class ActionNode extends graph.GraphNode {
  * In addition, a state is characterized by the set of active object nodes
  */
 export class StateNode extends graph.GraphNode {
+
   constructor(name:string, description = '') {
     super('state');
     super.setAttr('name', name);
@@ -530,7 +531,7 @@ export class StateNode extends graph.GraphNode {
 
   //<author>: Michael Gillhofer
 
-  calcSimHash():string[] {
+ calcSimHash():string[] {
     //console.log("Recalc Hash of " + this.id)
     var allTokens: IStateToken[] = [];
     for (var oN of this.consistsOf) {
@@ -540,14 +541,19 @@ export class StateNode extends graph.GraphNode {
       }
     }
     let hash:string[] = SimHash.hasher.calcHash(allTokens)
-    super.setAttr('simHash', hash);
-    super.setAttr('simTokens', allTokens)
+    this.setAttr('simHash', hash);
+    this.setAttr('stateTokens', allTokens)
     //console.log(hash)
     return hash
   }
 
+  get stateTokens():IStateToken[] {
+    let tokens = this.getAttr('stateTokens')
+    return tokens === null ? null : SimHash.normalizeTokenPriority(tokens)
+  }
+
   get simHash(): string[]{
-    var simHash:string[] = super.getAttr('simHash');
+    var simHash:string[] = this.getAttr('simHash');
     if (simHash === null) {
       console.log("Sim Hash Was null")
       simHash = this.calcSimHash()
@@ -561,7 +567,9 @@ export class StateNode extends graph.GraphNode {
   }
   */
 
-  getSimilarityTo(otherState:StateNode): number{
+  getSimilarityTo(otherState:StateNode, exact:boolean = false): number{
+    //exact = true
+    //if (exact) return this.getExactSimilarityTo(otherState)
     let thisH:string[] = this.simHash
     let otherH:string[] = otherState.simHash
     if (thisH[0] == "invalid" || otherH[0] == "invalid") return -1
@@ -577,6 +585,17 @@ export class StateNode extends graph.GraphNode {
     }
     return similarity >=0 ? similarity : 0;
   }
+
+  getExactSimilarityTo(otherState:StateNode):number {
+    if (this.id === otherState.id) return 1;
+    let thisTokens:IStateToken[] = this.stateTokens
+    let otherTokens:IStateToken[] = otherState.stateTokens
+    if (thisTokens === null || otherTokens===null) return -1
+    let tree = new MatchedTokenTree(thisTokens, otherTokens)
+    let s = tree.similarityForLineup;
+    return tree.similarity
+  }
+
 
 
   numberOfSetBits(i:number):number{

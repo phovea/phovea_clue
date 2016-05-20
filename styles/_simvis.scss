@@ -166,10 +166,19 @@
 
     order:2;
     width: 100%;
-    background-color: "grey";
-    flex-grow: 20;
+    //background-color: $core_colour_text;
+    flex-grow: 200;
     //height: 100%;
     //margin-bottom: 60px;
+
+    div.lu{
+      //height:100%;
+      top:auto;
+      bottom:auto;
+      flex-grow: 200;
+      order:2;
+      margin: 10px;
+    }
   }
 
 

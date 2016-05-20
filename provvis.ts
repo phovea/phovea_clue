@@ -22,7 +22,7 @@ import Color = d3.Color;
 import {SimHash} from "./simhash";
 import {WeightInterface,LinupStateView} from "./simvis"
 import {isUndefined, indexOf} from "../caleydo_core/main";
-import lineup = require('lineupjs')
+
 
 
 function extractTags(text: string) {
@@ -714,27 +714,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     return $p;
   }
-
-  /*
-  private addLineupInterface() {
-    let config = {
-      renderingoptions: {
-        histogram: true
-      },
-      body: {
-        freezeCols:2
-      }
-    };
-    let columns = ["One", "Two", "Three"]
-    let rows =  [[1,2,3],[4,5,6],[7,8,9]]
-    lineup.deriveColors(columns)
-    const storage = lineup.createLocalStorage(rows, columns);
-    let lu = lineup.create(storage, $('.stateLinupView')[0], config);
-    lu.update()
-
-  }
-
-*/
+  
 
 
   private onStateClick(d: StateRepr) {

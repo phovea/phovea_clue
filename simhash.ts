@@ -4,6 +4,7 @@ import Color = d3.Color;
 import idtype = require('../caleydo_core/idtype')
 import {IStateToken, StateTokenLeaf, StateTokenNode,TokenType} from "./statetoken";
 import events = require('../caleydo_core/event');
+import {StateNode} from "./prov";
 
 
 
@@ -79,6 +80,274 @@ class HashTable {
   }
 }
 
+export class MatchedTokenTree {
+  private root:TreeNode = new TreeRoot(null, null)
+
+  constructor(left:IStateToken[], right:IStateToken[]) {
+    //let matchedTokens = SimHash.matchTokens(left, right)
+    this.matchIntoNode(this.root, new StateTokenNode("dummyRoot", 1, left), new StateTokenNode("dummyRoot", 1, right))
+    this.root.balanceWeights(1);
+    let sim = this.similarity;
+  }
+
+
+  // matches lists of tokens according to a venn diagramm
+  matchTokens(leftList:IStateToken[], rightList:IStateToken[]){
+    let left:IStateToken[]=[];
+    let center = [];
+    let right:IStateToken[] = [];
+    for (let i=0; i < leftList.length; i++) {
+      let found:boolean= false;
+      for (let j = 0; j < rightList.length; j++) {
+        if (leftList[i].name === rightList[j].name) {
+          center = center.concat({"left": leftList[i], "right": rightList[j]})
+          found = true;
+          break;
+        }
+      }
+      if (!found) left = left.concat(leftList[i])
+    }
+    for (let i=0; i < rightList.length; i++) {
+      let found:boolean= false;
+      for (let j = 0; j < leftList.length; j++) {
+        if (rightList[i].name === leftList[j].name) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) right = right.concat(rightList[i])
+    }
+    return [left, center, right]
+  }
+
+  matchIntoNode(root:TreeNode, left:IStateToken, right:IStateToken) {
+    if (left === null && right === null) {
+      //nothing to do
+      return;
+    } else if (left === null || right === null) {
+      if (left === null) {
+        if (!(right.isLeaf)) {
+          for (let j = 0; j < (<StateTokenNode>right).childs.length; j++) {
+            let node = new TreeNode(null, (<StateTokenNode>right).childs[j])
+            this.matchIntoNode(node, null, (<StateTokenNode>right).childs[j])
+            root.appendChild(node)
+          }
+        }
+      } else if (right === null) {
+        if (!(left.isLeaf)) {
+          for (let j = 0; j < (<StateTokenNode>left).childs.length; j++) {
+            let node = new TreeNode((<StateTokenNode>left).childs[j], null)
+            this.matchIntoNode(node, (<StateTokenNode>left).childs[j], null)
+            root.appendChild(node)
+          }
+        }
+      }
+    } else {
+
+      if (left.isLeaf || right.isLeaf) {
+        return;
+      } else {
+        let leftNode = <StateTokenNode> left;
+        let rightNode = <StateTokenNode> right;
+        let matchedTokens = this.matchTokens(leftNode.childs, rightNode.childs)
+        for (let j = 0; j < matchedTokens[0].length; j++) {
+          let node = new TreeNode(matchedTokens[0][j], null)
+          this.matchIntoNode(node, matchedTokens[0][j], null)
+          root.appendChild(node)
+        }
+
+        for (let j = 0; j < matchedTokens[1].length; j++) {
+          let node = new TreeNode(matchedTokens[1][j]["left"],matchedTokens[1][j]["right"])
+          this.matchIntoNode(node, matchedTokens[1][j]["left"],matchedTokens[1][j]["right"])
+          root.appendChild(node)
+        }
+
+        for (let j = 0; j < matchedTokens[2].length;j++) {
+          let node = new TreeNode(null,matchedTokens[2][j])
+          this.matchIntoNode(node, null, matchedTokens[2][j])
+          root.appendChild(node)
+        }
+      }
+    }
+  }
+
+  private _similarity
+
+  get similarityForLineup() {
+    let leafs:TreeNode[] = this.root.leafs;
+    var leftSims = [0,0,0,0,0];
+    var centerSims = [0,0,0,0,0];
+    var rightSims = [0,0,0,0,0];
+    for (let i = 0; i < leafs.length; i++) {
+      if (leafs[i].isPaired) {
+        centerSims[leafs[i].category] += leafs[i].importance
+      } else {
+        if (leafs[i].hasLeftToken) {
+          leftSims[leafs[i].category] += leafs[i].importance
+        } else {
+          rightSims[leafs[i].category] += leafs[i].importance
+        }
+      }
+    }
+    let weights = SimHash.hasher.categoryWeighting;
+    let total = 0;
+    for (let i = 0; i < weights.length; i++) {
+      leftSims[i] = leftSims[i] * weights[i]/100
+      total += leftSims[i]
+      centerSims[i] = centerSims[i] * weights[i]/100
+      total += centerSims[i]
+      rightSims[i] = rightSims[i] * weights[i]/100
+      total += rightSims[i]
+    }
+
+    for (let i = 0; i < weights.length; i++) {
+      leftSims[i] = leftSims[i] / total
+      centerSims[i] = centerSims[i] / total
+      rightSims[i] = rightSims[i] / total
+    }
+
+    return [leftSims, centerSims, rightSims]
+  }
+
+  get similarityPerCategory() {
+    let leafs:TreeNode[] = this.root.leafs;
+    let weights = SimHash.hasher.categoryWeighting
+    var sims = [0,0,0,0,0];
+    var total = [0,0,0,0,0]
+    for (let i = 0; i < leafs.length; i++) {
+      total[leafs[i].category] += leafs[i].importance
+      sims[leafs[i].category] += leafs[i].isPaired ? leafs[i].importance : 0
+    }
+    for (let i = 0; i < weights.length; i++) {
+      sims[i] = total[i]=== 0 ? 1 : sims[i] / total[i]
+    }
+    this._similarity = sims;
+    return sims;
+  }
+
+  get similarity() {
+    let weights = SimHash.hasher.categoryWeighting
+    var sims = this.similarityPerCategory
+    let sim = 0;
+    for (let i = 0; i < weights.length; i++) {
+      sim += sims[i] === 0 ? weights[i]/100 : sims[i]*weights[i]/100
+    }
+    return sim;
+  }
+}
+
+
+
+class TreeNode {
+  private childs:TreeNode[]= [];
+  private leftToken:IStateToken;
+  private rightToken:IStateToken;
+
+  constructor(left:IStateToken, right:IStateToken) {
+    this.leftToken = left;
+    this.rightToken = right;
+  }
+
+  appendChild(ch:TreeNode) {
+    this.childs = this.childs.concat(ch)
+  }
+
+  static categories = ["data", "visual", "selection", "layout", "analysis"]
+
+  public get category():number {
+    if (!(this.isLeafNode)) return null;
+    let cat = this.leftToken=== null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
+    return TreeNode.categories.indexOf(cat);
+  }
+
+  get importance():number{
+    return this.leftToken !== null ? this.leftToken.importance: this.rightToken.importance
+  }
+
+  get isRoot():boolean{
+    return false;
+  }
+  get name():string {
+    let name = this.leftToken === null ? null : this.leftToken.name;
+    if (name == null) name = this.rightToken === null ? null : this.rightToken.name;
+    return name;
+  }
+
+  balanceWeights(targetWeight:number) {
+    let factor:number = 1
+    for (let i = 0; i < this.childs.length; i++) {
+      if (this.childs[i].isPaired) {
+        if (this.childs[i].leftToken.importance !== this.childs[i].rightToken.importance) {
+          factor =  this.childs[i].leftToken.importance / this.childs[i].rightToken.importance
+          break;
+        }
+      }
+    }
+    if (factor > 1) {
+      for (let i = 0; i < this.childs.length; i++) {
+        if (!(this.childs[i].leftToken === null)) this.childs[i].leftToken.importance /= factor
+      }
+    } else if (factor <1) {
+      for (let i = 0; i < this.childs.length; i++) {
+        if (!(this.childs[i].rightToken === null)) this.childs[i].rightToken.importance *= factor
+      }
+    }
+    let sumFactor = 0;
+    for (let i = 0; i < this.childs.length; i++) {
+      if (this.childs[i].leftToken !== null) {
+        sumFactor += this.childs[i].leftToken.importance
+      } else if (this.childs[i].rightToken !== null) {
+        sumFactor += this.childs[i].rightToken.importance
+      }
+    }
+    if (sumFactor !== targetWeight) {
+      for (let i = 0; i < this.childs.length; i++) {
+        if (this.childs[i].leftToken !== null) {
+          this.childs[i].leftToken.importance *= (targetWeight / sumFactor)
+        }
+        if (this.childs[i].rightToken !== null) {
+          this.childs[i].rightToken.importance *= (targetWeight / sumFactor)
+        }
+      }
+    }
+    //balance all childs
+      for (let i = 0; i < this.childs.length; i++) {
+        if (!(this.childs[i].isLeafNode)) {
+          this.childs[i].balanceWeights(this.childs[i].leftToken !== null ? this.childs[i].leftToken.importance : this.childs[i].rightToken.importance)
+        }
+      }
+  }
+
+  get isLeafNode():boolean {
+    return this.childs.length === 0
+  }
+  get isPaired():boolean {
+    return (this.leftToken !== null && this.rightToken !== null)
+  }
+
+  get hasLeftToken():boolean{
+    return !this.leftToken===null
+  }
+
+  get leafs():TreeNode[] {
+    let leafs:TreeNode[] =  []
+    if (!this.isLeafNode) {
+      for (let i = 0; i < this.childs.length ; i++) {
+        leafs = leafs.concat(this.childs[i].leafs)
+      }
+    } else {
+      return [this];
+    }
+    return leafs;
+  }
+}
+
+class TreeRoot extends TreeNode {
+
+  get isRoot():boolean{
+    return true;
+  }
+}
 export class SimHash extends events.EventHandler{
 
   private static _instance:SimHash = new SimHash();
@@ -166,7 +435,7 @@ export class SimHash extends events.EventHandler{
     if (tokens.length == 0) {
       return ["invalid", "invalid", "invalid", "invalid", "invalid"]
     }
-    tokens = this.normalizeTokenPriority(tokens, 1)
+    tokens = SimHash.normalizeTokenPriority(tokens, 1)
     let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens)
 
     function groupBy(arr:StateTokenLeaf[]) {
@@ -257,7 +526,7 @@ export class SimHash extends events.EventHandler{
     return this.hashTable[cat].toHash(this._nrBits);
   };
 
-  private normalizeTokenPriority(tokens:IStateToken[], baseLevel:number):IStateToken[] {
+  public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number=1):IStateToken[] {
     let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
     for (let i:number = 0; i < tokens.length; i++) {
       tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
