@@ -1,8 +1,10 @@
 {
   "name": "caleydo_clue",
+  "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
   "version": "0.0.1",
   "license": "SEE LICENSE IN LICENSE",
   "repository": "Caleydo/caleydo_clue",
+  "homepage": "http://vistories.org",
   "dependencies": {
   },
   "peerDependencies": {
@@ -13,6 +15,7 @@
     "caleydo_security_flask": "*"
   },
   "caleydo": {
+    "type": "app",
     "plugins": {
       "web": [
         {
