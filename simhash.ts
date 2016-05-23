@@ -180,12 +180,12 @@ export class MatchedTokenTree {
     var rightSims = [0,0,0,0,0];
     for (let i = 0; i < leafs.length; i++) {
       if (leafs[i].isPaired) {
-        centerSims[leafs[i].category] += leafs[i].importance
+        centerSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
       } else {
         if (leafs[i].hasLeftToken) {
-          leftSims[leafs[i].category] += leafs[i].importance
+          leftSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
         } else {
-          rightSims[leafs[i].category] += leafs[i].importance
+          rightSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
         }
       }
     }
@@ -209,6 +209,7 @@ export class MatchedTokenTree {
     return [leftSims, centerSims, rightSims]
   }
 
+
   get similarityPerCategory() {
     let leafs:TreeNode[] = this.root.leafs;
     let weights = SimHash.hasher.categoryWeighting
@@ -216,7 +217,7 @@ export class MatchedTokenTree {
     var total = [0,0,0,0,0]
     for (let i = 0; i < leafs.length; i++) {
       total[leafs[i].category] += leafs[i].importance
-      sims[leafs[i].category] += leafs[i].isPaired ? leafs[i].importance : 0
+      sims[leafs[i].category] += leafs[i].isPaired ? leafs[i].importance*leafs[i].tokenSimilarity : 0
     }
     for (let i = 0; i < weights.length; i++) {
       sims[i] = total[i]=== 0 ? 1 : sims[i] / total[i]
@@ -253,6 +254,27 @@ class TreeNode {
   }
 
   static categories = ["data", "visual", "selection", "layout", "analysis"]
+
+  public get tokenSimilarity():number{
+    if (this.leftToken === null || this.rightToken=== null) return 0;
+    if (!this.leftToken.isLeaf) {
+      throw Error("Only Leafs' similarity should be used")
+    } else {
+      switch((<StateTokenLeaf>this.leftToken).type) {
+        case 0:
+              return (<StateTokenLeaf>this.leftToken).value === (<StateTokenLeaf>this.leftToken).value ? 1:0;
+        case 1:
+          let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken
+          let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken
+          let leftpct = (left.value[2]-left.value[0])/(left.value[1]-left.value[0])
+          let rightpct = (right.value[2]-right.value[0])/(right.value[1]-right.value[0])
+              return 1-Math.abs(leftpct-rightpct)
+        case 2:
+        case 3:
+              return 1;
+      }
+    }
+  }
 
   public get category():number {
     if (!(this.isLeafNode)) return null;
