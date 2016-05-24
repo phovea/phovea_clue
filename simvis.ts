@@ -43,7 +43,7 @@ export class LinupStateView extends vis.AVisInstance {
     this.initialize()
     SimHash.hasher.on('weights_changed', this.updateWeights.bind(this))
     this.data.on('add_state', this.recalcStateSim.bind(this));
-    this.data.on('selection_changed', this.recalcStateSim.bind(this));
+    this.data.on('select_state', this.recalcStateSim.bind(this));
     return this;
   }
 
