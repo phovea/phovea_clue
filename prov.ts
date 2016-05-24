@@ -603,6 +603,8 @@ export class StateNode extends graph.GraphNode {
   getSimForLineupTo(otherState:StateNode) {
     let thisTokens:IStateToken[] = this.stateTokens
     let otherTokens:IStateToken[] = otherState.stateTokens
+    if (thisTokens === null && otherTokens === null) return [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
+    if (thisTokens === null || otherTokens === null) return [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
     let tree = new MatchedTokenTree(thisTokens, otherTokens)
     //this.treeMatches[otherState.id] = tree;
     return tree.similarityForLineup
