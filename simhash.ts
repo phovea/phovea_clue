@@ -271,7 +271,8 @@ class TreeNode {
               return 1-Math.abs(leftpct-rightpct)
         case 2:
         case 3:
-              return 1;
+          //TODO
+          return 1;
       }
     }
   }

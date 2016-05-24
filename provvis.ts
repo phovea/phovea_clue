@@ -683,7 +683,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
 
     let weightContainer = new WeightInterface($simArea.select(".catWeightContainer"))
-    let luContainer = new LinupStateView($simArea.select(".stateLinupView"))
+    let luContainer = new LinupStateView($simArea.select(".stateLinupView"),this.data)
 
     //init the toolbar filter options
 
@@ -714,7 +714,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     return $p;
   }
-  
+
 
 
   private onStateClick(d: StateRepr) {

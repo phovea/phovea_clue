@@ -529,6 +529,8 @@ export class StateNode extends graph.GraphNode {
     super.setAttr('description', description);
   }
 
+  private treeMatches:MatchedTokenTree[] = []
+
   //<author>: Michael Gillhofer
 
  calcSimHash():string[] {
@@ -569,7 +571,7 @@ export class StateNode extends graph.GraphNode {
 
   getSimilarityTo(otherState:StateNode, exact:boolean = false): number{
     //exact = true
-    //if (exact) return this.getExactSimilarityTo(otherState)
+    if (exact) return this.getExactSimilarityTo(otherState)
     let thisH:string[] = this.simHash
     let otherH:string[] = otherState.simHash
     if (thisH[0] == "invalid" || otherH[0] == "invalid") return -1
@@ -588,12 +590,22 @@ export class StateNode extends graph.GraphNode {
 
   getExactSimilarityTo(otherState:StateNode):number {
     if (this.id === otherState.id) return 1;
+    //if (this.treeMatches[otherState.id]) return this.treeMatches[otherState.id].similarity
     let thisTokens:IStateToken[] = this.stateTokens
     let otherTokens:IStateToken[] = otherState.stateTokens
     if (thisTokens === null || otherTokens===null) return -1
     let tree = new MatchedTokenTree(thisTokens, otherTokens)
-    let s = tree.similarityForLineup;
+    //let s = tree.similarityForLineup;
+    this.treeMatches[otherState.id] = tree;
     return tree.similarity
+  }
+
+  getSimForLineupTo(otherState:StateNode) {
+    let thisTokens:IStateToken[] = this.stateTokens
+    let otherTokens:IStateToken[] = otherState.stateTokens
+    let tree = new MatchedTokenTree(thisTokens, otherTokens)
+    //this.treeMatches[otherState.id] = tree;
+    return tree.similarityForLineup
   }
 
 

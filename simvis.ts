@@ -8,6 +8,16 @@ import {isUndefined, indexOf, mod} from "../caleydo_core/main";
 import lineup = require('lineupjs')
 import tables = require('../caleydo_core/table');
 import {numberCol2} from "../targid2/LineUpView";
+import {EventHandler} from "../caleydo_core/event";
+
+import C = require('../caleydo_core/main');
+import $ = require('jquery');
+import ranges = require('../caleydo_core/range');
+import idtypes = require('../caleydo_core/idtype');
+import provenance = require('./prov');
+import d3 = require('d3');
+import vis = require('../caleydo_core/vis');
+import {StateNode} from "./prov";
 
 interface Weight {
   name;
@@ -17,22 +27,37 @@ interface Weight {
 }
 
 
-export class LinupStateView {
+export class LinupStateView extends vis.AVisInstance{
   protected node;
   private config;
   private lineup;
-  
 
-  constructor(container) {
+
+  constructor(container, public data:provenance.ProvenanceGraph) {
+    super()
     this.node = container;
     this.initialize()
 
     return this;
   }
 
+   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
+    const selectedStates = this.data.selectedStates(type);
+    //let worker = new Worker(this.changeMarkedState(selectedStates[0]))
+   };
+
+
+  changeMarkedState(newSelectedState:StateNode) {
+    let cats = ["data", "visual", "selection", "layout", "analysis"]
+    let rows = [];
+    for (let currState in this.data.states) {
+      let sim = newSelectedState.getSimForLineupTo(<any>currState)
+    }
+  }
 
 
   initialize() {
+
     this.config = {
       renderingOptions: {
         histograms: true
@@ -43,12 +68,12 @@ export class LinupStateView {
     };
     let columns = []
     let rows = [{"first":0, "second": 5},
-      {"first":1, "second": 6},
-    {"first":2, "second": 7},
-    {"first":3, "second": 8},
-    {"first":4, "second": 9}]
-    columns[0] = numberCol2("first", 0,4);
-    columns[1] = numberCol2("second", 5,9);
+      {"first": {"f":1, "s":2}, "second": 6},
+    {"first": {"f":1, "s":2}, "second": 7},
+    {"first": {"f":1, "s":2}, "second": 8},
+    {"first": {"f":1, "s":2}, "second": 9}]
+    columns[0] = numberCol2("first", 0,1);
+    columns[1] = numberCol2("second", 0,1);
 
     lineup.deriveColors(columns);
     const storage = lineup.createLocalStorage(rows, columns);
@@ -62,8 +87,8 @@ export class LinupStateView {
 
 export class WeightInterface {
 
-  protected weights:Weight[] = [];
   protected cats = ["data", "visual", "selection", "layout", "analysis"]
+  protected weights:Weight[] = [];
   protected cumSum:number[] = []
   protected scalefactor:number = (300 - 4) / 100
 
