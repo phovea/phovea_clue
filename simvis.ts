@@ -28,61 +28,128 @@ interface Weight {
 
 
 export class LinupStateView extends vis.AVisInstance{
-  protected node;
-  private config;
-  private lineup;
+    protected node;
+    private config;
+    private lineup;
+
+    private lstack;
+    private cstack;
+    private rstack;
+
+    private lu;
 
 
-  constructor(container, public data:provenance.ProvenanceGraph) {
-    super()
-    this.node = container;
-    this.initialize()
-
-    return this;
-  }
-
-   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
-    const selectedStates = this.data.selectedStates(type);
-    //let worker = new Worker(this.changeMarkedState(selectedStates[0]))
-   };
-
-
-  changeMarkedState(newSelectedState:StateNode) {
-    let cats = ["data", "visual", "selection", "layout", "analysis"]
-    let rows = [];
-    for (let currState in this.data.states) {
-      let sim = newSelectedState.getSimForLineupTo(<any>currState)
+    constructor(container, public data:provenance.ProvenanceGraph) {
+        super()
+        this.node = container;
+        this.initialize()
+        SimHash.hasher.on('weights_changed', this.updateWeights.bind(this) )
+        return this;
     }
-  }
 
-
-  initialize() {
-
-    this.config = {
-      renderingOptions: {
-        histograms: true
-      },
-      body: {
-        freezeCols: 2
-      }
+    private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
+        const selectedStates = this.data.selectedStates(type);
+        //let worker = new Worker(this.changeMarkedState(selectedStates[0]))
     };
-    let columns = []
-    let rows = [{"first":0, "second": 5},
-      {"first": {"f":1, "s":2}, "second": 6},
-    {"first": {"f":1, "s":2}, "second": 7},
-    {"first": {"f":1, "s":2}, "second": 8},
-    {"first": {"f":1, "s":2}, "second": 9}]
-    columns[0] = numberCol2("first", 0,1);
-    columns[1] = numberCol2("second", 0,1);
-
-    lineup.deriveColors(columns);
-    const storage = lineup.createLocalStorage(rows, columns);
-    storage.deriveDefault()
-    this.lineup = lineup.create(storage, this.node,  this.config);
-    this.lineup.update();
-  }
 
 
+    changeMarkedState(newSelectedState:StateNode) {
+        let cats = ["data", "visual", "selection", "layout", "analysis"]
+        let rows = [];
+        for (let currState in this.data.states) {
+            let sim = newSelectedState.getSimForLineupTo(<any>currState)
+        }
+      }
+
+    updateWeights() {
+        let width:number = 48;
+        this.lstack.setWeights(SimHash.hasher.categoryWeighting);
+        this.lstack.setWidth(width);
+        this.cstack.setWeights(SimHash.hasher.categoryWeighting);
+        this.cstack.setWidth(width);
+        this.rstack.setWeights(SimHash.hasher.categoryWeighting);
+        this.rstack.setWidth(width);
+        this.lu.update();
+    }
+
+    private static classColors = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00']
+
+    initialize() {
+        var desc = [
+              {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+              {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
+              {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+              {label: 'layout', type: 'number', column: 'll', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+              {label: 'analysis', type: 'number', column: 'la', 'domain': [0, 1], color: LinupStateView.classColors[4]},
+              {label: 'data', type: 'number', column: 'cd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+              {label: 'visual', type: 'number', column: 'cv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
+              {label: 'selection', type: 'number', column: 'cs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+              {label: 'layout', type: 'number', column: 'cl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+              {label: 'analysis', type: 'number', column: 'ca', 'domain': [0, 1], color: LinupStateView.classColors[4]},
+              {label: 'data', type: 'number', column: 'rd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+              {label: 'visual', type: 'number', column: 'rv', 'domain': [0, 1], color: LinupStateView.classColors[1]}, {label: 'selection', type: 'number', column: 'rs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+              {label: 'layout', type: 'number', column: 'rl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+              {label: 'analysis', type: 'number', column: 'ra', 'domain': [0, 1], color: LinupStateView.classColors[4]}
+        ];
+        let arr = [{"ld":1, "lv":1, "ls":1, "ll":1, "la":1,"cd":1, "cv":1, "cs":1, "cl":1, "ca":1,"rd":1, "rv":1, "rs":1, "rl":1, "ra":1}]
+
+        var p = new lineup.provider.LocalDataProvider(arr, desc);
+        var r = p.pushRanking();
+
+
+        this.lstack = p.create(lineup.model.createStackDesc('Left'));
+        r.push(this.lstack)
+        this.lstack.push(p.create(desc[0]))
+        this.lstack.push(p.create(desc[1]))
+        this.lstack.push(p.create(desc[2]))
+        this.lstack.push(p.create(desc[3]))
+        this.lstack.push(p.create(desc[4]))
+
+        this.cstack = p.create(lineup.model.createStackDesc('Intersection'));
+        r.push(this.cstack)
+        this.cstack.push(p.create(desc[5]));
+        this.cstack.push(p.create(desc[6]));
+        this.cstack.push(p.create(desc[7]));
+        this.cstack.push(p.create(desc[8]));
+        this.cstack.push(p.create(desc[9]));
+
+        this.rstack = p.create(lineup.model.createStackDesc('Right'));
+        r.push(this.rstack)
+        this.rstack.push(p.create(desc[10]));
+        this.rstack.push(p.create(desc[11]));
+        this.rstack.push(p.create(desc[12]));
+        this.rstack.push(p.create(desc[13]));
+        this.rstack.push(p.create(desc[14]));
+
+        this.lu = lineup.create(p, this.node, {
+            /*
+            additionalDesc : [
+              lineup.model.StackColumn.desc('+ Stack')
+            ],
+            */
+            /*htmlLayout: {
+              autoRotateLabels: true
+            },*/
+            body: {
+              renderer: 'svg'
+            },
+            /*header: {
+              rankingButtons: function($node) {
+                $node.append('button').text('+').on('click', function(d) {
+                  console.log(d);
+                });
+              },
+              linkTemplates: ['a/$1', 'b/$1']
+            },
+            */
+            /*renderingOptions: {
+              histograms: true
+            }*/
+          });
+        this.updateWeights()
+      //this.lu.update();
+
+    }
 }
 
 export class WeightInterface {
