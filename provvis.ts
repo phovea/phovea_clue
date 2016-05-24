@@ -445,6 +445,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
   private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
+  
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   };
