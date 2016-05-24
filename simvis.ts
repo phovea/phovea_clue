@@ -1,7 +1,3 @@
-
-
-
-
 import {AVisInstance} from "../caleydo_core/vis";
 import {SimHash} from "./simhash"
 import {isUndefined, indexOf, mod} from "../caleydo_core/main";
@@ -27,129 +23,147 @@ interface Weight {
 }
 
 
-export class LinupStateView extends vis.AVisInstance{
-    protected node;
-    private config;
-    private lineup;
+export class LinupStateView extends vis.AVisInstance {
+  protected node;
+  private config;
+  private lineup;
 
-    private lstack;
-    private cstack;
-    private rstack;
+  private lstack;
+  private cstack;
+  private rstack;
 
-    private lu;
+  private lu;
+  private luDataProvider
+  private arr;
 
 
-    constructor(container, public data:provenance.ProvenanceGraph) {
-        super()
-        this.node = container;
-        this.initialize()
-        SimHash.hasher.on('weights_changed', this.updateWeights.bind(this) )
-        return this;
+  constructor(container, public data:provenance.ProvenanceGraph) {
+    super()
+    this.node = container;
+    this.initialize()
+    SimHash.hasher.on('weights_changed', this.updateWeights.bind(this))
+    this.data.on('add_state', this.recalcStateSim.bind(this));
+    this.data.on('selection_changed', this.recalcStateSim.bind(this));
+    return this;
+  }
+
+  recalcStateSim() {
+    //this.fillArr();
+    //this.luDataProvider.data =this.arr
+    //this.lu.update()
+    this.lu.destroy()
+    this.initialize();
+  }
+
+  fillArr() {
+    this.arr = []
+    let state:StateNode = this.data.selectedStates(idtypes.defaultSelectionType)[0]
+    if (isUndefined(state)) return;
+    let allstates = this.data.states;
+    for (let i = 0; i < allstates.length; i++) {
+      let currState:StateNode = <StateNode>allstates[i];
+      if (state === currState) continue;
+      let sim = state.getSimForLineupTo(currState)
+      this.arr = this.arr.concat({
+        "ld": sim[0][0], "lv": sim[0][1], "ls": sim[0][2], "ll": sim[0][3], "la": sim[0][4],
+        "cd": sim[1][0], "cv": sim[1][1], "cs": sim[1][2], "cl": sim[1][3], "ca": sim[1][4],
+        "rd": sim[2][0], "rv": sim[2][1], "rs": sim[2][2], "rl": sim[2][3], "ra": sim[2][4]
+      })
     }
-
-    private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
-        const selectedStates = this.data.selectedStates(type);
-        //let worker = new Worker(this.changeMarkedState(selectedStates[0]))
-    };
+  }
 
 
-    changeMarkedState(newSelectedState:StateNode) {
-        let cats = ["data", "visual", "selection", "layout", "analysis"]
-        let rows = [];
-        for (let currState in this.data.states) {
-            let sim = newSelectedState.getSimForLineupTo(<any>currState)
-        }
-      }
+  updateWeights() {
+    let width:number = 48;
+    let weights = SimHash.hasher.categoryWeighting
+    this.lstack.setWeights(weights);
+    this.lstack.setWidth(width);
+    this.cstack.setWeights(weights);
+    this.cstack.setWidth(width);
+    this.rstack.setWeights(weights);
+    this.rstack.setWidth(width);
+    this.lu.update();
+  }
 
-    updateWeights() {
-        let width:number = 48;
-        this.lstack.setWeights(SimHash.hasher.categoryWeighting);
-        this.lstack.setWidth(width);
-        this.cstack.setWeights(SimHash.hasher.categoryWeighting);
-        this.cstack.setWidth(width);
-        this.rstack.setWeights(SimHash.hasher.categoryWeighting);
-        this.rstack.setWidth(width);
-        this.lu.update();
-    }
+  private static classColors = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00']
 
-    private static classColors = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00']
+  initialize() {
+    var desc = [
+      {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+      {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
+      {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+      {label: 'layout', type: 'number', column: 'll', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+      {label: 'analysis', type: 'number', column: 'la', 'domain': [0, 1], color: LinupStateView.classColors[4]},
+      {label: 'data', type: 'number', column: 'cd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+      {label: 'visual', type: 'number', column: 'cv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
+      {label: 'selection', type: 'number', column: 'cs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+      {label: 'layout', type: 'number', column: 'cl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+      {label: 'analysis', type: 'number', column: 'ca', 'domain': [0, 1], color: LinupStateView.classColors[4]},
+      {label: 'data', type: 'number', column: 'rd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
+      {label: 'visual', type: 'number', column: 'rv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
+      {label: 'selection', type: 'number', column: 'rs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
+      {label: 'layout', type: 'number', column: 'rl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
+      {label: 'analysis', type: 'number', column: 'ra', 'domain': [0, 1], color: LinupStateView.classColors[4]}
+    ];
+    //this.arr = [{"ld":1, "lv":1, "ls":1, "ll":1, "la":1,"cd":1, "cv":1, "cs":1, "cl":1, "ca":1,"rd":1, "rv":1, "rs":1, "rl":1, "ra":1}]
 
-    initialize() {
-        var desc = [
-              {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: LinupStateView.classColors[0]},
-              {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
-              {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: LinupStateView.classColors[2]},
-              {label: 'layout', type: 'number', column: 'll', 'domain': [0, 1], color: LinupStateView.classColors[3]},
-              {label: 'analysis', type: 'number', column: 'la', 'domain': [0, 1], color: LinupStateView.classColors[4]},
-              {label: 'data', type: 'number', column: 'cd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
-              {label: 'visual', type: 'number', column: 'cv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
-              {label: 'selection', type: 'number', column: 'cs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
-              {label: 'layout', type: 'number', column: 'cl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
-              {label: 'analysis', type: 'number', column: 'ca', 'domain': [0, 1], color: LinupStateView.classColors[4]},
-              {label: 'data', type: 'number', column: 'rd', 'domain': [0, 1], color: LinupStateView.classColors[0]},
-              {label: 'visual', type: 'number', column: 'rv', 'domain': [0, 1], color: LinupStateView.classColors[1]}, {label: 'selection', type: 'number', column: 'rs', 'domain': [0, 1], color: LinupStateView.classColors[2]},
-              {label: 'layout', type: 'number', column: 'rl', 'domain': [0, 1], color: LinupStateView.classColors[3]},
-              {label: 'analysis', type: 'number', column: 'ra', 'domain': [0, 1], color: LinupStateView.classColors[4]}
-        ];
-        let arr = [{"ld":1, "lv":1, "ls":1, "ll":1, "la":1,"cd":1, "cv":1, "cs":1, "cl":1, "ca":1,"rd":1, "rv":1, "rs":1, "rl":1, "ra":1}]
+    this.fillArr()
+    this.luDataProvider = new lineup.provider.LocalDataProvider(this.arr, desc);
+    var r = this.luDataProvider.pushRanking();
 
-        var p = new lineup.provider.LocalDataProvider(arr, desc);
-        var r = p.pushRanking();
+    this.lstack = this.luDataProvider.create(lineup.model.createStackDesc('Left'));
+    r.push(this.lstack)
+    this.lstack.push(this.luDataProvider.create(desc[0]))
+    this.lstack.push(this.luDataProvider.create(desc[1]))
+    this.lstack.push(this.luDataProvider.create(desc[2]))
+    this.lstack.push(this.luDataProvider.create(desc[3]))
+    this.lstack.push(this.luDataProvider.create(desc[4]))
 
+    this.cstack = this.luDataProvider.create(lineup.model.createStackDesc('Intersection'));
+    r.push(this.cstack)
+    this.cstack.push(this.luDataProvider.create(desc[5]));
+    this.cstack.push(this.luDataProvider.create(desc[6]));
+    this.cstack.push(this.luDataProvider.create(desc[7]));
+    this.cstack.push(this.luDataProvider.create(desc[8]));
+    this.cstack.push(this.luDataProvider.create(desc[9]));
 
-        this.lstack = p.create(lineup.model.createStackDesc('Left'));
-        r.push(this.lstack)
-        this.lstack.push(p.create(desc[0]))
-        this.lstack.push(p.create(desc[1]))
-        this.lstack.push(p.create(desc[2]))
-        this.lstack.push(p.create(desc[3]))
-        this.lstack.push(p.create(desc[4]))
+    this.rstack = this.luDataProvider.create(lineup.model.createStackDesc('Right'));
+    r.push(this.rstack)
+    this.rstack.push(this.luDataProvider.create(desc[10]));
+    this.rstack.push(this.luDataProvider.create(desc[11]));
+    this.rstack.push(this.luDataProvider.create(desc[12]));
+    this.rstack.push(this.luDataProvider.create(desc[13]));
+    this.rstack.push(this.luDataProvider.create(desc[14]));
 
-        this.cstack = p.create(lineup.model.createStackDesc('Intersection'));
-        r.push(this.cstack)
-        this.cstack.push(p.create(desc[5]));
-        this.cstack.push(p.create(desc[6]));
-        this.cstack.push(p.create(desc[7]));
-        this.cstack.push(p.create(desc[8]));
-        this.cstack.push(p.create(desc[9]));
+    this.lu = lineup.create(this.luDataProvider, this.node, {
+      /*
+       additionalDesc : [
+       lineup.model.StackColumn.desc('+ Stack')
+       ],
+       */
+      /*htmlLayout: {
+       autoRotateLabels: true
+       },*/
+      body: {
+        renderer: 'svg'
+      },
+      /*header: {
+       rankingButtons: function($node) {
+       $node.append('button').text('+').on('click', function(d) {
+       console.log(d);
+       });
+       },
+       linkTemplates: ['a/$1', 'b/$1']
+       },
+       */
+      /*renderingOptions: {
+       histograms: true
+       }*/
+    });
+    this.updateWeights()
+    //this.lu.update();
 
-        this.rstack = p.create(lineup.model.createStackDesc('Right'));
-        r.push(this.rstack)
-        this.rstack.push(p.create(desc[10]));
-        this.rstack.push(p.create(desc[11]));
-        this.rstack.push(p.create(desc[12]));
-        this.rstack.push(p.create(desc[13]));
-        this.rstack.push(p.create(desc[14]));
-
-        this.lu = lineup.create(p, this.node, {
-            /*
-            additionalDesc : [
-              lineup.model.StackColumn.desc('+ Stack')
-            ],
-            */
-            /*htmlLayout: {
-              autoRotateLabels: true
-            },*/
-            body: {
-              renderer: 'svg'
-            },
-            /*header: {
-              rankingButtons: function($node) {
-                $node.append('button').text('+').on('click', function(d) {
-                  console.log(d);
-                });
-              },
-              linkTemplates: ['a/$1', 'b/$1']
-            },
-            */
-            /*renderingOptions: {
-              histograms: true
-            }*/
-          });
-        this.updateWeights()
-      //this.lu.update();
-
-    }
+  }
 }
 
 export class WeightInterface {
@@ -264,8 +278,8 @@ export class WeightInterface {
     let l = <any>lines
     if (transitions) l = <any>lines.transition().duration(transitionDuration)
     l.style("stroke", function (d) {
-        return d.color
-      })
+      return d.color
+    })
       .attr("y1", function (d, i) {
         return (_that.cumSum[i] + _that.cumSum[i + 1]) / 2 * _that.scalefactor + 10
       })

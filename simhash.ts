@@ -173,34 +173,39 @@ export class MatchedTokenTree {
 
   private _similarity
 
+
+  //not affected by weighting. Just delivers the correct proportions of leafs for each category.
   get similarityForLineup() {
     let leafs:TreeNode[] = this.root.leafs;
     var leftSims = [0,0,0,0,0];
-    var centerSims = [0,0,0,0,0];
+    var centerSims = [-1,-1,-1,-1,-1];
     var rightSims = [0,0,0,0,0];
     for (let i = 0; i < leafs.length; i++) {
       if (leafs[i].isPaired) {
-        centerSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
+        if (centerSims[i] < 0) centerSims[i] = 0
+        let sim = leafs[i].tokenSimilarity
+        centerSims[leafs[i].category] += leafs[i].importance*sim
+        leftSims[leafs[i].category] += leafs[i].importance*(1-sim)/2
+        rightSims[leafs[i].category] += leafs[i].importance*(1-sim)/2
       } else {
         if (leafs[i].hasLeftToken) {
-          leftSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
+          leftSims[leafs[i].category] += leafs[i].importance
         } else {
-          rightSims[leafs[i].category] += leafs[i].importance*leafs[i].tokenSimilarity
+          rightSims[leafs[i].category] += leafs[i].importance
         }
       }
     }
-    let weights = SimHash.hasher.categoryWeighting;
-    let total = 0;
-    for (let i = 0; i < weights.length; i++) {
-      leftSims[i] = leftSims[i] * weights[i]/100
-      total += leftSims[i]
-      centerSims[i] = centerSims[i] * weights[i]/100
-      total += centerSims[i]
-      rightSims[i] = rightSims[i] * weights[i]/100
-      total += rightSims[i]
+
+    for (let i = 0; i < 5; i++) {
+      centerSims[i] = centerSims[i] < 0 ? 1: centerSims[0]
     }
 
-    for (let i = 0; i < weights.length; i++) {
+    let total = 0;
+    for (let i = 0; i < 5; i++) {
+      total = 0;
+      total += leftSims[i]
+      total += centerSims[i]
+      total += rightSims[i]
       leftSims[i] = leftSims[i] / total
       centerSims[i] = centerSims[i] / total
       rightSims[i] = rightSims[i] / total
@@ -553,7 +558,7 @@ export class SimHash extends events.EventHandler{
     let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
     for (let i:number = 0; i < tokens.length; i++) {
       tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
-      if (!(tokens[i] instanceof StateTokenLeaf)) {
+      if (!(tokens[i].isLeaf)) {
         (<StateTokenNode>tokens[i]).childs = this.normalizeTokenPriority((<StateTokenNode>tokens[i]).childs, tokens[i].importance)
       }
     }
