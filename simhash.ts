@@ -179,7 +179,7 @@ export class MatchedTokenTree {
         var leftSims = [0, 0, 0, 0, 0];
         var centerSims = [0, 0, 0, 0, 0];
         var rightSims = [0, 0, 0, 0, 0];
-        let catContainsToken:boolean[]= [false,false,false,false];
+        let catContainsToken:boolean[]= [false,false,false,false,false];
         for (let i = 0; i < leafs.length; i++) {
             if (leafs[i].isPaired) {
                 catContainsToken[leafs[i].category] = true;
@@ -201,13 +201,17 @@ export class MatchedTokenTree {
 
         let total = 0;
         for (let i = 0; i < 5; i++) {
-            total = 0;
-            total += leftSims[i]
-            total += centerSims[i]
-            total += rightSims[i]
-            leftSims[i] = leftSims[i] / total
-            centerSims[i] = centerSims[i] / total
-            rightSims[i] = rightSims[i] / total
+            if (catContainsToken[i]) {
+                total = 0;
+                total += leftSims[i]
+                total += centerSims[i]
+                total += rightSims[i]
+                leftSims[i] = leftSims[i] / total
+                centerSims[i] = centerSims[i] / total
+                rightSims[i] = rightSims[i] / total
+            } else {
+                centerSims[i] = 1
+            }
         }
 
         return [leftSims, centerSims, rightSims]

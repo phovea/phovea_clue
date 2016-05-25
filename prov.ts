@@ -529,9 +529,9 @@ export class StateNode extends graph.GraphNode {
         super.setAttr('description', description);
     }
 
-    private treeMatches:MatchedTokenTree[] = []
-
     //<author>: Michael Gillhofer
+    private treeMatches:MatchedTokenTree[] = []
+    public isHoveredInLineUp:boolean = false;
 
     calcSimHash():string[] {
         //console.log("Recalc Hash of " + this.id)
@@ -1282,13 +1282,11 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
 
     act:StateNode = null;
     private lastAction:ActionNode = null;
-
     public comparing:boolean = false;
 
     get compareMode():boolean {
         return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
     }
-
 
     //currently executing promise
     private currentlyRunning = false;

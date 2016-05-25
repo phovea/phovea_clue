@@ -11,6 +11,7 @@ import $ = require('jquery');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
 import provenance = require('./prov');
+import provvis = require('./provvis')
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import {StateNode} from "./prov";
@@ -90,7 +91,7 @@ export class LinupStateView extends vis.AVisInstance {
             this.arr = this.arr.concat({
                 "ld": sim[0][0], "lv": sim[0][1], "ls": sim[0][2], "ll": sim[0][3], "la": sim[0][4],
                 "cd": sim[1][0], "cv": sim[1][1], "cs": sim[1][2], "cl": sim[1][3], "ca": sim[1][4],
-                "rd": sim[2][0], "rv": sim[2][1], "rs": sim[2][2], "rl": sim[2][3], "ra": sim[2][4]
+                "rd": sim[2][0], "rv": sim[2][1], "rs": sim[2][2], "rl": sim[2][3], "ra": sim[2][4], "state":currState
             })
         }
     }
@@ -187,7 +188,35 @@ export class LinupStateView extends vis.AVisInstance {
         this.cstack.sortByMe(false);
         this.updateWeights()
         this.lu.update();
+        this.registerListeners()
+    }
 
+    registerListeners() {
+        this.lu.on("selectionChanged", this.selectStateListener.bind(this))
+        this.lu.on("hoverChanged", this.hoverListener.bind(this))
+    }
+
+    private lastHovered:number = -1
+    private hoverListener(index:number) {
+        if (index < 0) {
+            this.arr[this.lastHovered].state.isHoveredInLineUp = false;
+            this.lastHovered = -1
+        } else {
+            //console.log(this.arr[index])
+            this.arr[index].state.isHoveredInLineUp = true;
+            this.lastHovered = index;
+        }
+        this.data.fire('linupHoverChanged')
+    }
+
+    private selectStateListener(index:number) {
+        if (index < 0) return
+        /*
+        d3.event.stopPropagation();
+        this.data.selectState(this.arr[index].state,idtypes.toSelectOperation(d3.event))
+        this.data.jumpTo(this.arr[index].state);
+        */
+        //TODO draw state similarity view
     }
 }
 

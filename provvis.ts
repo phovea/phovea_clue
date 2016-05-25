@@ -79,6 +79,10 @@ class StateRepr {
     */
     this.a = s.creator;
   }
+  
+  get isHoveredInLineUp() {
+    return this.s.isHoveredInLineUp
+  }
 
   get similarityToHoveredState():number {
     //console.log(this.graph.compareMode);
@@ -372,7 +376,7 @@ class StateRepr {
       .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
-      .classed('caleydo-select-selected', (d) => d.selected)
+      .classed('caleydo-select-selected', (d) => (d.selected || d.isHoveredInLineUp))
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .style('opacity', (d) => d.opacity)
       .attr('data-doi',(d) => d.doi)
@@ -450,6 +454,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     state.on('setAttr', this.trigger);
   };
 
+  private onLinupHoverChanged = (event:any,state:provenance.StateNode) => {
+    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    $elem.call(StateRepr.render);
+  }
 
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
@@ -523,6 +531,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
+    this.data.on('linupHoverChanged', this.onLinupHoverChanged)
     //this.data.on('weighting_change', this.onWeightingChanged)
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
