@@ -1491,18 +1491,25 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         return inverted;
     }
 
-    push(action:IAction);
-    push(meta:ActionMetaData, f_id:string, f:ICmdFunction, inputs:IObjectRef<any>[], parameter:any);
-    push(arg:any, f_id:string = '', f:ICmdFunction = null, inputs:IObjectRef<any>[] = [], parameter:any = {}) {
-        return this.inOrder(() => {
-            if (arg instanceof ActionMetaData) {
-                return this.run(this.createAction(<ActionMetaData>arg, f_id, f, inputs, parameter));
-            } else {
-                var a = <IAction>arg;
-                return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}));
-            }
-        });
-    }
+  push(action:IAction);
+  push(meta:ActionMetaData, f_id:string, f:ICmdFunction, inputs:IObjectRef<any>[], parameter:any);
+  push(arg:any, f_id:string = '', f:ICmdFunction = null, inputs:IObjectRef<any>[] = [], parameter:any = {}) {
+    return this.inOrder(() => {
+      if (arg instanceof ActionMetaData) {
+        return this.run(this.createAction(<ActionMetaData>arg, f_id, f, inputs, parameter), null);
+      } else {
+        var a = <IAction>arg;
+        return this.run(this.createAction(a.meta, a.id, a.f, a.inputs || [], a.parameter || {}), null);
+      }
+    });
+  }
+
+  pushWithResult(action:IAction, result: ICmdResult) {
+    return this.inOrder(() => {
+      const a = this.createAction(action.meta, action.id, action.f, action.inputs || [], action.parameter || {});
+      return this.run(a, result);
+    });
+  }
 
     findObject<T>(value:T) {
         var r = C.search(this._objects, (obj) => obj.value === value);
@@ -1613,85 +1620,84 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         }
     }
 
-    private run(action:ActionNode, withinMilliseconds:number | (() => number) = -1) {
-        var current = this.act,
-            next:StateNode = action.resultsIn,
-            newState = false;
-        if (!next) { //create a new state
-            newState = true;
-            this.addEdge(current, 'next', action);
-            next = this.makeState(action.meta.name);
-            this.addEdge(action, 'resultsIn', next);
-        }
-        this.fire('execute', action);
-        if (C.hash.is('debug')) {
-            console.log('execute ' + action.meta + ' ' + action.f_id);
-        }
-        this.currentlyRunning = true;
+  private executedAction(action: ActionNode, newState: boolean, result) {
+    const current = this.act;
+    const next = action.resultsIn;
+    result = C.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
+    this.fire('executed', action, result);
 
-        if (C.isFunction(withinMilliseconds)) {
-            withinMilliseconds = (<any>withinMilliseconds)();
-        }
-        this.executeCurrentActionWithin = <number>withinMilliseconds;
+    var firstTime = !action.onceExecuted;
+    action.onceExecuted = true;
 
-        const runningAction = action.execute(this, this.executeCurrentActionWithin).then((result) => {
-            result = C.mixin({created: [], removed: [], inverse: null, consumed: 0}, result);
-            this.fire('executed', action, result);
+    if (firstTime) {
+      //create an link outputs
+      //
+      var created = this.resolve(result.created);
+      created.forEach((c, i) => {
+        this.addEdge(action, 'creates', c, {index: i});
+      });
+      // a removed one should be part of the inputs
+      const requires = action.requires;
+      var removed = result.removed.map((r) => this.findInArray(requires, r));
+      removed.forEach((c) => {
+        c.value = null; //free reference
+        this.addEdge(action, 'removes', c);
+      });
 
-            var firstTime = !action.onceExecuted;
-            action.onceExecuted = true;
+      //update new state
+      if (newState) {
+        var objs = current.consistsOf;
+        objs.push.apply(objs, created);
+        removed.forEach((r) => {
+          var i = objs.indexOf(r);
+          objs.splice(i, 1);
+        });
+        objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
+      }
+      this.fire('executed_first', action, next);
+    } else {
+      //update creates reference values
+      action.creates.forEach((c, i) => {
+        c.value = result.created[i].value;
+      });
+      action.removes.forEach((c) => c.value = null);
+    }
+      let hash = next.calcSimHash();
+    result.inverse = asFunction(result.inverse);
+    action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
-            if (firstTime) {
-                //create an link outputs
-                //
-                var created = this.resolve(result.created);
-                created.forEach((c, i) => {
-                    this.addEdge(action, 'creates', c, {index: i});
-                });
-                // a removed one should be part of the inputs
-                const requires = action.requires;
-                var removed = result.removed.map((r) => this.findInArray(requires, r));
-                removed.forEach((c) => {
-                    c.value = null; //free reference
-                    this.addEdge(action, 'removes', c);
-                });
+    this.switchToImpl(action, next);
+    this.fire('action-execution-complete', action.resultsIn);
+    return {
+      action: action,
+      state: next,
+      created: created,
+      removed: removed,
+      consumed: result.consumed
+    };
+  }
 
-                //update new state
-                if (newState) {
-                    var objs = current.consistsOf;
-                    objs.push.apply(objs, created);
-                    removed.forEach((r) => {
-                        var i = objs.indexOf(r);
-                        objs.splice(i, 1);
-                    });
-                    objs.forEach((obj) => this.addEdge(next, 'consistsOf', obj));
-                }
-                this.fire('executed_first', action, next);
-                //action.resultsIn.checkduplicate()
+  private run(action:ActionNode, result: ICmdResult, withinMilliseconds:number | (() => number) = -1) {
+    var next:StateNode = action.resultsIn,
+      newState = false;
+    if (!next) { //create a new state
+      newState = true;
+      this.addEdge(this.act, 'next', action);
+      next = this.makeState(action.meta.name);
+      this.addEdge(action, 'resultsIn', next);
+    }
+    this.fire('execute', action);
+    if (C.hash.is('debug')) {
+      console.log('execute ' + action.meta + ' ' + action.f_id);
+    }
+    this.currentlyRunning = true;
 
-            } else {
-                //update creates reference values
-                action.creates.forEach((c, i) => {
-                    c.value = result.created[i].value;
-                });
-                action.removes.forEach((c) => c.value = null);
-            }
-            let hash = next.calcSimHash();
-            //console.log("recalculated hash of " + next.id +" is " + hash);
+    if (C.isFunction(withinMilliseconds)) {
+      withinMilliseconds = (<any>withinMilliseconds)();
+    }
+    this.executeCurrentActionWithin = <number>withinMilliseconds;
 
-            result.inverse = asFunction(result.inverse);
-            action.updateInverse(this, <IInverseActionCreator>result.inverse);
-
-            this.switchToImpl(action, next);
-            this.fire('action-execution-complete', action.resultsIn);
-            return {
-                action: action,
-                state: next,
-                created: created,
-                removed: removed,
-                consumed: result.consumed
-            };
-        })
+    const runningAction = (result ? Promise.resolve(result) : action.execute(this, this.executeCurrentActionWithin)).then(this.executedAction.bind(this, action, newState));
 
         runningAction.then((result) => {
             const q = this.nextQueue.shift();
@@ -1743,34 +1749,34 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
                 remaining -= consumed;
             }
 
-            torun.forEach((action, i) => {
-                r = r.then((results) => this.run(action, withinMilliseconds < 0 ? -1 : guessTime(i)).then((result) => {
-                    results.push(result);
-                    updateTime(result.consumed);
-                    return results;
-                }));
-            });
-            return r.then((results) => {
-                if (this.act !== last.resultsIn) {
-                    this.switchToImpl(last, last.resultsIn);
-                }
-                return results;
-            });
-        });
-    }
+      torun.forEach((action, i) => {
+        r = r.then((results) => this.run(action, null, withinMilliseconds < 0 ? -1 : guessTime(i)).then((result: any) => {
+          results.push(result);
+          updateTime(result.consumed);
+          return results;
+        }));
+      });
+      return r.then((results) => {
+        if (this.act !== last.resultsIn) {
+          this.switchToImpl(last, last.resultsIn);
+        }
+        return results;
+      });
+    });
+  }
 
-    undo() {
-        if (!this.lastAction) {
-            return Promise.resolve(null);
-        }
-        //create and store the inverse
-        if (this.lastAction.inverses != null) {
-            //undo and undoing should still go one up
-            return this.jumpTo(this.act.previousState);
-        } else {
-            return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this)));
-        }
+  undo() {
+    if (!this.lastAction) {
+      return Promise.resolve(null);
     }
+    //create and store the inverse
+    if (this.lastAction.inverses != null) {
+      //undo and undoing should still go one up
+      return this.jumpTo(this.act.previousState);
+    } else {
+      return this.inOrder(() => this.run(this.lastAction.getOrCreateInverse(this), null));
+    }
+  }
 
     jumpTo(state:StateNode, withinMilliseconds = -1) {
         return this.inOrder(() => {

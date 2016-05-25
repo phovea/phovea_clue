@@ -2,8 +2,6 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
-@import "vars";
-
 .provenance-story-vis {
   display: -webkit-flex;
   display: flex;
@@ -140,7 +138,7 @@
 
 div.stories {
 
-  &.vertical {;
+  &.vertical {
 
     div.story {
       height: 5em;

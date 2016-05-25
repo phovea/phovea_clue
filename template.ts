@@ -329,7 +329,11 @@ export class CLUEWrapper extends events.EventHandler {
     /**
      * whether thumbnails should be shown in the provenance or story vis
      */
-    thumbnails: true
+    thumbnails: true,
+    /**
+     * App Header Link
+     */
+    appLink: new header.AppHeaderLink('CLUE')
   };
 
   private manager:prov.MixedStorageProvenanceGraphManager;
@@ -373,7 +377,7 @@ export class CLUEWrapper extends events.EventHandler {
 
     //create the common header
     this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
-      app: this.options.app,
+      appLink: this.options.appLink,
       inverse: false
     });
 
