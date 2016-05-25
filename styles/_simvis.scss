@@ -25,10 +25,11 @@
   flex-direction: column;
   width: 300px;
 
-    &:first-child {
+  .header {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
       color: $core_colour_text;
+      background-color: $core_colour;
   }
 
   .catWeightContainer {

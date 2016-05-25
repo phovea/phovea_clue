@@ -671,7 +671,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .attr({'class': 'provenance-similarity-vis'})
       .style('transform', 'rotate(' + that.options.rotate + 'deg)')
 
-    $simArea.html('<div><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
+    $simArea.html('<div class="header"><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
       '<div class="catWeightContainer closed"><div class="barContainer"></div><svg class="lineContainer"></svg><div class="controlContainer"></div></div>'+
         '<div class="stateLinupView"></div>'+
         '<div class="stateCompareView"></div>'
