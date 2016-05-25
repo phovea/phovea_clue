@@ -602,6 +602,10 @@ export class StateNode extends graph.GraphNode {
 
   getSimForLineupTo(otherState:StateNode) {
     let thisTokens:IStateToken[] = this.stateTokens
+    if (thisTokens === null) {
+      this.calcSimHash()
+      thisTokens = this.stateTokens
+    }
     let otherTokens:IStateToken[] = otherState.stateTokens
     if (thisTokens === null && otherTokens === null) return [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
     if (thisTokens === null || otherTokens === null) return [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
@@ -1680,7 +1684,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
       this.switchToImpl(action, next);
-
+      this.fire('action-execution-complete', action.resultsIn);
       return {
         action: action,
         state: next,
@@ -1688,7 +1692,7 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         removed: removed,
         consumed: result.consumed
       };
-    });
+    })
 
     runningAction.then((result) => {
       const q = this.nextQueue.shift();

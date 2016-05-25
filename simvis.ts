@@ -42,27 +42,46 @@ export class LinupStateView extends vis.AVisInstance {
     this.node = container;
     this.initialize()
     SimHash.hasher.on('weights_changed', this.updateWeights.bind(this))
-    this.data.on('add_state', this.recalcStateSim.bind(this));
+    this.data.on('add_state', this.onExecutionStartedListener.bind(this));
+    this.data.on('action-execution-complete', this.onStateAddedListener.bind(this));
     this.data.on('select_state', this.stateSelectionChanged.bind(this));
     return this;
   }
 
-  stateSelectionChanged(event:any, state:provenance.StateNode) {
-    if (event.args[1] === "selected") this.recalcStateSim()
+  private executionToStateRunning:StateNode= null;
+
+  onExecutionStartedListener(event:any, state:provenance.StateNode) {
+    if (this.executionToStateRunning === null) {
+      this.executionToStateRunning = state;
+    } else {
+      throw Error("Two executions are run in paralell")
+    }
   }
 
-  recalcStateSim() {
+  onStateAddedListener(event:any, state:provenance.StateNode) {
+    if (this.executionToStateRunning === null) return
+    if (this.executionToStateRunning === state) {
+      this.recalcStateSim(event, state)
+      this.executionToStateRunning = null;
+    }
+  }
+
+  stateSelectionChanged(event:any, state:provenance.StateNode) {
+    if (event.args[1] === "selected") this.recalcStateSim(event, state)
+  }
+
+  recalcStateSim(event:any, state:provenance.StateNode) {
     //this.fillArr();
     //this.luDataProvider.data =this.arr
     //this.lu.update()
     this.lu.destroy()
-    this.initialize();
+    this.initialize(state);
   }
 
-  fillArr() {
+  fillArr(state:provenance.StateNode) {
     this.arr = []
-    let state:StateNode = this.data.selectedStates(idtypes.defaultSelectionType)[0]
-    if (isUndefined(state)) return;
+    //let state:StateNode = this.data.selectedStates(idtypes.defaultSelectionType)[0]
+    if (isUndefined(state) || state === null) return;
     let allstates = this.data.states;
     for (let i = 0; i < allstates.length; i++) {
       let currState:StateNode = <StateNode>allstates[i];
@@ -91,7 +110,7 @@ export class LinupStateView extends vis.AVisInstance {
 
   private static classColors = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00']
 
-  initialize() {
+  initialize(reason:provenance.StateNode = null) {
     var desc = [
       {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: LinupStateView.classColors[0]},
       {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: LinupStateView.classColors[1]},
@@ -111,7 +130,7 @@ export class LinupStateView extends vis.AVisInstance {
     ];
     //this.arr = [{"ld":1, "lv":1, "ls":1, "ll":1, "la":1,"cd":1, "cv":1, "cs":1, "cl":1, "ca":1,"rd":1, "rv":1, "rs":1, "rl":1, "ra":1}]
 
-    this.fillArr()
+    this.fillArr(reason)
     this.luDataProvider = new lineup.provider.LocalDataProvider(this.arr, desc);
     var r = this.luDataProvider.pushRanking();
 
