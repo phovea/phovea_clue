@@ -177,27 +177,27 @@ export class MatchedTokenTree {
     get similarityForLineup() {
         let leafs:TreeNode[] = this.root.leafs;
         var leftSims = [0, 0, 0, 0, 0];
-        var centerSims = [-1, -1, -1, -1, -1];
+        var centerSims = [0, 0, 0, 0, 0];
         var rightSims = [0, 0, 0, 0, 0];
+        let catContainsToken:boolean[]= [false,false,false,false];
         for (let i = 0; i < leafs.length; i++) {
             if (leafs[i].isPaired) {
-                if (centerSims[i] < 0) centerSims[i] = 0
+                catContainsToken[leafs[i].category] = true;
                 let sim = leafs[i].tokenSimilarity
                 centerSims[leafs[i].category] += leafs[i].importance * sim
                 leftSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2
                 rightSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2
             } else {
                 if (leafs[i].hasLeftToken) {
+                    catContainsToken[leafs[i].category] = true;
                     leftSims[leafs[i].category] += leafs[i].importance
                 } else {
+                    catContainsToken[leafs[i].category] = true;
                     rightSims[leafs[i].category] += leafs[i].importance
                 }
             }
         }
 
-        for (let i = 0; i < 5; i++) {
-            centerSims[i] = centerSims[i] < 0 ? 1 : centerSims[0]
-        }
 
         let total = 0;
         for (let i = 0; i < 5; i++) {
@@ -354,7 +354,7 @@ class TreeNode {
     }
 
     get hasLeftToken():boolean {
-        return !this.leftToken === null
+        return !(this.leftToken === null)
     }
 
     get leafs():TreeNode[] {
