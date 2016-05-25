@@ -269,7 +269,7 @@ class TreeNode {
         } else {
             switch ((<StateTokenLeaf>this.leftToken).type) {
                 case 0:
-                    return (<StateTokenLeaf>this.leftToken).value === (<StateTokenLeaf>this.leftToken).value ? 1 : 0;
+                    return (<StateTokenLeaf>this.leftToken).value === (<StateTokenLeaf>this.rightToken).value ? 1 : 0;
                 case 1:
                     let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken
                     let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken
