@@ -84,6 +84,9 @@ export class LinupStateView extends vis.AVisInstance {
         //let state:StateNode = this.data.selectedStates(idtypes.defaultSelectionType)[0]
         if (isUndefined(state) || state === null) return;
         let allstates = this.data.states;
+        allstates.forEach(function (s) {
+          s.lineUpIndex = -1;
+        })
         for (let i = 0; i < allstates.length; i++) {
             let currState:StateNode = <StateNode>allstates[i];
             if (state === currState) continue;
@@ -93,6 +96,7 @@ export class LinupStateView extends vis.AVisInstance {
                 "cd": sim[1][0], "cv": sim[1][1], "cs": sim[1][2], "cl": sim[1][3], "ca": sim[1][4],
                 "rd": sim[2][0], "rv": sim[2][1], "rs": sim[2][2], "rl": sim[2][3], "ra": sim[2][4], "state":currState
             })
+            currState.lineUpIndex = i;
         }
     }
 
@@ -194,6 +198,18 @@ export class LinupStateView extends vis.AVisInstance {
     registerListeners() {
         this.lu.on("selectionChanged", this.selectStateListener.bind(this))
         this.lu.on("hoverChanged", this.hoverListener.bind(this))
+        this.data.on("select", this.selectionChangedListener.bind(this))
+    }
+
+    private selectionChangedListener = (event: any, type: string, act: ranges.Range) => {
+      if (type === idtypes.hoverSelectionType) {
+        const selectedStates = this.data.selectedStates(type);
+        if (selectedStates.length === 0) this.luDataProvider.clearSelection()
+        else {
+          this.luDataProvider.select(selectedStates[0].lineUpIndex)
+        }
+      }
+
     }
 
     private lastHovered:number = -1

@@ -523,7 +523,7 @@ export class ActionNode extends graph.GraphNode {
  */
 export class StateNode extends graph.GraphNode {
 
-    constructor(name:string, description = '') {
+  constructor(name:string, description = '') {
         super('state');
         super.setAttr('name', name);
         super.setAttr('description', description);
@@ -532,7 +532,16 @@ export class StateNode extends graph.GraphNode {
     //<author>: Michael Gillhofer
     private treeMatches:MatchedTokenTree[] = []
     public isHoveredInLineUp:boolean = false;
+    private _lineupIndex:number = -1;
 
+    get lineUpIndex():number{
+        return this._lineupIndex;
+    }
+  
+    set lineUpIndex(value:number){
+        this._lineupIndex=value;
+    }
+  
     calcSimHash():string[] {
         //console.log("Recalc Hash of " + this.id)
         var allTokens:IStateToken[] = [];
