@@ -385,7 +385,7 @@ export class SimHash extends events.EventHandler {
     private static _instance:SimHash = new SimHash();
 
     private _catWeighting:number[] = [30, 20, 25, 20, 5];
-    private _nrBits:number = 2000;
+    private _nrBits:number = 300;
 
     public static get hasher():SimHash {
         return this._instance;
