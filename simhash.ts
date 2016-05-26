@@ -19,15 +19,15 @@ class HashTable {
     maxSize:number;
 
 
-    push(value:string, prob:number, hash:string) {
+    push(name: string, value:string, prob:number, hash:string) {
         if (hash == null) hash = String(murmurhash2_32_gc(value, 0))
-        let index = this.dict.indexOf(value)
+        let index = this.dict.indexOf(name)
         if (index < 0) {
             index = this.dict.length
         }
-        this.dict[index] = value
-        this.probs[value] = prob;
-        this.hashes[value] = hash;
+        this.dict[index] = name
+        this.probs[name] = prob;
+        this.hashes[name] = hash;
     }
 
     toHash(n:number):string {
@@ -385,7 +385,7 @@ export class SimHash extends events.EventHandler {
     private static _instance:SimHash = new SimHash();
 
     private _catWeighting:number[] = [30, 20, 25, 20, 5];
-    private _nrBits:number = 200;
+    private _nrBits:number = 2000;
 
     public static get hasher():SimHash {
         return this._instance;
@@ -420,7 +420,7 @@ export class SimHash extends events.EventHandler {
             this.hashTable[type.id] = new HashTable(this._HashTableSize)
         }
         for (let i:number = 0; i < allTokens.length; i++) {
-            this.hashTable[type.id].push(allTokens[i].value, allTokens[i].importance, null)
+            this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null)
         }
         return this.hashTable[type.id].toHash(this._nrBits)
     }
@@ -432,7 +432,8 @@ export class SimHash extends events.EventHandler {
         let selection:number[] = type.selections(selectionType).dim(0).asList(0);
         for (var sel of selection) {
             this.hashTable[type.id].push(
-                String(sel),
+              String(sel),
+              String(sel),
                 1,
                 ordinalHash(min, max, sel, this._nrBits))
         }
@@ -505,6 +506,7 @@ export class SimHash extends events.EventHandler {
             for (let i:number = 0; i < ordinalTokens.length; i++) {
                 this.hashTable[cat].push(
                     ordinalTokens[i].name,
+                  ordinalTokens[i].value,
                     ordinalTokens[i].importance,
                     ordinalHash(
                         ordinalTokens[i].value[0],
@@ -521,6 +523,7 @@ export class SimHash extends events.EventHandler {
             for (let i:number = 0; i < ordidTypeTokens.length; i++) {
                 this.hashTable[cat].push(
                     ordidTypeTokens[i].name,
+                  ordidTypeTokens[i].value,
                     ordidTypeTokens[i].importance,
                     this.getHashOfOrdinalIDTypeSelection(
                         ordidTypeTokens[i].value[0],
@@ -537,6 +540,7 @@ export class SimHash extends events.EventHandler {
         if (idtypeTokens !== undefined) {
             for (let i:number = 0; i < idtypeTokens.length; i++) {
                 this.hashTable[cat].push(
+                    idtypeTokens[i].name,
                     idtypeTokens[i].value,
                     idtypeTokens[i].importance,
                     this.getHashOfIDTypeSelection(
@@ -550,7 +554,7 @@ export class SimHash extends events.EventHandler {
         let regularTokens:StateTokenLeaf[] = splitTokens[0];
         if (regularTokens !== undefined) {
             for (let i:number = 0; i < regularTokens.length; i++) {
-                this.hashTable[cat].push(regularTokens[i].value, regularTokens[i].importance, null)
+                this.hashTable[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null)
             }
         }
 
