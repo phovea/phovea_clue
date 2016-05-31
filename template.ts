@@ -465,12 +465,15 @@ export class CLUEWrapper extends events.EventHandler {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
-      prov_sel.create(graph, this.options.recordSelectionTypes, {
-        filter: function (idtype) {
-          return idtype && idtype.name[0] !== '_';
-        },
-        animated: this.options.animatedSelections
-      });
+      if (this.options.recordSelectionTypes) {
+        //record selections of the given type
+        prov_sel.create(graph, this.options.recordSelectionTypes, {
+          filter: function (idtype) {
+            return idtype && idtype.name[0] !== '_';
+          },
+          animated: this.options.animatedSelections
+        });
+      }
 
       this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
 
