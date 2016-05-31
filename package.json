@@ -29,7 +29,8 @@
           "type": "actionCompressor",
           "id": "idtype-selection",
           "file": "selection",
-          "factory": "compressSelection"
+          "factory": "compressSelection",
+          "matches": "select"
         },
         {
           "type": "actionFactory",
