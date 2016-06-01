@@ -170,7 +170,7 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
 
   return manager.list().then((list) => {
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
-    $list.enter().insert('li', ':first-child').classed('graph', true).html((d) => `<a href="#clue_graph=${d.id}"><span class="glyphicon glyphicon-file"></span> ${d.name} </a>`).select('a').on('click', (d) => {
+    $list.enter().insert('li', ':first-child').classed('graph', true).html((d) => `<a href="#clue_graph=${d.id}"><i class="fa fa-code-fork fa-rotate-180" aria-hidden="true"></i> ${d.name} </a>`).select('a').on('click', (d) => {
       d3.event.preventDefault();
       manager.loadGraph(d);
     });
@@ -211,9 +211,9 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal" ><span class="fa fa-open"></span> Select</button>
-                    <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone"></span> Clone</button>
-                    <button class="btn btn-danger" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
+                    <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone" aria-hidden="true"></span> Clone</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                 </div>
             </div>
         </div>`);
@@ -394,12 +394,12 @@ export class CLUEWrapper extends events.EventHandler {
                aria-expanded="false"><i class="fa fa-code-fork fa-lg fa-rotate-180"></i></a>
             <ul class="dropdown-menu" id="provenancegraph_list">
                 <li role="separator" class="divider"></li>
-                <li><a href="#" id="provenancegraph_import"><span class="glyphicon glyphicon-import"></span> Import ...</a></li>
-                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote"><span class="glyphicon glyphicon-import"></span> Import Remote ...</a></li>
-                <li><a href="#" id="provenancegraph_export"><span class="glyphicon glyphicon-export"></span> Export ...</a></li>
+                <li><a href="#" id="provenancegraph_import"><span class="fa fa-upload" aria-hidden="true"></span> Import ...</a></li>
+                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote"><span class="fa fa-cloud-upload" aria-hidden="true"></span> Import Remote ...</a></li>
+                <li><a href="#" id="provenancegraph_export"><span class="fa fa-download" aria-hidden="true"></span> Export ...</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="#" id="provenancegraph_new"><span class="glyphicon glyphicon-upload"></span> New ...</a></li>
-                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote"><span class="glyphicon glyphicon-upload"></span> New Remote...</a></li>
+                <li><a href="#" id="provenancegraph_new"><span class="fa fa-plus-circle" aria-hidden="true"></span> New ...</a></li>
+                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote"><span class="fa fa-cloud" aria-hidden="true"></span> New Remote...</a></li>
             </ul>
         </li>`);
 
@@ -465,12 +465,15 @@ export class CLUEWrapper extends events.EventHandler {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
-      prov_sel.create(graph, this.options.recordSelectionTypes, {
-        filter: function (idtype) {
-          return idtype && idtype.name[0] !== '_';
-        },
-        animated: this.options.animatedSelections
-      });
+      if (this.options.recordSelectionTypes) {
+        //record selections of the given type
+        prov_sel.create(graph, this.options.recordSelectionTypes, {
+          filter: function (idtype) {
+            return idtype && idtype.name[0] !== '_';
+          },
+          animated: this.options.animatedSelections
+        });
+      }
 
       this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
 
@@ -624,10 +627,10 @@ export class CLUEWrapper extends events.EventHandler {
       let ul = document.createElement('ul');
       ul.classList.add('nav', 'navbar-nav', 'navbar-right');
       ul.innerHTML = `
-      <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><span class="glyphicon glyphicon-user"></span></a></li>
+      <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><i class="fa fa-user" aria-hidden="true"></i></a></li>
         <li style="display: none" class="dropdown" id="user_menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-               aria-expanded="false"><span class="glyphicon glyphicon-user"></span> Unknown</a>
+               aria-expanded="false"><i class="fa fa-user" aria-hidden="true"></i> Unknown</a>
             <ul class="dropdown-menu">
                 <li role="separator" class="divider"></li>
                 <li><a href="#" id="logout_link">Logout</a></li>
