@@ -537,11 +537,11 @@ export class StateNode extends graph.GraphNode {
     get lineUpIndex():number{
         return this._lineupIndex;
     }
-  
+
     set lineUpIndex(value:number){
         this._lineupIndex=value;
     }
-  
+
     calcSimHash():string[] {
         //console.log("Recalc Hash of " + this.id)
         var allTokens:IStateToken[] = [];
@@ -1284,7 +1284,9 @@ function findMetaObject<T>(find:IObjectRef<T>) {
 }
 
 export class ProvenanceGraph extends datatypes.DataTypeBase {
-    private _actions:ActionNode[] = [];
+
+
+  private _actions:ActionNode[] = [];
     private _objects:ObjectNode<any>[] = [];
     private _states:StateNode[] = [];
     private _slides:SlideNode[] = [];
@@ -1296,6 +1298,16 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
     get compareMode():boolean {
         return this.comparing && this.selectedStates(idtypes.hoverSelectionType).length > 0;
     }
+
+    private _similarityMode:boolean = false;
+
+    get similarityMode():boolean{
+      return this._similarityMode;
+      }
+
+    set similarityMode(value:boolean){
+      this._similarityMode=value;
+      }
 
     //currently executing promise
     private currentlyRunning = false;

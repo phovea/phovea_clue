@@ -79,7 +79,7 @@ class StateRepr {
     */
     this.a = s.creator;
   }
-  
+
   get isHoveredInLineUp() {
     return this.s.isHoveredInLineUp
   }
@@ -196,9 +196,8 @@ class StateRepr {
 
 
   get compareMode() {
-    return this.graph.compareMode;
+    return this.graph.compareMode || this.graph.similarityMode;
   }
-
 
 
   static toRepr(graph : provenance.ProvenanceGraph, highlight: any, options : any = {}) {
@@ -385,6 +384,15 @@ class StateRepr {
     $elem.select('span.icon').html(StateRepr.toIcon);
     //$elem.select('span.slabel').text((d) => d.name);
     $elem.select('span.slabel').text((d) => ((d.compareMode && (d.similarityToHoveredState >=0)) ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
+    $elem.select('span.slabel').text(function(d) {
+      let text:string = "";
+      if (d.compareMode && (d.similarityToActiveState >=0)) {
+        text += ": " + Math.round(d.similarityToActiveState * 100) + "%"
+        text += " " + d.name ;
+        return text;
+      }
+      return d.name;
+    });
 
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
@@ -449,7 +457,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private $node:d3.Selection<any>;
   private trigger = C.bind(this.update, this);
   private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
-  
+
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   };
@@ -458,7 +466,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
   }
-
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
@@ -527,7 +534,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   private bind() {
-    this.data.on('switch_state,forked_branch,clear', this.trigger);
+    this.data.on('switch_state,forked_branch,clear,redraw_states', this.trigger);
     this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
@@ -709,6 +716,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         b.toggle('fast')
         weightContainer.close();
         simAreaIsActive = !simAreaIsActive
+        that.data.similarityMode = simAreaIsActive;
+        that.data.fire('redraw_states')
       } else {
           that.highlight[this.name][this.value] = this.checked;
           that.update()
