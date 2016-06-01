@@ -383,7 +383,7 @@ class StateRepr {
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     //$elem.select('span.slabel').text((d) => d.name);
-    $elem.select('span.slabel').text((d) => ((d.compareMode && (d.similarityToHoveredState >=0)) ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
+    //$elem.select('span.slabel').text((d) => ((d.compareMode && (d.similarityToHoveredState >=0)) ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
     $elem.select('span.slabel').text(function(d) {
       let text:string = "";
       if (d.compareMode && (d.similarityToActiveState >=0)) {
@@ -392,7 +392,16 @@ class StateRepr {
         return text;
       }
       return d.name;
-    });
+    })
+      /*.style('font-weight', function(d) {
+        if (d.compareMode) {
+          let val = Math.round(d.similarityToActiveState*10)*100
+          val = Math.min(val, 900)
+          return Math.max(val, 100)
+        }
+        return 500;
+      })
+*/
 
     $elem.select('i.bookmark')
       .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
