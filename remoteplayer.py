@@ -147,7 +147,7 @@ def create_thumbnail(app, prov_id, state, format):
 
   obj = mc.get(key)
   if not obj or force:
-    s = _create_screenshot_impl(app, prov_id, state, format, force)
+    s = _create_screenshot_impl(app, prov_id, state, format, force=force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
@@ -174,7 +174,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
 
   obj = mc.get(key)
   if not obj or force:
-    s = _create_preview_impl(app, prov_id, slide, format, force)
+    s = _create_preview_impl(app, prov_id, slide, format, force=force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
