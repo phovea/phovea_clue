@@ -560,20 +560,12 @@ export class StateNode extends graph.GraphNode {
         return allTokens;
     }
 
-    calcSimHash():string[] {
-        let allTokens = this.stateTokens;
-        let hash:string[] = SimHash.hasher.calcHash(allTokens)
-        this.setAttr('simHash', hash);
-        return hash
-    }
-
-
-
     get simHash():string[] {
         var simHash:string[] = this.getAttr('simHash');
         if (simHash === null) {
-            console.log("Sim Hash Was null")
-            simHash = this.calcSimHash()
+            let allTokens = this.stateTokens;
+            let hash:string[] = SimHash.hasher.calcHash(allTokens)
+            this.setAttr('simHash', hash);
         }
         return simHash;
     }
@@ -589,7 +581,8 @@ export class StateNode extends graph.GraphNode {
         if (exact) return this.getExactSimilarityTo(otherState)
         let thisH:string[] = this.simHash
         let otherH:string[] = otherState.simHash
-        if (thisH[0] == "invalid" || otherH[0] == "invalid") return -1
+        if (thisH === null || otherH === null) return -1
+        if (thisH[0] === "invalid" || otherH[0] === "invalid") return -1
         let weighting = SimHash.hasher.categoryWeighting
         let similarity:number = 0;
         for (let j = 0; j < 5; j++) {
@@ -1683,11 +1676,11 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
       });
       action.removes.forEach((c) => c.value = null);
     }
-      let hash = next.calcSimHash();
     result.inverse = asFunction(result.inverse);
     action.updateInverse(this, <IInverseActionCreator>result.inverse);
 
     this.switchToImpl(action, next);
+    let hash = next.simHash;
     this.fire('action-execution-complete', action.resultsIn);
     return {
       action: action,

@@ -8,6 +8,7 @@
  */
 'use strict';
 import {isUndefined} from "../caleydo_core/main";
+import {IDType} from "../caleydo_core/idtype";
 
 
 export enum TokenType {
@@ -42,16 +43,18 @@ export class StateTokenNode extends IStateToken {
     this.childs = childs
     this.isLeaf = false;
   }
-  
+
 }
 
 export class StateTokenLeaf extends IStateToken{
+
 
   static categories:string[] = ["data", "visual", "selection", "layout", "analysis"]
 
   type: TokenType;
   value;
   category:string;
+  private _hash=null;
 
   constructor(name:string,  importance: number,  type: TokenType,  value,  category:string) {
     super(name,importance);
@@ -59,6 +62,15 @@ export class StateTokenLeaf extends IStateToken{
     this.value = value;;
     this.category = category;
     this.isLeaf = true;
+  }
+
+  get hash(){
+      if (this._hash ===null) throw Error("No hash has been set")
+      return this._hash;
+  }
+
+  set hash(value){
+      this._hash=value;
   }
 
 }

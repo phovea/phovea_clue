@@ -278,10 +278,19 @@ class TreeNode {
                     return 1 - Math.abs(leftpct - rightpct)
                 case 2:
                 case 3:
-                    //TODO
-                    return 1;
+                    return this.similarityFromhash((<StateTokenLeaf>this.leftToken).hash, (<StateTokenLeaf>this.rightToken).hash)
             }
         }
+    }
+
+    private similarityFromhash(hash1:string, hash2:string) {
+        let len = Math.min(hash1.length, hash2.length);
+        let nrEqu = 0;
+        let similarity = 0;
+            for (let i = 0; i < len; i++) {
+                if (hash1.charAt(i) == hash2.charAt(i)) nrEqu++;
+            }
+        return (nrEqu / len - 0.5) * 2
     }
 
     public get category():number {
@@ -403,7 +412,8 @@ export class SimHash extends events.EventHandler {
         //this.fire('weighting_change');
     }
 
-    getHashOfIDTypeSelection(type:IDType, selectionType):string {
+    getHashOfIDTypeSelection(token:StateTokenLeaf, selectionType):string {
+        let type:IDType = token.value;
         let selection:number[] = type.selections(selectionType).dim(0).asList(0);
         let allTokens:StateTokenLeaf[] = [];
         for (var sel of selection) {
@@ -422,7 +432,9 @@ export class SimHash extends events.EventHandler {
         for (let i:number = 0; i < allTokens.length; i++) {
             this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null)
         }
-        return this.hashTable[type.id].toHash(this._nrBits)
+        let hash = this.hashTable[type.id].toHash(this._nrBits)
+        token.hash = hash;
+        return hash
     }
 
     getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
@@ -544,7 +556,7 @@ export class SimHash extends events.EventHandler {
                     idtypeTokens[i].value,
                     idtypeTokens[i].importance,
                     this.getHashOfIDTypeSelection(
-                        idtypeTokens[i].value,
+                        idtypeTokens[i],
                         idtype.defaultSelectionType
                     )
                 )
