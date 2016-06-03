@@ -646,7 +646,7 @@ export class CLUEWrapper extends events.EventHandler {
 
       $alert.hide();
       login.bindLoginForm(<HTMLFormElement>$form[0], (error, user) => {
-        session.store('logged_in', !error && user);
+        session.store('logged_in', (!error && user) ? true : false);
         if (!error && user) {
           $('#login_menu').hide();
           var $base = $('#user_menu').show();

@@ -1820,65 +1820,75 @@ export class ProvenanceGraph extends datatypes.DataTypeBase {
         });
     }
 
-    fork(action:ActionNode, target:StateNode) {
-        //sanity check if target is a child of target ... bad
-        //collect all states
-        const all:StateNode[] = [];
-        const queue = [action.resultsIn];
-        while (queue.length > 0) {
-            let next = queue.shift();
-            if (all.indexOf(next) >= 0) {
-                continue;
-            }
-            all.push(next);
-            queue.push.apply(queue, next.nextStates);
-        }
-        if (all.indexOf(target) >= 0) {
-            return false; //target is a child of state
-        }
+  /**
+   *
+   * @param action the action to fork and attach to target
+   * @param target the state to attach the given action and all of the rest
+   * @param objectReplacements mappings of object replacements
+   * @returns {boolean}
+   */
+  fork(action:ActionNode, target:StateNode, objectReplacements: {from:IObjectRef<any>, to: IObjectRef<any>}[] = []) {
+    //sanity check if target is a child of target ... bad
+    //collect all states
+    const all:StateNode[] = [];
+    const queue = [action.resultsIn];
+    while (queue.length > 0) {
+      let next = queue.shift();
+      if (all.indexOf(next) >= 0) {
+        continue;
+      }
+      all.push(next);
+      queue.push.apply(queue, next.nextStates);
+    }
+    if (all.indexOf(target) >= 0) {
+      return false; //target is a child of state
+    }
 
-        const targetObjects = target.consistsOf;
-        const sourceObjects = action.previous.consistsOf;
-        //function isSame(a: any[], b : any[]) {
-        //  return a.length === b.length && a.every((ai, i) => ai === b[i]);
-        //}
-        //if (isSame(targetObjects, sourceObjects)) {
-        //no state change ~ similar state, just create a link
-        //we can copy the action and point to the same target
-        //  const clone = this.initAction(action.clone(), action.requires);
-        //  this.addEdge(target, 'next', clone);
-        //  this.addEdge(clone, 'resultsIn', action.resultsIn);
-        //} else {
-        const removedObjects = sourceObjects.filter((o) => targetObjects.indexOf(o) < 0);
-        //need to copy all the states and actions
-        this.copyBranch(action, target, removedObjects);
-        //}
+    const targetObjects = target.consistsOf;
+    const sourceObjects = action.previous.consistsOf;
+    //function isSame(a: any[], b : any[]) {
+    //  return a.length === b.length && a.every((ai, i) => ai === b[i]);
+    //}
+    //if (isSame(targetObjects, sourceObjects)) {
+    //no state change ~ similar state, just create a link
+    //we can copy the action and point to the same target
+    //  const clone = this.initAction(action.clone(), action.requires);
+    //  this.addEdge(target, 'next', clone);
+    //  this.addEdge(clone, 'resultsIn', action.resultsIn);
+    //} else {
+    const removedObjects = sourceObjects.filter((o) => targetObjects.indexOf(o) < 0);
+    const replacements :{[id: string]: IObjectRef<any>} = {};
+    objectReplacements.forEach((d) => replacements[this.findOrAddObject(d.from).id] = d.to);
+    //need to copy all the states and actions
+    this.copyBranch(action, target, removedObjects, replacements);
+    //}
 
         this.fire('forked_branch', action, target);
         return true;
     }
 
-    private copyAction(action:ActionNode, appendTo:StateNode) {
-        const clone = this.initAction(action.clone(), action.requires);
-        this.addEdge(appendTo, 'next', clone);
-        var s = this.makeState(action.resultsIn.name, action.resultsIn.description);
-        this.addEdge(clone, 'resultsIn', s);
-        return s;
-    }
+  private copyAction(action:ActionNode, appendTo:StateNode, objectReplacements: {[id: string]: IObjectRef<any>}) {
+    const clone = this.initAction(action.clone(), action.requires.map(a => objectReplacements[String(a.id)] || a));
+    this.addEdge(appendTo, 'next', clone);
+    var s = this.makeState(action.resultsIn.name, action.resultsIn.description);
+    this.addEdge(clone, 'resultsIn', s);
+    return s;
+  }
 
-    private copyBranch(action:ActionNode, target:StateNode, removedObject:ObjectNode<any>[]) {
-        var queue = [{a: action, b: target}];
-        while (queue.length > 0) {
-            let next = queue.shift();
-            var b = next.b;
-            let a = next.a;
-            if (!a.requires.some((ai) => removedObject.indexOf(ai) >= 0)) {
-                //copy it and create a new pair to execute
-                b = this.copyAction(a, next.b);
-            }
-            queue.push.apply(queue, a.resultsIn.next.map((aa) => ({a: aa, b: b})));
-        }
+  private copyBranch(action:ActionNode, target:StateNode, removedObject:ObjectNode<any>[], objectReplacements: {[id: string]: IObjectRef<any>}) {
+    var queue = [{a: action, b: target}];
+    while (queue.length > 0) {
+      let next = queue.shift();
+      var b = next.b;
+      let a = next.a;
+      let someRemovedObjectRequired = a.requires.some((ai) => removedObject.indexOf(ai) >= 0 && !(String(ai.id) in objectReplacements));
+      if (!someRemovedObjectRequired) {
+        //copy it and create a new pair to execute
+        b = this.copyAction(a, next.b, objectReplacements);
+      }
+      queue.push.apply(queue, a.resultsIn.next.map((aa) => ({a: aa, b: b})));
     }
+  }
 
     private makeState(name:string, description = '') {
         var s = new StateNode(name, description);
