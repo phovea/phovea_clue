@@ -12,6 +12,7 @@ import session = require('../caleydo_core/session');
 
 import {SimHash, MatchedTokenTree} from "./simhash";
 import {IStateToken, StateTokenNode} from "./statetoken";
+import all = Promise.all;
 
 /**
  * reexport the edge type
@@ -542,26 +543,31 @@ export class StateNode extends graph.GraphNode {
         this._lineupIndex=value;
     }
 
-    calcSimHash():string[] {
-        //console.log("Recalc Hash of " + this.id)
-        var allTokens:IStateToken[] = [];
-        for (var oN of this.consistsOf) {
-            if (oN.stateTokenPropertyExists) {
-                if (oN.category == "data") continue
-                allTokens = allTokens.concat(oN.stateTokens);
+    get stateTokens():IStateToken[] {
+        let allTokens:IStateToken[] = this.getAttr('stateTokens')
+        if (allTokens === null) {
+            allTokens = []
+            for (var oN of this.consistsOf) {
+                if (oN.stateTokenPropertyExists) {
+                    if (oN.category == "data") continue
+                    allTokens = allTokens.concat(oN.stateTokens);
+                }
             }
+            allTokens = SimHash.normalizeTokenPriority(allTokens)
+            this.setAttr('stateTokens', allTokens)
         }
+
+        return allTokens;
+    }
+
+    calcSimHash():string[] {
+        let allTokens = this.stateTokens;
         let hash:string[] = SimHash.hasher.calcHash(allTokens)
         this.setAttr('simHash', hash);
-        this.setAttr('stateTokens', allTokens)
-        //console.log(hash)
         return hash
     }
 
-    get stateTokens():IStateToken[] {
-        let tokens = this.getAttr('stateTokens')
-        return tokens === null ? null : SimHash.normalizeTokenPriority(tokens)
-    }
+
 
     get simHash():string[] {
         var simHash:string[] = this.getAttr('simHash');
@@ -611,13 +617,9 @@ export class StateNode extends graph.GraphNode {
 
     getSimForLineupTo(otherState:StateNode) {
         let thisTokens:IStateToken[] = this.stateTokens
-        if (thisTokens === null) {
-            this.calcSimHash()
-            thisTokens = this.stateTokens
-        }
         let otherTokens:IStateToken[] = otherState.stateTokens
-        if (thisTokens === null && otherTokens === null) return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
-        if (thisTokens === null || otherTokens === null) return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        if (thisTokens.length === 0  && otherTokens.length === 0) return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
+        if (thisTokens.length === 0  || otherTokens.length === 0) return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         let tree = new MatchedTokenTree(thisTokens, otherTokens)
         //this.treeMatches[otherState.id] = tree;
         return tree.similarityForLineup
