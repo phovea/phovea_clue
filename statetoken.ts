@@ -54,7 +54,7 @@ export class StateTokenLeaf extends IStateToken{
   type: TokenType;
   value;
   category:string;
-  private _hash=null;
+  hash=null;
 
   constructor(name:string,  importance: number,  type: TokenType,  value,  category:string) {
     super(name,importance);
@@ -62,15 +62,6 @@ export class StateTokenLeaf extends IStateToken{
     this.value = value;;
     this.category = category;
     this.isLeaf = true;
-  }
-
-  get hash(){
-      if (this._hash ===null) throw Error("No hash has been set")
-      return this._hash;
-  }
-
-  set hash(value){
-      this._hash=value;
   }
 
 }
