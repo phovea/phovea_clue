@@ -278,12 +278,12 @@ class TreeNode {
                     return 1 - Math.abs(leftpct - rightpct)
                 case 2:
                 case 3:
-                    return this.similarityFromhash((<StateTokenLeaf>this.leftToken).hash, (<StateTokenLeaf>this.rightToken).hash)
+                    return this.similarityFromHash((<StateTokenLeaf>this.leftToken).hash, (<StateTokenLeaf>this.rightToken).hash)
             }
         }
     }
 
-    private similarityFromhash(hash1:string, hash2:string) {
+    private similarityFromHash(hash1:string, hash2:string) {
         let len = Math.min(hash1.length, hash2.length);
         let nrEqu = 0;
         let similarity = 0;
