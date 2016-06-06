@@ -20,7 +20,7 @@ import {ProvenanceGraph} from "../caleydo_clue/prov";
 import {StateNode} from "../caleydo_clue/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
-import {WeightInterface,LinupStateView} from "./simvis"
+import {WeightInterface,LinupStateView,TokenTreeVizualization} from "./simvis"
 import {isUndefined, indexOf} from "../caleydo_core/main";
 
 
@@ -699,7 +699,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $simArea.html('<div class="header"><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
       '<div class="catWeightContainer closed"><div class="barContainer"></div><svg class="lineContainer"></svg><div class="controlContainer"></div></div>'+
         '<div class="stateLinupView"></div>'+
-        '<div class="stateCompareView"></div>'
+        '<div class="tokenTreeViz"></div>'
     )
 
     cmode.on('modeChanged', function () {
@@ -710,6 +710,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     let weightContainer = new WeightInterface($simArea.select(".catWeightContainer"))
     let luContainer = new LinupStateView($simArea.select(".stateLinupView"),this.data)
+    let treeVizContainer = new TokenTreeVizualization($simArea.select(".tokenTreeViz"), this.data)
 
     //init the toolbar filter options
 

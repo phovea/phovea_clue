@@ -260,6 +260,27 @@ class TreeNode {
         this.childs = this.childs.concat(ch)
     }
 
+    //stores the importance of all childs (recursive) per category.
+    private impPerCat:number[] = null;
+
+    get impOfChildsPerCat():number[]{
+      if (this.impPerCat === null) {
+        let childsImpPerCat:number[] = [0,0,0,0,0]
+        for (let i = 0; i < this.childs.length; i++) {
+          if (this.isLeafNode) {
+            childsImpPerCat[TreeNode.categories.indexOf(this.categoryName)] = this.importance
+            this.impPerCat = childsImpPerCat;
+            return childsImpPerCat
+          }
+          let tmp = this.childs[i].impOfChildsPerCat
+          for (let j = 0; j < tmp.length; j++) {
+            childsImpPerCat[j] += tmp[j]
+          }
+        }
+      }
+      return this.impPerCat;
+    }
+
     static categories = ["data", "visual", "selection", "layout", "analysis"]
 
     public get tokenSimilarity():number {
@@ -298,6 +319,12 @@ class TreeNode {
         let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
         return TreeNode.categories.indexOf(cat);
     }
+
+    public get categoryName():string {
+      if (!(this.isLeafNode)) return null;
+      return this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
+    }
+
 
     get importance():number {
         return this.leftToken !== null ? this.leftToken.importance : this.rightToken.importance

@@ -1,5 +1,5 @@
 import {AVisInstance} from "../caleydo_core/vis";
-import {SimHash} from "./simhash"
+import {SimHash, MatchedTokenTree} from "./simhash"
 import {isUndefined, indexOf, mod} from "../caleydo_core/main";
 import lineup = require('lineupjs')
 import tables = require('../caleydo_core/table');
@@ -14,7 +14,7 @@ import provenance = require('./prov');
 import provvis = require('./provvis')
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
-import {StateNode} from "./prov";
+import {StateNode, ProvenanceGraph} from "./prov";
 
 interface Weight {
     name;
@@ -597,4 +597,144 @@ export class WeightInterface {
         })
     }
 }
+
+export class TokenTreeVizualization {
+
+  private paritionAS = null;
+  private svg = null;
+  private root = null;
+  private diagonal = null;
+  private duration = null;
+  private i = null;
+  private container = null;
+  private data = null;
+
+  constructor(container, tree:MatchedTokenTree, data:ProvenanceGraph) {
+    this.container = container;
+    this.root = tree;
+    this.initialize()
+    this.data = data;
+    return this;
+  }
+
+
+  initialize() {
+
+
+    this.paritionAS = d3.layout.hierarchy()
+    this.i = 0;
+
+    this.diagonal = d3.svg.diagonal()
+      .projection(function(d) { return [d.y, d.x]; });
+
+    this.svg = this.container.append("svg")
+      .append("g")
+
+    this.root.x0 = 150 / 2;
+    this.root.y0 = 0;
+
+    this.update(this.root);
+    d3.select(self.frameElement).style("height", "300px");
+  }
+
+
+  update(source) {
+      let that = this;
+
+      // Compute the new tree layout.
+      var nodes = that.paritionAS.nodes(that.root,)
+
+      // Normalize for fixed-depth.
+      nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+      // Update the nodes…
+      var node = this.svg.selectAll("g.node")
+        .data(nodes, function(d) { return d.id || (d.id = ++that.i); });
+
+      // Enter any new nodes at the parent's previous position.
+      var nodeEnter = node.enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+        .on("click", that.click.bind(that));
+
+      nodeEnter.append("circle")
+        .attr("r", 1e-6)
+        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+      nodeEnter.append("text")
+        .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+        .text(function(d) { return d.name; })
+        .style("fill-opacity", 1e-6);
+
+      // Transition nodes to their new position.
+      var nodeUpdate = node.transition()
+        .duration(this.duration)
+        .attr("transform", function(d) {
+          return "translate(" + d.y + "," + d.x + ")";
+        });
+
+      nodeUpdate.select("circle")
+        .attr("r", 10)
+        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+      nodeUpdate.select("text")
+        .style("fill-opacity", 1);
+
+      // Transition exiting nodes to the parent's new position.
+      var nodeExit = node.exit().transition()
+        .duration(that.duration)
+        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+        .remove();
+
+      nodeExit.select("circle")
+        .attr("r", 1e-6);
+
+      nodeExit.select("text")
+        .style("fill-opacity", 1e-6);
+
+
+      // Stash the old positions for transition.
+      nodes.forEach(function(d) {
+      d.x0 = d.x;
+      d.y0 = d.y;
+      });
+    }
+
+    // Toggle children on click.
+    click(d) {
+      if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else {
+        d.children = d._children;
+        d._children = null;
+      }
+      this.update(d);
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
