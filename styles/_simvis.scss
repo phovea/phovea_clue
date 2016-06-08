@@ -202,6 +202,16 @@
       padding: 1px
     }
 
+    .visStateDescription{
+      border-radius: 20px;
+      background-color: $header-menu-bg-color;
+      font-size: 150%;
+      color: white;
+      text-align: center;
+      vertical-align: middle;
+      transform: translate(0px,9px);
+    }
+
     .token {
 		  position:relative;
       cursor: pointer;

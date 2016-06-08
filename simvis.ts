@@ -698,7 +698,9 @@ export class TokenTreeVizualization {
       .style("width", function (d){return that.stateVizX(d.dx)+"px";})
       .html(function(d) {
         let bgcolor:string =  d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
-        let html = "<div class='token' style='background-color: " + bgcolor + "'>";
+        let html = "";
+        if (d.isRoot) html += "<div class='visStateDescription'>Selected State</div>";
+        else html += "<div class='token' style='background-color: " + bgcolor + "'>";
         return html;
       })
       /*.style("background-color", function(d) {
