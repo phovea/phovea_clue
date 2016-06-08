@@ -626,8 +626,7 @@ export class TokenTreeVizualization {
     this.bottom_stateContainer.classed("tokenStructViz", true)
       .style("height", "186px")
       .style("order", 3)
-    this.bottom_state = this.bottom_stateContainer.append("div")
-    this.bottom_state.classed("bottom-state", true)
+
     this.stateSepSpace = this.container.append("div")
     this.stateSepSpace.classed("stateSepSpace", true)
 
@@ -635,6 +634,9 @@ export class TokenTreeVizualization {
     this.top_stateContainer.classed("tokenStructViz", true)
       .style("height", "40px")
       .style("order", 1)
+
+    this.bottom_state = this.bottom_stateContainer.append("div")
+    this.bottom_state.classed("bottom-state", true)
     this.top_state = this.top_stateContainer.append("div")
     this.top_state.classed("top-state", true)
 
@@ -667,10 +669,14 @@ export class TokenTreeVizualization {
   private stateVizY = null
 
   initializeTree(activeState:StateNode) {
+
     this._tree = activeState.getMatchedTreeWithOtherState(null)
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {return d.childs;})
       .value(function (d) {return d.importance})
+    this.bottom_stateContainer.selectAll(".bottom-state").remove()
+    this.bottom_state = this.bottom_stateContainer.append("div")
+    this.bottom_state.classed("bottom-state", true)
     this.update(this._tree.rootNode);
   }
 
@@ -687,7 +693,7 @@ export class TokenTreeVizualization {
     // Update the nodes…
     var node = this.bottom_state.selectAll("div")
       .data(nodes, function (d) {
-        return d.id;});
+        return isUndefined(d) ? 0 : d.id;});
 
     // Enter any new nodes at the parent's previous position.
     var nodeEnter = node.enter().append("div")
