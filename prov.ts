@@ -13,6 +13,7 @@ import session = require('../caleydo_core/session');
 import {SimHash, MatchedTokenTree} from "./simhash";
 import {IStateToken, StateTokenNode} from "./statetoken";
 import all = Promise.all;
+import {isUndefined} from "../caleydo_core/main";
 
 /**
  * reexport the edge type
@@ -556,7 +557,6 @@ export class StateNode extends graph.GraphNode {
             allTokens = SimHash.normalizeTokenPriority(allTokens)
             this.setAttr('stateTokens', allTokens)
         }
-
         return allTokens;
     }
 
@@ -596,26 +596,24 @@ export class StateNode extends graph.GraphNode {
         return similarity >= 0 ? similarity : 0;
     }
 
-    getExactSimilarityTo(otherState:StateNode):number {
-        if (this.id === otherState.id) return 1;
-        //if (this.treeMatches[otherState.id]) return this.treeMatches[otherState.id].similarity
-        let thisTokens:IStateToken[] = this.stateTokens
-        let otherTokens:IStateToken[] = otherState.stateTokens
-        if (thisTokens === null || otherTokens === null) return -1
-        let tree = new MatchedTokenTree(thisTokens, otherTokens)
-        //let s = tree.similarityForLineup;
+    public getMatchedTreeWithOtherState(otherState:StateNode):MatchedTokenTree{
+        if (otherState === null || isUndefined(otherState)) otherState = this
+        if (this.treeMatches[otherState.id]) return this.treeMatches[otherState.id]
+        let tree = new MatchedTokenTree(this, otherState)
         this.treeMatches[otherState.id] = tree;
+        otherState.treeMatches[this.id] = tree;
+        return tree;
+    }
+
+    public getExactSimilarityTo(otherState:StateNode):number {
+        if (this.id === otherState.id) return 1;
+        let tree:MatchedTokenTree = this.getMatchedTreeWithOtherState(otherState);
+        //if (tree === null) return 0;
         return tree.similarity
     }
 
     getSimForLineupTo(otherState:StateNode) {
-        let thisTokens:IStateToken[] = this.stateTokens
-        let otherTokens:IStateToken[] = otherState.stateTokens
-        if (thisTokens.length === 0  && otherTokens.length === 0) return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
-        if (thisTokens.length === 0  || otherTokens.length === 0) return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
-        let tree = new MatchedTokenTree(thisTokens, otherTokens)
-        //this.treeMatches[otherState.id] = tree;
-        return tree.similarityForLineup
+        return this.getMatchedTreeWithOtherState(otherState).similarityForLineup
     }
 
 

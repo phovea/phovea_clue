@@ -185,30 +185,60 @@
 
   .tokenTreeViz {
     order:3;
-    height: 200px;
+    height: 300px;
     //position: absolute;
     //bottom:0
     width: 100%;
+    position: relative;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
 
+    .tokenWrapper{
+      position:absolute;
+      padding: 1px
+    }
 
-    .node {
-		  cursor: pointer;
+    .token {
+		  position:relative;
+      cursor: pointer;
+      border: solid;
+      border-width: 1px;
+      border-color: black;
+      height: 100%;
+      width: 100%;
 	  }
 
-    .node circle {
-      fill: #fff;
-      stroke: steelblue;
-      stroke-width: 3px;
+    .tokenStructViz {
+      margin: 5px;
+      padding: 8px;
+      background-color: $core_colour;
+      border-radius: 15px;
+      width: 286px;
+      position: relative;
     }
 
-    .node text {
-      font: 12px sans-serif;
+    .top-state {
+      align-self: flex-start;
+      height: 100%;
+      width: 100%;
     }
 
-    .link {
-      fill: none;
-      stroke: #ccc;
-      stroke-width: 2px;
+    .bottom-state{
+      height: 100%;
+      width: 100%;
+      align-self: flex-end;
+    }
+
+    .stateSepSpace {
+      margin: 5px;
+      heigth: 50px;
+      width: 286px;
+      order: 2;
+      flex: 1;
     }
 
   }
