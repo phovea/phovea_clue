@@ -202,6 +202,11 @@
       padding: 1px
     }
 
+    .bandWrapper{
+      position:absolute;
+      padding: 1px
+    }
+
     .visStateDescription{
       border-radius: 20px;
       background-color: $header-menu-bg-color;
@@ -228,6 +233,23 @@
       width: 100%;
     }
 
+    .band {
+      position:relative;
+      cursor: pointer;
+      border: solid;
+      border-width: 1px;
+      border-color: black;
+      height: 100%;
+      width: 100%;
+      z-index: 4;
+    }
+
+    .nonMatchingBand {
+      position:relative;
+      height: 100%;
+      width: 100%;
+    }
+
     .tokenStructViz {
       margin: 5px;
       padding: 8px;
@@ -237,8 +259,16 @@
       position: relative;
     }
 
+    .stateSepSpace {
+      margin: 5px;
+      padding: 8px;
+      //background-color: $core_colour;
+      //border-radius: 15px;
+      width: 286px;
+      position: relative;
+    }
+
     .top-state {
-      align-self: flex-start;
       height: 100%;
       width: 100%;
     }
@@ -246,16 +276,16 @@
     .bottom-state{
       height: 100%;
       width: 100%;
-      align-self: flex-end;
     }
 
-    .stateSepSpace {
-      margin: 5px;
-      heigth: 30px;
-      width: 286px;
-      order: 2;
-      flex: 1;
+    .bandSpace {
+      heigth: 100%;
+      width: 100%;
+      //order: 2;
+      //flex: 1;
     }
+
+
 
   }
 

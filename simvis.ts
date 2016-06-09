@@ -596,7 +596,8 @@ export class TokenTreeVizualization {
   private bottom_stateContainer = null;
   private top_state = null
   private top_stateContainer = null
-  private stateSepSpace = null
+  private bandContainer = null
+  private bandSpace = null
   private _tree:MatchedTokenTree = null;
   private diagonal = null;
   private duration = null;
@@ -622,17 +623,20 @@ export class TokenTreeVizualization {
     this.bottom_stateContainer.classed("tokenStructViz", true)
       .style("height", "186px")
       .style("order", 3)
+    this.bottom_state = this.bottom_stateContainer.append("div")
+    this.bottom_state.classed("bottom-state", true)
 
-    this.stateSepSpace = this.container.append("div")
-    this.stateSepSpace.classed("stateSepSpace", true)
+    this.bandContainer = this.container.append("div")
+    this.bandContainer.classed("stateSepSpace", true)
+      .style("height", "30px")
+      .style("order", 2)
+    this.bandSpace = this.bandContainer.append("div")
+    this.bandSpace.classed("bandSpace", true)
 
     this.top_stateContainer = this.container.append("div")
     this.top_stateContainer.classed("tokenStructViz", true)
       .style("height", "186px")
       .style("order", 1)
-
-    this.bottom_state = this.bottom_stateContainer.append("div")
-    this.bottom_state.classed("bottom-state", true)
     this.top_state = this.top_stateContainer.append("div")
     this.top_state.classed("top-state", true)
 
@@ -686,13 +690,18 @@ export class TokenTreeVizualization {
       .value(function (d) {
         return d.importance
       })
-    this.bottom_stateContainer.selectAll(".bottom-state").remove()
-    this.bottom_state = this.bottom_stateContainer.append("div")
-    this.bottom_state.classed("bottom-state", true)
 
     this.top_stateContainer.selectAll(".top-state").remove()
     this.top_state = this.top_stateContainer.append("div")
     this.top_state.classed("top-state", true)
+
+    this.bandContainer.selectAll(".bandSpace").remove()
+    this.bandSpace = this.bandContainer.append("div")
+    this.bandSpace.classed("bandSpace", true)
+
+    this.bottom_stateContainer.selectAll(".bottom-state").remove()
+    this.bottom_state = this.bottom_stateContainer.append("div")
+    this.bottom_state.classed("bottom-state", true)
     this.update(this._tree.rootNode);
   }
 
@@ -785,6 +794,39 @@ export class TokenTreeVizualization {
     nodeEnter.selectAll(".visStateDescription")
       .style("transform", "translate(0px, 9px")
 
+
+    let bands = nodes.filter(function (d)  {return d.isLeafNode})
+    let band = this.bandSpace.selectAll("div")
+      .data(bands, function (d) {
+        return isUndefined(d) ? 0 : d.id;
+      });
+
+    let bandEnter = band.enter().append("div")
+      .classed("bandWrapper", true)
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("bottom", function (d) {
+        return -25 + "px";
+      })
+      .style("height", function (d) {
+        return 90 + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx)*d.tokenSimilarity + "px";
+      })
+      .html(function (d) {
+        let isVisible:boolean = true;
+        if (!d.isPaired) {
+          isVisible = false;
+        }
+        if (d.tokenSimilarity === 0) isVisible = false;
+        if (!isVisible) return "<div class='nonMatchingBand'>";
+        let bgcolor:string = SimHash.shadeColor(SimHash.colorOfCat(d.categoryName),0.3)
+        let html = "";
+        html = "<div class='band' style='background-color: " + bgcolor + "'>";
+        return html;
+      })
   }
 
   // Toggle children on click.
