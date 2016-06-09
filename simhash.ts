@@ -80,22 +80,29 @@ class HashTable {
 }
 
 export class MatchedTokenTree {
+  get leftState():StateNode {
+    return this._leftState;
+  }
+
+  get rightState():StateNode {
+    return this._rightState;
+  }
 
   private size:number = null
   private root:TreeNode = null
 
-  private leftState:StateNode = null
-  private rightState:StateNode = null
+  private _leftState:StateNode = null
+  private _rightState:StateNode = null
 
   get treeHasPartnerState():boolean {
-    return this.leftState !== null && this.leftState !== this.rightState;
+    return this._leftState !== null && this._leftState !== this._rightState;
   }
 
   constructor(left:StateNode, right:StateNode) {
     this.size = 0;
     this.root = new TreeRoot(null, null, this.size++)
-    this.leftState = left;
-    this.rightState = right;
+    this._leftState = left;
+    this._rightState = right;
     let leftTokens:IStateToken[] = left.stateTokens
     let rightTokens:IStateToken[] = right.stateTokens
     this.matchIntoNode(this.root, new StateTokenNode("dummyRoot", 1, leftTokens), new StateTokenNode("dummyRoot", 1, rightTokens))
@@ -193,8 +200,8 @@ export class MatchedTokenTree {
 
   //not affected by weighting. Just delivers the correct proportions of leafs for each category.
   get similarityForLineup() {
-    let leftTokens:IStateToken[] = this.leftState.stateTokens
-    let rightTokens:IStateToken[] = this.rightState.stateTokens
+    let leftTokens:IStateToken[] = this._leftState.stateTokens
+    let rightTokens:IStateToken[] = this._rightState.stateTokens
     if (leftTokens.length === 0 && rightTokens.length === 0) return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
     if (leftTokens.length === 0 || rightTokens.length === 0) return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
@@ -451,11 +458,11 @@ export class TreeNode {
 
 class TreeRoot extends TreeNode {
 
-  constructor(left, right,id) {
-    super(left,right,id)
+  constructor(left, right, id) {
+    super(left, right, id)
   }
 
-  get isLeafNode():boolean{
+  get isLeafNode():boolean {
     return false;
   }
 

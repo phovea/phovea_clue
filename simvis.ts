@@ -641,7 +641,7 @@ export class TokenTreeVizualization {
   }
 
   private luSelectedState:StateNode = null;
-  private selectedState:StateNode = null;
+  private activeState:StateNode = null;
 
   linupSelectionListener(event:any, state:provenance.StateNode) {
     this.luSelectedState = state;
@@ -668,7 +668,7 @@ export class TokenTreeVizualization {
 
   stateSelectionChanged(event:any, state:provenance.StateNode) {
     if (event.args[1] === "selected") {
-      this.selectedState = state;
+      this.activeState = state;
       this.findAndInitializeTree()
     }
   }
@@ -677,8 +677,8 @@ export class TokenTreeVizualization {
   private stateVizY = null
 
   findAndInitializeTree() {
-    this.selectedState = this.data.act
-    this._tree = this.selectedState.getMatchedTreeWithOtherState(this.luSelectedState)
+    this.activeState = this.data.act
+    this._tree = this.activeState.getMatchedTreeWithOtherState(this.luSelectedState)
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {
       return d.childs;
@@ -699,53 +699,25 @@ export class TokenTreeVizualization {
   private padding:number = 8 //px
 
   update(source) {
-    let that = this;
+    const that = this;
     let i = 0;
     this.stateVizX = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().width]);
     this.stateVizY = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().height]);
+
+    const activeStateIsLeft:boolean = that._tree.leftState === that.activeState ? false : true;
     // Compute the new tree layout.
     let nodes = that.partitionAS(that._tree.rootNode);
 
-    // Update the nodes…
-    let node = this.bottom_state.selectAll("div")
+
+    // TOP STATE
+    let node = this.top_state.selectAll("div")
       .data(nodes, function (d) {
         return isUndefined(d) ? 0 : d.id;
       });
 
     // Enter any new nodes at the parent's previous position.
     let nodeEnter = node.enter().append("div")
-      .attr("class", "tokenWrapper")
-      .style("left", function (d) {
-        return that.stateVizX(d.x) + that.padding + "px";
-      })
-      .style("bottom", function (d) {
-        return that.stateVizY(d.y) + that.padding + "px";
-      })
-      .style("height", function (d) {
-        return that.stateVizY(d.dy) + "px";
-      })
-      .style("width", function (d) {
-        return that.stateVizX(d.dx) + "px";
-      })
-      .html(function (d) {
-        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
-        let html = "";
-        if (d.isRoot) html += "<div class='visStateDescription'>Active State</div>";
-        else html += "<div class='token' style='background-color: " + bgcolor + "'>";
-        return html;
-      })
-
-    nodeEnter.selectAll(".visStateDescription")
-      .style("transform", "translate(0px, 9px")
-
-    node = this.top_state.selectAll("div")
-      .data(nodes, function (d) {
-        return isUndefined(d) ? 0 : d.id;
-      });
-
-    // Enter any new nodes at the parent's previous position.
-    nodeEnter = node.enter().append("div")
-      .attr("class", "tokenWrapper")
+      .classed("tokenWrapper", true)
       .style("left", function (d) {
         return that.stateVizX(d.x) + that.padding + "px";
       })
@@ -759,14 +731,59 @@ export class TokenTreeVizualization {
         return that.stateVizX(d.dx) + "px";
       })
       .html(function (d) {
+        if (d.isRoot) return "<div class='visStateDescription'>Active State</div>";
+        let isVisible:boolean = true
+        if (!d.isPaired) {
+          if (!activeStateIsLeft) {
+            if (d.hasLeftToken) isVisible = false;
+          }
+        }
+        if (!isVisible) return "<div class='nonPairedToken'>";
         let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
-        if (d.isRoot) html += "<div class='visStateDescription'>Selected State</div>";
-        else html += "<div class='token' style='background-color: " + bgcolor + "'>";
+        html = "<div class='token' style='background-color: " + bgcolor + "'>";
         return html;
       })
-    //nodeEnter.selectAll(".visStateDescription")
-    //  .style("transform", "translate(0px, -9px")
+
+
+    // BOTTOM STATE
+    node = this.bottom_state.selectAll("div")
+      .data(nodes, function (d) {
+        return isUndefined(d) ? 0 : d.id;
+      });
+
+    // Enter any new nodes at the parent's previous position.
+    nodeEnter = node.enter().append("div")
+      .classed("tokenWrapper", true)
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("bottom", function (d) {
+        return that.stateVizY(d.y) + that.padding + "px";
+      })
+      .style("height", function (d) {
+        return that.stateVizY(d.dy) + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx) + "px";
+      })
+      .html(function (d) {
+        if (d.isRoot) return "<div class='visStateDescription'>Active State</div>";
+        let isVisible:boolean = true;
+        if (!d.isPaired) {
+          if (activeStateIsLeft) {
+            if (!d.hasLeftToken) isVisible = false;
+          }
+        }
+        if (!isVisible) return "<div class='nonPairedToken'>";
+        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
+        let html = "";
+        html = "<div class='token' style='background-color: " + bgcolor + "'>";
+        return html;
+      })
+
+    nodeEnter.selectAll(".visStateDescription")
+      .style("transform", "translate(0px, 9px")
 
   }
 
