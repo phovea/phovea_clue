@@ -282,10 +282,10 @@ export class TreeNode {
   }
 
   get childs():TreeNode[] {
-    return this._childs;
+    return this._childs.concat(this._dummyChilds);
   }
 
-  private _childs:TreeNode[] = [];
+  protected _childs:TreeNode[] = [];
   private leftToken:IStateToken;
   private rightToken:IStateToken;
 
@@ -300,13 +300,58 @@ export class TreeNode {
     return this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
   }
 
-  private _id:number = null;
+  private _id = null;
+  private _dummyChilds:TreeNode[] = [];
 
   constructor(left:IStateToken, right:IStateToken, id) {
     this._id = id;
     this.leftToken = left;
     this.rightToken = right;
+    this.checkForDummyChilds();
   }
+
+  checkForDummyChilds() {
+    if (this.leftToken === null && this.rightToken === null) return
+    let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
+    let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
+    if (left !== null) {
+      if (!(left instanceof StateTokenLeaf)) return
+      if (right !== null) {
+        //both left and right
+        if (!(left.category === SimHash.categories[2])) return;
+        let sim = this.tokenSimilarity
+        let leftImp = left.importance * sim
+        let rightImp = right.importance * sim
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", leftImp, left.type, "matching", SimHash.categories[2])
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", rightImp, left.type, "matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + "_match"))
+        leftImp = left.importance * (1 - sim)
+        rightImp = right.importance * (1 - sim)
+        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", leftImp, left.type, "non-matching", SimHash.categories[2])
+        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", rightImp, left.type, "non-matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + "_match"))
+        return;
+      } else {
+        //just left
+        if (!(left.category === SimHash.categories[2])) return;
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", left.importance, left.type, "matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + "_match"))
+      }
+    } else {
+      if (right !== null) {
+        if (!(right instanceof StateTokenLeaf)) return
+        if (!(right.category === SimHash.categories[2])) return;
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", right.importance, left.type, "matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + "_match"))
+      } else {
+        //both are null
+        return
+      }
+    }
+
+
+  }
+
 
   appendChild(ch:TreeNode) {
     this._childs = this._childs.concat(ch)
@@ -361,7 +406,7 @@ export class TreeNode {
     for (let i = 0; i < len; i++) {
       if (hash1.charAt(i) == hash2.charAt(i)) nrEqu++;
     }
-    return (nrEqu / len - 0.5) * 2
+    return Math.max((nrEqu / len - 0.5) * 2 , 0)
   }
 
 
@@ -431,8 +476,12 @@ export class TreeNode {
     }
   }
 
+  get isLeafNodeWithDummyChilds():boolean {
+    return (this._childs.length === 0 && this._dummyChilds.length === 0);
+  }
+  
   get isLeafNode():boolean {
-    return this._childs.length === 0
+    return this._childs.length === 0;
   }
 
   get isPaired():boolean {
@@ -456,6 +505,18 @@ export class TreeNode {
   }
 }
 
+class DummyTreeNode extends TreeNode {
+
+  checkForDummyChilds() {
+    return;
+  }
+
+  public get tokenSimilarity():number {
+    return 1
+  }
+
+}
+
 class TreeRoot extends TreeNode {
 
   constructor(left, right, id) {
@@ -471,6 +532,7 @@ class TreeRoot extends TreeNode {
   }
 
 }
+
 export class SimHash extends events.EventHandler {
 
   private static _instance:SimHash = new SimHash();

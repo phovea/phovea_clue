@@ -747,8 +747,9 @@ export class TokenTreeVizualization {
             if (d.hasLeftToken) isVisible = false;
           }
         }
+        if (d.importance < 0.01) isVisible = false;
         if (!isVisible) return "<div class='nonPairedToken'>";
-        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
+        let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
         html = "<div class='token' style='background-color: " + bgcolor + "'>";
         return html;
@@ -784,8 +785,9 @@ export class TokenTreeVizualization {
             if (!d.hasLeftToken) isVisible = false;
           }
         }
+        if (d.importance < 0.01) isVisible = false;
         if (!isVisible) return "<div class='nonPairedToken'>";
-        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
+        let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
         html = "<div class='token' style='background-color: " + bgcolor + "'>";
         return html;
@@ -795,7 +797,7 @@ export class TokenTreeVizualization {
       .style("transform", "translate(0px, 9px")
 
 
-    let bands = nodes.filter(function (d)  {return d.isLeafNode})
+    let bands = nodes.filter(function (d)  {return d.isLeafNodeWithDummyChilds})
     let band = this.bandSpace.selectAll("div")
       .data(bands, function (d) {
         return isUndefined(d) ? 0 : d.id;
@@ -810,7 +812,7 @@ export class TokenTreeVizualization {
         return -30 + "px";
       })
       .style("height", function (d) {
-        return 90 + "px";
+        return 92 + "px";
       })
       .style("width", function (d) {
         return that.stateVizX(d.dx)*d.tokenSimilarity + "px";
@@ -821,6 +823,7 @@ export class TokenTreeVizualization {
           isVisible = false;
         }
         if (d.tokenSimilarity === 0) isVisible = false;
+        if (d.importance < 0.01) isVisible = false;
         if (!isVisible) return "<div class='nonMatchingBand'>";
         let bgcolor:string = SimHash.shadeColor(SimHash.colorOfCat(d.categoryName),0.3)
         let html = "";
