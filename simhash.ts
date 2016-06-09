@@ -455,6 +455,10 @@ class TreeRoot extends TreeNode {
     super(left,right,id)
   }
 
+  get isLeafNode():boolean{
+    return false;
+  }
+
   get isRoot():boolean {
     return true;
   }

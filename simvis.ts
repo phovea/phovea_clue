@@ -215,13 +215,8 @@ export class LinupStateView extends vis.AVisInstance {
   }
 
   private selectStateListener(index:number) {
-    if (index < 0) return
-    /*
-     d3.event.stopPropagation();
-     this.data.selectState(this.arr[index].state,idtypes.toSelectOperation(d3.event))
-     this.data.jumpTo(this.arr[index].state);
-     */
-    //TODO draw state similarity view
+    if (index < 0) this.data.fire("stateSimLU-selection", null)
+    else this.data.fire("stateSimLU-selection", this.arr[index].state)
   }
 }
 
@@ -601,7 +596,7 @@ export class TokenTreeVizualization {
   private bottom_stateContainer = null;
   private top_state = null
   private top_stateContainer = null
-  private stateSepSpace =null
+  private stateSepSpace = null
   private _tree:MatchedTokenTree = null;
   private diagonal = null;
   private duration = null;
@@ -621,6 +616,7 @@ export class TokenTreeVizualization {
     this.data.on('add_state', this.onExecutionStartedListener.bind(this));
     this.data.on('action-execution-complete', this.onStateAddedListener.bind(this));
     this.data.on('select_state', this.stateSelectionChanged.bind(this));
+    this.data.on('stateSimLU-selection', this.linupSelectionListener.bind(this))
 
     this.bottom_stateContainer = this.container.append("div")
     this.bottom_stateContainer.classed("tokenStructViz", true)
@@ -632,7 +628,7 @@ export class TokenTreeVizualization {
 
     this.top_stateContainer = this.container.append("div")
     this.top_stateContainer.classed("tokenStructViz", true)
-      .style("height", "40px")
+      .style("height", "186px")
       .style("order", 1)
 
     this.bottom_state = this.bottom_stateContainer.append("div")
@@ -640,7 +636,16 @@ export class TokenTreeVizualization {
     this.top_state = this.top_stateContainer.append("div")
     this.top_state.classed("top-state", true)
 
-      //.style("heigth", "200");
+    this.findAndInitializeTree()
+    //.style("heigth", "200");
+  }
+
+  private luSelectedState:StateNode = null;
+  private selectedState:StateNode = null;
+
+  linupSelectionListener(event:any, state:provenance.StateNode) {
+    this.luSelectedState = state;
+    this.findAndInitializeTree();
   }
 
   private executionToStateRunning:StateNode = null;
@@ -656,27 +661,38 @@ export class TokenTreeVizualization {
   onStateAddedListener(event:any, state:provenance.StateNode) {
     if (this.executionToStateRunning === null) return
     if (this.executionToStateRunning === state) {
-      this.initializeTree(state)
+      this.findAndInitializeTree()
       this.executionToStateRunning = null;
     }
   }
 
   stateSelectionChanged(event:any, state:provenance.StateNode) {
-    if (event.args[1] === "selected") this.initializeTree(state)
+    if (event.args[1] === "selected") {
+      this.selectedState = state;
+      this.findAndInitializeTree()
+    }
   }
 
   private stateVizX = null
   private stateVizY = null
 
-  initializeTree(activeState:StateNode) {
-
-    this._tree = activeState.getMatchedTreeWithOtherState(null)
+  findAndInitializeTree() {
+    this.selectedState = this.data.act
+    this._tree = this.selectedState.getMatchedTreeWithOtherState(this.luSelectedState)
     this.partitionAS = d3.layout.partition<TreeNode>()
-    this.partitionAS.children(function (d) {return d.childs;})
-      .value(function (d) {return d.importance})
+    this.partitionAS.children(function (d) {
+      return d.childs;
+    })
+      .value(function (d) {
+        return d.importance
+      })
     this.bottom_stateContainer.selectAll(".bottom-state").remove()
     this.bottom_state = this.bottom_stateContainer.append("div")
     this.bottom_state.classed("bottom-state", true)
+
+    this.top_stateContainer.selectAll(".top-state").remove()
+    this.top_state = this.top_stateContainer.append("div")
+    this.top_state.classed("top-state", true)
     this.update(this._tree.rootNode);
   }
 
@@ -691,56 +707,67 @@ export class TokenTreeVizualization {
     let nodes = that.partitionAS(that._tree.rootNode);
 
     // Update the nodes…
-    var node = this.bottom_state.selectAll("div")
+    let node = this.bottom_state.selectAll("div")
       .data(nodes, function (d) {
-        return isUndefined(d) ? 0 : d.id;});
+        return isUndefined(d) ? 0 : d.id;
+      });
 
     // Enter any new nodes at the parent's previous position.
-    var nodeEnter = node.enter().append("div")
+    let nodeEnter = node.enter().append("div")
       .attr("class", "tokenWrapper")
-      .style("left", function (d) {return that.stateVizX(d.x)+that.padding + "px";})
-      .style("bottom", function (d) {return that.stateVizY(d.y)+that.padding +"px";})
-      .style("height", function (d){return that.stateVizY(d.dy)+"px";})
-      .style("width", function (d){return that.stateVizX(d.dx)+"px";})
-      .html(function(d) {
-        let bgcolor:string =  d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("bottom", function (d) {
+        return that.stateVizY(d.y) + that.padding + "px";
+      })
+      .style("height", function (d) {
+        return that.stateVizY(d.dy) + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx) + "px";
+      })
+      .html(function (d) {
+        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
+        let html = "";
+        if (d.isRoot) html += "<div class='visStateDescription'>Active State</div>";
+        else html += "<div class='token' style='background-color: " + bgcolor + "'>";
+        return html;
+      })
+
+    nodeEnter.selectAll(".visStateDescription")
+      .style("transform", "translate(0px, 9px")
+
+    node = this.top_state.selectAll("div")
+      .data(nodes, function (d) {
+        return isUndefined(d) ? 0 : d.id;
+      });
+
+    // Enter any new nodes at the parent's previous position.
+    nodeEnter = node.enter().append("div")
+      .attr("class", "tokenWrapper")
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("top", function (d) {
+        return that.stateVizY(d.y) + that.padding + "px";
+      })
+      .style("height", function (d) {
+        return that.stateVizY(d.dy) + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx) + "px";
+      })
+      .html(function (d) {
+        let bgcolor:string = d.isLeafNode ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
         if (d.isRoot) html += "<div class='visStateDescription'>Selected State</div>";
         else html += "<div class='token' style='background-color: " + bgcolor + "'>";
         return html;
       })
-      /*.style("background-color", function(d) {
-        if (d.isLeafNode) return SimHash.colorOfCat(d.categoryName)
-        else return "white";
-      })
-      .style("margin", that.margin+"px")
-      .style("margin", that.border+"px")
-      .attr("name", function (d) { return d.name})
-      */
-      //.attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    //.on("click", that.click.bind(that));
+    //nodeEnter.selectAll(".visStateDescription")
+    //  .style("transform", "translate(0px, -9px")
 
-    /*nodeEnter.append("circle")
-      .attr("r", 1e-6)
-      .style("fill", function (d) {
-        return d._children ? "lightsteelblue" : "#fff";
-      });
-*/
-
-    /*nodeEnter.append("text")
-     .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
-     .attr("dy", ".35em")
-     .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-     .text(function(d) { return d.name; })
-     .style("fill-opacity", 1e-6);
-     */
-
-    // Transition nodes to their new position.
-    var nodeUpdate = node.transition()
-      .duration(this.duration)
-      /*.style("transform", function (d) {
-        return "translate(" + d.y*scaleFactor + "px," + d.x*scaleFactor + "px)";
-      });*/
   }
 
   // Toggle children on click.

@@ -185,7 +185,7 @@
 
   .tokenTreeViz {
     order:3;
-    height: 300px;
+    height: 440px;
     //position: absolute;
     //bottom:0
     width: 100%;
@@ -209,7 +209,7 @@
       color: white;
       text-align: center;
       vertical-align: middle;
-      transform: translate(0px,9px);
+      //transform: translate(0px,9px);
     }
 
     .token {
@@ -245,7 +245,7 @@
 
     .stateSepSpace {
       margin: 5px;
-      heigth: 50px;
+      heigth: 30px;
       width: 286px;
       order: 2;
       flex: 1;
