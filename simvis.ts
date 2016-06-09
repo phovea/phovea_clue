@@ -731,7 +731,7 @@ export class TokenTreeVizualization {
         return that.stateVizX(d.dx) + "px";
       })
       .html(function (d) {
-        if (d.isRoot) return "<div class='visStateDescription'>Active State</div>";
+        if (d.isRoot) return "<div class='visStateDescription'>Selected State</div>";
         let isVisible:boolean = true
         if (!d.isPaired) {
           if (!activeStateIsLeft) {
