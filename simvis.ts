@@ -807,7 +807,7 @@ export class TokenTreeVizualization {
         return that.stateVizX(d.x) + that.padding + "px";
       })
       .style("bottom", function (d) {
-        return -25 + "px";
+        return -30 + "px";
       })
       .style("height", function (d) {
         return 90 + "px";
