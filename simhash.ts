@@ -367,17 +367,22 @@ export class TreeNode {
   get impOfChildsPerCat():number[] {
     if (this.impPerCat === null) {
       let childsImpPerCat:number[] = [0, 0, 0, 0, 0]
+      if (this.isLeafNode) {
+        childsImpPerCat[SimHash.categories.indexOf(this.categoryName)] += this.importance
+        this.impPerCat = childsImpPerCat;
+        return childsImpPerCat;
+      }
       for (let i = 0; i < this._childs.length; i++) {
-        if (this.isLeafNode) {
-          childsImpPerCat[SimHash.categories.indexOf(this.categoryName)] = this.importance
-          this.impPerCat = childsImpPerCat;
-          return childsImpPerCat
-        }
-        let tmp = this._childs[i].impOfChildsPerCat
-        for (let j = 0; j < tmp.length; j++) {
-          childsImpPerCat[j] += tmp[j]
+        if (this._childs[i].isLeafNode) {
+          childsImpPerCat[SimHash.categories.indexOf(this._childs[i].categoryName)] += this._childs[i].importance
+        } else {
+          let tmp = this._childs[i].impOfChildsPerCat
+          for (let j = 0; j < tmp.length; j++) {
+            childsImpPerCat[j] += tmp[j]
+          }
         }
       }
+      this.impPerCat = childsImpPerCat;
     }
     return this.impPerCat;
   }
@@ -423,6 +428,16 @@ export class TreeNode {
       }
     }
     return this.leftToken.importance
+  }
+
+  get weightedImportance():number {
+    let weights = SimHash.hasher.categoryWeighting;
+    let imp = this.impOfChildsPerCat;
+    let sum = 0
+    for (let i = 0; i < weights.length; i++) {
+      sum += imp[i]*weights[i]
+    }
+    return sum
   }
 
   get isRoot():boolean {
@@ -529,6 +544,10 @@ class TreeRoot extends TreeNode {
 
   get isLeafNode():boolean {
     return false;
+  }
+
+  get weightedImportance() {
+    return 1;
   }
 
   get isRoot():boolean {

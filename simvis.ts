@@ -618,6 +618,7 @@ export class TokenTreeVizualization {
     this.data.on('action-execution-complete', this.onStateAddedListener.bind(this));
     this.data.on('select_state', this.stateSelectionChanged.bind(this));
     this.data.on('stateSimLU-selection', this.linupSelectionListener.bind(this))
+    SimHash.hasher.on('weights_changed', this.weightsChangedListener.bind(this))
 
     this.bottom_stateContainer = this.container.append("div")
     this.bottom_stateContainer.classed("tokenStructViz", true)
@@ -646,6 +647,10 @@ export class TokenTreeVizualization {
 
   private luSelectedState:StateNode = null;
   private activeState:StateNode = null;
+
+  weightsChangedListener(event:any) {
+    this.update(this._tree.rootNode)
+  }
 
   linupSelectionListener(event:any, state:provenance.StateNode) {
     this.luSelectedState = state;
@@ -686,9 +691,11 @@ export class TokenTreeVizualization {
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {
       return d.childsAndDummyChilds;
+      //return d.childs;
     })
       .value(function (d) {
-        return d.importance
+        return d.weightedImportance
+        //return d.importance
       })
 
     this.top_stateContainer.selectAll(".top-state").remove()
@@ -722,7 +729,19 @@ export class TokenTreeVizualization {
     let node = this.top_state.selectAll("div")
       .data(nodes, function (d) {
         return isUndefined(d) ? 0 : d.id;
-      });
+      })
+     .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("top", function (d) {
+        return that.stateVizY(d.y) + that.padding + "px";
+      })
+      .style("height", function (d) {
+        return that.stateVizY(d.dy) + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx) + "px";
+      })
 
     // Enter any new nodes at the parent's previous position.
     let nodeEnter = node.enter().append("div")
@@ -760,6 +779,18 @@ export class TokenTreeVizualization {
     node = this.bottom_state.selectAll("div")
       .data(nodes, function (d) {
         return isUndefined(d) ? 0 : d.id;
+      })
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("bottom", function (d) {
+        return that.stateVizY(d.y) + that.padding + "px";
+      })
+      .style("height", function (d) {
+        return that.stateVizY(d.dy) + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx) + "px";
       });
 
     // Enter any new nodes at the parent's previous position.
@@ -801,6 +832,18 @@ export class TokenTreeVizualization {
     let band = this.bandSpace.selectAll("div")
       .data(bands, function (d) {
         return isUndefined(d) ? 0 : d.id;
+      })
+      .style("left", function (d) {
+        return that.stateVizX(d.x) + that.padding + "px";
+      })
+      .style("bottom", function (d) {
+        return -30 + "px";
+      })
+      .style("height", function (d) {
+        return 92 + "px";
+      })
+      .style("width", function (d) {
+        return that.stateVizX(d.dx)*d.tokenSimilarity + "px";
       });
 
     let bandEnter = band.enter().append("div")
