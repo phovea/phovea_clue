@@ -282,6 +282,10 @@ export class TreeNode {
   }
 
   get childs():TreeNode[] {
+    return this._childs.concat();
+  }
+
+  get children():TreeNode[] {
     return this._childs.concat(this._dummyChilds);
   }
 
@@ -479,7 +483,7 @@ export class TreeNode {
   get isLeafNodeWithDummyChilds():boolean {
     return (this._childs.length === 0 && this._dummyChilds.length === 0);
   }
-  
+
   get isLeafNode():boolean {
     return this._childs.length === 0;
   }

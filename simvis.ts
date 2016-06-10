@@ -685,7 +685,7 @@ export class TokenTreeVizualization {
     this._tree = this.activeState.getMatchedTreeWithOtherState(this.luSelectedState)
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {
-      return d.childs;
+      return d.children;
     })
       .value(function (d) {
         return d.importance
@@ -747,7 +747,7 @@ export class TokenTreeVizualization {
             if (d.hasLeftToken) isVisible = false;
           }
         }
-        if (d.importance < 0.01) isVisible = false;
+        if (d.importance < 0.02) isVisible = false;
         if (!isVisible) return "<div class='nonPairedToken'>";
         let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
