@@ -685,7 +685,7 @@ export class TokenTreeVizualization {
     this._tree = this.activeState.getMatchedTreeWithOtherState(this.luSelectedState)
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {
-      return d.children;
+      return d.childsAndDummyChilds;
     })
       .value(function (d) {
         return d.importance

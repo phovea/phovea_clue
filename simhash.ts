@@ -285,7 +285,7 @@ export class TreeNode {
     return this._childs.concat();
   }
 
-  get children():TreeNode[] {
+  get childsAndDummyChilds():TreeNode[] {
     return this._childs.concat(this._dummyChilds);
   }
 
