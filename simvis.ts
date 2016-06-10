@@ -813,7 +813,7 @@ export class TokenTreeVizualization {
         let isVisible:boolean = true;
         if (!d.isPaired) {
           if (activeStateIsLeft) {
-            if (!d.hasLeftToken) isVisible = false;
+            if (d.hasLeftToken) isVisible = false;
           }
         }
         if (d.importance < 0.01) isVisible = false;
