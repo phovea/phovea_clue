@@ -691,11 +691,12 @@ export class TokenTreeVizualization {
     this.partitionAS = d3.layout.partition<TreeNode>()
     this.partitionAS.children(function (d) {
       return d.childsAndDummyChilds;
-      //return d.childs;
     })
       .value(function (d) {
         return d.weightedImportance
-        //return d.importance
+      })
+      .sort(function(a,b) {
+        return a.id - b.id
       })
 
     this.top_stateContainer.selectAll(".top-state").remove()
