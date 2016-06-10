@@ -765,6 +765,8 @@ export class TokenTreeVizualization {
         if (!d.isPaired) {
           if (!activeStateIsLeft) {
             if (d.hasLeftToken) isVisible = false;
+          } else {
+            if (d.hasRightToken) isVisible = false;
           }
         }
         if (d.importance < 0.02) isVisible = false;
@@ -815,6 +817,8 @@ export class TokenTreeVizualization {
         if (!d.isPaired) {
           if (activeStateIsLeft) {
             if (d.hasLeftToken) isVisible = false;
+          } else {
+            if (d.hasRightToken) isVisible = false;
           }
         }
         if (d.importance < 0.01) isVisible = false;

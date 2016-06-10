@@ -510,6 +510,10 @@ export class TreeNode {
   get hasLeftToken():boolean {
     return !(this.leftToken === null)
   }
+  
+  get hasRightToken():boolean {
+    return !(this.rightToken === null)
+  }
 
   get leafs():TreeNode[] {
     let leafs:TreeNode[] = []
