@@ -695,7 +695,7 @@ export class TokenTreeVizualization {
       .value(function (d) {
         return d.weightedImportance
       })
-      .sort(function(a,b) {
+      .sort(function (a, b) {
         return a.id - b.id
       })
 
@@ -731,7 +731,7 @@ export class TokenTreeVizualization {
       .data(nodes, function (d) {
         return isUndefined(d) ? 0 : d.id;
       })
-     .style("left", function (d) {
+      .style("left", function (d) {
         return that.stateVizX(d.x) + that.padding + "px";
       })
       .style("top", function (d) {
@@ -833,7 +833,9 @@ export class TokenTreeVizualization {
       .style("transform", "translate(0px, 9px")
 
 
-    let bands = nodes.filter(function (d)  {return d.isLeafNodeWithDummyChilds})
+    let bands = nodes.filter(function (d) {
+      return d.isLeafNodeWithDummyChilds
+    })
     let band = this.bandSpace.selectAll("div")
       .data(bands, function (d) {
         return isUndefined(d) ? 0 : d.id;
@@ -848,7 +850,7 @@ export class TokenTreeVizualization {
         return 92 + "px";
       })
       .style("width", function (d) {
-        return that.stateVizX(d.dx)*d.tokenSimilarity + "px";
+        return that.stateVizX(d.dx) * d.tokenSimilarity + "px";
       });
 
     let bandEnter = band.enter().append("div")
@@ -863,7 +865,7 @@ export class TokenTreeVizualization {
         return 92 + "px";
       })
       .style("width", function (d) {
-        return that.stateVizX(d.dx)*d.tokenSimilarity + "px";
+        return that.stateVizX(d.dx) * d.tokenSimilarity + "px";
       })
       .html(function (d) {
         let isVisible:boolean = true;
@@ -873,11 +875,16 @@ export class TokenTreeVizualization {
         if (d.tokenSimilarity === 0) isVisible = false;
         if (d.importance < 0.01) isVisible = false;
         if (!isVisible) return "<div class='nonMatchingBand'>";
-        let bgcolor:string = SimHash.shadeColor(SimHash.colorOfCat(d.categoryName),0.3)
+        let bgcolor:string = SimHash.shadeColor(SimHash.colorOfCat(d.categoryName), 0.3)
         let html = "";
         html = "<div class='band' style='background-color: " + bgcolor + "'>";
         return html;
       })
+
+    let topStateVisible = that._tree.leftState.id === that._tree.rightState.id  ? "hidden" : "visible"
+    that.top_stateContainer.style("visibility", topStateVisible)
+    that.bandContainer.style("visibility", topStateVisible)
+
   }
 
   // Toggle children on click.
