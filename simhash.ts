@@ -409,6 +409,8 @@ export class TreeNode {
   }
 
   private similarityFromHash(hash1:string, hash2:string) {
+    if (hash1 === null && hash2 === null) return 1;
+    if (hash1 === null || hash2 === null) return 0;
     let len = Math.min(hash1.length, hash2.length);
     let nrEqu = 0;
     let similarity = 0;
@@ -510,7 +512,7 @@ export class TreeNode {
   get hasLeftToken():boolean {
     return !(this.leftToken === null)
   }
-  
+
   get hasRightToken():boolean {
     return !(this.rightToken === null)
   }
