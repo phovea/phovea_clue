@@ -773,7 +773,8 @@ export class TokenTreeVizualization {
         if (!isVisible) return "<div class='nonPairedToken'>";
         let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
-        html = "<div class='token' style='background-color: " + bgcolor + "'>";
+        let text = d.name;
+        html = "<div title='"+ text + "' class='token center' style='background-color: " + bgcolor + "'>"+text+"</div>";
         return html;
       })
 
@@ -825,7 +826,8 @@ export class TokenTreeVizualization {
         if (!isVisible) return "<div class='nonPairedToken'>";
         let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
-        html = "<div class='token' style='background-color: " + bgcolor + "'>";
+        let text = d.name;
+        html = "<div title='"+ text + "' class='token center' style='background-color: " + bgcolor + "'>"+text+"</div>";
         return html;
       })
 

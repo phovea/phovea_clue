@@ -1,21 +1,17 @@
 
-
-
-.container{
-	position: relative;
+.container {
+  position: relative;
 
 }
 
-.bar_description{
-	display: inline-block;
-	position: absolute;
-	transform-origin: left;
-	transform: rotate(45deg);
-	margin-top: -2px;
-	font: 14px sans-serif;
+.bar_description {
+  display: inline-block;
+  position: absolute;
+  transform-origin: left;
+  transform: rotate(45deg);
+  margin-top: -2px;
+  font: 14px sans-serif;
 }
-
-
 
 .provenance-similarity-vis {
   position: relative;
@@ -28,8 +24,8 @@
   .header {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
-      color: $core_colour_text;
-      background-color: $core_colour;
+    color: $core_colour_text;
+    background-color: $core_colour;
   }
 
   .catWeightContainer {
@@ -62,14 +58,13 @@
 
   }
 
-  .catWeightContainer:hover{
+  .catWeightContainer:hover {
     background-color: white;
     transition: background-color 100ms;
 
-
   }
 
-  .catWeightContainer.closed{
+  .catWeightContainer.closed {
     cursor: move;
   }
 
@@ -81,18 +76,15 @@
     border-color: black;
   }
 
-
   .bar.compact {
     overflow: hidden;
     line-height: 22px;
-    max-height: 22px ;
+    max-height: 22px;
   }
 
-
-  .lineContainer{
+  .lineContainer {
     position: absolute;
   }
-
 
   .controlContainer {
     position: absolute;
@@ -101,8 +93,7 @@
     top: 90px;
     left: 120px;
 
-
-    .categoryUnit{
+    .categoryUnit {
       input[type=number]::-webkit-inner-spin-button,
       input[type=number]::-webkit-outer-spin-button {
         -webkit-appearance: none;
@@ -133,14 +124,11 @@
         box-shadow: 0 0 5px 1px #969696;
       }
 
-
-
-
-      label{
+      label {
         width: 90px;
         text-align: left;
         display: inline-block;
-        input[type="checkbox"]{
+        input[type="checkbox"] {
         }
       }
     }
@@ -148,43 +136,40 @@
   }
 
   line {
-    stroke-width:5;
+    stroke-width: 5;
   }
 
-    div .chart_handle{
-      display: inline-block;
-      position: absolute;
-      cursor: pointer;
-    	z-index:4;
-    }
+  div .chart_handle {
+    display: inline-block;
+    position: absolute;
+    cursor: pointer;
+    z-index: 4;
+  }
 
-
-
-  .stateLinupView{
+  .stateLinupView {
     //margin: 5px;
     //padding: 2px;
     //position: absolute;
 
-    order:2;
+    order: 2;
     width: 100%;
     //background-color: $core_colour_text;
     flex-grow: 200;
     //height: 100%;
     //margin-bottom: 60px;
 
-    div.lu{
+    div.lu {
       //height:100%;
-      top:auto;
-      bottom:auto;
+      top: auto;
+      bottom: auto;
       flex-grow: 200;
-      order:2;
+      order: 2;
       margin: 10px;
     }
   }
 
-
   .tokenTreeViz {
-    order:3;
+    order: 3;
     height: 440px;
     //position: absolute;
     //bottom:0
@@ -197,17 +182,17 @@
     flex-wrap: nowrap;
     justify-content: space-between;
 
-    .tokenWrapper{
-      position:absolute;
+    .tokenWrapper {
+      position: absolute;
       padding: 1px
     }
 
-    .bandWrapper{
-      position:absolute;
+    .bandWrapper {
+      position: absolute;
       padding: 1px
     }
 
-    .visStateDescription{
+    .visStateDescription {
       border-radius: 20px;
       background-color: $header-menu-bg-color;
       font-size: 150%;
@@ -218,23 +203,36 @@
     }
 
     .token {
-		  position:relative;
+      position: relative;
       cursor: pointer;
       border: solid;
       border-width: 1px;
       border-color: black;
       height: 100%;
       width: 100%;
-	  }
+      white-space: nowrap;
+      padding: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      center {
+        text-align: center;
+        position: relative;
+        top: 50%;
+        -ms-transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+      }
+    }
 
     .nonPairedToken {
-      position:relative;
+      position: relative;
       height: 100%;
       width: 100%;
     }
 
     .band {
-      position:relative;
+      position: relative;
       border: solid;
       border-width: 1px;
       border-color: black;
@@ -244,7 +242,7 @@
     }
 
     .nonMatchingBand {
-      position:relative;
+      position: relative;
       height: 100%;
       width: 100%;
     }
@@ -272,7 +270,7 @@
       width: 100%;
     }
 
-    .bottom-state{
+    .bottom-state {
       height: 100%;
       width: 100%;
     }
@@ -284,9 +282,6 @@
       //flex: 1;
     }
 
-
-
   }
-
 
 }
