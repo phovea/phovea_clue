@@ -205,13 +205,11 @@ export class ObjectNode<T> extends graph.GraphNode implements IObjectRef<T> {
         return this._v;
     }
 
-    set value(v:T) {
-        this._v = v;
-        if (this._promise == null) {
-            this._promise = Promise.resolve(v);
-        }
-        this._persisted = null;
-    }
+  set value(v:T) {
+    this._v = v;
+    this._promise = v== null ? null : Promise.resolve(v);
+    this._persisted = null;
+  }
 
     /**
      * checks whether the persisted value was already restored
