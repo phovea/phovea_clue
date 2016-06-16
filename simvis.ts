@@ -693,7 +693,7 @@ export class TokenTreeVizualization {
       return d.childsAndDummyChilds;
     })
       .value(function (d) {
-        return d.weightedImportance
+        return d.getScaledSize
       })
       .sort(function (a, b) {
         return a.id - b.id
@@ -771,7 +771,7 @@ export class TokenTreeVizualization {
         }
         if (d.importance < 0.02) isVisible = false;
         if (!isVisible) return "<div class='nonPairedToken'>";
-        let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
+        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
         let text = d.name;
         html = "<div title='"+ text + "' class='token center' style='background-color: " + bgcolor + "'>"+text+"</div>";
@@ -824,7 +824,7 @@ export class TokenTreeVizualization {
         }
         if (d.importance < 0.01) isVisible = false;
         if (!isVisible) return "<div class='nonPairedToken'>";
-        let bgcolor:string = d.isLeafNodeWithDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
+        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.colorOfCat(d.categoryName) : "white";
         let html = "";
         let text = d.name;
         html = "<div title='"+ text + "' class='token center' style='background-color: " + bgcolor + "'>"+text+"</div>";
@@ -836,7 +836,7 @@ export class TokenTreeVizualization {
 
 
     let bands = nodes.filter(function (d) {
-      return d.isLeafNodeWithDummyChilds
+      return d.isLeafNodeWithoutDummyChilds
     })
     let band = this.bandSpace.selectAll("div")
       .data(bands, function (d) {

@@ -107,6 +107,7 @@ export class MatchedTokenTree {
     let rightTokens:IStateToken[] = right.stateTokens
     this.matchIntoNode(this.root, new StateTokenNode("dummyRoot", 1, leftTokens), new StateTokenNode("dummyRoot", 1, rightTokens))
     this.root.balanceWeights(1);
+    this.root.setUnscaledSize([1,1,1,1,1])
     //let sim = this.similarity;
   }
 
@@ -324,29 +325,25 @@ export class TreeNode {
         //both left and right
         if (!(left.category === SimHash.categories[2])) return;
         let sim = this.tokenSimilarity
-        let leftImp = left.importance * sim
-        let rightImp = right.importance * sim
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", leftImp, left.type, "matching", SimHash.categories[2])
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", rightImp, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + "_match"))
-        leftImp = left.importance * (1 - sim)
-        rightImp = right.importance * (1 - sim)
-        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", leftImp, left.type, "non-matching", SimHash.categories[2])
-        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", rightImp, left.type, "non-matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + "_match"))
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", left.importance, left.type, "matching", SimHash.categories[2])
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", right.importance, left.type, "matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + "_match", sim))
+        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", left.importance, left.type, "non-matching", SimHash.categories[2])
+        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", right.importance, left.type, "non-matching", SimHash.categories[2])
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + "_match", (1 - sim)))
         return;
       } else {
         //just left
         if (!(left.category === SimHash.categories[2])) return;
         let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", left.importance, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + "_match"))
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + "_match",0))
       }
     } else {
       if (right !== null) {
         if (!(right instanceof StateTokenLeaf)) return
         if (!(right.category === SimHash.categories[2])) return;
         let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", right.importance, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + "_match"))
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + "_match",0))
       } else {
         //both are null
         return
@@ -432,15 +429,6 @@ export class TreeNode {
     return this.leftToken.importance
   }
 
-  get weightedImportance():number {
-    let weights = SimHash.hasher.categoryWeighting;
-    let imp = this.impOfChildsPerCat;
-    let sum = 0
-    for (let i = 0; i < weights.length; i++) {
-      sum += imp[i]*weights[i]
-    }
-    return sum
-  }
 
   get isRoot():boolean {
     return false;
@@ -497,7 +485,33 @@ export class TreeNode {
     }
   }
 
-  get isLeafNodeWithDummyChilds():boolean {
+  protected _unscaledSize = -1;
+
+  get getScaledSize() {
+    let weights = SimHash.hasher.categoryWeighting;
+    return this._unscaledSize * weights[this.category]
+  }
+
+  setUnscaledSize(target:number[]) {
+    let currentImp = this.impOfChildsPerCat
+    if (this.isLeafNodeWithoutDummyChilds) {
+      this._unscaledSize = target[this.category]
+      return
+    }
+    let dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds)
+    for (let i = 0; i < dummyAndOtherChilds.length; i++) {
+      let targetCpy = target.slice(0)
+      let childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
+      for (let j = 0; j < 5; j++) {
+        if (childImp[j]===0) continue;
+        let ratio = currentImp[j]/childImp[j]
+        targetCpy[j] = targetCpy[j]/ratio
+      }
+      dummyAndOtherChilds[i].setUnscaledSize(targetCpy);
+    }
+  }
+
+  get isLeafNodeWithoutDummyChilds():boolean {
     return (this._childs.length === 0 && this._dummyChilds.length === 0);
   }
 
@@ -538,6 +552,19 @@ class DummyTreeNode extends TreeNode {
 
   public get tokenSimilarity():number {
     return 1
+  }
+
+  private tokenSim = -1
+
+  get getScaledSize() {
+    let weights = SimHash.hasher.categoryWeighting;
+    return this.tokenSim * weights[this.category]
+  }
+
+
+  constructor(left:IStateToken, right:IStateToken, id, unscaledSize) {
+    super(left,right,id)
+    this.tokenSim = unscaledSize;
   }
 
 }
