@@ -138,18 +138,19 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
 
   //new button
   $ul.select('#provenancegraph_new_remote').on('click', () => {
-    d3.event.preventDefault();
+    (<Event>d3.event).preventDefault();
     manager.newRemoteGraph();
   });
   //new local
   $ul.select('#provenancegraph_new').on('click', () => {
-    d3.event.preventDefault();
+    (<Event>d3.event).preventDefault();
     manager.newGraph();
   });
 
   d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function () {
-    d3.event.preventDefault();
-    d3.event.stopPropagation();
+    let e = (<Event>d3.event);
+    e.preventDefault();
+    e.stopPropagation();
     var remote = this.id === 'provenancegraph_import_remote';
     //import dialog
     const d = dialogs.generateDialog('Select File', 'Upload');
@@ -171,7 +172,7 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
   return manager.list().then((list) => {
     const $list = $ul.select('#provenancegraph_list').selectAll('li.graph').data(list);
     $list.enter().insert('li', ':first-child').classed('graph', true).html((d) => `<a href="#clue_graph=${d.id}"><i class="fa fa-code-fork fa-rotate-180" aria-hidden="true"></i> ${d.name} </a>`).select('a').on('click', (d) => {
-      d3.event.preventDefault();
+      (<Event>d3.event).preventDefault();
       manager.loadGraph(d);
     });
     const format = d3.time.format.utc('%Y-%m-%dT%H:%M');
@@ -406,8 +407,9 @@ export class CLUEWrapper extends events.EventHandler {
       this.header.insertCustomRightMenu(ul);
 
       d3.select('#provenancegraph_export').on('click', () => {
-        d3.event.preventDefault();
-        d3.event.stopPropagation();
+        let e = (<Event>d3.event);
+        e.preventDefault();
+        e.stopPropagation();
         this.graph.then((g) => {
           console.log(g);
           const r = g.persist();
@@ -585,11 +587,12 @@ export class CLUEWrapper extends events.EventHandler {
       });
       d3.select('#attachNote form').on('submit', () => {
         const note = d3.select('#attachNote_note').property('value');
+        let e = (<Event>d3.event);
         graph.act.setAttr('note', note);
         (<any>$('#attachNote')).modal('hide');
         (<HTMLFormElement>document.querySelector('#attachNote form')).reset();
-        d3.event.preventDefault();
-        d3.event.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
       });
 
       //undo the step

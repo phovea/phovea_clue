@@ -580,7 +580,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   private onStateClick(d: StateRepr) {
-    d3.event.stopPropagation();
+    (<Event>d3.event).stopPropagation();
     this.data.selectState(d.s, idtypes.toSelectOperation(d3.event));
     this.data.jumpTo(d.s);
   }
@@ -622,7 +622,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         }
       }).on('dragover', () => {
         if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
-          d3.event.preventDefault();
+          (<Event>d3.event).preventDefault();
           C.updateDropEffect(d3.event);
           return false;
         }
@@ -658,16 +658,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $inner.append('div').classed('sthumbnail', true);
     const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
     $toolbar_enter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
-      const v= !d.s.getAttr('starred',false);
+      const v = !d.s.getAttr('starred',false);
+      let e = <Event>d3.event;
       d.s.setAttr('starred', v);
       d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
     });
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      let e = <Event>d3.event;
       d.showDialog();
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
     });
 
     $states.call(StateRepr.render);

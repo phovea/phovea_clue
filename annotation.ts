@@ -472,7 +472,7 @@ export class Renderer {
       .on('click', function (d:prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotationElem(d);
-        d3.event.preventDefault();
+        (<Event>d3.event).preventDefault();
       });
 
 
