@@ -351,10 +351,9 @@ export class CLUEWrapper extends events.EventHandler {
     super();
     const that = this;
     C.mixin(this.options, options);
-    //replace content with the template
+
+    // replace content with the template
     body.innerHTML = template;
-
-
 
     //special flag for rendering server side screenshots
     if (C.hash.is('clue_headless')) {

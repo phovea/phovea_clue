@@ -475,8 +475,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
+      <a href="#" class="btn-collapse"><i class="fa fa-arrow-circle-o-right"></i></a>
       <div>
-        <h2><i class="fa fa-code-fork fa-rotate-180"></i> Provenance <i class="fa fa-filter"></i></h2>
+        <h2>
+          <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
+          <a href="#" class="btn-filter"><i class="fa fa-filter"></i></a>
+        </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs" title="data actions">
@@ -572,8 +576,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
-    jp.find('h2 i').on('click', () => {
+    jp.find('.btn-filter').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
+      return false;
+    });
+
+    jp.find('.btn-collapse').on('click', () => {
+      $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', $p.classed('collapsed')).classed('fa-arrow-circle-o-left', !$p.classed('collapsed'));
+      $p.classed('collapsed', !$p.classed('collapsed'));
     });
 
     return $p;
