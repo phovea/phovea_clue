@@ -581,7 +581,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       return false;
     });
 
-    jp.find('.btn-collapse').on('click', () => {
+    jp.find('.btn-collapse').on('click', (evt) => {
+      evt.preventDefault();
       $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', $p.classed('collapsed')).classed('fa-arrow-circle-o-left', !$p.classed('collapsed'));
       $p.classed('collapsed', !$p.classed('collapsed'));
     });
