@@ -120,7 +120,7 @@ aside {
   position: relative;
 }
 
-header {
+header.clue-modeselector {
   position: absolute;
   left: 30vw;
   width: 40vw;
@@ -128,7 +128,7 @@ header {
   text-align: center;
 
   label {
-    padding: 1em 5px;
+    //padding: 1em 5px;
     width: 10em;
   }
 }

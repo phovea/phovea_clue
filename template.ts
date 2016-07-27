@@ -454,7 +454,9 @@ export class CLUEWrapper extends events.EventHandler {
 
 
     //cmode.create(body.querySelector('#modeselector'));
-    cmode.createButton(body.querySelector('header'), {
+    const modeselector = body.querySelector('header');
+    modeselector.className += 'clue-modeselector';
+    cmode.createButton(modeselector, {
       size: 'sm'
     });
     //cmode.createSlider(body.querySelector('#modeselector'));
