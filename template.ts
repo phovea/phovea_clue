@@ -334,7 +334,11 @@ export class CLUEWrapper extends events.EventHandler {
     /**
      * App Header Link
      */
-    appLink: new header.AppHeaderLink('CLUE')
+    appLink: new header.AppHeaderLink('CLUE'),
+    /**
+     * Should the provenance graph layout be collapsed by default?
+     */
+    provVisCollapsed: false
   };
 
   private manager:prov.MixedStorageProvenanceGraphManager;
@@ -490,7 +494,8 @@ export class CLUEWrapper extends events.EventHandler {
 
 
       provvis2.create(graph, body.querySelector('div.content'), {
-        thumbnails: this.options.thumbnails
+        thumbnails: this.options.thumbnails,
+        provVisCollapsed: this.options.provVisCollapsed
       });
 
       this.storyvis = storyvis.create(graph, body.querySelector('div.content'), {

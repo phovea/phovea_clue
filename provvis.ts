@@ -412,7 +412,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
     this.options = C.mixin({
-      thumbnails: true
+      thumbnails: true,
+      provVisCollapsed: false
     }, options);
     this.options.scale = [1, 1];
     this.options.rotate = 0;
@@ -470,12 +471,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $p = $parent.append('aside').attr({
-      'class': 'provenance-layout-vis'
-    }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
+    var $p = $parent.append('aside')
+      .classed('provenance-layout-vis', true)
+      .classed('collapsed', this.options.provVisCollapsed)
+      .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
-      <a href="#" class="btn-collapse"><i class="fa fa-arrow-circle-o-right"></i></a>
+      <a href="#" class="btn-collapse"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
       <div>
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
