@@ -668,6 +668,7 @@ export class CLUEWrapper extends events.EventHandler {
           (<any>$('#loginDialog')).modal('hide');
 
           $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
+          events.fire('USER_LOGGED_IN', user);
 
         } else {
           that.header.ready();
@@ -679,13 +680,15 @@ export class CLUEWrapper extends events.EventHandler {
 
 
     $('#logout_link').on('click', () => {
-      this.header.wait();
+      that.header.wait();
       login.logout().then(function () {
         session.store('logged_in', false);
         $('#user_menu').hide();
         $('#login_menu').show();
         $('.login_required').addClass('disabled');
+        that.header.ready();
         //TODO
+        events.fire('USER_LOGGED_OUT');
       });
     });
   }
