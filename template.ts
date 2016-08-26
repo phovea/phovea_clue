@@ -3,9 +3,6 @@
  *
  * Created by Samuel Gratzl on 27.08.2015.
  */
-/// <amd-dependency path='font-awesome' />
-/// <amd-dependency path='bootstrap' />
-/// <amd-dependency path='css!./style' />
 
 
 /// <amd-dependency path="text!./_template.html" name="template"/>
