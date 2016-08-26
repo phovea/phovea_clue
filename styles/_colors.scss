@@ -2,6 +2,13 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
+// header navbar color (the inverse colors will be computed using sass `invert($color)`)
+$header-bg-color: #60AA85;
+$header-border-color: transparent;
+$header-link-color: #F5F3F3;
+$header-dropdown-link-color: #000;
+
+
 $select-color: orange;
 $select-color-bright: #ffdca3;
 $hover-color: black;
