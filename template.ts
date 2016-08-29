@@ -428,7 +428,7 @@ export class CLUEWrapper extends events.EventHandler {
         return false;
       });
 
-      d3.select(this.header.options).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
+      d3.select(this.header.optionsDialog).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
         this.graph.then((g:prov.ProvenanceGraph) => {
             return datas.create({
               id: g.desc.id,
