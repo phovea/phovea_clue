@@ -20,7 +20,7 @@ label {
 
   &.clue-E, &.clue-A, &.clue-P {
     font-size: 17px;
-    padding: 0px 10px;
+    padding: 0 10px;
 
     border-radius: 5px !important;
     margin: 3px 3px 2px 3px;
@@ -262,41 +262,6 @@ div.shortcuts {
 }
 
 body {
-  nav.navbar {
-    margin: 2px 2px 0 2px;
-    //margin-bottom: 0px !important;
-    background-color:$core_colour;
-    border-radius: 5px;
-
-    /*transition: top 1s ease;
-    position: fixed;
-    z-index: 100;
-    top: -50px;
-    left: 0;
-    right: 0;
-
-    &:hover {
-      top: 0px;
-    }*/
-
-    a {
-      color:$core_colour_text;
-
-      &.disabled {
-        color: #f4f2f2;
-        pointer-events: none;
-      }
-
-      &:hover, &:focus {
-        background-color: $header-menu-bg-color;
-        color: $header-menu-color;
-      }
-    }
-
-    .dropdown-menu a {
-      color: $core_color_almost_black;
-    }
-  }
 
   div.content {
     //margin-top: 7px;

@@ -1,6 +1,8 @@
 
 // import variables first
-@import "styles/vars";
+@import "styles/colors";
+
+@import "../caleydo_bootstrap_fontawesome/styles/base";
 
 // basic CLUE style
 @import "styles/base";
@@ -9,3 +11,8 @@
 @import "styles/annotation";
 @import "styles/provvis";
 @import "styles/storyvis";
+
+// import the header navbar with a more specific CSS selector again, to style it with the CLUE colors
+.box {
+  @import "../caleydo_bootstrap_fontawesome/styles/header_navbar";
+}

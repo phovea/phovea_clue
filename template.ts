@@ -3,9 +3,6 @@
  *
  * Created by Samuel Gratzl on 27.08.2015.
  */
-/// <amd-dependency path='font-awesome' />
-/// <amd-dependency path='bootstrap' />
-/// <amd-dependency path='css!./style' />
 
 
 /// <amd-dependency path="text!./_template.html" name="template"/>
@@ -338,7 +335,11 @@ export class CLUEWrapper extends events.EventHandler {
     /**
      * Should the provenance graph layout be collapsed by default?
      */
-    provVisCollapsed: false
+    provVisCollapsed: false,
+    /**
+     * Options that will be passed to the header
+     */
+    headerOptions: {}
   };
 
   private manager:prov.MixedStorageProvenanceGraphManager;
@@ -380,10 +381,11 @@ export class CLUEWrapper extends events.EventHandler {
     this.clueManager = new CLUEGraphManager(this.manager);
 
     //create the common header
-    this.header = header.create(<HTMLElement>body.querySelector('div.box'), {
-      appLink: this.options.appLink,
-      inverse: false
+    const headerOptions = C.mixin(this.options.headerOptions, {
+      showOptionsLink: true, // always activate options
+      appLink: this.options.appLink
     });
+    this.header = header.create(<HTMLElement>body.querySelector('div.box'), headerOptions);
 
     this.header.wait();
 
@@ -392,19 +394,41 @@ export class CLUEWrapper extends events.EventHandler {
     {
       //add provenance graph management menu entry
       let ul = document.createElement('ul');
-      let $ul = d3.select(ul).attr('class', 'nav navbar-nav navbar-right').html(`
-      <li class="dropdown">
-            <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-               aria-expanded="false"><i class="fa fa-code-fork fa-lg fa-rotate-180"></i></a>
-            <ul class="dropdown-menu" id="provenancegraph_list">
-                <li role="separator" class="divider"></li>
-                <li><a href="#" id="provenancegraph_import"><span class="fa fa-upload" aria-hidden="true"></span> Import ...</a></li>
-                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote"><span class="fa fa-cloud-upload" aria-hidden="true"></span> Import Remote ...</a></li>
-                <li><a href="#" id="provenancegraph_export"><span class="fa fa-download" aria-hidden="true"></span> Export ...</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#" id="provenancegraph_new"><span class="fa fa-plus-circle" aria-hidden="true"></span> New ...</a></li>
-                <li><a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote"><span class="fa fa-cloud" aria-hidden="true"></span> New Remote...</a></li>
-            </ul>
+      let $ul = d3.select(ul)
+        .attr('class', 'nav navbar-nav navbar-right')
+        .html(`<li class="dropdown">
+          <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-code-fork fa-lg fa-rotate-180 fa-fw"></i>
+          </a>
+          <ul class="dropdown-menu" id="provenancegraph_list">
+            <li role="separator" class="divider"></li>
+            <li>
+              <a href="#" id="provenancegraph_import">
+                <i class="fa fa-upload" aria-hidden="true"></i> Import ...
+              </a>
+            </li>
+            <li>
+              <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote">
+                <i class="fa fa-cloud-upload" aria-hidden="true"></i> Import Remote ...
+              </a>
+            </li>
+            <li>
+              <a href="#" id="provenancegraph_export">
+                <i class="fa fa-download" aria-hidden="true"></i> Export ...
+              </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li>
+              <a href="#" id="provenancegraph_new">
+                <i class="fa fa-plus-circle" aria-hidden="true"></i> New ...
+              </a>
+            </li>
+            <li>
+              <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote">
+                <i class="fa fa-cloud" aria-hidden="true"></i> New Remote...
+              </a>
+            </li>
+          </ul>
         </li>`);
 
       this.header.insertCustomRightMenu(ul);
@@ -428,30 +452,33 @@ export class CLUEWrapper extends events.EventHandler {
         return false;
       });
 
-      d3.select(this.header.optionsDialog).append('button').text('Show').attr('class', 'btn btn-default').on('click', () => {
-        this.graph.then((g:prov.ProvenanceGraph) => {
-            return datas.create({
-              id: g.desc.id,
-              name: g.desc.name,
-              fqname: g.desc.fqname,
-              type: 'graph',
-              storage: 'given',
-              graph: g.backend
+      d3.select(this.header.optionsDialog)
+        .append('button').text('Show Provenance Graph')
+        .attr('class', 'btn btn-default')
+        .on('click', () => {
+          this.graph.then((g:prov.ProvenanceGraph) => {
+              return datas.create({
+                id: g.desc.id,
+                name: g.desc.name,
+                fqname: g.desc.fqname,
+                type: 'graph',
+                storage: 'given',
+                graph: g.backend
+              });
+            })
+            .then((proxy) => {
+              const l = vis.list(proxy);
+              if (l.length <= 0) {
+                return;
+              }
+              l[0].load().then((force) => {
+                let p = dialogs.generateDialog('Provenance Graph');
+                force.factory(proxy, p.body);
+                p.show();
+              });
             });
-          })
-          .then((proxy) => {
-            const l = vis.list(proxy);
-            if (l.length <= 0) {
-              return;
-            }
-            l[0].load().then((force) => {
-              let p = dialogs.generateDialog('Provenance Graph');
-              force.factory(proxy, p.body);
-              p.show();
-            });
-          });
-        return false;
-      });
+          return false;
+        });
 
       this.graph = chooseProvenanceGraph(this.clueManager, $ul);
     }
@@ -636,7 +663,10 @@ export class CLUEWrapper extends events.EventHandler {
       let ul = document.createElement('ul');
       ul.classList.add('nav', 'navbar-nav', 'navbar-right');
       ul.innerHTML = `
-      <li id="login_menu"><a data-toggle="modal" data-target="#loginDialog" href="#"><i class="fa fa-user" aria-hidden="true"></i></a></li>
+      <li id="login_menu">
+        <a data-toggle="modal" data-target="#loginDialog" href="#">
+        <i class="fa fa-user fa-fw" aria-hidden="true"></i>
+        </a></li>
         <li style="display: none" class="dropdown" id="user_menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                aria-expanded="false"><i class="fa fa-user" aria-hidden="true"></i> Unknown</a>
