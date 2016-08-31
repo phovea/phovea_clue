@@ -4,6 +4,7 @@ Caleydo CLUE ![Caleydo Web Client Plugin](https://img.shields.io/badge/Caleydo%2
 CLUE (for **C**apture, **L**abel, **U**nderstand, **E**xplain) is a model that tightly integrates data exploration and presentation of discoveries. Based on provenance data captured during the exploration process, users can extract key steps, add annotations, and author 'Vistories', visual stories based on the history of the exploration.
 
 Further Resources:
+* [Vistories.org](http://vistories.org)
 * [Project Homepage](http://www.caleydo.org/publications/2016_eurovis_clue/)
 * Examples using CLUE: [StratomeX](http://vistories.org/v/stratomex) and [Gapminder](http://vistories.org/v/gapminder)
 
