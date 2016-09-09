@@ -4,7 +4,7 @@ import Color = d3.Color;
 import idtype = require('../caleydo_core/idtype')
 import {IStateToken, StateTokenLeaf, StateTokenNode, TokenType} from "./statetoken";
 import events = require('../caleydo_core/event');
-import {StateNode} from "./prov";
+import {StateNode} from "../caleydo_core/prov";
 
 
 class HashTable {

@@ -10,11 +10,11 @@ import C = require('../caleydo_core/main');
 import $ = require('jquery');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/prov');
 import provvis = require('./provvis')
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
-import {StateNode, ProvenanceGraph} from "./prov";
+import {StateNode, ProvenanceGraph} from "../caleydo_core/prov";
 
 interface Weight {
   name;

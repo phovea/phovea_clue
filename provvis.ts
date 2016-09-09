@@ -16,8 +16,8 @@ import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
 //import events = require('../caleydo_core/events');
-import {ProvenanceGraph} from "../caleydo_clue/prov";
-import {StateNode} from "../caleydo_clue/prov";
+import {ProvenanceGraph} from "../caleydo_core/prov";
+import {StateNode} from "../caleydo_core/prov";
 import Color = d3.Color;
 import {SimHash} from "./simhash";
 import {WeightInterface,LinupStateView,TokenTreeVizualization} from "./simvis"
