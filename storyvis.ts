@@ -5,7 +5,7 @@
 
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/provenance');
 import idtypes = require('../caleydo_core/idtype');
 import cmode = require('./mode');
 import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');

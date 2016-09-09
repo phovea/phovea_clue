@@ -6,7 +6,7 @@
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
 import header = require('../caleydo_bootstrap_fontawesome/header');
-import prov = require('./prov');
+import prov = require('../caleydo_core/provenance');
 import d3 = require('d3');
 
 /**

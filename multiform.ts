@@ -3,7 +3,7 @@
  */
 
 import multiform = require('../caleydo_core/multiform');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/provenance');
 import vis = require('../caleydo_core/vis');
 import C = require('../caleydo_core/main');
 

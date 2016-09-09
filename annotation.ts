@@ -3,7 +3,7 @@
  */
 
 import C = require('../caleydo_core/main');
-import prov = require('./prov');
+import prov = require('../caleydo_core/provenance');
 import cmode = require('./mode');
 import d3 = require('d3');
 import marked = require('marked');

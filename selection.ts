@@ -4,7 +4,7 @@
 
 import idtypes = require('../caleydo_core/idtype');
 import events = require('../caleydo_core/event');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/provenance');
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
 
