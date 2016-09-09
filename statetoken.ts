@@ -7,8 +7,6 @@
  * Created by michael gillhofer
  */
 'use strict';
-import {isUndefined} from '../caleydo_core/main';
-import {IDType} from '../caleydo_core/idtype';
 
 
 export enum TokenType {
@@ -23,9 +21,7 @@ export abstract class IStateToken {
   name: string;
   importance: number;
   stateTokens: IStateToken[];
-
-
-  protected catImpOfChilds:number[];
+  //protected catImpOfChilds:number[];
 
   constructor(name:string, importance:number) {
     this.name = name;
@@ -47,8 +43,7 @@ export class StateTokenNode extends IStateToken {
 
 }
 
-export class StateTokenLeaf extends IStateToken{
-
+export class StateTokenLeaf extends IStateToken {
 
   static categories:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
 

@@ -228,7 +228,7 @@ export class MatchedTokenTree {
         let sim = leafs[i].tokenSimilarity;
         centerSims[leafs[i].category] += leafs[i].importance * sim;
         leftSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2;
-        rightSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2
+        rightSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2;
       } else {
         if (leafs[i].hasLeftToken) {
           catContainsToken[leafs[i].category] = true;
@@ -757,7 +757,9 @@ export class SimHash extends events.EventHandler {
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
-    if (!(typeof tokens !== 'undefined')) return Array(this._nrBits + 1).join('0');
+    if (!(typeof tokens !== 'undefined')) {
+      return Array(this._nrBits + 1).join('0');
+    }
 
     //let b:number = 0;
     let splitTokens = this.prepHashCalc(tokens);
@@ -885,7 +887,7 @@ export class SimHash extends events.EventHandler {
 function hashFnv32a(str:string, seed:number):string {
   /*jshint bitwise:false */
   var i, l,
-    hval = (typeof seed != 'undefined') ? 0x811c9dc5 : seed;
+    hval = (typeof seed !== 'undefined') ? 0x811c9dc5 : seed;
   for (i = 0, l = str.length; i < l; i++) {
     hval ^= str.charCodeAt(i);
     hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
@@ -967,9 +969,9 @@ function ordinalHash(min:number, max:number, value:number, nrBits:number):string
   return hash;
 }
 
-function dec2bin(dec:number):string {
+/*function dec2bin(dec:number):string {
   return (dec >>> 0).toString(2);
-}
+}*/
 
 
 class RNG {

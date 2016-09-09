@@ -17,8 +17,10 @@ interface IWeight {
   active;
 }
 
-class SimVisStateNode extends StateNode {
+export class SimVisStateNode extends StateNode {
   lineUpIndex: number;
+  isHoveredInLineUp: boolean;
+  duplicates: any[]; // any??
 }
 
 

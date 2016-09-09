@@ -15,13 +15,8 @@ import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 
 import utils = require('./utils');
-//import events = require('../caleydo_core/events');
-import {ProvenanceGraph} from "../caleydo_core/prov";
-import {StateNode} from "../caleydo_core/prov";
-import Color = d3.Color;
-import {SimHash} from "./simhash";
-import {WeightInterface,LinupStateView,TokenTreeVizualization} from "./simvis"
-import {isUndefined, indexOf} from "../caleydo_core/main";
+import {SimHash} from './simhash';
+import {WeightInterface, LinupStateView, TokenTreeVizualization, SimVisStateNode} from './simvis';
 
 
 
@@ -71,8 +66,8 @@ class StateRepr {
   a : provenance.ActionNode = null;
 
 
-  constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
-    this.doi = 0.1
+  constructor(public s: SimVisStateNode, public graph: provenance.ProvenanceGraph) {
+    this.doi = 0.1;
     /*if (this.similarityToActiveState >= 0) {
       this.doi = this.doi*this.similarityToActiveState;
     }
@@ -81,7 +76,7 @@ class StateRepr {
   }
 
   get isHoveredInLineUp() {
-    return this.s.isHoveredInLineUp
+    return this.s.isHoveredInLineUp;
   }
 
   get similarityToHoveredState():number {
@@ -90,8 +85,10 @@ class StateRepr {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
-      var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
-      if (selState.length==0) return 1;
+      var selState:SimVisStateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
+      if (selState.length === 0) {
+        return 1;
+      }
       return selState[0].getSimilarityTo(this.s);
     }
     return 1;
@@ -110,11 +107,13 @@ class StateRepr {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
-      var selState:StateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
-      if (selState.length==0) return 1;
-      let sim =selState[0].getSimilarityTo(this.s)
-      sim = Math.max(0.25, sim)
-      return sim
+      var selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
+      if (selState.length === 0) {
+        return 1;
+      }
+      let sim =selState[0].getSimilarityTo(this.s);
+      sim = Math.max(0.25, sim);
+      return sim;
     }
     return 1;
   }
@@ -124,7 +123,7 @@ class StateRepr {
   }*/
 
   get hasDuplicates():boolean{
-    return this.s.duplicates.length > 0
+    return this.s.duplicates.length > 0;
   }
 
   get thumbnail() {
@@ -385,14 +384,14 @@ class StateRepr {
     //$elem.select('span.slabel').text((d) => d.name);
     //$elem.select('span.slabel').text((d) => ((d.compareMode && (d.similarityToHoveredState >=0)) ? ": " + Math.round(d.similarityToHoveredState*100) + "%" : "")+ " " + d.name );
     $elem.select('span.slabel').text(function(d) {
-      let text:string = "";
+      let text:string = '';
       if (d.compareMode && (d.similarityToActiveState >=0)) {
-        text += ": " + Math.round(d.similarityToActiveState * 100) + "%"
-        text += " " + d.name ;
+        text += ': ' + Math.round(d.similarityToActiveState * 100) + '%';
+        text += ' ' + d.name ;
         return text;
       }
       return d.name;
-    })
+    });
       /*.style('font-weight', function(d) {
         if (d.compareMode) {
           let val = Math.round(d.similarityToActiveState*10)*100
@@ -474,7 +473,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private onLinupHoverChanged = (event:any,state:provenance.StateNode) => {
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
-  }
+  };
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
@@ -548,12 +547,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
-    this.data.on('linupHoverChanged', this.onLinupHoverChanged)
+    this.data.on('linupHoverChanged', this.onLinupHoverChanged);
     //this.data.on('weighting_change', this.onWeightingChanged)
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
     });
-    SimHash.hasher.on('weights_changed', this.trigger)
+    SimHash.hasher.on('weights_changed', this.trigger);
     cmode.on('modeChanged', this.trigger);
   }
 
@@ -566,7 +565,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.states.forEach((s) => {
       s.off('setAttr', this.trigger);
     });
-    SimHash.hasher.off('weights_changed', this.trigger)
+    SimHash.hasher.off('weights_changed', this.trigger);
     cmode.off('modeChanged', this.trigger);
   }
 
@@ -700,23 +699,25 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     let $simArea:d3.Selection<any> = null;
     $simArea = d3.selectAll('.content').append('aside')
       .attr({'class': 'provenance-similarity-vis'})
-      .style('transform', 'rotate(' + that.options.rotate + 'deg)')
+      .style('transform', 'rotate(' + that.options.rotate + 'deg)');
 
     $simArea.html('<div class="header"><h2 style="white-space: nowrap;"><i class="fa fa-balance-scale"></i>State similarity</h2></div>' +
       '<div class="catWeightContainer closed"><div class="barContainer"></div><svg class="lineContainer"></svg><div class="controlContainer"></div></div>'+
         '<div class="stateLinupView"></div>'+
         '<div class="tokenTreeViz"></div>'
-    )
+    );
 
     cmode.on('modeChanged', function () {
       if (simAreaIsActive) {
-        $('input#compareStatesBtn').trigger('click')
+        $('input#compareStatesBtn').trigger('click');
       }
     });
 
-    let weightContainer = new WeightInterface($simArea.select(".catWeightContainer"))
-    let luContainer = new LinupStateView($simArea.select(".stateLinupView"),this.data)
-    let treeVizContainer = new TokenTreeVizualization($simArea.select(".tokenTreeViz"), this.data)
+    let weightContainer = new WeightInterface($simArea.select('.catWeightContainer'));
+    //let luContainer =
+      new LinupStateView($simArea.select('.stateLinupView'),this.data);
+    //let treeVizContainer =
+      new TokenTreeVizualization($simArea.select('.tokenTreeViz'), this.data);
 
     //init the toolbar filter options
 
@@ -726,18 +727,17 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         that.highlight.tags = this.value.split(' ');
         jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
         that.update();
-      }
-      else if (this.id === "compareStatesBtn") {
-        let b = $('.provenance-similarity-vis')
-        b.toggle('fast')
+      } else if (this.id === 'compareStatesBtn') {
+        let b = $('.provenance-similarity-vis');
+        b.toggle('fast');
         weightContainer.close();
-        simAreaIsActive = !simAreaIsActive
+        simAreaIsActive = !simAreaIsActive;
         that.data.similarityMode = simAreaIsActive;
-        that.data.fire('redraw_states')
+        that.data.fire('redraw_states');
       } else {
           that.highlight[this.name][this.value] = this.checked;
-          that.update()
-      };
+          that.update();
+      }
     });
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
@@ -815,25 +815,25 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
-    })//.on('duplicate', $states.transition().attr("fill", "pink"));
+    });//.on('duplicate', $states.transition().attr("fill", "pink"));
 
-    d3.select("body").on("keydown", function() {
+    d3.select('body').on('keydown', function() {
       if(d3.event.ctrlKey) {
         this.comparing=true;
       }
     }.bind(graph))
-      .on("keyup", function() {
+      .on('keyup', function() {
       this.comparing=false;
     }.bind(graph));
 
 
 
-    d3.select("body").on("keydown", function() {
+    d3.select('body').on('keydown', function() {
       if(d3.event.ctrlKey) {
         this.comparing=true;
       }
     }.bind(graph))
-      .on("keyup", function() {
+      .on('keyup', function() {
       this.comparing=false;
     }.bind(graph));
 
