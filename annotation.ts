@@ -3,7 +3,7 @@
  */
 
 import C = require('../caleydo_core/main');
-import prov = require('./prov');
+import prov = require('../caleydo_core/provenance');
 import cmode = require('./mode');
 import d3 = require('d3');
 import marked = require('marked');
@@ -472,7 +472,7 @@ export class Renderer {
       .on('click', function (d:prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotationElem(d);
-        d3.event.preventDefault();
+        (<Event>d3.event).preventDefault();
       });
 
 

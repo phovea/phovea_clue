@@ -5,7 +5,7 @@
 
 import C = require('../caleydo_core/main');
 import ranges = require('../caleydo_core/range');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/provenance');
 import idtypes = require('../caleydo_core/idtype');
 import cmode = require('./mode');
 import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
@@ -349,7 +349,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         }
       }).on('dragover', (d) => {
       if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
-        d3.event.preventDefault();
+        (<Event>d3.event).preventDefault();
         C.updateDropEffect(d3.event);
         return false;
       }
@@ -464,7 +464,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     elem.attr('draggable',true)
       .on('dragstart', (d) => {
         if (!isEditAble()) {
-          d3.event.preventDefault();
+          (<Event>d3.event).preventDefault();
           return;
         }
         const e = <DragEvent>(<any>d3.event);
@@ -491,9 +491,10 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const $toolbar_enter = $elem.append('div').classed('toolbar', true);
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      let e = <Event>d3.event;
       //remove me
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
       dialogs.prompt(d.name, {
         title: 'Edit name',
         placeholder: 'Markdown supported...',
@@ -507,9 +508,10 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
 
     $toolbar_enter.append('i').attr('class', 'fa fa-copy').attr('title','clone slide').on('click', (d) => {
+      let e = <Event>d3.event;
       //remove me
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
       this.data.moveSlide(this.data.cloneSingleSlideNode(d), d, false);
       this.update();
       return false;
@@ -525,9 +527,10 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     });
     */
     $toolbar_enter.append('i').attr('class', 'fa fa-remove').attr('title','remove slide').on('click', (d) => {
+      let e = <Event>d3.event;
       //remove me
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
       if (d === this.story) {
         this.story = this.story.next;
         if (this.story === null) {
@@ -590,7 +593,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.enter().insert('li').append('a')
       .attr('href', '#').on('click', (d) => {
       this.switchTo(d);
-      d3.event.preventDefault();
+      (<Event>d3.event).preventDefault();
     });
     $stories.select('a').text((d) => d.name);
 

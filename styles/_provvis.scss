@@ -9,7 +9,11 @@
   -webkit-flex-direction: column;
   flex-direction: column;
 
-  &:first-child {
+  &.collapsed > div {
+    display: none;
+  }
+
+  > div:first-child {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
   }
@@ -35,13 +39,26 @@
     }
   }
 
-  h2 i:last-of-type {
+  .btn-filter {
+    color: $core_colour_text;
     float: right;
     cursor: pointer;
+    margin-right: 15px;
 
     &:hover {
       font-weight: bold;
     }
+  }
+
+  .btn-collapse {
+    color: $core_colour_text;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+  }
+
+  &.collapsed > .btn-collapse {
+    color: $header-menu-color;
   }
 
   div.state {

@@ -8,7 +8,7 @@ import C = require('../caleydo_core/main');
 import $ = require('jquery');
 import ranges = require('../caleydo_core/range');
 import idtypes = require('../caleydo_core/idtype');
-import provenance = require('./prov');
+import provenance = require('../caleydo_core/provenance');
 import cmode = require('./mode');
 import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
 import d3 = require('d3');
@@ -531,7 +531,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
     this.options = C.mixin({
-      thumbnails: true
+      thumbnails: true,
+      provVisCollapsed: false
     }, options);
     this.options.scale = [1, 1];
     this.options.rotate = 0;
@@ -593,13 +594,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $p = $parent.append('aside').attr({
-      'class': 'provenance-layout-vis'
-    }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
+    var $p = $parent.append('aside')
+      .classed('provenance-layout-vis', true)
+      .classed('collapsed', this.options.provVisCollapsed)
+      .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
+      <a href="#" class="btn-collapse"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
       <div>
-        <h2><i class="fa fa-code-fork fa-rotate-180"></i> Provenance <i class="fa fa-filter"></i></h2>
+        <h2>
+          <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
+          <a href="#" class="btn-filter"><i class="fa fa-filter"></i></a>
+        </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs" title="data actions">
@@ -736,8 +742,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //initialize bootstrap
     (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
 
-    jp.find('h2 i').on('click', () => {
+    jp.find('.btn-filter').on('click', () => {
       jp.find('form.toolbar').toggle('fast');
+      return false;
+    });
+
+    jp.find('.btn-collapse').on('click', (evt) => {
+      evt.preventDefault();
+      $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', $p.classed('collapsed')).classed('fa-arrow-circle-o-left', !$p.classed('collapsed'));
+      $p.classed('collapsed', !$p.classed('collapsed'));
     });
 
 
@@ -747,7 +760,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
   private onStateClick(d: StateRepr) {
-    d3.event.stopPropagation();
+    (<Event>d3.event).stopPropagation();
     this.data.selectState(d.s, idtypes.toSelectOperation(d3.event));
     this.data.jumpTo(d.s);
   }
@@ -789,7 +802,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         }
       }).on('dragover', () => {
         if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
-          d3.event.preventDefault();
+          (<Event>d3.event).preventDefault();
           C.updateDropEffect(d3.event);
           return false;
         }
@@ -847,16 +860,18 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $inner.append('div').classed('sthumbnail', true);
     const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
     $toolbar_enter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
-      const v= !d.s.getAttr('starred',false);
+      const v = !d.s.getAttr('starred',false);
+      let e = <Event>d3.event;
       d.s.setAttr('starred', v);
       d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
     });
     $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      let e = <Event>d3.event;
       d.showDialog();
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
     });
 
     $states.call(StateRepr.render);

@@ -343,7 +343,7 @@ export class TriangleModeSelector {
       cy: xy[1],
       r: 2
     }).call(d3.behavior.drag().on('drag', () => {
-      var m = this.fromCoordinates(d3.event.x, d3.event.y);
+      var m = this.fromCoordinates((<MouseEvent>d3.event).x, (<MouseEvent>d3.event).y);
       setMode(m);
     }));
     return $root;
