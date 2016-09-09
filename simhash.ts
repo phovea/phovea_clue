@@ -1,80 +1,83 @@
-import {IDType} from "../caleydo_core/idtype";
-import {isUndefined} from "../caleydo_core/main";
-import Color = d3.Color;
-import idtype = require('../caleydo_core/idtype')
-import {IStateToken, StateTokenLeaf, StateTokenNode, TokenType} from "./statetoken";
+import {IDType} from '../caleydo_core/idtype';
+import {isUndefined} from '../caleydo_core/main';
+import idtype = require('../caleydo_core/idtype');
+import {IStateToken, StateTokenLeaf, StateTokenNode, TokenType} from './statetoken';
 import events = require('../caleydo_core/event');
-import {StateNode} from "../caleydo_core/prov";
+import {StateNode} from '../caleydo_core/provenance';
 
 
 class HashTable {
 
   constructor(maxSize:number) {
-    this.maxSize = maxSize
+    this.maxSize = maxSize;
   }
 
   dict:string[] = [];
   hashes:string[] = [];
-  probs:number[] = []
+  probs:number[] = [];
   maxSize:number;
 
 
   push(name:string, value:string, prob:number, hash:string) {
-    if (hash == null) hash = String(murmurhash2_32_gc(value, 0))
-    let index = this.dict.indexOf(name)
-    if (index < 0) {
-      index = this.dict.length
+    if (hash == null) {
+      hash = String(murmurhash2_32_gc(value, 0));
     }
-    this.dict[index] = name
+    let index = this.dict.indexOf(name);
+    if (index < 0) {
+      index = this.dict.length;
+    }
+    this.dict[index] = name;
     this.probs[name] = prob;
     this.hashes[name] = hash;
   }
 
   toHash(n:number):string {
-    if (Object.keys(this.probs).length == 0) {
-      let st:string = "";
+    if (Object.keys(this.probs).length === 0) {
+      let st:string = '';
       for (let i:number = 0; i < n; i++) {
-        st = st + "0"
+        st = st + '0';
       }
       return st;
     }
 
     let cdf:number[] = [];
-    let lastElement = this.probs[this.dict[this.dict.length - 1]]
-    if (lastElement == null) lastElement = 0
+    let lastElement = this.probs[this.dict[this.dict.length - 1]];
+    if (lastElement == null) {
+      lastElement = 0;
+    }
     cdf[0] = lastElement;
 
     for (var i:number = 1; i < this.dict.length; i++) {
-      let val:number = this.probs[this.dict[this.dict.length - i - 1]]
+      let val:number = this.probs[this.dict[this.dict.length - i - 1]];
       val = isUndefined(val) ? 0 : val;
       cdf[i] = cdf[i - 1] + val;
     }
-    cdf = cdf.reverse()
+    cdf = cdf.reverse();
     for (var i:number = 0; i < this.dict.length; i++) {
-      cdf[i] = this.probs[this.dict[i]] / cdf[i]
+      cdf[i] = this.probs[this.dict[i]] / cdf[i];
     }
 
-    var rng:RNG = new RNG(1)
-    var samples:number[] = []
+    var rng:RNG = new RNG(1);
+    var samples:number[] = [];
     for (var i:number = 0; i < n; i++) {
-      var found:boolean = false
+      var found:boolean = false;
       for (var j:number = 0; j < this.maxSize; j++) {
-        var rndN:number = rng.nextDouble()
+        var rndN:number = rng.nextDouble();
         if (!found && rndN < cdf[j]) {
-          samples[i] = j
-          found = true
+          samples[i] = j;
+          found = true;
         }
       }
     }
 
-    var hash:string = "";
+    var hash:string = '';
     for (var i:number = 0; i < n; i++) {
-      let hashPart = this.hashes[this.dict[samples[i]]]
-      let bitToUse = hashPart.charAt(i % hashPart.length) // use the "bitToUse" bit of "hashPart"
-      hash = hash + bitToUse
+      let hashPart = this.hashes[this.dict[samples[i]]];
+      let bitToUse = hashPart.charAt(i % hashPart.length); // use the 'bitToUse' bit of 'hashPart'
+      hash = hash + bitToUse;
     }
-    this.hashes = []
-    this.probs = []
+    this.hashes = [];
+    this.probs = [];
     return hash;
   }
 }
@@ -88,11 +91,11 @@ export class MatchedTokenTree {
     return this._rightState;
   }
 
-  private size:number = null
-  private root:TreeNode = null
+  private size:number = null;
+  private root:TreeNode = null;
 
-  private _leftState:StateNode = null
-  private _rightState:StateNode = null
+  private _leftState:StateNode = null;
+  private _rightState:StateNode = null;
 
   get treeHasPartnerState():boolean {
     return this._leftState !== null && this._leftState !== this._rightState;
@@ -100,14 +103,14 @@ export class MatchedTokenTree {
 
   constructor(left:StateNode, right:StateNode) {
     this.size = 0;
-    this.root = new TreeRoot(null, null, this.size++)
+    this.root = new TreeRoot(null, null, this.size++);
     this._leftState = left;
     this._rightState = right;
-    let leftTokens:IStateToken[] = left.stateTokens
-    let rightTokens:IStateToken[] = right.stateTokens
-    this.matchIntoNode(this.root, new StateTokenNode("dummyRoot", 1, leftTokens), new StateTokenNode("dummyRoot", 1, rightTokens))
+    let leftTokens:IStateToken[] = left.stateTokens;
+    let rightTokens:IStateToken[] = right.stateTokens;
+    this.matchIntoNode(this.root, new StateTokenNode('dummyRoot', 1, leftTokens), new StateTokenNode('dummyRoot', 1, rightTokens));
     this.root.balanceWeights(1);
-    this.root.setUnscaledSize([1,1,1,1,1])
+    this.root.setUnscaledSize([1,1,1,1,1]);
     //let sim = this.similarity;
   }
 
@@ -125,12 +128,14 @@ export class MatchedTokenTree {
       let found:boolean = false;
       for (let j = 0; j < rightList.length; j++) {
         if (leftList[i].name === rightList[j].name) {
-          center = center.concat({"left": leftList[i], "right": rightList[j]})
+          center = center.concat({'left': leftList[i], 'right': rightList[j]});
           found = true;
           break;
         }
       }
-      if (!found) left = left.concat(leftList[i])
+      if (!found) {
+        left = left.concat(leftList[i]);
+      }
     }
     for (let i = 0; i < rightList.length; i++) {
       let found:boolean = false;
@@ -140,9 +145,11 @@ export class MatchedTokenTree {
           break;
         }
       }
-      if (!found) right = right.concat(rightList[i])
+      if (!found) {
+        right = right.concat(rightList[i]);
+      }
     }
-    return [left, center, right]
+    return [left, center, right];
   }
 
   matchIntoNode(root:TreeNode, left:IStateToken, right:IStateToken) {
@@ -153,17 +160,17 @@ export class MatchedTokenTree {
       if (left === null) {
         if (!(right.isLeaf)) {
           for (let j = 0; j < (<StateTokenNode>right).childs.length; j++) {
-            let node = new TreeNode(null, (<StateTokenNode>right).childs[j], this.size++)
-            this.matchIntoNode(node, null, (<StateTokenNode>right).childs[j])
-            root.appendChild(node)
+            let node = new TreeNode(null, (<StateTokenNode>right).childs[j], this.size++);
+            this.matchIntoNode(node, null, (<StateTokenNode>right).childs[j]);
+            root.appendChild(node);
           }
         }
       } else if (right === null) {
         if (!(left.isLeaf)) {
           for (let j = 0; j < (<StateTokenNode>left).childs.length; j++) {
-            let node = new TreeNode((<StateTokenNode>left).childs[j], null, this.size++)
-            this.matchIntoNode(node, (<StateTokenNode>left).childs[j], null)
-            root.appendChild(node)
+            let node = new TreeNode((<StateTokenNode>left).childs[j], null, this.size++);
+            this.matchIntoNode(node, (<StateTokenNode>left).childs[j], null);
+            root.appendChild(node);
           }
         }
       }
@@ -174,37 +181,41 @@ export class MatchedTokenTree {
       } else {
         let leftNode = <StateTokenNode> left;
         let rightNode = <StateTokenNode> right;
-        let matchedTokens = this.matchTokens(leftNode.childs, rightNode.childs)
+        let matchedTokens = this.matchTokens(leftNode.childs, rightNode.childs);
         for (let j = 0; j < matchedTokens[0].length; j++) {
-          let node = new TreeNode(matchedTokens[0][j], null, this.size++)
-          this.matchIntoNode(node, matchedTokens[0][j], null)
-          root.appendChild(node)
+          let node = new TreeNode(matchedTokens[0][j], null, this.size++);
+          this.matchIntoNode(node, matchedTokens[0][j], null);
+          root.appendChild(node);
         }
 
         for (let j = 0; j < matchedTokens[1].length; j++) {
-          let node = new TreeNode(matchedTokens[1][j]["left"], matchedTokens[1][j]["right"], this.size++)
-          this.matchIntoNode(node, matchedTokens[1][j]["left"], matchedTokens[1][j]["right"])
-          root.appendChild(node)
+          let node = new TreeNode((<any>matchedTokens[1][j])['left'], (<any>matchedTokens[1][j])['right'], this.size++);
+          this.matchIntoNode(node, (<any>matchedTokens[1][j])['left'], (<any>matchedTokens[1][j])['right']);
+          root.appendChild(node);
         }
 
         for (let j = 0; j < matchedTokens[2].length; j++) {
-          let node = new TreeNode(null, matchedTokens[2][j], this.size++)
-          this.matchIntoNode(node, null, matchedTokens[2][j])
-          root.appendChild(node)
+          let node = new TreeNode(null, matchedTokens[2][j], this.size++);
+          this.matchIntoNode(node, null, matchedTokens[2][j]);
+          root.appendChild(node);
         }
       }
     }
   }
 
-  private _similarity
+  private _similarity;
 
 
   //not affected by weighting. Just delivers the correct proportions of leafs for each category.
   get similarityForLineup() {
-    let leftTokens:IStateToken[] = this._leftState.stateTokens
-    let rightTokens:IStateToken[] = this._rightState.stateTokens
-    if (leftTokens.length === 0 && rightTokens.length === 0) return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
-    if (leftTokens.length === 0 || rightTokens.length === 0) return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+    let leftTokens:IStateToken[] = this._leftState.stateTokens;
+    let rightTokens:IStateToken[] = this._rightState.stateTokens;
+    if (leftTokens.length === 0 && rightTokens.length === 0) {
+      return [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]];
+    }
+    if (leftTokens.length === 0 || rightTokens.length === 0) {
+      return [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]];
+    }
 
     let leafs:TreeNode[] = this.root.leafs;
     var leftSims = [0, 0, 0, 0, 0];
@@ -214,17 +225,17 @@ export class MatchedTokenTree {
     for (let i = 0; i < leafs.length; i++) {
       if (leafs[i].isPaired) {
         catContainsToken[leafs[i].category] = true;
-        let sim = leafs[i].tokenSimilarity
-        centerSims[leafs[i].category] += leafs[i].importance * sim
-        leftSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2
+        let sim = leafs[i].tokenSimilarity;
+        centerSims[leafs[i].category] += leafs[i].importance * sim;
+        leftSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2;
         rightSims[leafs[i].category] += leafs[i].importance * (1 - sim) / 2
       } else {
         if (leafs[i].hasLeftToken) {
           catContainsToken[leafs[i].category] = true;
-          leftSims[leafs[i].category] += leafs[i].importance
+          leftSims[leafs[i].category] += leafs[i].importance;
         } else {
           catContainsToken[leafs[i].category] = true;
-          rightSims[leafs[i].category] += leafs[i].importance
+          rightSims[leafs[i].category] += leafs[i].importance;
         }
       }
     }
@@ -234,43 +245,43 @@ export class MatchedTokenTree {
     for (let i = 0; i < 5; i++) {
       if (catContainsToken[i]) {
         total = 0;
-        total += leftSims[i]
-        total += centerSims[i]
-        total += rightSims[i]
-        leftSims[i] = leftSims[i] / total
-        centerSims[i] = centerSims[i] / total
-        rightSims[i] = rightSims[i] / total
+        total += leftSims[i];
+        total += centerSims[i];
+        total += rightSims[i];
+        leftSims[i] = leftSims[i] / total;
+        centerSims[i] = centerSims[i] / total;
+        rightSims[i] = rightSims[i] / total;
       } else {
-        centerSims[i] = 1
+        centerSims[i] = 1;
       }
     }
 
-    return [leftSims, centerSims, rightSims]
+    return [leftSims, centerSims, rightSims];
   }
 
 
   get similarityPerCategory() {
     let leafs:TreeNode[] = this.root.leafs;
-    let weights = SimHash.hasher.categoryWeighting
+    let weights = SimHash.hasher.categoryWeighting;
     var sims = [0, 0, 0, 0, 0];
-    var total = [0, 0, 0, 0, 0]
+    var total = [0, 0, 0, 0, 0];
     for (let i = 0; i < leafs.length; i++) {
-      total[leafs[i].category] += leafs[i].importance
-      sims[leafs[i].category] += leafs[i].isPaired ? leafs[i].importance * leafs[i].tokenSimilarity : 0
+      total[leafs[i].category] += leafs[i].importance;
+      sims[leafs[i].category] += leafs[i].isPaired ? leafs[i].importance * leafs[i].tokenSimilarity : 0;
     }
     for (let i = 0; i < weights.length; i++) {
-      sims[i] = total[i] === 0 ? 1 : sims[i] / total[i]
+      sims[i] = total[i] === 0 ? 1 : sims[i] / total[i];
     }
     this._similarity = sims;
     return sims;
   }
 
   get similarity() {
-    let weights = SimHash.hasher.categoryWeighting
-    var sims = this.similarityPerCategory
+    let weights = SimHash.hasher.categoryWeighting;
+    var sims = this.similarityPerCategory;
     let sim = 0;
     for (let i = 0; i < weights.length; i++) {
-      sim += sims[i] === 0 ? weights[i] / 100 : sims[i] * weights[i] / 100
+      sim += sims[i] === 0 ? weights[i] / 100 : sims[i] * weights[i] / 100;
     }
     return sim;
   }
@@ -295,14 +306,18 @@ export class TreeNode {
   private rightToken:IStateToken;
 
   public get category():number {
-    if (!(this.isLeafNode)) return null;
-    let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
+    if (!(this.isLeafNode)) {
+      return null;
+    }
+    let cat = this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
     return SimHash.categories.indexOf(cat);
   }
 
   public get categoryName():string {
-    if (!(this.isLeafNode)) return null;
-    return this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category
+    if (!(this.isLeafNode)) {
+      return null;
+    }
+    return this.leftToken === null ? (<StateTokenLeaf>this.rightToken).category : (<StateTokenLeaf>this.leftToken).category;
   }
 
   private _id = null;
@@ -316,37 +331,49 @@ export class TreeNode {
   }
 
   checkForDummyChilds() {
-    if (this.leftToken === null && this.rightToken === null) return
+    if (this.leftToken === null && this.rightToken === null) {
+      return;
+    }
     let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
     let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
     if (left !== null) {
-      if (!(left instanceof StateTokenLeaf)) return
+      if (!(left instanceof StateTokenLeaf)) {
+        return;
+      }
       if (right !== null) {
         //both left and right
-        if (!(left.category === SimHash.categories[2])) return;
-        let sim = this.tokenSimilarity
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", left.importance, left.type, "matching", SimHash.categories[2])
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", right.importance, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + "_match", sim))
-        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", left.importance, left.type, "non-matching", SimHash.categories[2])
-        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf("Non-Matching", right.importance, left.type, "non-matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + "_match", (1 - sim)))
+        if (!(left.category === SimHash.categories[2])) {
+          return;
+        }
+        let sim = this.tokenSimilarity;
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.categories[2]);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.categories[2]);
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, rightChildMatch, this.id + '_match', sim));
+        let leftChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', left.importance, left.type, 'non-matching', SimHash.categories[2]);
+        let rightChildNonMatch:StateTokenLeaf = new StateTokenLeaf('Non-Matching', right.importance, left.type, 'non-matching', SimHash.categories[2]);
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildNonMatch, rightChildNonMatch, this.id + '_match', (1 - sim)));
         return;
       } else {
         //just left
-        if (!(left.category === SimHash.categories[2])) return;
-        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", left.importance, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + "_match",0))
+        if (!(left.category === SimHash.categories[2])) {
+          return;
+        }
+        let leftChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', left.importance, left.type, 'matching', SimHash.categories[2]);
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(leftChildMatch, null, this.id + '_match',0));
       }
     } else {
       if (right !== null) {
-        if (!(right instanceof StateTokenLeaf)) return
-        if (!(right.category === SimHash.categories[2])) return;
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf("Matching", right.importance, left.type, "matching", SimHash.categories[2])
-        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + "_match",0))
+        if (!(right instanceof StateTokenLeaf)) {
+          return;
+        }
+        if (!(right.category === SimHash.categories[2])) {
+          return;
+        }
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.categories[2]);
+        this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
-        return
+        return;
       }
     }
 
@@ -355,7 +382,7 @@ export class TreeNode {
 
 
   appendChild(ch:TreeNode) {
-    this._childs = this._childs.concat(ch)
+    this._childs = this._childs.concat(ch);
   }
 
   //stores the importance of all childs (recursive) per category.
@@ -363,19 +390,19 @@ export class TreeNode {
 
   get impOfChildsPerCat():number[] {
     if (this.impPerCat === null) {
-      let childsImpPerCat:number[] = [0, 0, 0, 0, 0]
+      let childsImpPerCat:number[] = [0, 0, 0, 0, 0];
       if (this.isLeafNode) {
-        childsImpPerCat[SimHash.categories.indexOf(this.categoryName)] += this.importance
+        childsImpPerCat[SimHash.categories.indexOf(this.categoryName)] += this.importance;
         this.impPerCat = childsImpPerCat;
         return childsImpPerCat;
       }
       for (let i = 0; i < this._childs.length; i++) {
         if (this._childs[i].isLeafNode) {
-          childsImpPerCat[SimHash.categories.indexOf(this._childs[i].categoryName)] += this._childs[i].importance
+          childsImpPerCat[SimHash.categories.indexOf(this._childs[i].categoryName)] += this._childs[i].importance;
         } else {
-          let tmp = this._childs[i].impOfChildsPerCat
+          let tmp = this._childs[i].impOfChildsPerCat;
           for (let j = 0; j < tmp.length; j++) {
-            childsImpPerCat[j] += tmp[j]
+            childsImpPerCat[j] += tmp[j];
           }
         }
       }
@@ -385,36 +412,43 @@ export class TreeNode {
   }
 
   public get tokenSimilarity():number {
-    if (this.leftToken === null || this.rightToken === null) return 0;
+    if (this.leftToken === null || this.rightToken === null) {
+      return 0;
+    }
     if (!this.leftToken.isLeaf) {
-      throw Error("Only Leafs' similarity should be used")
+      throw Error('Only Leafs similarity should be used');
     } else {
       switch ((<StateTokenLeaf>this.leftToken).type) {
         case 0:
           return (<StateTokenLeaf>this.leftToken).value === (<StateTokenLeaf>this.rightToken).value ? 1 : 0;
         case 1:
-          let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken
-          let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken
-          let leftpct = (left.value[2] - left.value[0]) / (left.value[1] - left.value[0])
-          let rightpct = (right.value[2] - right.value[0]) / (right.value[1] - right.value[0])
-          return 1 - Math.abs(leftpct - rightpct)
+          let left:StateTokenLeaf = <StateTokenLeaf>this.leftToken;
+          let right:StateTokenLeaf = <StateTokenLeaf>this.rightToken;
+          let leftpct = (left.value[2] - left.value[0]) / (left.value[1] - left.value[0]);
+          let rightpct = (right.value[2] - right.value[0]) / (right.value[1] - right.value[0]);
+          return 1 - Math.abs(leftpct - rightpct);
         case 2:
         case 3:
-          return this.similarityFromHash((<StateTokenLeaf>this.leftToken).hash, (<StateTokenLeaf>this.rightToken).hash)
+          return this.similarityFromHash((<StateTokenLeaf>this.leftToken).hash, (<StateTokenLeaf>this.rightToken).hash);
       }
     }
   }
 
   private similarityFromHash(hash1:string, hash2:string) {
-    if (hash1 === null && hash2 === null) return 1;
-    if (hash1 === null || hash2 === null) return 0;
+    if (hash1 === null && hash2 === null) {
+      return 1;
+    }
+    if (hash1 === null || hash2 === null) {
+      return 0;
+    }
     let len = Math.min(hash1.length, hash2.length);
     let nrEqu = 0;
-    let similarity = 0;
     for (let i = 0; i < len; i++) {
-      if (hash1.charAt(i) == hash2.charAt(i)) nrEqu++;
+      if (hash1.charAt(i) === hash2.charAt(i)) {
+        nrEqu++;
+      }
     }
-    return Math.max((nrEqu / len - 0.5) * 2 , 0)
+    return Math.max((nrEqu / len - 0.5) * 2 , 0);
   }
 
 
@@ -426,7 +460,7 @@ export class TreeNode {
         return this.rightToken.importance;
       }
     }
-    return this.leftToken.importance
+    return this.leftToken.importance;
   }
 
 
@@ -436,51 +470,57 @@ export class TreeNode {
 
   get name():string {
     let name = this.leftToken === null ? null : this.leftToken.name;
-    if (name == null) name = this.rightToken === null ? null : this.rightToken.name;
+    if (name == null) {
+      name = this.rightToken === null ? null : this.rightToken.name;
+    }
     return name;
   }
 
   balanceWeights(targetWeight:number) {
-    let factor:number = 1
+    let factor:number = 1;
     for (let i = 0; i < this._childs.length; i++) {
       if (this._childs[i].isPaired) {
         if (this._childs[i].leftToken.importance !== this._childs[i].rightToken.importance) {
-          factor = this._childs[i].leftToken.importance / this._childs[i].rightToken.importance
+          factor = this._childs[i].leftToken.importance / this._childs[i].rightToken.importance;
           break;
         }
       }
     }
     if (factor > 1) {
       for (let i = 0; i < this._childs.length; i++) {
-        if (!(this._childs[i].leftToken === null)) this._childs[i].leftToken.importance /= factor
+        if (!(this._childs[i].leftToken === null)) {
+          this._childs[i].leftToken.importance /= factor;
+        }
       }
     } else if (factor < 1) {
       for (let i = 0; i < this._childs.length; i++) {
-        if (!(this._childs[i].rightToken === null)) this._childs[i].rightToken.importance *= factor
+        if (!(this._childs[i].rightToken === null)) {
+          this._childs[i].rightToken.importance *= factor;
+        }
       }
     }
     let sumFactor = 0;
     for (let i = 0; i < this._childs.length; i++) {
       if (this._childs[i].leftToken !== null) {
-        sumFactor += this._childs[i].leftToken.importance
+        sumFactor += this._childs[i].leftToken.importance;
       } else if (this._childs[i].rightToken !== null) {
-        sumFactor += this._childs[i].rightToken.importance
+        sumFactor += this._childs[i].rightToken.importance;
       }
     }
     if (sumFactor !== targetWeight) {
       for (let i = 0; i < this._childs.length; i++) {
         if (this._childs[i].leftToken !== null) {
-          this._childs[i].leftToken.importance *= (targetWeight / sumFactor)
+          this._childs[i].leftToken.importance *= (targetWeight / sumFactor);
         }
         if (this._childs[i].rightToken !== null) {
-          this._childs[i].rightToken.importance *= (targetWeight / sumFactor)
+          this._childs[i].rightToken.importance *= (targetWeight / sumFactor);
         }
       }
     }
     //balance all childs
     for (let i = 0; i < this._childs.length; i++) {
       if (!(this._childs[i].isLeafNode)) {
-        this._childs[i].balanceWeights(this._childs[i].leftToken !== null ? this._childs[i].leftToken.importance : this._childs[i].rightToken.importance)
+        this._childs[i].balanceWeights(this._childs[i].leftToken !== null ? this._childs[i].leftToken.importance : this._childs[i].rightToken.importance);
       }
     }
   }
@@ -489,23 +529,25 @@ export class TreeNode {
 
   get getScaledSize() {
     let weights = SimHash.hasher.categoryWeighting;
-    return this._unscaledSize * weights[this.category]
+    return this._unscaledSize * weights[this.category];
   }
 
   setUnscaledSize(target:number[]) {
-    let currentImp = this.impOfChildsPerCat
+    let currentImp = this.impOfChildsPerCat;
     if (this.isLeafNodeWithoutDummyChilds) {
-      this._unscaledSize = target[this.category]
-      return
+      this._unscaledSize = target[this.category];
+      return;
     }
-    let dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds)
+    let dummyAndOtherChilds:TreeNode[] = this._childs.concat(this._dummyChilds);
     for (let i = 0; i < dummyAndOtherChilds.length; i++) {
-      let targetCpy = target.slice(0)
+      let targetCpy = target.slice(0);
       let childImp = dummyAndOtherChilds[i].impOfChildsPerCat;
       for (let j = 0; j < 5; j++) {
-        if (childImp[j]===0) continue;
-        let ratio = currentImp[j]/childImp[j]
-        targetCpy[j] = targetCpy[j]/ratio
+        if (childImp[j]===0) {
+          continue;
+        }
+        let ratio = currentImp[j]/childImp[j];
+        targetCpy[j] = targetCpy[j]/ratio;
       }
       dummyAndOtherChilds[i].setUnscaledSize(targetCpy);
     }
@@ -520,22 +562,22 @@ export class TreeNode {
   }
 
   get isPaired():boolean {
-    return (this.leftToken !== null && this.rightToken !== null)
+    return (this.leftToken !== null && this.rightToken !== null);
   }
 
   get hasLeftToken():boolean {
-    return !(this.leftToken === null)
+    return !(this.leftToken === null);
   }
 
   get hasRightToken():boolean {
-    return !(this.rightToken === null)
+    return !(this.rightToken === null);
   }
 
   get leafs():TreeNode[] {
-    let leafs:TreeNode[] = []
+    let leafs:TreeNode[] = [];
     if (!this.isLeafNode) {
       for (let i = 0; i < this._childs.length; i++) {
-        leafs = leafs.concat(this._childs[i].leafs)
+        leafs = leafs.concat(this._childs[i].leafs);
       }
     } else {
       return [this];
@@ -551,19 +593,19 @@ class DummyTreeNode extends TreeNode {
   }
 
   public get tokenSimilarity():number {
-    return 1
+    return 1;
   }
 
-  private tokenSim = -1
+  private tokenSim = -1;
 
   get getScaledSize() {
     let weights = SimHash.hasher.categoryWeighting;
-    return this.tokenSim * weights[this.category]
+    return this.tokenSim * weights[this.category];
   }
 
 
   constructor(left:IStateToken, right:IStateToken, id, unscaledSize) {
-    super(left,right,id)
+    super(left,right,id);
     this.tokenSim = unscaledSize;
   }
 
@@ -572,7 +614,7 @@ class DummyTreeNode extends TreeNode {
 class TreeRoot extends TreeNode {
 
   constructor(left, right, id) {
-    super(left, right, id)
+    super(left, right, id);
   }
 
   get isLeafNode():boolean {
@@ -592,16 +634,16 @@ class TreeRoot extends TreeNode {
 export class SimHash extends events.EventHandler {
 
   private static _instance:SimHash = new SimHash();
-  public static categories:string[] = ["data", "visual", "selection", "layout", "analysis"]
-  public static cols = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00']
+  public static categories:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
+  public static cols = ['#e41a1c', '#377eb8', '#984ea3', '#ffff33', '#ff7f00'];
 
   public static shadeColor(color, percent) {
     var f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
-    return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+    return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
   }
 
   static colorOfCat(cat:string) {
-    return SimHash.cols[SimHash.categories.indexOf(cat)]
+    return SimHash.cols[SimHash.categories.indexOf(cat)];
   }
 
   private _catWeighting:number[] = [30, 20, 25, 20, 5];
@@ -629,28 +671,28 @@ export class SimHash extends events.EventHandler {
     let allTokens:StateTokenLeaf[] = [];
     for (var sel of selection) {
       var t = new StateTokenLeaf(
-        "dummy",
+        'dummy',
         1,
         TokenType.string,
         sel.toString(),
-        ""
-      )
+        ''
+      );
       allTokens = allTokens.concat(t);
     }
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(this._HashTableSize)
+      this.hashTable[type.id] = new HashTable(this._HashTableSize);
     }
     for (let i:number = 0; i < allTokens.length; i++) {
-      this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null)
+      this.hashTable[type.id].push(allTokens[i].value, allTokens[i].value, allTokens[i].importance, null);
     }
-    let hash = this.hashTable[type.id].toHash(this._nrBits)
+    let hash = this.hashTable[type.id].toHash(this._nrBits);
     token.hash = hash;
-    return hash
+    return hash;
   }
 
   getHashOfOrdinalIDTypeSelection(type:IDType, min:number, max:number, selectionType):string {
     if (this.hashTable[type.id] == null) {
-      this.hashTable[type.id] = new HashTable(this._HashTableSize)
+      this.hashTable[type.id] = new HashTable(this._HashTableSize);
     }
     let selection:number[] = type.selections(selectionType).dim(0).asList(0);
     for (var sel of selection) {
@@ -658,9 +700,9 @@ export class SimHash extends events.EventHandler {
         String(sel),
         String(sel),
         1,
-        ordinalHash(min, max, sel, this._nrBits))
+        ordinalHash(min, max, sel, this._nrBits));
     }
-    return this.hashTable[type.id].toHash(this._nrBits)
+    return this.hashTable[type.id].toHash(this._nrBits);
   }
 
 
@@ -668,7 +710,7 @@ export class SimHash extends events.EventHandler {
     function groupBy(arr:StateTokenLeaf[]) {
       return arr.reduce(function (memo, x:StateTokenLeaf) {
           if (!memo[x.type]) {
-            memo[x.type] = []
+            memo[x.type] = [];
           }
           memo[x.type].push(x);
           return memo;
@@ -676,28 +718,28 @@ export class SimHash extends events.EventHandler {
       );
     }
 
-    if (needsNormalization && typeof tokens != 'undefined') {
-      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
+    if (needsNormalization && typeof tokens !== 'undefined') {
+      let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
       for (let i:number = 0; i < tokens.length; i++) {
-        tokens[i].importance /= totalImportance
+        tokens[i].importance /= totalImportance;
       }
     }
 
-    return groupBy(tokens)
+    return groupBy(tokens);
   }
 
 
   public calcHash(tokens:IStateToken[]):string[] {
-    if (tokens.length == 0) {
-      return ["invalid", "invalid", "invalid", "invalid", "invalid"]
+    if (tokens.length === 0) {
+      return ['invalid', 'invalid', 'invalid', 'invalid', 'invalid'];
     }
-    tokens = SimHash.normalizeTokenPriority(tokens, 1)
-    let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens)
+    tokens = SimHash.normalizeTokenPriority(tokens, 1);
+    let leafs:StateTokenLeaf[] = this.filterLeafsAndSerialize(tokens);
 
     function groupBy(arr:StateTokenLeaf[]) {
       return arr.reduce(function (memo, x:StateTokenLeaf) {
           if (!memo[x.category]) {
-            memo[x.category] = []
+            memo[x.category] = [];
           }
           memo[x.category].push(x);
           return memo;
@@ -706,21 +748,21 @@ export class SimHash extends events.EventHandler {
     }
 
 
-    let hashes:string[] = []
-    let groupedTokens = groupBy(leafs)
+    let hashes:string[] = [];
+    let groupedTokens = groupBy(leafs);
     for (let i = 0; i < 5; i++) {
-      hashes[i] = this.calcHashOfCat(groupedTokens[SimHash.categories[i]], SimHash.categories[i])
+      hashes[i] = this.calcHashOfCat(groupedTokens[SimHash.categories[i]], SimHash.categories[i]);
     }
-    return hashes
+    return hashes;
   }
 
   private calcHashOfCat(tokens:StateTokenLeaf[], cat:string) {
-    if (!(typeof tokens != 'undefined')) return Array(this._nrBits + 1).join("0")
+    if (!(typeof tokens !== 'undefined')) return Array(this._nrBits + 1).join('0');
 
-    let b:number = 0;
-    let splitTokens = this.prepHashCalc(tokens)
+    //let b:number = 0;
+    let splitTokens = this.prepHashCalc(tokens);
     if (this.hashTable[cat] == null) {
-      this.hashTable[cat] = new HashTable(this._HashTableSize)
+      this.hashTable[cat] = new HashTable(this._HashTableSize);
     }
 
     let ordinalTokens:StateTokenLeaf[] = splitTokens[1];
@@ -736,7 +778,7 @@ export class SimHash extends events.EventHandler {
             ordinalTokens[i].value[2],
             this._nrBits
           )
-        )
+        );
       }
     }
 
@@ -753,7 +795,7 @@ export class SimHash extends events.EventHandler {
             ordidTypeTokens[i].value[2],
             idtype.defaultSelectionType
           )
-        )
+        );
       }
     }
 
@@ -769,14 +811,14 @@ export class SimHash extends events.EventHandler {
             idtypeTokens[i],
             idtype.defaultSelectionType
           )
-        )
+        );
       }
     }
 
     let regularTokens:StateTokenLeaf[] = splitTokens[0];
     if (regularTokens !== undefined) {
       for (let i:number = 0; i < regularTokens.length; i++) {
-        this.hashTable[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null)
+        this.hashTable[cat].push(regularTokens[i].name, regularTokens[i].value, regularTokens[i].importance, null);
       }
     }
 
@@ -785,25 +827,25 @@ export class SimHash extends events.EventHandler {
   };
 
   public static normalizeTokenPriority(tokens:IStateToken[], baseLevel:number = 1):IStateToken[] {
-    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0)
+    let totalImportance = tokens.reduce((prev, a:IStateToken) => prev + a.importance, 0);
     for (let i:number = 0; i < tokens.length; i++) {
-      tokens[i].importance = tokens[i].importance / totalImportance * baseLevel
+      tokens[i].importance = tokens[i].importance / totalImportance * baseLevel;
       if (!(tokens[i].isLeaf)) {
-        (<StateTokenNode>tokens[i]).childs = this.normalizeTokenPriority((<StateTokenNode>tokens[i]).childs, tokens[i].importance)
+        (<StateTokenNode>tokens[i]).childs = this.normalizeTokenPriority((<StateTokenNode>tokens[i]).childs, tokens[i].importance);
       }
     }
-    return tokens
+    return tokens;
   }
 
   private filterLeafsAndSerialize(tokens:IStateToken[]):StateTokenLeaf[] {
-    let childs:StateTokenLeaf[] = []
+    let childs:StateTokenLeaf[] = [];
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i] instanceof StateTokenLeaf) {
-        childs = childs.concat(<StateTokenLeaf>tokens[i])
+        childs = childs.concat(<StateTokenLeaf>tokens[i]);
       } else {
         childs = childs.concat(
           this.filterLeafsAndSerialize((<StateTokenNode>tokens[i]).childs)
-        )
+        );
       }
     }
     return childs;
@@ -855,9 +897,9 @@ function hashFnv32a(str:string, seed:number):string {
 /**
  * JS Implementation of MurmurHash2
  *
- * @author <a href="mailto:gary.court@gmail.com">Gary Court</a>
+ * @author <a href='mailto:gary.court@gmail.com'>Gary Court</a>
  * @see http://github.com/garycourt/murmurhash-js
- * @author <a href="mailto:aappleby@gmail.com">Austin Appleby</a>
+ * @author <a href='mailto:aappleby@gmail.com'>Austin Appleby</a>
  * @see http://sites.google.com/site/murmurhash/
  *
  * @param {string} str ASCII only
@@ -891,11 +933,14 @@ function murmurhash2_32_gc(str, seed) {
   switch (l) {
     case 3:
       h ^= (str.charCodeAt(i + 2) & 0xff) << 16;
+      break;
     case 2:
       h ^= (str.charCodeAt(i + 1) & 0xff) << 8;
+      break;
     case 1:
       h ^= (str.charCodeAt(i) & 0xff);
       h = (((h & 0xffff) * 0x5bd1e995) + ((((h >>> 16) * 0x5bd1e995) & 0xffff) << 16));
+      break;
   }
 
   h ^= h >>> 13;
@@ -906,17 +951,17 @@ function murmurhash2_32_gc(str, seed) {
 }
 
 function ordinalHash(min:number, max:number, value:number, nrBits:number):string {
-  let pct = (value - min) / (max - min)
-  let minH:string = hashFnv32a(String(min), 0)
-  let maxH:string = hashFnv32a(String(max), 0)
+  let pct = (value - min) / (max - min);
+  let minH:string = hashFnv32a(String(min), 0);
+  let maxH:string = hashFnv32a(String(max), 0);
   let rng = new RNG(1);
 
-  let hash:string = ""
+  let hash:string = '';
   for (let i = 0; i < nrBits; i++) {
     if (rng.nextDouble() > pct) {
-      hash = hash + minH.charAt(i % minH.length)
+      hash = hash + minH.charAt(i % minH.length);
     } else {
-      hash = hash + maxH.charAt(i % maxH.length)
+      hash = hash + maxH.charAt(i % maxH.length);
     }
   }
   return hash;

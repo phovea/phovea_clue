@@ -7,8 +7,8 @@
  * Created by michael gillhofer
  */
 'use strict';
-import {isUndefined} from "../caleydo_core/main";
-import {IDType} from "../caleydo_core/idtype";
+import {isUndefined} from '../caleydo_core/main';
+import {IDType} from '../caleydo_core/idtype';
 
 
 export enum TokenType {
@@ -16,12 +16,13 @@ export enum TokenType {
     ordinal,
     ordinalIDType,
     idtype
-  };
+}
 
 
 export abstract class IStateToken {
   name: string;
   importance: number;
+  stateTokens: IStateToken[];
 
 
   protected catImpOfChilds:number[];
@@ -36,11 +37,11 @@ export abstract class IStateToken {
 
 export class StateTokenNode extends IStateToken {
 
-  childs: IStateToken[]
+  childs: IStateToken[];
 
   constructor(name:string, importance:number, childs:IStateToken[]) {
-    super(name,importance)
-    this.childs = childs
+    super(name,importance);
+    this.childs = childs;
     this.isLeaf = false;
   }
 
@@ -49,7 +50,7 @@ export class StateTokenNode extends IStateToken {
 export class StateTokenLeaf extends IStateToken{
 
 
-  static categories:string[] = ["data", "visual", "selection", "layout", "analysis"]
+  static categories:string[] = ['data', 'visual', 'selection', 'layout', 'analysis'];
 
   type: TokenType;
   value;
@@ -58,8 +59,8 @@ export class StateTokenLeaf extends IStateToken{
 
   constructor(name:string,  importance: number,  type: TokenType,  value,  category:string) {
     super(name,importance);
-    this.type = type;;
-    this.value = value;;
+    this.type = type;
+    this.value = value;
     this.category = category;
     this.isLeaf = true;
   }
