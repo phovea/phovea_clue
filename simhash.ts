@@ -4,6 +4,7 @@ import idtype = require('../caleydo_core/idtype');
 import {IStateToken, StateTokenLeaf, StateTokenNode, TokenType} from './statetoken';
 import events = require('../caleydo_core/event');
 import {StateNode} from '../caleydo_core/provenance';
+import {SimVisStateNode} from "./simvis";
 
 
 class HashTable {
@@ -83,25 +84,25 @@ class HashTable {
 }
 
 export class MatchedTokenTree {
-  get leftState():StateNode {
+  get leftState():SimVisStateNode {
     return this._leftState;
   }
 
-  get rightState():StateNode {
+  get rightState():SimVisStateNode {
     return this._rightState;
   }
 
   private size:number = null;
   private root:TreeNode = null;
 
-  private _leftState:StateNode = null;
-  private _rightState:StateNode = null;
+  private _leftState:SimVisStateNode = null;
+  private _rightState:SimVisStateNode = null;
 
   get treeHasPartnerState():boolean {
     return this._leftState !== null && this._leftState !== this._rightState;
   }
 
-  constructor(left:StateNode, right:StateNode) {
+  constructor(left:SimVisStateNode, right:SimVisStateNode) {
     this.size = 0;
     this.root = new TreeRoot(null, null, this.size++);
     this._leftState = left;

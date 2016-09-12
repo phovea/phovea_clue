@@ -9,6 +9,7 @@ import provenance = require('../caleydo_core/provenance');
 import d3 = require('d3');
 import vis = require('../caleydo_core/vis');
 import {StateNode, ProvenanceGraph} from '../caleydo_core/provenance';
+import {IStateToken} from './statetoken';
 
 interface IWeight {
   name;
@@ -21,6 +22,7 @@ export class SimVisStateNode extends StateNode {
   lineUpIndex: number;
   isHoveredInLineUp: boolean;
   duplicates: any[]; // any??
+  stateTokens: IStateToken[];
 }
 
 

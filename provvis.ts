@@ -85,7 +85,7 @@ class StateRepr {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
-      var selState:SimVisStateNode[] = this.graph.selectedStates(idtypes.hoverSelectionType);
+      var selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
       if (selState.length === 0) {
         return 1;
       }
