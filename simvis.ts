@@ -304,7 +304,7 @@ export class WeightInterface {
       .data(this.weights, function (d) {
         return d.name;
       });
-    let lines = this.catContainer.selectAll('line')
+    let lines = d3.select('.lineContainer').selectAll('line')
       .data(this.weights, function (d) {
         return d.name;
       });
