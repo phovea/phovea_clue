@@ -146,7 +146,7 @@ export class LinupStateView extends vis.AVisInstance {
     this.luDataProvider = new lineup.provider.LocalDataProvider(this.arr, desc);
     var r = this.luDataProvider.pushRanking();
 
-    this.lstack = this.luDataProvider.create(lineup.model.createStackDesc('Selected'));
+    this.lstack = this.luDataProvider.create(lineup.model.createStackDesc('Active'));
     r.push(this.lstack);
     this.lstack.push(this.luDataProvider.create(desc[0]));
     this.lstack.push(this.luDataProvider.create(desc[1]));
@@ -162,7 +162,7 @@ export class LinupStateView extends vis.AVisInstance {
     this.cstack.push(this.luDataProvider.create(desc[8]));
     this.cstack.push(this.luDataProvider.create(desc[9]));
 
-    this.rstack = this.luDataProvider.create(lineup.model.createStackDesc('Other'));
+    this.rstack = this.luDataProvider.create(lineup.model.createStackDesc('Ranked'));
     r.push(this.rstack);
     this.rstack.push(this.luDataProvider.create(desc[10]));
     this.rstack.push(this.luDataProvider.create(desc[11]));
