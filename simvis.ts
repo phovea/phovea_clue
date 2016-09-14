@@ -93,9 +93,11 @@ export class LinupStateView extends vis.AVisInstance {
     allstates.forEach(function (s:SimVisStateNode) {
       s.lineUpIndex = -1;
     });
+    let ownStateAlreadyFound:boolean = false;
     for (let i = 0; i < allstates.length; i++) {
       let currState:SimVisStateNode = <SimVisStateNode>allstates[i];
       if (state === currState) {
+        ownStateAlreadyFound = true;
         continue;
       }
       let sim = state.getSimForLineupTo(currState);
@@ -104,7 +106,7 @@ export class LinupStateView extends vis.AVisInstance {
         'cd': sim[1][0], 'cv': sim[1][1], 'cs': sim[1][2], 'cl': sim[1][3], 'ca': sim[1][4],
         'rd': sim[2][0], 'rv': sim[2][1], 'rs': sim[2][2], 'rl': sim[2][3], 'ra': sim[2][4], 'state': currState
       });
-      currState.lineUpIndex = i;
+      currState.lineUpIndex = ownStateAlreadyFound ? i-1 : i;
     }
   }
 
