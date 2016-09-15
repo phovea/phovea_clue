@@ -370,7 +370,7 @@ export class TreeNode {
         if (!(right.category === SimHash.categories[2])) {
           return;
         }
-        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, left.type, 'matching', SimHash.categories[2]);
+        let rightChildMatch:StateTokenLeaf = new StateTokenLeaf('Matching', right.importance, right.type, 'matching', SimHash.categories[2]);
         this._dummyChilds = this._dummyChilds.concat(new DummyTreeNode(null, rightChildMatch, this.id + '_match',0));
       } else {
         //both are null
