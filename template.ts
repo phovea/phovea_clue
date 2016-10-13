@@ -396,6 +396,7 @@ export class CLUEWrapper extends events.EventHandler {
       let ul = document.createElement('ul');
       let $ul = d3.select(ul)
         .attr('class', 'nav navbar-nav navbar-right')
+        .attr('data-clue', 'provenanceGraphList')
         .html(`<li class="dropdown">
           <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-code-fork fa-lg fa-rotate-180 fa-fw"></i>
