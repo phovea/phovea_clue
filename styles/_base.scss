@@ -108,8 +108,8 @@ body > div.box > div.content {
   display: flex;
   -webkit-align-items: stretch;
   align-items: stretch;
-  -webkit-flex: 1 1 auto; /* Chrome */
-  flex: 1 1 auto;
+  -webkit-flex: 1 1 0; /* Chrome */
+  flex: 1 1 0;
 
   position: relative;
 }
