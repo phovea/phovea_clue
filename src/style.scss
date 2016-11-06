@@ -2,7 +2,7 @@
 // import variables first
 @import "styles/colors";
 
-@import "../phovea_bootstrap_fontawesome/src/styles/base";
+@import "~phovea_bootstrap_fontawesome/src/styles/base";
 
 // basic CLUE style
 @import "styles/base";
@@ -14,5 +14,5 @@
 
 // import the header navbar with a more specific CSS selector again, to style it with the CLUE colors
 .box {
-  @import "../phovea_bootstrap_fontawesome/styles/header_navbar";
+  @import "~phovea_bootstrap_fontawesome/src/styles/header_navbar";
 }
