@@ -14,6 +14,7 @@ import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
 import * as marked from 'marked';
 import * as player from './player';
+import * as $ from 'jquery';
 
 
 interface ISlideNodeRepr {
