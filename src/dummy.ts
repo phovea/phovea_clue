@@ -5,9 +5,9 @@
  */
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
-import header = require('../caleydo_bootstrap_fontawesome/header');
-import prov = require('../caleydo_core/provenance');
-import d3 = require('d3');
+import * as header from 'phovea_bootstrap_fontawesome/src/header';
+import * as prov from 'phovea_core/src/provenance';
+import * as d3 from 'd3';
 
 /**
  * factory method creating a CLUEWrapper instance

@@ -1,12 +1,12 @@
 __author__ = 'Samuel Gratzl'
 
-import flask
+from phovea_server import ns
 
-app = flask.Flask(__name__)
+app = ns.Namespace(__name__)
 
-import caleydo_server.config
+import phovea_server.config
 
-conf = caleydo_server.config.view('caleydo_clue')
+conf = phovea_server.config.view('phovea_clue')
 
 import memcache
 
@@ -110,12 +110,12 @@ def fix_format(format):
 
 @app.route('/screenshot/<app>/<prov_id>/<state>.<format>')
 def create_screenshot(app, prov_id, state, format):
-  width = flask.request.args.get('width', 1920)
-  height = flask.request.args.get('height', 1080)
-  force = flask.request.args.get('force',None) is not None
+  width = ns.request.args.get('width', 1920)
+  height = ns.request.args.get('height', 1080)
+  force = ns.request.args.get('force',None) is not None
 
   s = _create_screenshot_impl(app, prov_id, state, format, width, height, force)
-  return flask.Response(s, mimetype='image/'+fix_format(format))
+  return ns.Response(s, mimetype='image/'+fix_format(format))
 
 
 def to_thumbnail(s, width, format):
@@ -138,8 +138,8 @@ def to_thumbnail(s, width, format):
 @app.route('/thumbnail/<app>/<prov_id>/<state>.<format>')
 def create_thumbnail(app, prov_id, state, format):
   format = fix_format(format)
-  width = int(flask.request.args.get('width', 128))
-  force = flask.request.args.get('force',None) is not None
+  width = int(ns.request.args.get('width', 128))
+  force = ns.request.args.get('force',None) is not None
 
   url = generate_url(app, prov_id, state)
 
@@ -151,22 +151,22 @@ def create_thumbnail(app, prov_id, state, format):
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
-  return flask.Response(obj, mimetype='image/'+format)
+  return ns.Response(obj, mimetype='image/'+format)
 
 @app.route('/preview/<app>/<prov_id>/<slide>.<format>')
 def create_preview(app, prov_id, slide, format):
-  width = flask.request.args.get('width', 1920)
-  height = flask.request.args.get('height', 1080)
-  force = flask.request.args.get('force',None) is not None
+  width = ns.request.args.get('width', 1920)
+  height = ns.request.args.get('height', 1080)
+  force = ns.request.args.get('force',None) is not None
 
   s = _create_preview_impl(app, prov_id, slide, format, width, height, force)
-  return flask.Response(s, mimetype='image/'+fix_format(format))
+  return ns.Response(s, mimetype='image/'+fix_format(format))
 
 @app.route('/preview_thumbnail/<app>/<prov_id>/<slide>.<format>')
 def create_preview_thumbnail(app, prov_id, slide, format):
   format = fix_format(format)
-  width = int(flask.request.args.get('width', 128))
-  force = flask.request.args.get('force',None) is not None
+  width = int(ns.request.args.get('width', 128))
+  force = ns.request.args.get('force',None) is not None
 
   url = generate_slide_url(app, prov_id, slide)
 
@@ -178,7 +178,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
-  return flask.Response(obj, mimetype='image/'+format)
+  return ns.Response(obj, mimetype='image/'+format)
 
 
 def create():

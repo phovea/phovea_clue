@@ -1,19 +1,19 @@
 /**
  * Created by sam on 09.02.2015.
  */
-/// <reference path="../../tsd.d.ts" />
 
-import C = require('../caleydo_core/main');
-import $ = require('jquery');
-import ranges = require('../caleydo_core/range');
-import idtypes = require('../caleydo_core/idtype');
-import provenance = require('../caleydo_core/provenance');
-import cmode = require('./mode');
-import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
-import d3 = require('d3');
-import vis = require('../caleydo_core/vis');
 
-import utils = require('./utils');
+import * as C from 'phovea_core/src/index';
+import * as $ from 'jquery';
+import * as ranges from 'phovea_core/src/range';
+import * as idtypes from 'phovea_core/src/idtype';
+import * as provenance from 'phovea_core/src/provenance';
+import * as cmode from './mode';
+import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as d3 from 'd3';
+import * as vis from 'phovea_core/src/vis';
+
+import * as utils from './utils';
 
 
 function extractTags(text: string) {

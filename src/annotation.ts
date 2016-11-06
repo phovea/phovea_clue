@@ -2,13 +2,13 @@
  * Created by Samuel Gratzl on 15.10.2015.
  */
 
-import C = require('../caleydo_core/main');
-import prov = require('../caleydo_core/provenance');
-import cmode = require('./mode');
-import d3 = require('d3');
-import marked = require('marked');
-import {defaultSelectionType} from '../caleydo_core/idtype';
-import player = require('./player');
+import * as C from 'phovea_core/src/index';
+import * as prov from 'phovea_core/src/provenance';
+import * as cmode from './mode';
+import * as d3 from 'd3';
+import * as marked from 'marked';
+import {defaultSelectionType} from 'phovea_core/src/idtype';
+import * as player from './player';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8

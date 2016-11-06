@@ -2,9 +2,9 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import provenance = require('../caleydo_core/provenance');
-import C = require('../caleydo_core/main');
-import d3 = require('d3');
+import * as provenance from 'phovea_core/src/provenance';
+import * as C from 'phovea_core/src/index';
+import * as d3 from 'd3';
 
 export const FACTOR = 1;
 export const MIN_DURATION = -1;
