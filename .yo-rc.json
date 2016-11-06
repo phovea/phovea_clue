@@ -9,7 +9,8 @@
       "phovea_d3",
       "phovea_vis",
       "phovea_bootstrap_fontawesome",
-      "phovea_security_flask"
+      "phovea_security_flask",
+      "phovea_server"
     ],
     "extensions": [
       {
