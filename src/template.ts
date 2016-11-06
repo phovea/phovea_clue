@@ -4,7 +4,7 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import * as template from './_template.html';
+import * as template from 'html!./_template.html';
 
 import * as C from 'phovea_core/src/index';
 import * as header from 'phovea_bootstrap_fontawesome/src/header';
