@@ -36,7 +36,8 @@ module.exports = (config) => {
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
-    middleware: ['polyfill'],
+    // middleware: ['polyfill'],
+    // BUG that install everything "karma-polyfill-service": "github:sgratzl/karma-polyfill-service",
     polyfill: {
       // features: '<feature-set>', // feature set, see polyfill-service docs for details, defaults to `{default: {}}`
       // path: '<path>' // path to serve the polyfill script under, defaults to '/polyfill.js'
