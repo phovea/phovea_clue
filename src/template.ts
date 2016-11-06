@@ -4,9 +4,7 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-
-/// <amd-dependency path="text!./_template.html" name="template"/>
-declare var template:string;
+import * as template from './_template.html';
 
 import * as C from 'phovea_core/src/index';
 import * as header from 'phovea_bootstrap_fontawesome/src/header';
@@ -358,7 +356,7 @@ export class CLUEWrapper extends events.EventHandler {
     C.mixin(this.options, options);
 
     // replace content with the template
-    body.innerHTML = template;
+    body.innerHTML = String(template);
 
     //special flag for rendering server side screenshots
     if (C.hash.is('clue_headless')) {
@@ -681,7 +679,7 @@ export class CLUEWrapper extends events.EventHandler {
     }
     const that = this;
     {
-      let $form = $('#loginDialog div.modal-body').html(login.form).find('form');
+      let $form = $('#loginDialog div.modal-body').html(String(login.form)).find('form');
       let $alert = $form.parent().find('div.alert');
 
       $alert.hide();

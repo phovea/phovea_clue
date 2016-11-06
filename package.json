@@ -80,13 +80,15 @@
     "webpack-dev-server": "^2.1.0-beta.10"
   },
   "dependencies": {
+    "@types/d3": "^3.5.36",
+    "@types/marked": "0.0.28",
+    "d3": "^3.5.17",
+    "marked": "^0.3.6",
+    "phovea_bootstrap_fontawesome": "github:phovea/phovea_bootstrap_fontawesome",
     "phovea_core": "github:phovea/phovea_core",
     "phovea_d3": "github:phovea/phovea_d3",
     "phovea_vis": "github:phovea/phovea_vis",
-    "phovea_bootstrap_fontawesome": "github:phovea/phovea_bootstrap_fontawesome",
-    "phovea_vis_lineup": "github:phovea/phovea_security_flask",
-    "@types/d3": "^3.5.36",
-    "d3": "^3.5.17"
+    "phovea_vis_lineup": "github:phovea/phovea_security_flask"
   },
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",

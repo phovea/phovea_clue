@@ -1,19 +1,17 @@
 __author__ = 'Samuel Gratzl'
 
 from phovea_server import ns
+from phovea_server.config import view as config_view
+import memcache
+import logging
+
 
 app = ns.Namespace(__name__)
-
-import phovea_server.config
-
-conf = phovea_server.config.view('phovea_clue')
-
-import memcache
+conf = config_view('phovea_clue')
 
 mc = memcache.Client(conf.get('memcached'), debug=0)
 mc_prefix = 'clue_'
 
-import logging
 _log = logging.getLogger(__name__)
 
 def generate_url(app, prov_id, state):
@@ -60,23 +58,23 @@ def create_via_selenium(url, width, height):
   return obj
 
 
-def create_via_phantomjs(url, width, height, format):
-  import tempfile, os, gevent.subprocess as subprocess
-
-  name = tempfile.mkstemp('.' + format)
-
-  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
-          '2' + name[1], str(width), str(height)]
-  _log.debug(' '.join(args))
-  proc = subprocess.Popen(args)
-  _log.debug('pre wait')
-  proc.wait()
-  _log.debug('here')
-
-  with open('2' + name[1], 'rb') as f:
-    obj = f.readall()
-  os.remove(name)
-  return obj
+# def create_via_phantomjs(url, width, height, format):
+#  import tempfile, os, gevent.subprocess as subprocess
+#
+#  name = tempfile.mkstemp('.' + format)
+#
+#  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
+#          '2' + name[1], str(width), str(height)]
+#  _log.debug(' '.join(args))
+#  proc = subprocess.Popen(args)
+#  _log.debug('pre wait')
+#  proc.wait()
+#  _log.debug('here')
+#
+#  with open('2' + name[1], 'rb') as f:
+#    obj = f.readall()
+#  os.remove(name)
+#  return obj
 
 
 def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
