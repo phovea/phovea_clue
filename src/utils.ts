@@ -1,11 +1,11 @@
 /**
  * Created by sam on 09.02.2015.
  */
-/// <reference path="../../tsd.d.ts" />
 
-import C = require('../caleydo_core/main');
-import ajax = require('../caleydo_core/ajax');
-import provenance = require('../caleydo_core/provenance');
+
+import * as C from 'phovea_core/src/index';
+import * as ajax from 'phovea_core/src/ajax';
+import * as provenance from 'phovea_core/src/provenance';
 
 export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
   var o = {
@@ -23,7 +23,7 @@ export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenan
       width: o.width
     });
   }
-  return '../caleydo_clue/assets/not_available.png';
+  return 'phovea_clue/assets/src/not_available.png';
 }
 
 export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode, options= {}) {
@@ -41,7 +41,7 @@ export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: 
       width: o.width
     });
   }
-  return '../caleydo_clue/assets/not_available.png';
+  return 'phovea_clue/assets/src/not_available.png';
 }
 
 export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
@@ -59,7 +59,7 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
       width: o.width
     });
   }
-  return '../caleydo_clue/assets/not_available.png';
+  return 'phovea_clue/assets/src/not_available.png';
 }
 
 export function areThumbnailsAvailable(graph: provenance.ProvenanceGraph) {

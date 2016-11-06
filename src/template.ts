@@ -4,27 +4,25 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
+import * as template from './_template.html';
 
-/// <amd-dependency path="text!./_template.html" name="template"/>
-declare var template:string;
-
-import C = require('../caleydo_core/main');
-import header = require('../caleydo_bootstrap_fontawesome/header');
-import datas = require('../caleydo_core/data');
-import datatypes = require('../caleydo_core/datatype');
-import vis = require('../caleydo_core/vis');
-import prov = require('../caleydo_core/provenance');
-import d3 = require('d3');
-import $ = require('jquery');
-import prov_sel = require('./selection');
-import cmode = require('./mode');
-import provvis2 = require('./provvis');
-import storyvis = require('./storyvis');
-import events = require('../caleydo_core/event');
-import renderer = require('./annotation');
-import login = require('../caleydo_security_flask/login');
-import session = require('../caleydo_core/session');
-import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
+import * as C from 'phovea_core/src/index';
+import * as header from 'phovea_bootstrap_fontawesome/src/header';
+import * as datas from 'phovea_core/src/data';
+import * as datatypes from 'phovea_core/src/datatype';
+import * as vis from 'phovea_core/src/vis';
+import * as prov from 'phovea_core/src/provenance';
+import * as d3 from 'd3';
+import * as $ from 'jquery';
+import * as prov_sel from './selection';
+import * as cmode from './mode';
+import * as provvis2 from './provvis';
+import * as storyvis from './storyvis';
+import * as events from 'phovea_core/src/event';
+import * as renderer from './annotation';
+import * as login from 'phovea_security_flask/src/login';
+import * as session from 'phovea_core/src/session';
+import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
 
 export class CLUEGraphManager {
   constructor(private manager: prov.MixedStorageProvenanceGraphManager) {
@@ -358,7 +356,7 @@ export class CLUEWrapper extends events.EventHandler {
     C.mixin(this.options, options);
 
     // replace content with the template
-    body.innerHTML = template;
+    body.innerHTML = String(template);
 
     //special flag for rendering server side screenshots
     if (C.hash.is('clue_headless')) {
@@ -681,7 +679,7 @@ export class CLUEWrapper extends events.EventHandler {
     }
     const that = this;
     {
-      let $form = $('#loginDialog div.modal-body').html(login.form).find('form');
+      let $form = $('#loginDialog div.modal-body').html(String(login.form)).find('form');
       let $alert = $form.parent().find('div.alert');
 
       $alert.hide();

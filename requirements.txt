@@ -1,0 +1,2 @@
+selenium==2.48.0
+python-memcached==1.57
