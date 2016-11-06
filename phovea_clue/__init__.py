@@ -11,10 +11,11 @@ def phovea(registry):
   :param registry:
   """
   # generator-phovea:begin
-  registry.append('namespace','caleydo-clue-screenshot','phovea_clue.remoteplayer', {
-   'namespace': '/api/clue',
-   'factory': 'create'
-  })
+  registry.append('namespace', 'caleydo-clue-screenshot', 'phovea_clue.remoteplayer',
+                  {
+                      'namespace': '/api/clue',
+                      'factory': 'create'
+                  })
   # generator-phovea:end
   pass
 
