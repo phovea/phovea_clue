@@ -57,7 +57,7 @@
     "phovea_core": "github:phovea/phovea_core",
     "phovea_d3": "github:phovea/phovea_d3",
     "phovea_vis": "github:phovea/phovea_vis",
-    "phovea_vis_lineup": "github:phovea/phovea_security_flask"
+    "phovea_security_flask": "github:phovea/phovea_security_flask"
   },
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
