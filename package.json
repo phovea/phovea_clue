@@ -81,6 +81,7 @@
     "awesome-typescript-loader": "^2.2.4",
     "css-loader": "^0.25.0",
     "extract-text-webpack-plugin": "^2.0.0-beta.4",
+    "extract-loader": "0.0.2",
     "file-loader": "^0.9.0",
     "html-loader": "^0.4.4",
     "imports-loader": "^0.6.5",

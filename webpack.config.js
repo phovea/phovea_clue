@@ -111,7 +111,7 @@ function generateWebpack(options) {
     entry: injectRegistry(options.entries),
     output: {
       path: resolve(__dirname, 'build'),
-      filename: (options.name || (pkg.name + (options.bundle ? '_bundle' : ''))) + (options.min ? '.min' : '') + '.js',
+      filename: (options.name || (pkg.name + (options.bundle ? '_bundle' : ''))) + (options.min && !options.nosuffix ? '.min' : '') + '.js',
       publicPath: '' //no public path = relative
     },
     resolve: {
@@ -149,6 +149,18 @@ function generateWebpack(options) {
         '/api/*': {
           target: 'http://localhost:9000',
           secure: false
+        },
+        '/login': {
+          target: 'http://localhost:9000',
+          secure: false
+        },
+        '/logout': {
+          target: 'http://localhost:9000',
+          secure: false
+        },
+        '/loggedinas': {
+          target: 'http://localhost:9000',
+          secure: false
         }
       },
       contentBase: resolve(__dirname, 'build')
@@ -184,7 +196,8 @@ function generateWebpack(options) {
     (options.modules || []).forEach(function (m) {
       base.module.loaders.push({test: new RegExp('.*[\\\\/]' + m + '[\\\\/]phovea_registry.js'), loader: 'null'}); //use null loader
     });
-
+  }
+  if (!options.bundle || options.extractCss) {
     //extract the included css file to own file
     var p = new ExtractTextPlugin('style' + (options.min ? '.min' : '') + '.css');
     base.plugins.push(p);
@@ -243,7 +256,8 @@ function generateWebpackConfig(env) {
     }));
   }
 
-  if (type === 'app') {
+  if (type.startsWith('app')) {
+    base.extractCss = true;
     base.bundle = true; //bundle everything together
     base.name = '[name]'; //multiple entries case
     base.commons = true; //extract commons module
@@ -261,7 +275,8 @@ function generateWebpackConfig(env) {
     return generateWebpack(base);
   } else if (type === 'app') { //isProduction app
     return generateWebpack(Object.assign({}, base, {
-        min: true
+        min: true,
+        nosuffix: true
       }));
   } else { //isProduction
     return [
