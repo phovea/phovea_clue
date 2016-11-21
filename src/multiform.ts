@@ -2,10 +2,10 @@
  * Created by sam on 10.02.2015.
  */
 
-import multiform = require('../caleydo_core/multiform');
-import provenance = require('../caleydo_core/provenance');
-import vis = require('../caleydo_core/vis');
-import C = require('../caleydo_core/main');
+import * as multiform from 'phovea_core/src/multiform';
+import * as provenance from 'phovea_core/src/provenance';
+import * as vis from 'phovea_core/src/vis';
+import * as C from 'phovea_core/src/index';
 
 const disabled = {};
 

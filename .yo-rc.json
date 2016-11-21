@@ -1,0 +1,82 @@
+{
+  "generator-phovea": {
+    "type": "lib-slib",
+    "name": "phovea_clue",
+    "author": "The Caleydo Team",
+    "githubAccount": "phovea",
+    "modules": [
+      "phovea_core",
+      "phovea_d3",
+      "phovea_vis",
+      "phovea_bootstrap_fontawesome",
+      "phovea_security_flask",
+      "phovea_server"
+    ],
+    "extensions": [
+      {
+        "type": "actionFactory",
+        "id": "idtype-selection",
+        "module": "selection",
+        "extras": {
+          "factory": "createCmd",
+          "creates": "select"
+        }
+      },
+      {
+        "type": "actionCompressor",
+        "id": "idtype-selection",
+        "module": "selection",
+        "extras": {
+          "factory": "compressSelection",
+          "matches": "select"
+        }
+      },
+      {
+        "type": "actionFactory",
+        "id": "multiform",
+        "module": "multiform",
+        "extras": {
+          "factory": "createCmd",
+          "creates": "(transform|changeVis|setOption)"
+        }
+      }
+    ],
+    "sextensions": [
+      {
+        "type": "namespace",
+        "id": "caleydo-clue-screenshot",
+        "module": "remoteplayer",
+        "extras": {
+          "namespace": "/api/clue",
+          "factory": "create"
+        }
+      }
+    ],
+    "libraries": [
+      "d3"
+    ],
+    "unknown": {
+      "requirements": [
+        "selenium==2.48.0",
+        "python-memcached==1.57"
+      ],
+      "debianPackages": [
+        "memcached"
+      ],
+      "redhatPackages": []
+    },
+    "libraryAliases": {
+      "d3": "d3/d3"
+    },
+    "libraryExternals": [
+      "d3",
+      "d3",
+      "d3",
+      "jquery",
+      "font-awesome"
+    ],
+    "entries": "./index.js",
+    "ignores": [],
+    "today": "Sun, 06 Nov 2016 12:25:08 GMT"
+  }
+}

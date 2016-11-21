@@ -1,11 +1,11 @@
 /**
  * Created by Samuel Gratzl on 01.09.2015.
  */
-/// <reference path="../../tsd.d.ts" />
 
-import d3 = require('d3');
-import C = require('../caleydo_core/main');
-import events = require('../caleydo_core/event');
+
+import * as d3 from 'd3';
+import * as C from 'phovea_core/src/index';
+import * as events from 'phovea_core/src/event';
 
 /**
  * normalizes the given coordinates to sum up to one

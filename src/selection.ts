@@ -2,11 +2,11 @@
  * Created by sam on 10.02.2015.
  */
 
-import idtypes = require('../caleydo_core/idtype');
-import events = require('../caleydo_core/event');
-import provenance = require('../caleydo_core/provenance');
-import C = require('../caleydo_core/main');
-import ranges = require('../caleydo_core/range');
+import * as idtypes from 'phovea_core/src/idtype';
+import * as events from 'phovea_core/src/event';
+import * as provenance from 'phovea_core/src/provenance';
+import * as C from 'phovea_core/src/index';
+import * as ranges from 'phovea_core/src/range';
 
 const disabler = new events.EventHandler();
 

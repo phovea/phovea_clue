@@ -1,19 +1,20 @@
 /**
  * Created by sam on 09.02.2015.
  */
-/// <reference path="../../tsd.d.ts" />
 
-import C = require('../caleydo_core/main');
-import ranges = require('../caleydo_core/range');
-import provenance = require('../caleydo_core/provenance');
-import idtypes = require('../caleydo_core/idtype');
-import cmode = require('./mode');
-import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
-import d3 = require('d3');
-import vis = require('../caleydo_core/vis');
-import utils = require('./utils');
-import marked = require('marked');
-import player = require('./player');
+
+import * as C from 'phovea_core/src/index';
+import * as ranges from 'phovea_core/src/range';
+import * as provenance from 'phovea_core/src/provenance';
+import * as idtypes from 'phovea_core/src/idtype';
+import * as cmode from './mode';
+import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as d3 from 'd3';
+import * as vis from 'phovea_core/src/vis';
+import * as utils from './utils';
+import * as marked from 'marked';
+import * as player from './player';
+import * as $ from 'jquery';
 
 
 interface ISlideNodeRepr {
@@ -665,7 +666,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.attr('data-id', (d) => d.id);
     $stories.attr('title', (d) => d.name+'\n'+(d.transition > 0 ? '('+to_duration(d.transition)+')' : '')+'('+to_duration(d.duration)+')');
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(../caleydo_clue/assets/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(phovea_clue/assets/src/text.png)' : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d,story_raw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration)+'px');
