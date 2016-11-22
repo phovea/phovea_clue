@@ -1,14 +1,6 @@
 /**
  * Created by sam on 09.02.2015.
  */
-import dialogs = require('../caleydo_bootstrap_fontawesome/dialogs');
-import d3 = require('d3');
-import vis = require('../caleydo_core/vis');
-
-import utils = require('./utils');
-import {SimHash} from './simhash';
-import {WeightInterface, LinupStateView, TokenTreeVizualization, SimVisStateNode} from './simvis';
-
 
 import * as C from 'phovea_core/src/index';
 import * as $ from 'jquery';
@@ -21,6 +13,10 @@ import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 
 import * as utils from './utils';
+
+import {SimHash} from './simhash';
+import {WeightInterface, LinupStateView, TokenTreeVizualization, SimVisStateNode} from './simvis';
+
 
 
 function extractTags(text: string) {
@@ -821,7 +817,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });//.on('duplicate', $states.transition().attr("fill", "pink"));
 
     d3.select('body').on('keydown', function() {
-      if(d3.event.ctrlKey) {
+      if((<MouseEvent>d3.event).ctrlKey) {
         this.comparing=true;
       }
     }.bind(graph))
@@ -832,7 +828,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
     d3.select('body').on('keydown', function() {
-      if(d3.event.ctrlKey) {
+      if((<MouseEvent>d3.event).ctrlKey) {
         this.comparing=true;
       }
     }.bind(graph))
