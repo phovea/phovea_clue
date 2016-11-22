@@ -17,7 +17,7 @@ import * as d3 from 'd3';
  */
 export function create(body:HTMLElement, options:any = {}) {
   header.create(body, {
-      app: options.app || 'Caleydo',
+      appLink: new header.AppHeaderLink(options.app || 'Caleydo'),
       inverse: true
     });
   const $main = d3.select(body).append('main').style('height', '92vh');
