@@ -70,8 +70,6 @@
     },
     "libraryExternals": [
       "d3",
-      "d3",
-      "d3",
       "jquery",
       "font-awesome"
     ],
