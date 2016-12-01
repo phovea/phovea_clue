@@ -303,7 +303,7 @@ class StateRepr {
       .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
-      .classed('caleydo-select-selected', (d) => d.selected)
+      .classed('phovea-select-selected', (d) => d.selected)
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .attr('data-doi',(d) => d.doi)
       .attr('title', (d) => d.name);
@@ -378,7 +378,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   };
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
-    this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
+    this.$node.selectAll('div.state').classed('phovea-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -626,15 +626,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         const e = <DragEvent>(<any>d3.event);
         e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.s.name);
-        e.dataTransfer.setData('application/caleydo-prov-state',String(d.s.id));
+        e.dataTransfer.setData('application/phovea-prov-state',String(d.s.id));
       })
       .on('dragenter', function () {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', () => {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
           (<Event>d3.event).preventDefault();
           C.updateDropEffect(d3.event);
           return false;
@@ -645,7 +645,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
     });

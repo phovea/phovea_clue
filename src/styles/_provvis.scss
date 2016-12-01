@@ -130,7 +130,7 @@
     }
 
 
-    &.caleydo-select-selected {
+    &.phovea-select-selected {
       font-weight: bold;
       //background-color: $select-color;
 
@@ -138,7 +138,7 @@
         color: $select-color;
       }
     }
-    &.caleydo-select-hovered {
+    &.phovea-select-hovered {
       font-weight: bold;
       //background-color: $hover-color;
 
@@ -153,7 +153,7 @@
         display: none;
       }
 
-      &.caleydo-select-hovered {
+      &.phovea-select-hovered {
         .glyph {
           transition: font-size 200ms;
           transition: margin-left 100ms;

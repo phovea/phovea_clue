@@ -311,7 +311,7 @@ div.stories {
       background-color: #f0f0f0;
       border-radius: 5px;
 
-      &.caleydo-select-selected {
+      &.phovea-select-selected {
         border-color: $select-color;
         background-color: $select-color-bright;
         div.duration {
@@ -319,7 +319,7 @@ div.stories {
           font-weight: bold;
         }
       }
-      &.caleydo-select-hovered {
+      &.phovea-select-hovered {
         border-color: $hover-color;
         div.duration {
           color: $hover-color;
@@ -422,10 +422,10 @@ div.stories {
         display: none;
       }
 
-      &.caleydo-select-selected {
+      &.phovea-select-selected {
         background-color: $select-color;
       }
-      &.caleydo-select-hovered {
+      &.phovea-select-hovered {
         background-color: $hover-color;
       }
     }
