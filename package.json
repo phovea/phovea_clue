@@ -44,9 +44,8 @@
   },
   "main": "build/phovea_clue.js",
   "engines": {
-    "npm": ">= 3",
-    "node": ">= 6",
-    "iojs": ">= 3"
+    "npm": "3.10.9",
+    "node": "7.2.1",
   },
   "dependencies": {
     "@types/d3": "^3.5.36",
