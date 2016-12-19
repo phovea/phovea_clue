@@ -20,6 +20,8 @@ install:
   - pip install -r requirements_dev.txt
   - pip install -r requirements.txt
 
+addons:
+  firefox: 49.0.1 
 script: npm run dist
 
 deploy:
