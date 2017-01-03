@@ -53,7 +53,7 @@
     "@types/marked": "0.0.28",
     "d3": "3.5.17",
     "marked": "0.3.6",
-    "phovea_bootstrap_fontawesome": "github:phovea/phovea_bootstrap_fontawesome",
+    "phovea_ui": "github:phovea/phovea_ui",
     "phovea_core": "github:phovea/phovea_core",
     "phovea_d3": "github:phovea/phovea_d3",
     "phovea_vis": "github:phovea/phovea_vis",
