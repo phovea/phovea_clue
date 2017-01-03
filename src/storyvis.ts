@@ -28,7 +28,7 @@ interface ISlideNodeRepr {
 }
 
 function to_duration(d: number) {
-  var mm_ss = d3.time.format('%M:%S');
+  const mm_ss = d3.time.format('%M:%S');
   return mm_ss(new Date(d));
 }
 
@@ -182,7 +182,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return Promise.resolve(null);
   }
 
-  transform(scale?:number[], rotate:number = 0) {
+  transform(scale?:[number, number], rotate:number = 0) {
     var bak = {
       scale: this.options.scale || [1, 1],
       rotate: this.options.rotate || 0
