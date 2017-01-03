@@ -7,7 +7,7 @@
 import * as template from 'html-loader!./_template.html';
 
 import * as C from 'phovea_core/src/index';
-import * as header from 'phovea_bootstrap_fontawesome/src/header';
+import * as header from 'phovea_ui/src/header';
 import * as datas from 'phovea_core/src/data';
 import * as datatypes from 'phovea_core/src/datatype';
 import * as vis from 'phovea_core/src/vis';
@@ -22,7 +22,7 @@ import * as events from 'phovea_core/src/event';
 import * as renderer from './annotation';
 import * as login from 'phovea_security_flask/src/login';
 import * as session from 'phovea_core/src/session';
-import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as dialogs from 'phovea_ui/src/dialogs';
 
 export class CLUEGraphManager {
   constructor(private manager: prov.MixedStorageProvenanceGraphManager) {

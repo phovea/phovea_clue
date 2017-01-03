@@ -5,7 +5,7 @@
  */
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
-import * as header from 'phovea_bootstrap_fontawesome/src/header';
+import * as header from 'phovea_ui/src/header';
 import * as prov from 'phovea_core/src/provenance';
 import * as d3 from 'd3';
 

@@ -20,30 +20,32 @@ var INDEX_FILE = './index.ts';
  * @returns {number}
  */
 function byName(a, b) {
-    if (a === INDEX_FILE) {
-        return a === b ? 0 : -1;
-    }
-    if (b === INDEX_FILE) {
-        return 1;
-    }
-    return a.toLowerCase().localeCompare(b.toLowerCase());
+  if (a === INDEX_FILE) {
+    return a === b ? 0 : -1;
+  }
+  if (b === INDEX_FILE) {
+    return 1;
+  }
+  return a.toLowerCase().localeCompare(b.toLowerCase());
 }
 //list all modules in the src folder excluding the one starting with _
-var req = require.context('./src', false, /\/[^_].*\.tsx?$/);
+var req = require.context('./src', true, /^\.\/(?!internal)(([^_][\w]+)|(\w+\/index))\.tsx?$/);
 
 var files = req.keys().sort(byName);
 
 //root file exists? else use anonymous root object
 if (files[0] === INDEX_FILE) {
-    module.exports = req(files.shift());
+  module.exports = req(files.shift());
 } else {
-    module.exports = {};
+  module.exports = {};
 }
 
 //generate getter for all modules
 files.forEach(function (f) {
-    Object.defineProperty(module.exports, f.substring(2, f.length - 3), {
-        get: function () { return req(f); },
-        enumerable: true
-    });
+  Object.defineProperty(module.exports, f.substring(2, f.lastIndexOf('/index.') > 0 ? f.lastIndexOf('/index.') : f.lastIndexOf('.')), {
+    get: function () {
+      return req(f);
+    },
+    enumerable: true
+  });
 });

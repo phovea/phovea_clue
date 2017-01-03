@@ -50,9 +50,9 @@ function cleanupDependency(d) {
   return d;
 }
 
-function resolveUeber() {
+function resolveWorkspace() {
   console.log('resolve parent');
-  const ueberDeps = dependencyGraph('..').dependencies;
+  const workspaceDeps = dependencyGraph('..').dependencies;
   const modules = new Set(resolveModules());
 
   const resolveModule = (m) => {
@@ -69,9 +69,9 @@ function resolveUeber() {
   const deps = (deps) => {
     const r = {};
     Object.keys(deps).forEach((d) => {
-      if (d in ueberDeps) {
-        r[d] = cleanupDependency(ueberDeps[d]);
-        delete ueberDeps[d];
+      if (d in workspaceDeps) {
+        r[d] = cleanupDependency(workspaceDeps[d]);
+        delete workspaceDeps[d];
       } else if (modules.has(d)) {
         modules.delete(d);
         r[d] = resolveModule(d);
@@ -103,7 +103,7 @@ function resolveSingle() {
   const pkg = require(`./package.json`);
   const head = gitHead('.');
   const deps = {};
-  Object.keys(self.dependencies).forEach((d) => {
+  Object.keys(self.dependencies || {}).forEach((d) => {
     deps[d] = cleanupDependency(self.dependencies[d]);
   });
   return {
@@ -117,9 +117,9 @@ function resolveSingle() {
 
 function generate() {
   console.log('building buildInfo');
-  const isUeberContext = fs.existsSync('../phovea_registry.js');
-  if (isUeberContext) {
-    return resolveUeber();
+  const isWorkspaceContext = fs.existsSync('../phovea_registry.js');
+  if (isWorkspaceContext) {
+    return resolveWorkspace();
   } else {
     return resolveSingle();
   }

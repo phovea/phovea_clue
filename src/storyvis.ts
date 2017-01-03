@@ -8,7 +8,7 @@ import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as cmode from './mode';
-import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
