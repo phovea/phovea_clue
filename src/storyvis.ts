@@ -100,7 +100,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   };
 
   private options = {
-    scale: [1, 1],
+    scale: <[number,number]>[1, 1],
     rotate: 0,
 
     class: 'vertical',
