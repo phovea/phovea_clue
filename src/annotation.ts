@@ -22,7 +22,7 @@ enum EAnchorDirection {
 }
 
 const anchor2string = (() => {
-  var r = [];
+  const r = [];
   r[EAnchorDirection.EAST] = 'e';
   r[EAnchorDirection.NORTH] = 'n';
   r[EAnchorDirection.WEST] = 'w';
@@ -92,7 +92,7 @@ class Anchor {
 
   compute():[number, number] {
     //start with the bounds
-    var o = C.bounds(this.elem);
+    let o = C.bounds(this.elem);
     //add offset
     o.x += window.pageXOffset;
     o.y += window.pageYOffset;

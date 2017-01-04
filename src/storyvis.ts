@@ -8,7 +8,7 @@ import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as cmode from './mode';
-import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
@@ -28,7 +28,7 @@ interface ISlideNodeRepr {
 }
 
 function to_duration(d: number) {
-  var mm_ss = d3.time.format('%M:%S');
+  const mm_ss = d3.time.format('%M:%S');
   return mm_ss(new Date(d));
 }
 
@@ -70,7 +70,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private trigger = C.bind(this.update, this);
 
   private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string, op: any, extras) => {
-    this.$node.selectAll('div.story:not(.placeholder)').classed('caleydo-select-'+type,function (d: provenance.SlideNode) {
+    this.$node.selectAll('div.story:not(.placeholder)').classed('phovea-select-'+type,function (d: provenance.SlideNode) {
       const isSelected = d === slide;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -100,7 +100,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   };
 
   private options = {
-    scale: [1, 1],
+    scale: <[number,number]>[1, 1],
     rotate: 0,
 
     class: 'vertical',
@@ -182,7 +182,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return Promise.resolve(null);
   }
 
-  transform(scale?:number[], rotate:number = 0) {
+  transform(scale?:[number, number], rotate:number = 0) {
     var bak = {
       scale: this.options.scale || [1, 1],
       rotate: this.options.rotate || 0
@@ -344,12 +344,12 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const that = this;
     elem
       .on('dragenter', function (d) {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
+        if (C.hasDnDType(d3.event, 'application/phovea-prov-state') || C.hasDnDType(d3.event, 'application/phovea-prov-story') || C.hasDnDType(d3.event, 'application/phovea-prov-story-text')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', (d) => {
-      if (C.hasDnDType(d3.event, 'application/caleydo-prov-state') || C.hasDnDType(d3.event, 'application/caleydo-prov-story') || C.hasDnDType(d3.event, 'application/caleydo-prov-story-text')) {
+      if (C.hasDnDType(d3.event, 'application/phovea-prov-state') || C.hasDnDType(d3.event, 'application/phovea-prov-story') || C.hasDnDType(d3.event, 'application/phovea-prov-story-text')) {
         (<Event>d3.event).preventDefault();
         C.updateDropEffect(d3.event);
         return false;
@@ -374,14 +374,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         }
         that.update();
       };
-      if (C.hasDnDType(e, 'application/caleydo-prov-state')) {
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'), 10));
+      if (C.hasDnDType(e, 'application/phovea-prov-state')) {
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'), 10));
         insertIntoStory(that.data.wrapAsSlide(state));
 
-      } else if (C.hasDnDType(e, 'application/application/caleydo-prov-story-text')) {
+      } else if (C.hasDnDType(e, 'application/application/phovea-prov-story-text')) {
         insertIntoStory(that.data.makeTextSlide());
-      } else if (C.hasDnDType(e, 'application/caleydo-prov-story')) {
-        const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/caleydo-prov-story'), 10));
+      } else if (C.hasDnDType(e, 'application/phovea-prov-story')) {
+        const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/phovea-prov-story'), 10));
         if (full_story.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
           if (d_story == null) { //no self move
             if (story !== that.story) {
@@ -471,7 +471,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const e = <DragEvent>(<any>d3.event);
         e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.name);
-        e.dataTransfer.setData('application/caleydo-prov-story',String(d.id));
+        e.dataTransfer.setData('application/phovea-prov-story',String(d.id));
       })
       .on('click', this.onSlideClick.bind(this))
       .on('mouseenter', function(d)  {

@@ -4,9 +4,9 @@
 
 // import variables first
 @import "styles/colors";
-$boostrapAssetDir: '~phovea_bootstrap_fontawesome/src/assets';
+$boostrapAssetDir: '~phovea_ui/src/assets';
 
-@import "~phovea_bootstrap_fontawesome/src/styles/base";
+@import "~phovea_ui/src/styles/base";
 
 // basic CLUE style
 @import "styles/base";
@@ -19,5 +19,5 @@ $boostrapAssetDir: '~phovea_bootstrap_fontawesome/src/assets';
 
 // import the header navbar with a more specific CSS selector again, to style it with the CLUE colors
 .box {
-  @import "~phovea_bootstrap_fontawesome/src/styles/header_navbar";
+  @import "~phovea_ui/src/styles/header_navbar";
 }

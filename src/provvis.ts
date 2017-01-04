@@ -8,7 +8,7 @@ import * as ranges from 'phovea_core/src/range';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as cmode from './mode';
-import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 
@@ -373,7 +373,7 @@ class StateRepr {
       .classed('doi-sm', (d) => d.lod === LevelOfDetail.Small)
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
-      .classed('caleydo-select-selected', (d) => (d.selected || d.isHoveredInLineUp))
+      .classed('phovea-select-selected', (d) => (d.selected || d.isHoveredInLineUp))
       .classed('bookmarked', (d) => d.s.getAttr('starred',false))
       .style('opacity', (d) => d.opacity)
       .attr('data-doi',(d) => d.doi)
@@ -476,11 +476,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
-
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    
     $elem.call(StateRepr.render);
 
-    this.$node.selectAll('div.state').classed('caleydo-select-'+type, function (d: StateRepr) {
+    $elem.classed('phovea-select-'+type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -792,15 +792,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         const e = <DragEvent>(<any>d3.event);
         e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.s.name);
-        e.dataTransfer.setData('application/caleydo-prov-state',String(d.s.id));
+        e.dataTransfer.setData('application/phovea-prov-state',String(d.s.id));
       })
       .on('dragenter', function () {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', () => {
-        if (C.hasDnDType(d3.event, 'application/caleydo-prov-state')) {
+        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
           (<Event>d3.event).preventDefault();
           C.updateDropEffect(d3.event);
           return false;
@@ -811,7 +811,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         var e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/caleydo-prov-state'),10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'),10));
         that.data.fork(state.creator, d.s);
         return false;
     });//.on('duplicate', $states.transition().attr("fill", "pink"));

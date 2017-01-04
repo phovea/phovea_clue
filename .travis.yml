@@ -1,8 +1,8 @@
 language: python
 sudo: required
 env:
-  - TOXENV=py27
-  - TOXENV=py34
+- TOXENV=py27
+- TOXENV=py34
 
 node_js:
 - 6
@@ -14,11 +14,10 @@ before_install:
 - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
 
 install:
-  - npm install
-  - sudo apt-get install -y cython
-  - sudo apt-get install -y `cat debian_packages.txt | tr '\r' ' ' | tr '\n' ' '`
-  - pip install -r requirements_dev.txt
-  - pip install -r requirements.txt
+- (!(test -f docker_packages.txt) || (cat docker_packages.txt | xargs sudo apt-get install -y))
+- pip install -r requirements_dev.txt
+- pip install -r requirements.txt
+- npm install
 
 script: npm run dist
 

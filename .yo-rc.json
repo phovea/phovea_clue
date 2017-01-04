@@ -8,8 +8,7 @@
       "phovea_core",
       "phovea_d3",
       "phovea_vis",
-      "phovea_bootstrap_fontawesome",
-      "phovea_security_flask",
+      "phovea_ui",
       "phovea_security_flask",
       "phovea_server"
     ],
@@ -54,8 +53,7 @@
       }
     ],
     "libraries": [
-      "d3",
-      "lineupjs"
+      "d3"
     ],
     "unknown": {
       "requirements": [
@@ -72,7 +70,6 @@
     },
     "libraryExternals": [
       "d3",
-      "lineupjs",
       "jquery",
       "font-awesome"
     ],

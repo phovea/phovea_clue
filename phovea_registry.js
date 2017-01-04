@@ -13,7 +13,7 @@ import {register} from 'phovea_core/src/plugin';
 import 'phovea_core/phovea_registry.js';
 import 'phovea_d3/phovea_registry.js';
 import 'phovea_vis/phovea_registry.js';
-import 'phovea_bootstrap_fontawesome/phovea_registry.js';
+import 'phovea_ui/phovea_registry.js';
 import 'phovea_security_flask/phovea_registry.js';
 import 'phovea_security_flask/phovea_registry.js';
 //self

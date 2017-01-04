@@ -7,7 +7,7 @@
 import * as template from 'html-loader!./_template.html';
 
 import * as C from 'phovea_core/src/index';
-import * as header from 'phovea_bootstrap_fontawesome/src/header';
+import * as header from 'phovea_ui/src/header';
 import * as datas from 'phovea_core/src/data';
 import * as datatypes from 'phovea_core/src/datatype';
 import * as vis from 'phovea_core/src/vis';
@@ -22,7 +22,7 @@ import * as events from 'phovea_core/src/event';
 import * as renderer from './annotation';
 import * as login from 'phovea_security_flask/src/login';
 import * as session from 'phovea_core/src/session';
-import * as dialogs from 'phovea_bootstrap_fontawesome/src/dialogs';
+import * as dialogs from 'phovea_ui/src/dialogs';
 
 export class CLUEGraphManager {
   constructor(private manager: prov.MixedStorageProvenanceGraphManager) {
@@ -82,7 +82,7 @@ export class CLUEGraphManager {
     return this.manager.list();
   }
 
-  delete(graph: datatypes.IDataDescription) {
+  delete(graph: prov.IProvenanceGraphDataDescription) {
     return this.manager.delete(graph);
   }
 
@@ -105,7 +105,7 @@ export class CLUEGraphManager {
     if (graph === null || graph === 'new') {
       return this.manager.createLocal();
     }
-    const desc = list.filter((d) => d.id === graph)[0];
+    const desc = <prov.IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     if (desc) {
       if ((<any>desc).local || loggedIn) {
         return this.manager.get(desc);
@@ -115,7 +115,7 @@ export class CLUEGraphManager {
     return this.manager.create();
   }
 
-  loadOrClone(graph: datatypes.IDataDescription, isSelect: boolean) {
+  loadOrClone(graph: prov.IProvenanceGraphDataDescription, isSelect: boolean) {
     if (isSelect) {
       this.loadGraph(graph);
     } else {
@@ -459,10 +459,13 @@ export class CLUEWrapper extends events.EventHandler {
               return datas.create({
                 id: g.desc.id,
                 name: g.desc.name,
+                description: '',
                 fqname: g.desc.fqname,
                 type: 'graph',
                 storage: 'given',
-                graph: g.backend
+                graph: g.backend,
+                creator: 'Anonymous',
+                ts: Date.now()
               });
             })
             .then((proxy) => {
