@@ -8,10 +8,11 @@ import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as vis from 'phovea_core/src/vis';
 
-import {SimHash, MatchedTokenTree} from './simhash';
-import {isUndefined, mod} from 'phovea_core/src/index';
-import {StateNode, ProvenanceGraph} from 'phovea_core/src/provenance';
-import {IStateToken} from './statetoken';
+import {SimHash, MatchedTokenTree} from 'phovea_core/src/provenance/SimilarityHash';
+import {mod} from 'phovea_core/src/index';
+import {IStateToken} from 'phovea_core/src/provenance/StateToken';
+import StateNode from 'phovea_core/src/provenance/StateNode';
+import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 
 
 interface IWeight {
@@ -29,7 +30,7 @@ export class SimVisStateNode extends StateNode {
 }
 
 
-export class LinupStateView extends vis.AVisInstance {
+export class LineupStateView extends vis.AVisInstance {
   protected node;
 
   private lstack;
@@ -89,7 +90,7 @@ export class LinupStateView extends vis.AVisInstance {
   fillArr(state:SimVisStateNode) {
     this.arr = [];
     //let state:StateNode = this.data.selectedStates(idtypes.defaultSelectionType)[0]
-    if (isUndefined(state) || state === null) {
+    if (state === undefined || state === null) {
       return;
     }
     let allstates = this.data.states;
@@ -128,7 +129,7 @@ export class LinupStateView extends vis.AVisInstance {
 
 
   initialize(reason:SimVisStateNode = null) {
-    var desc = [
+    const desc = [
       {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: SimHash.cols[0]},
       {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: SimHash.cols[1]},
       {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: SimHash.cols[2]},
@@ -149,7 +150,7 @@ export class LinupStateView extends vis.AVisInstance {
 
     this.fillArr(reason);
     this.luDataProvider = new lineup.provider.LocalDataProvider(this.arr, desc);
-    var r = this.luDataProvider.pushRanking();
+    const r = this.luDataProvider.pushRanking();
 
     this.lstack = this.luDataProvider.create(lineup.model.createStackDesc('Active'));
     r.push(this.lstack);
@@ -256,10 +257,10 @@ export class WeightInterface {
     this.barContainer = this.catContainer.select('.barContainer');
     let rawWeights = SimHash.hasher.categoryWeighting;
     this.cumSum[0] = 0;
-    for (var i = 1; i <= rawWeights.length; i++) {
+    for (let i = 1; i <= rawWeights.length; i++) {
       this.cumSum[i] = this.cumSum[i - 1] + rawWeights[i - 1];
     }
-    var cols = SimHash.cols;
+    const cols = SimHash.cols;
     this.weights[0] = {name: this.cats[0], value: rawWeights[0], color: cols[0], active: true};
     this.weights[1] = {name: this.cats[1], value: rawWeights[1], color: cols[1], active: true};
     this.weights[2] = {name: this.cats[2], value: rawWeights[2], color: cols[2], active: true};
@@ -281,7 +282,7 @@ export class WeightInterface {
 
   protected getNextActive(index) {
     let nextIndex = -1;
-    for (var i = 1; i < this.weights.length; i++) {
+    for (let i = 1; i < this.weights.length; i++) {
       if (this.weights[mod(index + i, 5)].active) {
         nextIndex = mod(index + i, 5);
         break;
@@ -292,7 +293,7 @@ export class WeightInterface {
 
   protected getPreviousActive(index) {
     let nextIndex = -1;
-    for (var i = 1; i < this.weights.length; i++) {
+    for (let i = 1; i < this.weights.length; i++) {
       if (this.weights[mod(index - i, 5)].active) {
         nextIndex = mod(index - i, 5);
         break;
@@ -451,7 +452,7 @@ export class WeightInterface {
     $catWeightContainer.append(handleHtml(this.cats[2]));
     $catWeightContainer.append(handleHtml(this.cats[3]));
 
-    var dragResize = d3.behavior.drag()
+    const dragResize = d3.behavior.drag()
       .on('drag', function () {
         let x = d3.mouse(_that.barContainer.node())[1] / _that.scalefactor;
         if (x > 100) {
@@ -470,7 +471,7 @@ export class WeightInterface {
         }
 
         _that.cumSum[0] = 0;
-        for (var i = 1; i <= _that.weights.length; i++) {
+        for (let i = 1; i <= _that.weights.length; i++) {
           _that.cumSum[i] = _that.cumSum[i - 1] + _that.weights[i - 1].value;
         }
         _that.update(false);
@@ -611,7 +612,7 @@ export class WeightInterface {
       }
       _that.weights[index].active = !_that.weights[index].active;
       _that.cumSum[0] = 0;
-      for (var i = 1; i <= _that.weights.length; i++) {
+      for (let i = 1; i <= _that.weights.length; i++) {
         _that.cumSum[i] = _that.cumSum[i - 1] + _that.weights[i - 1].value;
       }
       _that.update(true);
@@ -621,7 +622,7 @@ export class WeightInterface {
   }
 }
 
-export class TokenTreeVizualization {
+export class TokenTreeVisualization {
 
   private partitionAS = null;
   private bottom_state = null;
@@ -649,7 +650,7 @@ export class TokenTreeVizualization {
     this.data.on('add_state', this.onExecutionStartedListener.bind(this));
     this.data.on('action-execution-complete', this.onStateAddedListener.bind(this));
     this.data.on('select_state', this.stateSelectionChanged.bind(this));
-    this.data.on('stateSimLU-selection', this.linupSelectionListener.bind(this));
+    this.data.on('stateSimLU-selection', this.lineupSelectionListener.bind(this));
     SimHash.hasher.on('weights_changed', this.weightsChangedListener.bind(this));
 
     this.bottom_stateContainer = this.container.append('div');
@@ -684,7 +685,7 @@ export class TokenTreeVizualization {
     this.update(this._tree.rootNode);
   }
 
-  linupSelectionListener(event:any, state:provenance.StateNode) {
+  lineupSelectionListener(event:any, state:provenance.StateNode) {
     this.luSelectedState = state;
     this.findAndInitializeTree();
   }
@@ -754,7 +755,7 @@ export class TokenTreeVizualization {
     this.stateVizX = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().width]);
     this.stateVizY = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().height]);
 
-    const activeStateIsLeft:boolean = that._tree.leftState === that.activeState ? false : true;
+    const activeStateIsLeft:boolean = (that._tree.leftState !== that.activeState);
     // Compute the new tree layout.
     let nodes = that.partitionAS(that._tree.rootNode);
 
@@ -762,7 +763,7 @@ export class TokenTreeVizualization {
     // TOP STATE
     let node = this.top_state.selectAll('div')
       .data(nodes, function (d) {
-        return isUndefined(d) ? 0 : d.id;
+        return d === undefined ? 0 : d.id;
       })
       .style('left', function (d) {
         return that.stateVizX(d.x) + that.padding + 'px';
@@ -825,7 +826,7 @@ export class TokenTreeVizualization {
     // BOTTOM STATE
     node = this.bottom_state.selectAll('div')
       .data(nodes, function (d) {
-        return isUndefined(d) ? 0 : d.id;
+        return d === undefined ? 0 : d.id;
       })
       .style('left', function (d) {
         return that.stateVizX(d.x) + that.padding + 'px';
@@ -888,41 +889,20 @@ export class TokenTreeVizualization {
       .style('transform', 'translate(0px, 9px');
 
 
-    let bands = nodes.filter(function (d) {
-      return d.isLeafNodeWithoutDummyChilds;
-    });
     let band = this.bandSpace.selectAll('div')
-      .data(bands, function (d) {
-        return isUndefined(d) ? 0 : d.id;
-      })
-      .style('left', function (d) {
-        return that.stateVizX(d.x) + that.padding + 'px';
-      })
-      .style('bottom', function (d) {
-        return -30 + 'px';
-      })
-      .style('height', function (d) {
-        return 92 + 'px';
-      })
-      .style('width', function (d) {
-        return that.stateVizX(d.dx) * d.tokenSimilarity + 'px';
-      });
+      .data(nodes.filter((d) => d.isLeafNodeWithoutDummyChilds), (d) => d === undefined ? 0 : d.id)
+      .style('left', (d) => that.stateVizX(d.x) + that.padding + 'px')
+      .style('bottom', (d) =>  '-30px')
+      .style('height', (d) =>  '92px')
+      .style('width', (d) => that.stateVizX(d.dx) * d.tokenSimilarity + 'px');
 
     band.enter().append('div')
       .classed('bandWrapper', true)
-      .style('left', function (d) {
-        return that.stateVizX(d.x) + that.padding + 'px';
-      })
-      .style('bottom', function (d) {
-        return -30 + 'px';
-      })
-      .style('height', function (d) {
-        return 92 + 'px';
-      })
-      .style('width', function (d) {
-        return that.stateVizX(d.dx) * d.tokenSimilarity + 'px';
-      })
-      .html(function (d) {
+      .style('left', (d) => that.stateVizX(d.x) + that.padding + 'px')
+      .style('bottom', (d) =>  '-30px')
+      .style('height', (d) =>  '92px')
+      .style('width', (d) => that.stateVizX(d.dx) * d.tokenSimilarity + 'px')
+      .html((d) => {
         let isVisible:boolean = true;
         if (!d.isPaired) {
           isVisible = false;
@@ -943,7 +923,6 @@ export class TokenTreeVizualization {
     let topStateVisible = that._tree.leftState.id === that._tree.rightState.id  ? 'hidden' : 'visible';
     that.top_stateContainer.style('visibility', topStateVisible);
     that.bandContainer.style('visibility', topStateVisible);
-
   }
 
   // Toggle children on click.

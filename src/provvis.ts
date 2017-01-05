@@ -14,8 +14,8 @@ import * as vis from 'phovea_core/src/vis';
 
 import * as utils from './utils';
 
-import {SimHash} from './simhash';
-import {WeightInterface, LinupStateView, TokenTreeVizualization, SimVisStateNode} from './simvis';
+import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
+import {WeightInterface, LineupStateView, TokenTreeVisualization, SimVisStateNode} from './simvis';
 
 
 
@@ -477,7 +477,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
-    
+
     $elem.call(StateRepr.render);
 
     $elem.classed('phovea-select-'+type, function (d: StateRepr) {
@@ -714,9 +714,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     let weightContainer = new WeightInterface($simArea.select('.catWeightContainer'));
     //let luContainer =
-      new LinupStateView($simArea.select('.stateLinupView'),this.data);
+      new LineupStateView($simArea.select('.stateLinupView'),this.data);
     //let treeVizContainer =
-      new TokenTreeVizualization($simArea.select('.tokenTreeViz'), this.data);
+      new TokenTreeVisualization($simArea.select('.tokenTreeViz'), this.data);
 
     //init the toolbar filter options
 
