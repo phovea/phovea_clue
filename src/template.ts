@@ -24,29 +24,33 @@ import * as login from 'phovea_security_flask/src/login';
 import * as session from 'phovea_core/src/session';
 import * as dialogs from 'phovea_ui/src/dialogs';
 
+
 export class CLUEGraphManager {
   constructor(private manager: prov.MixedStorageProvenanceGraphManager) {
     //selected by url
   }
 
+  static setGraphInUrl(value: string) {
+    C.hash.removeProp('clue_slide', false);
+    C.hash.removeProp('clue_state', false);
+    C.hash.setProp('clue_graph', value);
+  }
+
   newRemoteGraph() {
     if (session.retrieve('logged_in') === true) {
-      C.hash.removeProp('clue_slide', false);
-      C.hash.removeProp('clue_state', false);
-      C.hash.setProp('clue_graph', 'new_remote');
+      CLUEGraphManager.setGraphInUrl('new_remote');
       window.location.reload();
     }
   }
 
   newGraph() {
-    C.hash.removeProp('clue_slide', false);
-    C.hash.removeProp('clue_state', false);
-    C.hash.setProp('clue_graph', 'new');
+    CLUEGraphManager.setGraphInUrl('new');
     window.location.reload();
   }
 
-  loadGraph(desc:any) {
-    C.hash.setProp('clue_graph', desc.id);
+  loadGraph(desc: any) {
+    // reset
+    CLUEGraphManager.setGraphInUrl(desc.id);
     window.location.reload();
   }
 
@@ -129,7 +133,7 @@ export class CLUEGraphManager {
  * @param $ul
  * @returns {Promise<U>}
  */
-function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):Promise<prov.ProvenanceGraph> {
+function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>): Promise<prov.ProvenanceGraph> {
 
   //new button
   $ul.select('#provenancegraph_new_remote').on('click', () => {
@@ -153,7 +157,7 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
     d3.select(d.body).select('input').on('change', function () {
       var file = (<any>d3.event).target.files[0];
       var reader = new FileReader();
-      reader.onload = function (e:any) {
+      reader.onload = function (e: any) {
         var data_s = e.target.result;
         var dump = JSON.parse(data_s);
         manager.importGraph(dump, remote);
@@ -247,8 +251,8 @@ function chooseProvenanceGraph(manager:CLUEGraphManager, $ul:d3.Selection<any>):
  * injection for headless support
  * @param wrapper
  */
-function injectHeadlessSupport(wrapper:CLUEWrapper) {
-  var w:any = window;
+function injectHeadlessSupport(wrapper: CLUEWrapper) {
+  var w: any = window;
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   wrapper.on('jumped_to', () => {
@@ -261,12 +265,12 @@ function injectHeadlessSupport(wrapper:CLUEWrapper) {
 }
 
 function injectParentWindowSupport(wrapper: CLUEWrapper) {
-  var w:any = window;
+  var w: any = window;
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   //initial jump
   var jump_listener = (s) => {
-    window.top.postMessage({ type: 'caleydo', clue: 'jumped_to_initial'}, '*');
+    window.top.postMessage({type: 'caleydo', clue: 'jumped_to_initial'}, '*');
     wrapper.off('jumped_to', jump_listener);
   };
   wrapper.on('jumped_to', jump_listener);
@@ -277,17 +281,17 @@ function injectParentWindowSupport(wrapper: CLUEWrapper) {
       return;
     }
     if (d.clue === 'jump_to') {
-        wrapper.jumpToState(d.state).then(() => {
-          s.postMessage({ type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
-        }).catch(() => {
-          s.postMessage({ type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
-        });
+      wrapper.jumpToState(d.state).then(() => {
+        s.postMessage({type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
+      }).catch(() => {
+        s.postMessage({type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
+      });
     } else if (d.clue === 'show_slide') {
-        wrapper.jumpToStory(d.slide).then(() => {
-          s.postMessage({ type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
-        }).catch(() => {
-          s.postMessage({ type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
-        });
+      wrapper.jumpToStory(d.slide).then(() => {
+        s.postMessage({type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
+      }).catch(() => {
+        s.postMessage({type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
+      });
     } else if (d.clue === 'next_slide') {
       wrapper.nextSlide().then(() => {
         s.postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
@@ -340,17 +344,17 @@ export class CLUEWrapper extends events.EventHandler {
     headerOptions: {}
   };
 
-  private manager:prov.MixedStorageProvenanceGraphManager;
-  clueManager:CLUEGraphManager;
+  private manager: prov.MixedStorageProvenanceGraphManager;
+  clueManager: CLUEGraphManager;
 
-  graph:Promise<prov.ProvenanceGraph>;
-  header:header.AppHeader;
-  $main:d3.Selection<any>;
-  $main_ref:prov.IObjectRef<d3.Selection<any>>;
+  graph: Promise<prov.ProvenanceGraph>;
+  header: header.AppHeader;
+  $main: d3.Selection<any>;
+  $main_ref: prov.IObjectRef<d3.Selection<any>>;
 
-  private storyvis:storyvis.VerticalStoryVis;
+  private storyvis: storyvis.VerticalStoryVis;
 
-  constructor(body:HTMLElement, options:any = {}) {
+  constructor(body: HTMLElement, options: any = {}) {
     super();
     const that = this;
     C.mixin(this.options, options);
@@ -455,19 +459,19 @@ export class CLUEWrapper extends events.EventHandler {
         .append('button').text('Show Provenance Graph')
         .attr('class', 'btn btn-default')
         .on('click', () => {
-          this.graph.then((g:prov.ProvenanceGraph) => {
-              return datas.create({
-                id: g.desc.id,
-                name: g.desc.name,
-                description: '',
-                fqname: g.desc.fqname,
-                type: 'graph',
-                storage: 'given',
-                graph: g.backend,
-                creator: 'Anonymous',
-                ts: Date.now()
-              });
-            })
+          this.graph.then((g: prov.ProvenanceGraph) => {
+            return datas.create({
+              id: g.desc.id,
+              name: g.desc.name,
+              description: '',
+              fqname: g.desc.fqname,
+              type: 'graph',
+              storage: 'given',
+              graph: g.backend,
+              creator: 'Anonymous',
+              ts: Date.now()
+            });
+          })
             .then((proxy) => {
               const l = vis.list(proxy);
               if (l.length <= 0) {
@@ -497,7 +501,7 @@ export class CLUEWrapper extends events.EventHandler {
     this.$main = d3.select(body).select('main');
 
     this.graph.then((graph) => {
-      graph.on('sync_start,sync', (event:events.IEvent) => {
+      graph.on('sync_start,sync', (event: events.IEvent) => {
         d3.select('nav span.glyphicon-cog').classed('fa-spin', event.type !== 'sync');
       });
 
@@ -575,10 +579,10 @@ export class CLUEWrapper extends events.EventHandler {
         }
       });
 
-      graph.on('switch_state', (event:any, state:prov.StateNode) => {
+      graph.on('switch_state', (event: any, state: prov.StateNode) => {
         this.clueManager.storedState = state ? state.id : null;
       });
-      graph.on('select_slide_selected', (event:any, state:prov.SlideNode) => {
+      graph.on('select_slide_selected', (event: any, state: prov.SlideNode) => {
         this.clueManager.storedSlide = state ? state.id : null;
       });
 
@@ -586,7 +590,7 @@ export class CLUEWrapper extends events.EventHandler {
         const $right = $('aside.provenance-layout-vis');
         const $right_story = $(this.storyvis.node);
         this.propagate(cmode, 'modeChanged');
-        let update = (new_:cmode.CLUEMode) => {
+        let update = (new_: cmode.CLUEMode) => {
           $('body').attr('data-clue', new_.toString());
           //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
           if (new_.presentation > 0.8) {
@@ -737,7 +741,7 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  jumpToStory(story:number) {
+  jumpToStory(story: number) {
     console.log('jump to stored story', story);
     return this.graph.then((graph) => {
       const s = graph.getSlideById(story);
@@ -763,7 +767,7 @@ export class CLUEWrapper extends events.EventHandler {
     });
   }
 
-  jumpToState(state:number) {
+  jumpToState(state: number) {
     console.log('jump to stored state', state);
     return this.graph.then((graph) => {
       let s = graph.getStateById(state);
@@ -798,6 +802,23 @@ export class CLUEWrapper extends events.EventHandler {
     return Promise.resolve(this);
   }
 
+  jumpToStoredOrLastState() {
+    //jump to stored state
+    const target_story = this.clueManager.storedSlide;
+    if (target_story !== null) {
+      return this.jumpToStory(target_story);
+    }
+    const target_state = this.clueManager.storedState;
+    if (target_state !== null) {
+      return this.jumpToState(target_state);
+    }
+
+    return this.graph.then((graph) => {
+      const maxId = Math.max(...graph.states.map((s) => s.id));
+      return this.jumpToState(maxId);
+    });
+  }
+
   reset() {
     this.graph.then((graph) => {
       graph.jumpTo(graph.states[0]).then(() => {
@@ -815,6 +836,6 @@ export class CLUEWrapper extends events.EventHandler {
  * @param options
  * @returns {CLUEWrapper}
  */
-export function create(body:HTMLElement, options:any = {}) {
+export function create(body: HTMLElement, options: any = {}) {
   return new CLUEWrapper(body, options);
 }
