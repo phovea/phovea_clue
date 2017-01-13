@@ -130,21 +130,21 @@ export class LineupStateView extends vis.AVisInstance {
 
   initialize(reason:SimVisStateNode = null) {
     const desc = [
-      {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: SimHash.cols[0]},
-      {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: SimHash.cols[1]},
-      {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: SimHash.cols[2]},
-      {label: 'layout', type: 'number', column: 'll', 'domain': [0, 1], color: SimHash.cols[3]},
-      {label: 'analysis', type: 'number', column: 'la', 'domain': [0, 1], color: SimHash.cols[4]},
-      {label: 'data', type: 'number', column: 'cd', 'domain': [0, 1], color: SimHash.cols[0]},
-      {label: 'visual', type: 'number', column: 'cv', 'domain': [0, 1], color: SimHash.cols[1]},
-      {label: 'selection', type: 'number', column: 'cs', 'domain': [0, 1], color: SimHash.cols[2]},
-      {label: 'layout', type: 'number', column: 'cl', 'domain': [0, 1], color: SimHash.cols[3]},
-      {label: 'analysis', type: 'number', column: 'ca', 'domain': [0, 1], color: SimHash.cols[4]},
-      {label: 'data', type: 'number', column: 'rd', 'domain': [0, 1], color: SimHash.cols[0]},
-      {label: 'visual', type: 'number', column: 'rv', 'domain': [0, 1], color: SimHash.cols[1]},
-      {label: 'selection', type: 'number', column: 'rs', 'domain': [0, 1], color: SimHash.cols[2]},
-      {label: 'layout', type: 'number', column: 'rl', 'domain': [0, 1], color: SimHash.cols[3]},
-      {label: 'analysis', type: 'number', column: 'ra', 'domain': [0, 1], color: SimHash.cols[4]}
+      {label: 'data', type: 'number', column: 'ld', 'domain': [0, 1], color: SimHash.COLORS[0]},
+      {label: 'visual', type: 'number', column: 'lv', 'domain': [0, 1], color: SimHash.COLORS[1]},
+      {label: 'selection', type: 'number', column: 'ls', 'domain': [0, 1], color: SimHash.COLORS[2]},
+      {label: 'layout', type: 'number', column: 'll', 'domain': [0, 1], color: SimHash.COLORS[3]},
+      {label: 'analysis', type: 'number', column: 'la', 'domain': [0, 1], color: SimHash.COLORS[4]},
+      {label: 'data', type: 'number', column: 'cd', 'domain': [0, 1], color: SimHash.COLORS[0]},
+      {label: 'visual', type: 'number', column: 'cv', 'domain': [0, 1], color: SimHash.COLORS[1]},
+      {label: 'selection', type: 'number', column: 'cs', 'domain': [0, 1], color: SimHash.COLORS[2]},
+      {label: 'layout', type: 'number', column: 'cl', 'domain': [0, 1], color: SimHash.COLORS[3]},
+      {label: 'analysis', type: 'number', column: 'ca', 'domain': [0, 1], color: SimHash.COLORS[4]},
+      {label: 'data', type: 'number', column: 'rd', 'domain': [0, 1], color: SimHash.COLORS[0]},
+      {label: 'visual', type: 'number', column: 'rv', 'domain': [0, 1], color: SimHash.COLORS[1]},
+      {label: 'selection', type: 'number', column: 'rs', 'domain': [0, 1], color: SimHash.COLORS[2]},
+      {label: 'layout', type: 'number', column: 'rl', 'domain': [0, 1], color: SimHash.COLORS[3]},
+      {label: 'analysis', type: 'number', column: 'ra', 'domain': [0, 1], color: SimHash.COLORS[4]}
     ];
     //this.arr = [{'ld':1, 'lv':1, 'ls':1, 'll':1, 'la':1,'cd':1, 'cv':1, 'cs':1, 'cl':1, 'ca':1,'rd':1, 'rv':1, 'rs':1, 'rl':1, 'ra':1}]
 
@@ -240,7 +240,7 @@ export class LineupStateView extends vis.AVisInstance {
 
 export class WeightInterface {
 
-  protected cats = SimHash.categories;
+  protected cats = SimHash.CATEGORIES;
   protected weights:IWeight[] = [];
   protected cumSum:number[] = [];
   protected scalefactor:number = (300 - 4) / 100;
@@ -260,7 +260,7 @@ export class WeightInterface {
     for (let i = 1; i <= rawWeights.length; i++) {
       this.cumSum[i] = this.cumSum[i - 1] + rawWeights[i - 1];
     }
-    const cols = SimHash.cols;
+    const cols = SimHash.COLORS;
     this.weights[0] = {name: this.cats[0], value: rawWeights[0], color: cols[0], active: true};
     this.weights[1] = {name: this.cats[1], value: rawWeights[1], color: cols[1], active: true};
     this.weights[2] = {name: this.cats[2], value: rawWeights[2], color: cols[2], active: true};
@@ -815,7 +815,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.colorOfCat(d.categoryName) : 'white';
+        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
         let html = '';
         let text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
@@ -878,7 +878,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.colorOfCat(d.categoryName) : 'white';
+        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
         let html = '';
         let text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
@@ -916,7 +916,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonMatchingBand">`;
         }
-        let bgcolor:string = SimHash.shadeColor(SimHash.colorOfCat(d.categoryName), 0.3);
+        let bgcolor:string = SimHash.shadeColor(SimHash.getCategoryColor(d.categoryName), 0.3);
         return `<div class="band" style="background-color: ${bgcolor}">`;
       });
 
