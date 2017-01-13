@@ -14,8 +14,9 @@ import * as vis from 'phovea_core/src/vis';
 
 import * as utils from './utils';
 
+import {WeightInterface, LineupStateView, TokenTreeVisualization} from './simvis';
 import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
-import {WeightInterface, LineupStateView, TokenTreeVisualization, SimVisStateNode} from './simvis';
+import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
 
 
 

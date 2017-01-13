@@ -8,11 +8,12 @@ import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as vis from 'phovea_core/src/vis';
 
-import {SimHash, MatchedTokenTree} from 'phovea_core/src/provenance/SimilarityHash';
+import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
 import {mod} from 'phovea_core/src/index';
-import {IStateToken} from 'phovea_core/src/provenance/StateToken';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
+import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
+import {MatchedTokenTree} from 'phovea_core/src/provenance/token/MatchedTokenTree';
 
 
 interface IWeight {
@@ -20,13 +21,6 @@ interface IWeight {
   value;
   color;
   active;
-}
-
-export class SimVisStateNode extends StateNode {
-  lineUpIndex: number;
-  isHoveredInLineUp: boolean;
-  duplicates: any[]; // any??
-  stateTokens: IStateToken[];
 }
 
 
