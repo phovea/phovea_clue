@@ -361,8 +361,8 @@ export class WeightInterface {
 
     d3.selectAll('.categoryUnit label').transition()
       .delay(transitionDuration)
-      .style('background-color', function () {
-        return SimHash.shadeColor(_that.catsWeightMap($(this).attr('title')).color, 0.3);
+      .style('background-color', function() {
+        return d3.hsl(_that.catsWeightMap($(this).attr('title')).color).brighter(0.7).toString();
       });
 
 
@@ -910,7 +910,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonMatchingBand">`;
         }
-        let bgcolor:string = SimHash.shadeColor(SimHash.getCategoryColor(d.categoryName), 0.3);
+        let bgcolor = d3.hsl(SimHash.getCategoryColor(d.categoryName)).brighter(0.7).toString();
         return `<div class="band" style="background-color: ${bgcolor}">`;
       });
 
