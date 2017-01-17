@@ -3,7 +3,7 @@
  */
 
 function clue_random_id(length = 8) {
-  var id = '';
+  let id = '';
   while (id.length < length) {
     id += Math.random().toString(36).slice(-8);
   }
@@ -40,20 +40,20 @@ export class EmbeddedCLUE {
     msg.ref = clue_random_id();
     return new Promise((resolve, reject) => {
       this.callbacks[msg.ref] = {
-        resolve: resolve,
-        reject: reject,
-        type: type
+        resolve,
+        reject,
+        type
       };
       this.iframe.contentWindow.postMessage(msg, '*');
     });
   }
 
   showSlide(slide:number) {
-    return this.send('show_slide', {slide: slide});
+    return this.send('show_slide', {slide});
   }
 
   jumpToState(state:number) {
-    return this.send('jump_to', {state: state});
+    return this.send('jump_to', {state});
   }
 
   nextSlide() {
