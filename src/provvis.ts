@@ -37,7 +37,7 @@ const DOI_LARGE = 0.9;
 const DOI_MEDIUM = 0.7;
 const DOI_SMALL = 0.4;
 
-function getLevelOfDetail() {
+function getLevelOfDetail(): LevelOfDetail {
   const mode = cmode.getMode();
   //if (mode.exploration >= 0.8) {
   //  return LevelOfDetail.Small;

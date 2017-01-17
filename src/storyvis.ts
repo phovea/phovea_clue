@@ -47,7 +47,7 @@ enum LevelOfDetail {
   Large = 3
 }
 
-function getLevelOfDetail() {
+function getLevelOfDetail(): LevelOfDetail {
   const mode = cmode.getMode();
   if (mode.presentation >= 0.8) {
     return LevelOfDetail.Large;

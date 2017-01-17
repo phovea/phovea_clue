@@ -101,7 +101,7 @@ export class CLUEGraphManager {
   }
 
   choose(list: datatypes.IDataDescription[]) {
-    const loggedIn = session.retrieve('logged_in', false) === true;
+    const loggedIn = session.retrieve('logged_in', <boolean>false) === true;
     const graph = C.hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
       return this.manager.createRemote();
@@ -211,9 +211,9 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone" aria-hidden="true"></span> Clone</button>
-                    <button class="btn btn-danger" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                 </div>
             </div>
         </div>`);
