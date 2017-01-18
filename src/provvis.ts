@@ -21,8 +21,8 @@ import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
 
 
 function extractTags(text: string) {
-  var regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
-  var match;
+  const regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
+  let match;
   const matches = [];
   while (match = regex.exec(text)) {
     matches.push(match[1]);
@@ -41,7 +41,7 @@ const DOI_LARGE = 0.9;
 const DOI_MEDIUM = 0.7;
 const DOI_SMALL = 0.4;
 
-function getLevelOfDetail() {
+function getLevelOfDetail(): LevelOfDetail {
   const mode = cmode.getMode();
   //if (mode.exploration >= 0.8) {
   //  return LevelOfDetail.Small;
@@ -144,7 +144,7 @@ class StateRepr {
   }
 
   get flatChildren() {
-    var r = this.children.slice();
+    const r = this.children.slice();
     this.children.forEach((c) => r.push.apply(r, c.flatChildren));
     return r;
   }
@@ -205,28 +205,28 @@ class StateRepr {
 
     //mark selected
     const selected = graph.act;
-    const selected_path = selected.path.reverse();
+    const selectedPath = selected.path.reverse();
 
     const lod = getLevelOfDetail();
 
     const size = graph.states.length;
 
     const toState = (s) => {
-      var r = new StateRepr(s, graph);
-      var a = s.creator;
-      var meta = a ? a.meta : provenance.meta('No','none','none');
+      const r = new StateRepr(s, graph);
+      const a = s.creator;
+      const meta = a ? a.meta : provenance.meta('No','none','none');
 
       const category = highlight.category[meta.category] ? 1 : 0;
       const operation = highlight.operation[meta.operation] ? 1 : 0;
       const bookmark = (s.getAttr('starred', false) ? 1: 0);
       const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
-      const is_selected = s === selected ? 3: 0;
-      const inpath = selected_path.indexOf(s) >= 0 ? Math.max(-2.5,6-selected_path.indexOf(s)) : -2.5;
+      const isSelected = s === selected ? 3: 0;
+      const inpath = selectedPath.indexOf(s) >= 0 ? Math.max(-2.5,6-selectedPath.indexOf(s)) : -2.5;
       const similar = r.similarityToActiveState > 0.95 ? 1:0;
 
       const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
-      const sum = 6 + is_selected + inpath + sizePenality;
+      const sum = 6 + isSelected + inpath + sizePenality;
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
 
       if ((category + operation + bookmark + tags) > 0) {
@@ -247,7 +247,7 @@ class StateRepr {
       lookup[s.id] = r;
       return r;
     };
-    const states = (lod < LevelOfDetail.Medium ? selected_path : graph.states).map(toState);
+    const states = (lod < LevelOfDetail.Medium ? selectedPath : graph.states).map(toState);
 
     //route to path = 1
     const line = selected.path.map((p) => lookup[p.id]);
@@ -264,7 +264,7 @@ class StateRepr {
 
   private static layout(states: StateRepr[], line: StateRepr[]) {
     //horizontally align the line
-    var byLevel : StateRepr[][] = [];
+    let byLevel : StateRepr[][] = [];
     const root = states.filter((s) => s.parent === null)[0];
     byLevel.push([root]);
     byLevel.push(root.children.slice());
@@ -281,7 +281,7 @@ class StateRepr {
       }
     });
 
-    var changed = false, loop = 0;
+    let changed = false, loop = 0;
    do {
       changed = false;
      loop++;
@@ -289,11 +289,11 @@ class StateRepr {
       byLevel.forEach((level, i) => {
         //ensure that my children have at least a >= index than me
         for (let j = 0; j < level.length; ++j) {
-          let s = level[j];
+          const s = level[j];
           if (s) {
             s.xy = [j,i];
             if (s.children.length > 0) {
-              var start = byLevel[i+1].indexOf(s.children[0]);
+              const start = byLevel[i+1].indexOf(s.children[0]);
               changed = changed || start !== j;
               if(start < j) {
                 byLevel[i+1].splice.apply(byLevel[i+1],[start,0].concat(d3.range(j-start).map((d) => null)));
@@ -312,7 +312,7 @@ class StateRepr {
     byLevel = byLevel.filter((d) => d.length > 0);
     //boost all states that are on the left side to medium if they are small
     byLevel.forEach((level) => {
-      let s = level[0];
+      const s = level[0];
       if (s && s.lod === LevelOfDetail.Small) {
         s.doi = 0.8; //boost to medium
       }
@@ -353,19 +353,19 @@ class StateRepr {
       return ''; //`<i class="fa fa-circle" title="${repr.s.name}"></i>`;
     }
     const meta = repr.a.meta;
-    const cat_icons = {
+    const catIcons = {
       visual: 'bar-chart',
       data: 'database',
       logic: 'gear',
       layout: 'desktop',
       selection: 'pencil-square'
     };
-    const type_icons = {
+    const typeIcons = {
       create: 'plus',
       update: 'refresh',
       remove: 'remove'
     };
-    return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fa fa-${cat_icons[meta.category]}"></i><i class="super fa fa-${type_icons[meta.operation]}"></i></span>`;
+    return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fa fa-${catIcons[meta.category]}"></i><i class="super fa fa-${typeIcons[meta.operation]}"></i></span>`;
   }
 
   static render($elem: d3.Selection<StateRepr>) {
@@ -468,7 +468,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
-  };
+  }
 
   private onLinupHoverChanged = (event:any,state:provenance.StateNode) => {
     var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
@@ -488,7 +488,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
       return isSelected;
     });
-  };
+  }
 
 /*  private onWeightingChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
@@ -593,7 +593,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    var $p = $parent.append('aside')
+    const $p = $parent.append('aside')
       .classed('provenance-layout-vis', true)
       .classed('collapsed', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
@@ -777,7 +777,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     const states = StateRepr.toRepr(graph, this.highlight, { thumbnails: this.options.thumbnails });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
-    const $states_enter = $states.enter().append('div')
+    const $statesEnter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
       .append('div')
@@ -810,7 +810,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
       }).on('drop', function (d) {
         d3.select(this).classed('hover', false);
-        var e = <DragEvent>(<any>d3.event);
+        const e = <DragEvent>(<any>d3.event);
         e.preventDefault();
         const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'),10));
         that.data.fork(state.creator, d.s);
@@ -826,7 +826,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       this.comparing=false;
     }.bind(graph));
 
-
+    const $inner = $states_enter;
 
     d3.select('body').on('keydown', function() {
       if((<MouseEvent>d3.event).ctrlKey) {
@@ -840,7 +840,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
 
-    const $inner = $states_enter;
+    const $inner = $statesEnter;
     $inner.append('i').attr('class', 'fa fa-circle glyph');
     $inner.append('span').classed('icon', true);
     /*$states_enter.append('span').attr('class','star fa').on('click', (d) => {
@@ -858,17 +858,17 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });*/
     $inner.append('span').classed('slabel',true);
     $inner.append('div').classed('sthumbnail', true);
-    const $toolbar_enter = $states_enter.append('div').classed('toolbar', true);
-    $toolbar_enter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
+    const $toolbarEnter = $statesEnter.append('div').classed('toolbar', true);
+    $toolbarEnter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
       const v = !d.s.getAttr('starred',false);
-      let e = <Event>d3.event;
+      const e = <Event>d3.event;
       d.s.setAttr('starred', v);
       d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
       e.stopPropagation();
       e.preventDefault();
     });
-    $toolbar_enter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
-      let e = <Event>d3.event;
+    $toolbarEnter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+      const e = <Event>d3.event;
       d.showDialog();
       e.stopPropagation();
       e.preventDefault();
@@ -904,9 +904,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //    }
     //  });
 
-    var edges = [];
+    const edges = [];
     states.forEach((s) => {
-      edges.push.apply(edges, s.children.map((c) => ({s : s, t : c})));
+      edges.push.apply(edges, s.children.map((c) => ({s, t : c})));
     });
 
     this.dim = [
@@ -933,7 +933,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const states = $states.data();
     const lookup : any = {};
     states.forEach((s) => lookup[s.s.id] = s);
-    var firstSlide = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
+    let firstSlide = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
     if (firstSlide) {
       $g.style('display', null);
       while(firstSlide.previous) {

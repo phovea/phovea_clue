@@ -26,11 +26,11 @@ export class Player {
   constructor(private graph:provenance.ProvenanceGraph, controls:Element, options:any = {}) {
     C.mixin(this.options, options);
 
-    var $controls = d3.select(controls);
-    var that = this;
+    const $controls = d3.select(controls);
+    const that = this;
 
     this.$play = $controls.select('[data-player="play"]').on('click', function () {
-      var $i = d3.select(this);
+      const $i = d3.select(this);
       if ($i.classed('fa-play') && that.start()) {
         $i.classed('fa-play', false).classed('fa-pause', true);
       } else {
@@ -50,12 +50,12 @@ export class Player {
     });
 
     d3.select(document).on('keydown.playpause', () => {
-      let k = <KeyboardEvent>d3.event;
+      const k = <KeyboardEvent>d3.event;
       //pause key
       if (k.keyCode === 19) {
         k.preventDefault();
         //fake a click event
-        var event = <MouseEvent>document.createEvent('MouseEvents');
+        const event = <MouseEvent>document.createEvent('MouseEvents');
         event.initMouseEvent('click', /* type */
           true, /* canBubble */
           true, /* cancelable */
@@ -119,7 +119,7 @@ export class Player {
    * renders the next slide in an animated fashion
    */
   private next() {
-    var r = this.forward();
+    const r = this.forward();
     if (r) {
       r.then((act) => {
         this.anim = setTimeout(this.next.bind(this), act.duration * FACTOR);

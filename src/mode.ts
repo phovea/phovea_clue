@@ -43,7 +43,7 @@ export class CLUEMode {
     if (typeof index === 'number') {
       return this.coord[index];
     } else if (typeof index === 'string') {
-      let lookup = {e: this.coord[0], a: this.coord[1], p: this.coord[2]};
+      const lookup = {e: this.coord[0], a: this.coord[1], p: this.coord[2]};
       return lookup[index.charAt(0).toLowerCase()];
     }
     return null;
@@ -100,7 +100,7 @@ function fromString(s:string) {
   } else if (s === 'E') {
     return modes.Exploration;
   }
-  let coords = s.slice(1, s.length - 1).split('-').map(parseFloat);
+  const coords = s.slice(1, s.length - 1).split('-').map(parseFloat);
   return new CLUEMode(coords[0], coords[1], coords[2]);
 }
 
@@ -130,7 +130,7 @@ class ModeWrapper extends events.EventHandler {
       //use the real atomic one for a shared instance
       value = fromString(value.toString());
     }
-    var bak = this._mode;
+    const bak = this._mode;
     this._mode = value;
     //store in hash
     C.hash.setProp('clue', value.toString());
@@ -142,10 +142,10 @@ class ModeWrapper extends events.EventHandler {
     return this._mode;
   }
 }
-var _instance = new ModeWrapper();
+const _instance = new ModeWrapper();
 
-export var on = ModeWrapper.prototype.on.bind(_instance);
-export var off = ModeWrapper.prototype.off.bind(_instance);
+export const on = ModeWrapper.prototype.on.bind(_instance);
+export const off = ModeWrapper.prototype.off.bind(_instance);
 
 /**
  * returns the current mode
@@ -178,8 +178,8 @@ export class ButtonModeSelector {
     C.mixin(this.options, options);
     this.$node = this.build(d3.select(parent));
 
-    const listener = (event:events.IEvent, new_:CLUEMode) => {
-      this.$node.selectAll('label').classed('active', (d) => d === new_).select('input').property('checked', (d) => d === new_);
+    const listener = (event:events.IEvent, newMode:CLUEMode) => {
+      this.$node.selectAll('label').classed('active', (d) => d === newMode).select('input').property('checked', (d) => d === newMode);
     };
     _instance.on('modeChanged', listener);
     C.onDOMNodeRemoved(<Element>this.$node.node(), () => {
@@ -188,8 +188,8 @@ export class ButtonModeSelector {
   }
 
   private build($parent:d3.Selection<any>) {
-    var $root = $parent.append('div').classed('clue_buttonmodeselector', true).classed('btn-group', true).attr('data-toggle', 'buttons');
-    var $modes = $root.selectAll('label').data([modes.Exploration, modes.Authoring, modes.Presentation]);
+    const $root = $parent.append('div').classed('clue_buttonmodeselector', true).classed('btn-group', true).attr('data-toggle', 'buttons');
+    const $modes = $root.selectAll('label').data([modes.Exploration, modes.Authoring, modes.Presentation]);
     $modes.enter().append('label')
       .attr('class', (d) => 'btn btn-' + this.options.size + ' clue-' + d.toString())
       .classed('active', (d) => d === getMode())
@@ -215,10 +215,10 @@ export class SliderModeSelector {
     this.$node = d3.select(parent).append('div').classed('clue_modeselector', true).datum(this);
     this.build(this.$node);
 
-    const listener = (event:events.IEvent, new_:CLUEMode) => {
-      this.$node.select('label.clue-E input').property('value', Math.round(new_.exploration * 100));
-      this.$node.select('label.clue-A input').property('value', Math.round(new_.authoring * 100));
-      this.$node.select('label.clue-P input').property('value', Math.round(new_.presentation * 100));
+    const listener = (event:events.IEvent, newMode:CLUEMode) => {
+      this.$node.select('label.clue-E input').property('value', Math.round(newMode.exploration * 100));
+      this.$node.select('label.clue-A input').property('value', Math.round(newMode.authoring * 100));
+      this.$node.select('label.clue-P input').property('value', Math.round(newMode.presentation * 100));
     };
     _instance.on('modeChanged', listener);
     C.onDOMNodeRemoved(<Element>this.$node.node(), () => {
@@ -227,24 +227,24 @@ export class SliderModeSelector {
   }
 
   private build($parent:d3.Selection<any>) {
-    var $root = $parent.append('div').classed('clue_slidermodeselector', true);
-    var $modes = $root.selectAll('label').data([modes.Exploration, modes.Authoring, modes.Presentation]);
+    const $root = $parent.append('div').classed('clue_slidermodeselector', true);
+    const $modes = $root.selectAll('label').data([modes.Exploration, modes.Authoring, modes.Presentation]);
 
-    function normalize(eap:[number,number,number], driven_by:number) {
-      const base = eap[driven_by];
-      eap[driven_by] = 0;
-      var factor = (1 - base) / d3.sum(eap);
+    function normalize(eap:[number,number,number], drivenBy:number) {
+      const base = eap[drivenBy];
+      eap[drivenBy] = 0;
+      const factor = (1 - base) / d3.sum(eap);
       eap = <[number,number,number]>eap.map((v) => v * factor);
-      eap[driven_by] = base;
+      eap[drivenBy] = base;
       return eap;
     }
 
-    function updateMode(driven_by = -1) {
-      var e = parseFloat($modes.select('label.clue-E input').property('value')) / 100;
-      var a = parseFloat($modes.select('label.clue-A input').property('value')) / 100;
-      var p = parseFloat($modes.select('label.clue-P input').property('value')) / 100;
-      if (driven_by >= 0) {
-        [e, a, p] = normalize([e, a, p], driven_by);
+    function updateMode(drivenBy = -1) {
+      let e = parseFloat($modes.select('label.clue-E input').property('value')) / 100;
+      let a = parseFloat($modes.select('label.clue-A input').property('value')) / 100;
+      let p = parseFloat($modes.select('label.clue-P input').property('value')) / 100;
+      if (drivenBy >= 0) {
+        [e, a, p] = normalize([e, a, p], drivenBy);
       }
       setMode(mode(e, a, p));
     }
@@ -292,8 +292,8 @@ export class TriangleModeSelector {
     this.$node = d3.select(parent).append('div').classed('clue_trianglemodeselector', true).datum(this);
     this.build(this.$node);
 
-    const listener = (event:events.IEvent, new_:CLUEMode) => {
-      let c = this.toCoordinates(new_);
+    const listener = (event:events.IEvent, newMode:CLUEMode) => {
+      const c = this.toCoordinates(newMode);
       this.$node.select('circle.point').attr({
         cx: c[0],
         cy: c[1]
@@ -306,8 +306,8 @@ export class TriangleModeSelector {
   }
 
   private toCoordinates(m:CLUEMode) {
-    let x = m.exploration * this.e[0] + m.authoring * this.a[0] + m.presentation * this.p[0];
-    let y = m.exploration * this.e[1] + m.authoring * this.a[1] + m.presentation * this.p[1];
+    const x = m.exploration * this.e[0] + m.authoring * this.a[0] + m.presentation * this.p[0];
+    const y = m.exploration * this.e[1] + m.authoring * this.a[1] + m.presentation * this.p[1];
     return [x, y];
   }
 
@@ -316,17 +316,17 @@ export class TriangleModeSelector {
     const x1 = this.e[0], x2 = this.a[0], x3 = this.p[0], y1 = this.e[1], y2 = this.a[1], y3 = this.p[1];
     let e = Math.max(0, Math.min(1, ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3))));
     let a = Math.max(0, Math.min(1, ((y3 - y3) * (x - x3) + (x1 - x3) * (y - y3)) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3))));
-    let s = e + a;
+    const s = e + a;
     if (s > 1) {
       e /= s;
       a /= s;
     }
-    let p = 1 - e - a;
+    const p = 1 - e - a;
     return mode(e, a, p);
   }
 
   private build($parent:d3.Selection<any>) {
-    var $root = $parent.append('svg').classed('clue_trianglemodeselector', true).attr({
+    const $root = $parent.append('svg').classed('clue_trianglemodeselector', true).attr({
       width: this.p[0] + this.options.offset,
       height: this.p[1] + this.options.offset
     });
@@ -334,16 +334,16 @@ export class TriangleModeSelector {
     const $g = $root.append('g').attr('transform', `translate(${this.options.offset / 2},${this.options.offset / 2})`);
     $g.append('path').attr('d', d3.svg.line<number[]>().interpolate('linear-closed')([this.e, this.a, this.p])).on('click', function () {
       const xy = d3.mouse(this);
-      var m = that.fromCoordinates(xy[0], xy[1]);
+      const m = that.fromCoordinates(xy[0], xy[1]);
       setMode(m);
     });
-    var xy = this.toCoordinates(getMode());
+    const xy = this.toCoordinates(getMode());
     $g.append('circle').classed('point', true).attr({
       cx: xy[0],
       cy: xy[1],
       r: 2
     }).call(d3.behavior.drag().on('drag', () => {
-      var m = this.fromCoordinates((<MouseEvent>d3.event).x, (<MouseEvent>d3.event).y);
+      const m = this.fromCoordinates((<MouseEvent>d3.event).x, (<MouseEvent>d3.event).y);
       setMode(m);
     }));
     return $root;
