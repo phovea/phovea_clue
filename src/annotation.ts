@@ -56,11 +56,11 @@ class Anchor {
    * @type {null}
    * @private
    */
-  private pos_:[number, number] = null;
+  private _pos:[number, number] = null;
 
   constructor(private elem:Element, private anchor:EAnchorDirection, lazy = false) {
     if (!lazy) {
-      this.pos_ = this.compute();
+      this._pos = this.compute();
     }
   }
 
@@ -77,7 +77,7 @@ class Anchor {
   }
 
   get pos() {
-    return this.pos_ !== null ? this.pos_ : this.compute();
+    return this._pos !== null ? this._pos : this.compute();
   }
 
   /**
@@ -86,13 +86,13 @@ class Anchor {
    */
   checkForPositionChange() {
     const old = this.pos;
-    const new_ = this.pos_ = this.compute();
-    return Math.abs(old[0] - new_[0]) > 1 || Math.abs(old[1] - new_[1]) > 1;
+    const newValue = this._pos = this.compute();
+    return Math.abs(old[0] - newValue[0]) > 1 || Math.abs(old[1] - newValue[1]) > 1;
   }
 
   compute():[number, number] {
     //start with the bounds
-    let o = C.bounds(this.elem);
+    const o = C.bounds(this.elem);
     //add offset
     o.x += window.pageXOffset;
     o.y += window.pageYOffset;
@@ -148,7 +148,7 @@ class AnchorWatcher {
   private intervall = -1;
 
   add(anchor: string, callback: () => void) {
-    this.anchors.push({ anchor: Anchor.fromString(anchor, false), callback: callback});
+    this.anchors.push({ anchor: Anchor.fromString(anchor, false), callback});
     if (this.intervall < 0) {
       this.watch();
     }
@@ -248,19 +248,19 @@ export class Renderer {
     //replace variables within the text
     if (this.act) {
       //vars contains all possible variables
-      let vars:any = {
+      const vars:any = {
         name: this.act.name,
         description: this.act.description,
         duration: this.act.duration,
         slide_number: this.act.slideIndex
       };
-      let s = this.act.state;
+      const s = this.act.state;
       if (s) {
         vars.state_name = s.name;
         vars.state_notes = s.getAttr('notes');
-        let a = s.creator;
+        const a = s.creator;
         if (a) {
-          let aa = a.meta;
+          const aa = a.meta;
           vars.action_name = aa.name;
           vars.action_category = aa.category;
           vars.action_operation = aa.operation;
@@ -275,7 +275,7 @@ export class Renderer {
 
   private replaceVariables(d:string, vars:{ [key: string] : string }) {
     return d.replace(/\$\{([^}]+)\}/gi, function (match, variable) {
-      var r = vars[variable];
+      const r = vars[variable];
       if (r) {
         return r;
       }
@@ -297,7 +297,7 @@ export class Renderer {
     //create full chain
     this.prev = this.prev.then(() => {
       //hide old annotations
-      var takedown = this.hideOld();
+      const takedown = this.hideOld();
       this.act = state;
       if (!state) {
         return takedown;
@@ -311,7 +311,7 @@ export class Renderer {
       }
       //wait 1sec till the previous annotations are removed
       return takedown.then(() => C.resolveIn(waitBetweenTakeDown ? 1000 : 0)).then(() => {
-        var next = Promise.resolve(null);
+        let next = Promise.resolve(null);
         if (state.isTextOnly) { //no state jump
           next = this.renderText(state);
         } else {
@@ -375,20 +375,20 @@ export class Renderer {
       return null;
     }
     const abspos:[number, number] = [pos[0] + bounds.x, pos[1] + bounds.y];
-    var min_v = Number.POSITIVE_INFINITY,
-      min_a:Anchor = null;
+    let minV = Number.POSITIVE_INFINITY,
+      minAnchor:Anchor = null;
     $anchors.each((d) => {
       const distance = d.distance(abspos);
-      if (distance < min_v) {
-        min_a = d;
-        min_v = distance;
+      if (distance < minV) {
+        minAnchor = d;
+        minV = distance;
       }
     });
-    $anchors.classed('closest', (d, i) => d === min_a);
-    if (min_a) {
+    $anchors.classed('closest', (d, i) => d === minAnchor);
+    if (minAnchor) {
       return {
-        anchor: min_a.toString(),
-        offset: [abspos[0] - min_a.pos[0], abspos[1] - min_a.pos[1]]
+        anchor: minAnchor.toString(),
+        offset: [abspos[0] - minAnchor.pos[0], abspos[1] - minAnchor.pos[1]]
       };
     }
     //no anchor relative version
@@ -404,7 +404,7 @@ export class Renderer {
     const editable = modeFeatures.isEditable() && state != null;
 
     const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d, i) => state.id+'@'+d.type + i);
-    const $anns_enter = $anns.enter().append('div')
+    const $annsEnter = $anns.enter().append('div')
       .attr('class', (d) => d.type + '-annotation annotation');
 
     const bounds = C.bounds(<Element>this.$main.node());
@@ -454,21 +454,21 @@ export class Renderer {
     }
 
     //move
-    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
+    $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
       //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
       .on('dragstart', function (d:prov.IStateAnnotation, i) {
         that.renderAnchors(bounds);
       })
       .on('dragend', that.removeAnchors.bind(that))
       .on('drag', function (d:prov.IStateAnnotation, i) {
-        var mouse = d3.mouse(this.parentNode.parentNode);
+        const mouse = d3.mouse(this.parentNode.parentNode);
         d.pos = that.updateAnchor(mouse, bounds);
         state.updateAnnotation(d);
         d3.select(this.parentNode).each(updatePos);
       }));
 
     //remove
-    $anns_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
+    $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
       .on('click', function (d:prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotationElem(d);
@@ -477,9 +477,9 @@ export class Renderer {
 
 
     //Text
-    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts:d3.selection.Update<prov.ITextStateAnnotation>, $texts_enter:d3.selection.Update<prov.ITextStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts:d3.selection.Update<prov.ITextStateAnnotation>, $textsEnter:d3.selection.Update<prov.ITextStateAnnotation>) => {
 
-      let onEdit = function (d:prov.ITextStateAnnotation, i) {
+      const onEdit = function (d:prov.ITextStateAnnotation, i) {
         const $elem = d3.select(this);
         if (!d3.select(this.parentNode).classed('editable')) {
           return;
@@ -492,7 +492,7 @@ export class Renderer {
           $elem.html(that.renderer(this.value)).on('click', onEdit);
         });
       };
-      $texts_enter.append('div').classed('text', true).on('click', onEdit);
+      $textsEnter.append('div').classed('text', true).on('click', onEdit);
 
       $texts.select('div.text').html((d) => this.renderer(d.text)).style({
         width: (d:prov.ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
@@ -502,19 +502,19 @@ export class Renderer {
           d3.select(this).style(d.styles);
         }
       });
-    }, $anns_enter.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')));
+    }, $annsEnter.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')));
 
 
     //Arrow
-    $anns.filter((d) => d.type === 'arrow').call(($arrows:d3.selection.Update<prov.IArrowStateAnnotation>, $arrows_enter:d3.selection.Update<prov.IArrowStateAnnotation>) => {
-      var $svg_enter = $arrows_enter.insert('svg', ':first-child').attr({
+    $anns.filter((d) => d.type === 'arrow').call(($arrows:d3.selection.Update<prov.IArrowStateAnnotation>, $arrowsEnter:d3.selection.Update<prov.IArrowStateAnnotation>) => {
+      const $svgEnter = $arrowsEnter.insert('svg', ':first-child').attr({
         width: (d) => 30 + Math.abs(d.at[0]),
         height: (d) => 30 + Math.abs(d.at[1])
       }).style({
         left: (d) => (-15 + Math.min(0, d.at[0])) + 'px',
         top: (d) => (-15 + Math.min(0, d.at[1])) + 'px'
       });
-      $svg_enter.append('defs').append('marker').attr({
+      $svgEnter.append('defs').append('marker').attr({
         id: (d, i) => 'clue_text_arrow_marker' + i,
         viewBox: '0 0 10 10',
         refX: 6,
@@ -524,11 +524,11 @@ export class Renderer {
         markerUnits: 'strokeWidth',
         orient: 'auto'
       }).append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z');
-      $svg_enter.append('g').append('line').classed('arrow', true).attr({
+      $svgEnter.append('g').append('line').classed('arrow', true).attr({
         'marker-end': (d, i) => 'url(#clue_text_arrow_marker' + i + ')'
       });
 
-      var $svg = $arrows.select('svg');
+      const $svg = $arrows.select('svg');
 
       function updateShift() {
         $svg.attr({
@@ -541,7 +541,7 @@ export class Renderer {
         $svg.select('g').attr('transform', (d) => `translate(${-Math.min(0, d.at[0]) + 15},${-Math.min(0, d.at[1]) + 15})`);
       }
 
-      $svg_enter.select('g').append('circle').classed('anchor', true).attr('r', 5);
+      $svgEnter.select('g').append('circle').classed('anchor', true).attr('r', 5);
       $svg.select('circle').style({
         cx: (d) => d.at[0],
         cy: (d) => d.at[1]
@@ -570,10 +570,10 @@ export class Renderer {
           d3.select(this).style(d.styles);
         }
       });
-    }, $anns_enter.filter((d) => d.type === 'arrow'));
+    }, $annsEnter.filter((d) => d.type === 'arrow'));
 
     //FRAME
-    $anns.filter((d) => d.type === 'frame').call(($frames:d3.selection.Update<prov.IFrameStateAnnotation>, $frames_enter:d3.selection.Update<prov.IFrameStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'frame').call(($frames:d3.selection.Update<prov.IFrameStateAnnotation>, $framesEnter:d3.selection.Update<prov.IFrameStateAnnotation>) => {
       $frames.each(function (d) {
         updateSize.call(this, d);
         watchSizeAnchor.call(this, d);
@@ -583,20 +583,20 @@ export class Renderer {
       });
 
       //resize
-      $frames_enter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
+      $framesEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
           .on('dragstart', function (d:prov.IStateAnnotation, i) {
             that.renderAnchors(bounds);
           })
           .on('dragend', that.removeAnchors.bind(that))
           .on('drag', function (d:prov.IFrameStateAnnotation, i) {
-            var mouse = d3.mouse(this.parentNode.parentNode);
+            const mouse = d3.mouse(this.parentNode.parentNode);
             d.pos2 = that.updateAnchor(mouse, bounds);
             state.updateAnnotation(d);
             d3.select(this.parentNode).each(updateSize);
           }));
 
-    }, $anns_enter.filter((d) => d.type === 'frame'));
+    }, $annsEnter.filter((d) => d.type === 'frame'));
 
     $anns.each(updatePos).each(watchAnchor).classed('editable', editable);
 

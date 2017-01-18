@@ -101,7 +101,7 @@ export class CLUEGraphManager {
   }
 
   choose(list: datatypes.IDataDescription[]) {
-    const loggedIn = session.retrieve('logged_in', false) === true;
+    const loggedIn = session.retrieve('logged_in', <boolean>false) === true;
     const graph = C.hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
       return this.manager.createRemote();
@@ -147,19 +147,19 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
   });
 
   d3.selectAll('#provenancegraph_import, #provenancegraph_import_remote').on('click', function () {
-    let e = (<Event>d3.event);
+    const e = (<Event>d3.event);
     e.preventDefault();
     e.stopPropagation();
-    var remote = this.id === 'provenancegraph_import_remote';
+    const remote = this.id === 'provenancegraph_import_remote';
     //import dialog
     const d = dialogs.generateDialog('Select File', 'Upload');
     d.body.innerHTML = `<input type="file" placeholder="Select File to Upoad">`;
     d3.select(d.body).select('input').on('change', function () {
-      var file = (<any>d3.event).target.files[0];
-      var reader = new FileReader();
+      const file = (<any>d3.event).target.files[0];
+      const reader = new FileReader();
       reader.onload = function (e: any) {
-        var data_s = e.target.result;
-        var dump = JSON.parse(data_s);
+        const dataS = e.target.result;
+        const dump = JSON.parse(dataS);
         manager.importGraph(dump, remote);
       };
       // Read in the image file as a data URL.
@@ -179,11 +179,11 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
       html: true,
       placement: 'left',
       trigger: 'manual',
-      title: function () {
+      title() {
         const graph = d3.select(this).datum();
         return `${graph.name}`;
       },
-      content: function () {
+      content() {
         const graph = d3.select(this).datum();
         const creator = graph.creator;
         const description = graph.description || '';
@@ -211,9 +211,9 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
+                    <button class="btn btn-primary" ${session.retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone" aria-hidden="true"></span> Clone</button>
-                    <button class="btn btn-danger" ${session.retrieve('logged_in', false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                    <button class="btn btn-danger" ${session.retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                 </div>
             </div>
         </div>`);
@@ -232,10 +232,10 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
         return $elem;
       }
     }).parent().on({
-      mouseenter: function () {
+      mouseenter() {
         (<any>$(this).find('a')).popover('show');
       },
-      mouseleave: function () {
+      mouseleave() {
         (<any>$(this).find('a')).popover('hide');
       }
     });
@@ -252,7 +252,7 @@ function chooseProvenanceGraph(manager: CLUEGraphManager, $ul: d3.Selection<any>
  * @param wrapper
  */
 function injectHeadlessSupport(wrapper: CLUEWrapper) {
-  var w: any = window;
+  const w: any = window;
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   wrapper.on('jumped_to', () => {
@@ -265,15 +265,15 @@ function injectHeadlessSupport(wrapper: CLUEWrapper) {
 }
 
 function injectParentWindowSupport(wrapper: CLUEWrapper) {
-  var w: any = window;
+  const w: any = window;
   w.__caleydo = w.__caleydo || {};
   w.__caleydo.clue = wrapper;
   //initial jump
-  var jump_listener = (s) => {
+  const jumpListener = (s) => {
     window.top.postMessage({type: 'caleydo', clue: 'jumped_to_initial'}, '*');
-    wrapper.off('jumped_to', jump_listener);
+    wrapper.off('jumped_to', jumpListener);
   };
-  wrapper.on('jumped_to', jump_listener);
+  wrapper.on('jumped_to', jumpListener);
   window.addEventListener('message', (event: MessageEvent) => {
     const s = event.source,
       d = event.data;
@@ -350,7 +350,7 @@ export class CLUEWrapper extends events.EventHandler {
   graph: Promise<prov.ProvenanceGraph>;
   header: header.AppHeader;
   $main: d3.Selection<any>;
-  $main_ref: prov.IObjectRef<d3.Selection<any>>;
+  $mainRef: prov.IObjectRef<d3.Selection<any>>;
 
   private storyvis: storyvis.VerticalStoryVis;
 
@@ -395,8 +395,8 @@ export class CLUEWrapper extends events.EventHandler {
 
     {
       //add provenance graph management menu entry
-      let ul = document.createElement('ul');
-      let $ul = d3.select(ul)
+      const ul = document.createElement('ul');
+      const $ul = d3.select(ul)
         .attr('class', 'nav navbar-nav navbar-right')
         .attr('data-clue', 'provenanceGraphList')
         .html(`<li class="dropdown">
@@ -437,7 +437,7 @@ export class CLUEWrapper extends events.EventHandler {
       this.header.insertCustomRightMenu(ul);
 
       d3.select('#provenancegraph_export').on('click', () => {
-        let e = (<Event>d3.event);
+        const e = (<Event>d3.event);
         e.preventDefault();
         e.stopPropagation();
         this.graph.then((g) => {
@@ -445,10 +445,10 @@ export class CLUEWrapper extends events.EventHandler {
           const r = g.persist();
           console.log(r);
 
-          var str = JSON.stringify(r, null, '\t');
+          const str = JSON.stringify(r, null, '\t');
           //create blob and save it
-          var blob = new Blob([str], {type: 'application/json;charset=utf-8'});
-          var a = new FileReader();
+          const blob = new Blob([str], {type: 'application/json;charset=utf-8'});
+          const a = new FileReader();
           a.onload = (e) => window.open((<any>e.target).result, '_blank');
           a.readAsDataURL(blob);
         });
@@ -478,7 +478,7 @@ export class CLUEWrapper extends events.EventHandler {
                 return;
               }
               l[0].load().then((force) => {
-                let p = dialogs.generateDialog('Provenance Graph');
+                const p = dialogs.generateDialog('Provenance Graph');
                 force.factory(proxy, p.body);
                 p.show();
               });
@@ -508,14 +508,14 @@ export class CLUEWrapper extends events.EventHandler {
       if (this.options.recordSelectionTypes) {
         //record selections of the given type
         prov_sel.create(graph, this.options.recordSelectionTypes, {
-          filter: function (idtype) {
+          filter(idtype) {
             return idtype && idtype.name[0] !== '_';
           },
           animated: this.options.animatedSelections
         });
       }
 
-      this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
+      this.$mainRef = graph.findOrAddObject(this.$main, 'Application', 'visual');
 
       const r = renderer.create(<HTMLElement>this.$main.node(), graph);
 
@@ -539,7 +539,7 @@ export class CLUEWrapper extends events.EventHandler {
         d3.select('aside.annotations').style('display', state ? null : 'none');
       });
       d3.select('aside.annotations > div:first-of-type').call(d3.behavior.drag().on('drag', function () {
-        var mouse = d3.mouse(this.parentElement.parentElement);
+        const mouse = d3.mouse(this.parentElement.parentElement);
         d3.select(this.parentElement).style({
           left: mouse[0] + 'px',
           top: mouse[1] + 'px'
@@ -547,8 +547,8 @@ export class CLUEWrapper extends events.EventHandler {
       }));
 
       d3.selectAll('aside.annotations button[data-ann]').on('click', function () {
-        var create = this.dataset.ann;
-        var ann;
+        const create = this.dataset.ann;
+        let ann;
         switch (create) {
           case 'text':
             ann = {
@@ -588,23 +588,23 @@ export class CLUEWrapper extends events.EventHandler {
 
       {
         const $right = $('aside.provenance-layout-vis');
-        const $right_story = $(this.storyvis.node);
+        const $rightStory = $(this.storyvis.node);
         this.propagate(cmode, 'modeChanged');
-        let update = (new_: cmode.CLUEMode) => {
-          $('body').attr('data-clue', new_.toString());
+        const update = (newMode: cmode.CLUEMode) => {
+          $('body').attr('data-clue', newMode.toString());
           //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
-          if (new_.presentation > 0.8) {
+          if (newMode.presentation > 0.8) {
             $right.animate({width: 'hide'}, 'fast');
           } else {
             $right.animate({width: 'show'}, 'fast');
           }
-          if (new_.exploration > 0.8) {
-            $right_story.animate({width: 'hide'}, 'fast');
+          if (newMode.exploration > 0.8) {
+            $rightStory.animate({width: 'hide'}, 'fast');
           } else {
-            $right_story.animate({width: 'show'}, 'fast');
+            $rightStory.animate({width: 'show'}, 'fast');
           }
         };
-        cmode.on('modeChanged', (event, new_) => update(new_));
+        cmode.on('modeChanged', (event, newMode) => update(newMode));
         this.fire('modeChanged', cmode.getMode());
         update(cmode.getMode());
       }
@@ -626,7 +626,7 @@ export class CLUEWrapper extends events.EventHandler {
       });
       d3.select('#attachNote form').on('submit', () => {
         const note = d3.select('#attachNote_note').property('value');
-        let e = (<Event>d3.event);
+        const e = (<Event>d3.event);
         graph.act.setAttr('note', note);
         (<any>$('#attachNote')).modal('hide');
         (<HTMLFormElement>document.querySelector('#attachNote form')).reset();
@@ -640,7 +640,7 @@ export class CLUEWrapper extends events.EventHandler {
       });
       //undo using ctrl-z
       d3.select(document).on('keydown.player', () => {
-        let k = <KeyboardEvent>d3.event;
+        const k = <KeyboardEvent>d3.event;
         if (k.keyCode === 90 && k.ctrlKey) {
           //ctrl-z
           k.preventDefault();
@@ -666,7 +666,7 @@ export class CLUEWrapper extends events.EventHandler {
 
   private createLogin() {
     {
-      let ul = document.createElement('ul');
+      const ul = document.createElement('ul');
       ul.classList.add('nav', 'navbar-nav', 'navbar-right');
       ul.innerHTML = `
       <li id="login_menu">
@@ -686,15 +686,15 @@ export class CLUEWrapper extends events.EventHandler {
     }
     const that = this;
     {
-      let $form = $('#loginDialog div.modal-body').html(String(login.form)).find('form');
-      let $alert = $form.parent().find('div.alert');
+      const $form = $('#loginDialog div.modal-body').html(String(login.form)).find('form');
+      const $alert = $form.parent().find('div.alert');
 
       $alert.hide();
       login.bindLoginForm(<HTMLFormElement>$form[0], (error, user) => {
         session.store('logged_in', (!error && user) ? true : false);
         if (!error && user) {
           $('#login_menu').hide();
-          var $base = $('#user_menu').show();
+          const $base = $('#user_menu').show();
 
           session.store('username', user.name);
           session.store('user', user);
@@ -748,7 +748,7 @@ export class CLUEWrapper extends events.EventHandler {
       if (s) {
         console.log('jump to stored story', s.id);
         this.storyvis.switchTo(s);
-        var next;
+        let next;
         if (this.clueManager.isAutoPlay) {
           this.storyvis.player.start();
           next = Promise.resolve();
@@ -770,7 +770,7 @@ export class CLUEWrapper extends events.EventHandler {
   jumpToState(state: number) {
     console.log('jump to stored state', state);
     return this.graph.then((graph) => {
-      let s = graph.getStateById(state);
+      const s = graph.getStateById(state);
       if (s) {
         console.log('jump to stored', s.id);
         return graph.jumpTo(s).then(() => {
@@ -788,13 +788,13 @@ export class CLUEWrapper extends events.EventHandler {
 
   jumpToStored() {
     //jump to stored state
-    const target_story = this.clueManager.storedSlide;
-    if (target_story !== null) {
-      return this.jumpToStory(target_story);
+    const targetStory = this.clueManager.storedSlide;
+    if (targetStory !== null) {
+      return this.jumpToStory(targetStory);
     }
-    const target_state = this.clueManager.storedState;
-    if (target_state !== null) {
-      return this.jumpToState(target_state);
+    const targetState = this.clueManager.storedState;
+    if (targetState !== null) {
+      return this.jumpToState(targetState);
     }
     this.fire('jumped_to', null);
     this.header.ready();
@@ -804,13 +804,13 @@ export class CLUEWrapper extends events.EventHandler {
 
   jumpToStoredOrLastState() {
     //jump to stored state
-    const target_story = this.clueManager.storedSlide;
-    if (target_story !== null) {
-      return this.jumpToStory(target_story);
+    const targetStory = this.clueManager.storedSlide;
+    if (targetStory !== null) {
+      return this.jumpToStory(targetStory);
     }
-    const target_state = this.clueManager.storedState;
-    if (target_state !== null) {
-      return this.jumpToState(target_state);
+    const targetState = this.clueManager.storedState;
+    if (targetState !== null) {
+      return this.jumpToState(targetState);
     }
 
     return this.graph.then((graph) => {
@@ -823,7 +823,7 @@ export class CLUEWrapper extends events.EventHandler {
     this.graph.then((graph) => {
       graph.jumpTo(graph.states[0]).then(() => {
         graph.clear();
-        this.$main_ref = graph.findOrAddObject(this.$main, 'Application', 'visual');
+        this.$mainRef = graph.findOrAddObject(this.$main, 'Application', 'visual');
         cmode.setMode(cmode.modes.Exploration);
       });
     });

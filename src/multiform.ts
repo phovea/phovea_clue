@@ -10,7 +10,7 @@ import * as C from 'phovea_core/src/index';
 const disabled = {};
 
 function transform(inputs:provenance.IObjectRef<any>[], parameter:any):provenance.ICmdResult {
-  var v:vis.IVisInstance = inputs[0].value,
+  const v:vis.IVisInstance = inputs[0].value,
     transform = parameter.transform,
     bak = parameter.old || v.transform();
 
@@ -29,13 +29,13 @@ export function createTransform(v:provenance.IObjectRef<vis.IVisInstance>, t:vis
     inputs: [v],
     parameter: {
       transform: t,
-      old: old
+      old
     }
   };
 }
 
 function changeVis(inputs:provenance.IObjectRef<any>[], parameter:any):Promise<provenance.ICmdResult> {
-  var v:multiform.IMultiForm = inputs[0].value,
+  const v:multiform.IMultiForm = inputs[0].value,
     to:string = parameter.to,
     from = parameter.from || v.act.id;
   disabled['switch-' + v.id] = true;
@@ -53,14 +53,14 @@ export function createChangeVis(v:provenance.IObjectRef<multiform.IMultiForm>, t
     f: changeVis,
     inputs: [v],
     parameter: {
-      to: to,
-      from: from
+      to,
+      from
     }
   };
 }
 
 function setOption(inputs:provenance.IObjectRef<any>[], parameter:any):provenance.ICmdResult {
-  var v:vis.IVisInstance = inputs[0].value,
+  const v:vis.IVisInstance = inputs[0].value,
     name = parameter.name,
     value = parameter.value,
     bak = parameter.old || v.option(name);
@@ -79,33 +79,33 @@ export function createSetOption(v:provenance.IObjectRef<vis.IVisInstance>, name:
     f: setOption,
     inputs: [v],
     parameter: {
-      name: name,
-      value: value,
-      old: old
+      name,
+      value,
+      old
     }
   };
 }
 
 export function attach(graph:provenance.ProvenanceGraph, v:provenance.IObjectRef<vis.IVisInstance>) {
   const m = v.value, id = m.id;
-  if (C.isFunction((<any>m).switchTo)) {
-    m.on('changed', (event, new_, old) => {
+  if (typeof ((<any>m).switchTo) === 'function') {
+    m.on('changed', (event, newValue, old) => {
       if (disabled['switch-' + id] !== true) {
         console.log('push switch');
-        graph.push(createChangeVis(<provenance.IObjectRef<multiform.IMultiForm>>v, new_.id, old ? old.id : null));
+        graph.push(createChangeVis(<provenance.IObjectRef<multiform.IMultiForm>>v, newValue.id, old ? old.id : null));
       }
     });
   }
-  m.on('transform', (event, new_, old) => {
+  m.on('transform', (event, newValue, old) => {
     if (disabled['transform-' + id] !== true) {
       console.log('push transform');
-      graph.push(createTransform(v, new_, old));
+      graph.push(createTransform(v, newValue, old));
     }
   });
-  m.on('option', (event, name, new_, old) => {
+  m.on('option', (event, name, newValue, old) => {
     if (disabled['option-' + id] !== true) {
       console.log('push option');
-      graph.push(createSetOption(v, name, new_, old));
+      graph.push(createSetOption(v, name, newValue, old));
     }
   });
 }

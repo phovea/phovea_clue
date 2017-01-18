@@ -8,7 +8,7 @@ import * as ajax from 'phovea_core/src/ajax';
 import * as provenance from 'phovea_core/src/provenance';
 
 export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
-  var o = {
+  const o = {
     width: 128,
     format: 'jpg'
   };
@@ -27,7 +27,7 @@ export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenan
 }
 
 export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode, options= {}) {
-  var o = {
+  const o = {
     width: 128,
     format: 'jpg'
   };
@@ -45,7 +45,7 @@ export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: 
 }
 
 export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
-  var o = {
+  const o = {
     width: 128,
     format: 'jpg'
   };

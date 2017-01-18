@@ -24,7 +24,7 @@ export function create(body:HTMLElement, options:any = {}) {
   const graph = prov.createDummy();
   return {
     on: (...args : any[]) => 0,
-    $main: $main,
+    $main,
     graph: Promise.resolve(graph),
     jumpToStored: () => 0
   };
