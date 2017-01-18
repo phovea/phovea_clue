@@ -115,7 +115,7 @@ export class LineupStateView extends vis.AVisInstance {
 
   updateWeights() {
     const width:number = 48;
-    const weights = SimHash.getWeighting();
+    const weights = SimCats.getWeights();
     this.leftStackedCol.setWeights(weights);
     this.leftStackedCol.setWidth(width);
     this.centerStackedCol.setWeights(weights);
@@ -234,7 +234,7 @@ export class WeightInterface {
   constructor(container) {
     this.catContainer = container;
     this.barContainer = this.catContainer.select('.barContainer');
-    const rawWeights = SimHash.getWeighting();
+    const rawWeights = SimCats.getWeights();
     this.cumSum[0] = 0;
     for (let i = 1; i <= rawWeights.length; i++) {
       this.cumSum[i] = this.cumSum[i - 1] + rawWeights[i - 1];
@@ -775,7 +775,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimCats.getCategoryColor(d.categoryName) : 'white';
         let html = '';
         const text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
@@ -838,7 +838,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimCats.getCategoryColor(d.categoryName) : 'white';
         return `<div title="${d.name}" class="token center" style="background-color: ${bgcolor}">${d.name}</div>`;
       });
 
@@ -873,7 +873,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonMatchingBand">`;
         }
-        const bgcolor = d3.hsl(SimHash.getCategoryColor(d.categoryName)).brighter(0.7).toString();
+        const bgcolor = d3.hsl(SimCats.getCategoryColor(d.categoryName)).brighter(0.7).toString();
         return `<div class="band" style="background-color: ${bgcolor}">`;
       });
 
