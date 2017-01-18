@@ -8,12 +8,13 @@ import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as vis from 'phovea_core/src/vis';
 
-import {SimHash, ISimilarityCategory, SimilarityCategories} from 'phovea_core/src/provenance/SimilarityHash';
+import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
 import {mod} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
 import {MatchedTokenTree} from 'phovea_core/src/provenance/token/MatchedTokenTree';
+import {SimCats, ISimilarityCategory} from 'phovea_core/src/provenance/SimilarityCategories';
 
 
 interface ILineUpColumnDesc {
@@ -127,7 +128,7 @@ export class LineupStateView extends vis.AVisInstance {
 
   initialize(reason:SimVisStateNode = null) {
     const createDesc = (pos:string):ILineUpColumnDesc[] => {
-      return SimilarityCategories.CATEGORIES.map((d) => {
+      return SimCats.CATEGORIES.map((d) => {
         return {
           label: d.name,
           type: 'number',
@@ -249,13 +250,13 @@ export class WeightInterface {
   }
 
   protected catsWeightMap(name):ISimilarityCategory {
-    return SimilarityCategories.CATEGORIES.filter((d) => d.name === name)[0];
+    return SimCats.CATEGORIES.filter((d) => d.name === name)[0];
   }
 
   protected getNextActive(index) {
     let nextIndex = -1;
-    for (let i = 1; i < SimilarityCategories.CATEGORIES.length; i++) {
-      if (SimilarityCategories.CATEGORIES[mod(index + i, 5)].active) {
+    for (let i = 1; i < SimCats.CATEGORIES.length; i++) {
+      if (SimCats.CATEGORIES[mod(index + i, 5)].active) {
         nextIndex = mod(index + i, 5);
         break;
       }
@@ -265,8 +266,8 @@ export class WeightInterface {
 
   protected getPreviousActive(index) {
     let nextIndex = -1;
-    for (let i = 1; i < SimilarityCategories.CATEGORIES.length; i++) {
-      if (SimilarityCategories.CATEGORIES[mod(index - i, 5)].active) {
+    for (let i = 1; i < SimCats.CATEGORIES.length; i++) {
+      if (SimCats.CATEGORIES[mod(index - i, 5)].active) {
         nextIndex = mod(index - i, 5);
         break;
       }
@@ -279,11 +280,11 @@ export class WeightInterface {
     let _that = this;
     let transitionDuration = 300;
     let bars = this.barContainer.selectAll('div')
-      .data(SimilarityCategories.CATEGORIES, function (d) {
+      .data(SimCats.CATEGORIES, function (d) {
         return d.name;
       });
     let lines = d3.select('.lineContainer').selectAll('line')
-      .data(SimilarityCategories.CATEGORIES, function (d) {
+      .data(SimCats.CATEGORIES, function (d) {
         return d.name;
       });
 
@@ -355,7 +356,7 @@ export class WeightInterface {
       })
       .style('opacity', function () {
         let setActive = _that.catsWeightMap($(this).attr('id')).active;
-        let index = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
+        let index = SimCats.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
         if (_that.getNextActive(index) <= index) {
           setActive = false;
         }
@@ -371,7 +372,7 @@ export class WeightInterface {
       label = label.transition().duration(transitionDuration);
     }
     label.attr('value', function () {
-      return Math.round(SimilarityCategories.CATEGORIES.filter((d) => d.name === $(this).attr('id'))[0].weight) / 100;
+      return Math.round(SimCats.CATEGORIES.filter((d) => d.name === $(this).attr('id'))[0].weight) / 100;
     });
   }
 
@@ -392,7 +393,7 @@ export class WeightInterface {
     };
 
     const $controlContainer = $('.controlContainer');
-    SimilarityCategories.CATEGORIES.forEach((d) => {
+    SimCats.CATEGORIES.forEach((d) => {
       $controlContainer.append(categoryUnit(d.name, d.weight, d.icon));
     });
     $('.provenance-similarity-vis').hide();
@@ -407,7 +408,7 @@ export class WeightInterface {
     };
 
     const $catWeightContainer = $('.catWeightContainer');
-    SimilarityCategories.CATEGORIES.forEach((d) => {
+    SimCats.CATEGORIES.forEach((d) => {
       $catWeightContainer.append(handleHtml(d.name));
     });
 
@@ -417,21 +418,21 @@ export class WeightInterface {
         if (x > 100) {
           x = 100;
         }
-        let id = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
+        let id = SimCats.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
         let diff = _that.cumSum[id + 1] - x;
-        SimilarityCategories.CATEGORIES[id].weight -= diff;
+        SimCats.CATEGORIES[id].weight -= diff;
         let next = _that.getNextActive(id);
         let prev = _that.getPreviousActive(id);
         //let isLast = next <= id;
         if (next <= id) {
-          SimilarityCategories.CATEGORIES[prev].weight += diff;
+          SimCats.CATEGORIES[prev].weight += diff;
         } else {
-          SimilarityCategories.CATEGORIES[next].weight += diff;
+          SimCats.CATEGORIES[next].weight += diff;
         }
 
         _that.cumSum[0] = 0;
-        for (let i = 1; i <= SimilarityCategories.CATEGORIES.length; i++) {
-          _that.cumSum[i] = _that.cumSum[i - 1] + SimilarityCategories.CATEGORIES[i - 1].weight;
+        for (let i = 1; i <= SimCats.CATEGORIES.length; i++) {
+          _that.cumSum[i] = _that.cumSum[i - 1] + SimCats.CATEGORIES[i - 1].weight;
         }
         _that.update(false);
         SimHash.hasher.fire('weights_changed');
@@ -553,26 +554,26 @@ export class WeightInterface {
     this.catContainer.on('mouseleave', this.closeWeightSelection);
 
     d3.selectAll('.categoryUnit label input').on('change', function () {
-      let index = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('value'));
-      if (SimilarityCategories.CATEGORIES[index].active) {
+      let index = SimCats.CATEGORIES.findIndex((d) => d.name === $(this).attr('value'));
+      if (SimCats.CATEGORIES[index].active) {
         //deactivate
-        SimilarityCategories.CATEGORIES[_that.getNextActive(index)].weight += SimilarityCategories.CATEGORIES[index].weight;
-        SimilarityCategories.CATEGORIES[index].weight = 0;
+        SimCats.CATEGORIES[_that.getNextActive(index)].weight += SimCats.CATEGORIES[index].weight;
+        SimCats.CATEGORIES[index].weight = 0;
       } else {
         //activate
         let nextIndex = _that.getNextActive(index);
         if (nextIndex < 0) {
-          SimilarityCategories.CATEGORIES[index].weight = 100;
+          SimCats.CATEGORIES[index].weight = 100;
         } else {
-          let val = SimilarityCategories.CATEGORIES[nextIndex].weight;
-          SimilarityCategories.CATEGORIES[index].weight = val / 2;
-          SimilarityCategories.CATEGORIES[nextIndex].weight = val / 2;
+          let val = SimCats.CATEGORIES[nextIndex].weight;
+          SimCats.CATEGORIES[index].weight = val / 2;
+          SimCats.CATEGORIES[nextIndex].weight = val / 2;
         }
       }
-      SimilarityCategories.CATEGORIES[index].active = !SimilarityCategories.CATEGORIES[index].active;
+      SimCats.CATEGORIES[index].active = !SimCats.CATEGORIES[index].active;
       _that.cumSum[0] = 0;
-      for (let i = 1; i <= SimilarityCategories.CATEGORIES.length; i++) {
-        _that.cumSum[i] = _that.cumSum[i - 1] + SimilarityCategories.CATEGORIES[i - 1].weight;
+      for (let i = 1; i <= SimCats.CATEGORIES.length; i++) {
+        _that.cumSum[i] = _that.cumSum[i - 1] + SimCats.CATEGORIES[i - 1].weight;
       }
       _that.update(true);
       SimHash.hasher.fire('weights_changed');
