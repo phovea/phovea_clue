@@ -826,8 +826,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       this.comparing=false;
     }.bind(graph));
 
-    const $inner = $states_enter;
-
     d3.select('body').on('keydown', function() {
       if((<MouseEvent>d3.event).ctrlKey) {
         this.comparing=true;
@@ -836,8 +834,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .on('keyup', function() {
       this.comparing=false;
     }.bind(graph));
-
-
 
 
     const $inner = $statesEnter;
