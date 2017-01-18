@@ -85,7 +85,7 @@ class StateRepr {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
-      var selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
+      const selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
       if (selState.length === 0) {
         return 1;
       }
@@ -107,7 +107,7 @@ class StateRepr {
       //console.log(this.graph);
 
       //console.log(this.graph.selectedStates(idtypes.hoverSelectionType));
-      var selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
+      const selState:SimVisStateNode[] = (<SimVisStateNode[]>this.graph.selectedStates(idtypes.hoverSelectionType));
       if (selState.length === 0) {
         return 1;
       }
@@ -471,13 +471,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   private onLinupHoverChanged = (event:any,state:provenance.StateNode) => {
-    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    const $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
     $elem.call(StateRepr.render);
-  };
+  }
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
-    var $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
+    const $elem:d3.Selection<StateRepr> = this.$node.selectAll('div.state');
 
     $elem.call(StateRepr.render);
 
@@ -713,7 +713,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
     });
 
-    let weightContainer = new WeightInterface($simArea.select('.catWeightContainer'));
+    const weightContainer = new WeightInterface($simArea.select('.catWeightContainer'));
     //let luContainer =
       new LineupStateView($simArea.select('.stateLinupView'),this.data);
     //let treeVizContainer =
@@ -728,7 +728,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
         that.update();
       } else if (this.id === 'compareStatesBtn') {
-        let b = $('.provenance-similarity-vis');
+        const b = $('.provenance-similarity-vis');
         b.toggle('fast');
         weightContainer.close();
         simAreaIsActive = !simAreaIsActive;

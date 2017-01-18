@@ -87,18 +87,18 @@ export class LineupStateView extends vis.AVisInstance {
     if (state === undefined || state === null) {
       return;
     }
-    let allstates = this.data.states;
+    const allstates = this.data.states;
     allstates.forEach(function (s:SimVisStateNode) {
       s.lineUpIndex = -1;
     });
     let ownStateAlreadyFound:boolean = false;
     for (let i = 0; i < allstates.length; i++) {
-      let currState:SimVisStateNode = <SimVisStateNode>allstates[i];
+      const currState:SimVisStateNode = <SimVisStateNode>allstates[i];
       if (state === currState) {
         ownStateAlreadyFound = true;
         continue;
       }
-      let sim = state.getSimForLineupTo(currState);
+      const sim = state.getSimForLineupTo(currState);
       this.arr = this.arr.concat({
         'ld': sim[0][0], 'lv': sim[0][1], 'ls': sim[0][2], 'll': sim[0][3], 'la': sim[0][4],
         'cd': sim[1][0], 'cv': sim[1][1], 'cs': sim[1][2], 'cl': sim[1][3], 'ca': sim[1][4],
@@ -110,8 +110,8 @@ export class LineupStateView extends vis.AVisInstance {
 
 
   updateWeights() {
-    let width:number = 48;
-    let weights = SimHash.hasher.categoryWeighting;
+    const width:number = 48;
+    const weights = SimHash.hasher.categoryWeighting;
     this.lstack.setWeights(weights);
     this.lstack.setWidth(width);
     this.cstack.setWeights(weights);
@@ -207,7 +207,7 @@ export class LineupStateView extends vis.AVisInstance {
       }
     }
 
-  };
+  }
 
   private lastHovered:number = -1;
 
@@ -249,7 +249,7 @@ export class WeightInterface {
   constructor(container) {
     this.catContainer = container;
     this.barContainer = this.catContainer.select('.barContainer');
-    let rawWeights = SimHash.hasher.categoryWeighting;
+    const rawWeights = SimHash.hasher.categoryWeighting;
     this.cumSum[0] = 0;
     for (let i = 1; i <= rawWeights.length; i++) {
       this.cumSum[i] = this.cumSum[i - 1] + rawWeights[i - 1];
@@ -298,13 +298,13 @@ export class WeightInterface {
 
 
   protected update(transitions:boolean) {
-    let _that = this;
-    let transitionDuration = 300;
-    let bars = this.barContainer.selectAll('div')
+    const _that = this;
+    const transitionDuration = 300;
+    const bars = this.barContainer.selectAll('div')
       .data(this.weights, function (d) {
         return d.name;
       });
-    let lines = d3.select('.lineContainer').selectAll('line')
+    const lines = d3.select('.lineContainer').selectAll('line')
       .data(this.weights, function (d) {
         return d.name;
       });
@@ -367,7 +367,7 @@ export class WeightInterface {
 
 
     //set weights
-    let w = [0, 0, 0, 0, 0];
+    const w = [0, 0, 0, 0, 0];
     w[_that.cats.indexOf(_that.weights[0].name)] = _that.weights[0].value;
     w[_that.cats.indexOf(_that.weights[1].name)] = _that.weights[1].value;
     w[_that.cats.indexOf(_that.weights[2].name)] = _that.weights[2].value;
@@ -376,7 +376,7 @@ export class WeightInterface {
     SimHash.hasher.categoryWeighting = w;
 
     //update handlePos
-    let handles = this.catContainer.selectAll('.chart_handle');
+    const handles = this.catContainer.selectAll('.chart_handle');
     let h = <any>handles;
     if (transitions) {
       h = <any>handles.transition().duration(transitionDuration);
@@ -387,7 +387,7 @@ export class WeightInterface {
       })
       .style('opacity', function () {
         let setActive = _that.catsWeightMap($(this).attr('id')).active;
-        let index = _that.cats.indexOf($(this).attr('id'));
+        const index = _that.cats.indexOf($(this).attr('id'));
         if (_that.getNextActive(index) <= index) {
           setActive = false;
         }
@@ -409,10 +409,10 @@ export class WeightInterface {
 
 
   initialize() {
-    let _that = this;
-    let categoryUnit = function (catName:string, defaultWeight:number, faString:string):string {
-      let capitalizeFirstLetter = function (string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    const _that = this;
+    const categoryUnit = function (catName:string, defaultWeight:number, faString:string):string {
+      const capitalizeFirstLetter = function (text) {
+        return text.charAt(0).toUpperCase() + text.slice(1);
       };
       return (
       `<div class="categoryUnit" id="${catName}">
@@ -433,7 +433,7 @@ export class WeightInterface {
 
     $('.categoryUnit label input[type=checkbox]').prop('checked', true);
 
-    let handleHtml = function (id:string) {
+    const handleHtml = function (id:string) {
       return (
       `<div class="chart_handle" id="${id}">
       <i class="fa fa-arrow-right" aria-hidden="true"></i>
@@ -452,11 +452,11 @@ export class WeightInterface {
         if (x > 100) {
           x = 100;
         }
-        let id = _that.cats.indexOf($(this).attr('id'));
-        let diff = _that.cumSum[id + 1] - x;
+        const id = _that.cats.indexOf($(this).attr('id'));
+        const diff = _that.cumSum[id + 1] - x;
         _that.weights[id].value -= diff;
-        let next = _that.getNextActive(id);
-        let prev = _that.getPreviousActive(id);
+        const next = _that.getNextActive(id);
+        const prev = _that.getPreviousActive(id);
         //let isLast = next <= id;
         if (next <= id) {
           _that.weights[prev].value += diff;
@@ -476,7 +476,7 @@ export class WeightInterface {
 
 
     this.closeWeightSelection = function () {
-      let _that = this;
+      const _that = this;
       $('.controlContainer').hide();
       d3.select('.controlContainer').transition()
         .duration(150)
@@ -540,7 +540,7 @@ export class WeightInterface {
     }.bind(this);
 
     this.openWeightSelection = function () {
-      let _that = this;
+      const _that = this;
       $('.controlContainer').show();
       $('.lineContainer').show();
       d3.select('.lineContainer').transition()
@@ -588,18 +588,18 @@ export class WeightInterface {
     this.catContainer.on('mouseleave', this.closeWeightSelection);
 
     d3.selectAll('.categoryUnit label input').on('change', function () {
-      let index = _that.cats.indexOf($(this).attr('value'));
+      const index = _that.cats.indexOf($(this).attr('value'));
       if (_that.weights[index].active) {
         //deactivate
         _that.weights[_that.getNextActive(index)].value += _that.weights[index].value;
         _that.weights[index].value = 0;
       } else {
         //activate
-        let nextIndex = _that.getNextActive(index);
+        const nextIndex = _that.getNextActive(index);
         if (nextIndex < 0) {
           _that.weights[index].value = 100;
         } else {
-          let val = _that.weights[nextIndex].value;
+          const val = _that.weights[nextIndex].value;
           _that.weights[index].value = val / 2;
           _that.weights[nextIndex].value = val / 2;
         }
@@ -619,10 +619,10 @@ export class WeightInterface {
 export class TokenTreeVisualization {
 
   private partitionAS = null;
-  private bottom_state = null;
-  private bottom_stateContainer = null;
-  private top_state = null;
-  private top_stateContainer = null;
+  private bottomState = null;
+  private bottomStateContainer = null;
+  private topState = null;
+  private topStateContainer = null;
   private bandContainer = null;
   private bandSpace = null;
   private _tree:MatchedTokenTree = null;
@@ -647,12 +647,12 @@ export class TokenTreeVisualization {
     this.data.on('stateSimLU-selection', this.lineupSelectionListener.bind(this));
     SimHash.hasher.on('weights_changed', this.weightsChangedListener.bind(this));
 
-    this.bottom_stateContainer = this.container.append('div');
-    this.bottom_stateContainer.classed('tokenStructViz', true)
+    this.bottomStateContainer = this.container.append('div');
+    this.bottomStateContainer.classed('tokenStructViz', true)
       .style('height', '186px')
       .style('order', 3);
-    this.bottom_state = this.bottom_stateContainer.append('div');
-    this.bottom_state.classed('bottom-state', true);
+    this.bottomState = this.bottomStateContainer.append('div');
+    this.bottomState.classed('bottom-state', true);
 
     this.bandContainer = this.container.append('div');
     this.bandContainer.classed('stateSepSpace', true)
@@ -661,12 +661,12 @@ export class TokenTreeVisualization {
     this.bandSpace = this.bandContainer.append('div');
     this.bandSpace.classed('bandSpace', true);
 
-    this.top_stateContainer = this.container.append('div');
-    this.top_stateContainer.classed('tokenStructViz', true)
+    this.topStateContainer = this.container.append('div');
+    this.topStateContainer.classed('tokenStructViz', true)
       .style('height', '186px')
       .style('order', 1);
-    this.top_state = this.top_stateContainer.append('div');
-    this.top_state.classed('top-state', true);
+    this.topState = this.topStateContainer.append('div');
+    this.topState.classed('top-state', true);
 
     this.findAndInitializeTree();
     //.style('heigth', '200');
@@ -728,17 +728,17 @@ export class TokenTreeVisualization {
         return a.id - b.id;
       });
 
-    this.top_stateContainer.selectAll('.top-state').remove();
-    this.top_state = this.top_stateContainer.append('div');
-    this.top_state.classed('top-state', true);
+    this.topStateContainer.selectAll('.top-state').remove();
+    this.topState = this.topStateContainer.append('div');
+    this.topState.classed('top-state', true);
 
     this.bandContainer.selectAll('.bandSpace').remove();
     this.bandSpace = this.bandContainer.append('div');
     this.bandSpace.classed('bandSpace', true);
 
-    this.bottom_stateContainer.selectAll('.bottom-state').remove();
-    this.bottom_state = this.bottom_stateContainer.append('div');
-    this.bottom_state.classed('bottom-state', true);
+    this.bottomStateContainer.selectAll('.bottom-state').remove();
+    this.bottomState = this.bottomStateContainer.append('div');
+    this.bottomState.classed('bottom-state', true);
     this.update(this._tree.rootNode);
   }
 
@@ -746,16 +746,16 @@ export class TokenTreeVisualization {
 
   update(source) {
     const that = this;
-    this.stateVizX = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().width]);
-    this.stateVizY = d3.scale.linear().range([0, this.bottom_state.node().getBoundingClientRect().height]);
+    this.stateVizX = d3.scale.linear().range([0, this.bottomState.node().getBoundingClientRect().width]);
+    this.stateVizY = d3.scale.linear().range([0, this.bottomState.node().getBoundingClientRect().height]);
 
     const activeStateIsLeft:boolean = (that._tree.leftState !== that.activeState);
     // Compute the new tree layout.
-    let nodes = that.partitionAS(that._tree.rootNode);
+    const nodes = that.partitionAS(that._tree.rootNode);
 
 
     // TOP STATE
-    let node = this.top_state.selectAll('div')
+    let node = this.topState.selectAll('div')
       .data(nodes, function (d) {
         return d === undefined ? 0 : d.id;
       })
@@ -809,16 +809,16 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
         let html = '';
-        let text = d.name;
+        const text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
         return html;
       });
 
 
     // BOTTOM STATE
-    node = this.bottom_state.selectAll('div')
+    node = this.bottomState.selectAll('div')
       .data(nodes, function (d) {
         return d === undefined ? 0 : d.id;
       })
@@ -872,9 +872,9 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        let bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimHash.getCategoryColor(d.categoryName) : 'white';
         let html = '';
-        let text = d.name;
+        const text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
         return html;
       });
@@ -883,7 +883,7 @@ export class TokenTreeVisualization {
       .style('transform', 'translate(0px, 9px');
 
 
-    let band = this.bandSpace.selectAll('div')
+    const band = this.bandSpace.selectAll('div')
       .data(nodes.filter((d) => d.isLeafNodeWithoutDummyChilds), (d) => d === undefined ? 0 : d.id)
       .style('left', (d) => that.stateVizX(d.x) + that.padding + 'px')
       .style('bottom', (d) =>  '-30px')
@@ -910,12 +910,12 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonMatchingBand">`;
         }
-        let bgcolor:string = SimHash.shadeColor(SimHash.getCategoryColor(d.categoryName), 0.3);
+        const bgcolor:string = SimHash.shadeColor(SimHash.getCategoryColor(d.categoryName), 0.3);
         return `<div class="band" style="background-color: ${bgcolor}">`;
       });
 
-    let topStateVisible = that._tree.leftState.id === that._tree.rightState.id  ? 'hidden' : 'visible';
-    that.top_stateContainer.style('visibility', topStateVisible);
+    const topStateVisible = that._tree.leftState.id === that._tree.rightState.id  ? 'hidden' : 'visible';
+    that.topStateContainer.style('visibility', topStateVisible);
     that.bandContainer.style('visibility', topStateVisible);
   }
 
