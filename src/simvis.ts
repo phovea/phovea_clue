@@ -28,9 +28,9 @@ interface ILineUpColumnDesc {
 export class LineupStateView extends vis.AVisInstance {
   protected node;
 
-  private lstack;
-  private cstack;
-  private rstack;
+  private leftStackedCol;
+  private centerStackedCol;
+  private rightStackedCol;
 
   private lu;
   private luDataProvider;
@@ -89,36 +89,37 @@ export class LineupStateView extends vis.AVisInstance {
       return;
     }
     let allstates = this.data.states;
-    allstates.forEach(function (s:SimVisStateNode) {
+    allstates.forEach((s:SimVisStateNode) => {
       s.lineUpIndex = -1;
     });
     let ownStateAlreadyFound:boolean = false;
-    for (let i = 0; i < allstates.length; i++) {
-      let currState:SimVisStateNode = <SimVisStateNode>allstates[i];
+    allstates.map((currState:SimVisStateNode, index) => {
       if (state === currState) {
         ownStateAlreadyFound = true;
-        continue;
+        return;
       }
-      let sim = state.getSimForLineupTo(currState);
-      this.arr = this.arr.concat({
+      let sim = state.getMatchedTreeWithOtherState(currState).similarityForLineup;
+      console.log(sim);
+      const data = {
         'ld': sim[0][0], 'lv': sim[0][1], 'ls': sim[0][2], 'll': sim[0][3], 'la': sim[0][4],
         'cd': sim[1][0], 'cv': sim[1][1], 'cs': sim[1][2], 'cl': sim[1][3], 'ca': sim[1][4],
         'rd': sim[2][0], 'rv': sim[2][1], 'rs': sim[2][2], 'rl': sim[2][3], 'ra': sim[2][4], 'state': currState
-      });
-      currState.lineUpIndex = ownStateAlreadyFound ? i-1 : i;
-    }
+      };
+      this.arr.push(data);
+      currState.lineUpIndex = ownStateAlreadyFound ? index-1 : index;
+    });
   }
 
 
   updateWeights() {
     let width:number = 48;
     let weights = SimHash.getWeighting();
-    this.lstack.setWeights(weights);
-    this.lstack.setWidth(width);
-    this.cstack.setWeights(weights);
-    this.cstack.setWidth(width);
-    this.rstack.setWeights(weights);
-    this.rstack.setWidth(width);
+    this.leftStackedCol.setWeights(weights);
+    this.leftStackedCol.setWidth(width);
+    this.centerStackedCol.setWeights(weights);
+    this.centerStackedCol.setWidth(width);
+    this.rightStackedCol.setWeights(weights);
+    this.rightStackedCol.setWidth(width);
     this.lu.update();
   }
 
@@ -151,9 +152,9 @@ export class LineupStateView extends vis.AVisInstance {
       return stackedColumn;
     };
 
-    this.lstack = createStackedColumn('Active', descLeft);
-    this.cstack = createStackedColumn('Intersection', descCenter);
-    this.rstack = createStackedColumn('Ranked', descRight);
+    this.leftStackedCol = createStackedColumn('Active', descLeft);
+    this.centerStackedCol = createStackedColumn('Intersection', descCenter);
+    this.rightStackedCol = createStackedColumn('Ranked', descRight);
 
     this.lu = lineup.create(this.luDataProvider, this.node, {
       /*
@@ -170,7 +171,7 @@ export class LineupStateView extends vis.AVisInstance {
       },
       manipulative: false
     });
-    this.cstack.sortByMe(false);
+    this.centerStackedCol.sortByMe(false);
     this.updateWeights();
     this.lu.update();
     this.registerListeners();
