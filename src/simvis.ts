@@ -8,7 +8,7 @@ import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as vis from 'phovea_core/src/vis';
 
-import {SimHash, ISimilarityCategory} from 'phovea_core/src/provenance/SimilarityHash';
+import {SimHash, ISimilarityCategory, SimilarityCategories} from 'phovea_core/src/provenance/SimilarityHash';
 import {mod} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
@@ -99,11 +99,12 @@ export class LineupStateView extends vis.AVisInstance {
         return;
       }
       let sim = state.getMatchedTreeWithOtherState(currState).similarityForLineup;
-      console.log(sim);
+
       const data = {
         'ld': sim[0][0], 'lv': sim[0][1], 'ls': sim[0][2], 'll': sim[0][3], 'la': sim[0][4],
         'cd': sim[1][0], 'cv': sim[1][1], 'cs': sim[1][2], 'cl': sim[1][3], 'ca': sim[1][4],
-        'rd': sim[2][0], 'rv': sim[2][1], 'rs': sim[2][2], 'rl': sim[2][3], 'ra': sim[2][4], 'state': currState
+        'rd': sim[2][0], 'rv': sim[2][1], 'rs': sim[2][2], 'rl': sim[2][3], 'ra': sim[2][4],
+        'state': currState
       };
       this.arr.push(data);
       currState.lineUpIndex = ownStateAlreadyFound ? index-1 : index;
@@ -126,7 +127,7 @@ export class LineupStateView extends vis.AVisInstance {
 
   initialize(reason:SimVisStateNode = null) {
     const createDesc = (pos:string):ILineUpColumnDesc[] => {
-      return SimHash.CATEGORIES2.map((d) => {
+      return SimilarityCategories.CATEGORIES.map((d) => {
         return {
           label: d.name,
           type: 'number',
@@ -248,13 +249,13 @@ export class WeightInterface {
   }
 
   protected catsWeightMap(name):ISimilarityCategory {
-    return SimHash.CATEGORIES2.filter((d) => d.name === name)[0];
+    return SimilarityCategories.CATEGORIES.filter((d) => d.name === name)[0];
   }
 
   protected getNextActive(index) {
     let nextIndex = -1;
-    for (let i = 1; i < SimHash.CATEGORIES2.length; i++) {
-      if (SimHash.CATEGORIES2[mod(index + i, 5)].active) {
+    for (let i = 1; i < SimilarityCategories.CATEGORIES.length; i++) {
+      if (SimilarityCategories.CATEGORIES[mod(index + i, 5)].active) {
         nextIndex = mod(index + i, 5);
         break;
       }
@@ -264,8 +265,8 @@ export class WeightInterface {
 
   protected getPreviousActive(index) {
     let nextIndex = -1;
-    for (let i = 1; i < SimHash.CATEGORIES2.length; i++) {
-      if (SimHash.CATEGORIES2[mod(index - i, 5)].active) {
+    for (let i = 1; i < SimilarityCategories.CATEGORIES.length; i++) {
+      if (SimilarityCategories.CATEGORIES[mod(index - i, 5)].active) {
         nextIndex = mod(index - i, 5);
         break;
       }
@@ -278,11 +279,11 @@ export class WeightInterface {
     let _that = this;
     let transitionDuration = 300;
     let bars = this.barContainer.selectAll('div')
-      .data(SimHash.CATEGORIES2, function (d) {
+      .data(SimilarityCategories.CATEGORIES, function (d) {
         return d.name;
       });
     let lines = d3.select('.lineContainer').selectAll('line')
-      .data(SimHash.CATEGORIES2, function (d) {
+      .data(SimilarityCategories.CATEGORIES, function (d) {
         return d.name;
       });
 
@@ -354,7 +355,7 @@ export class WeightInterface {
       })
       .style('opacity', function () {
         let setActive = _that.catsWeightMap($(this).attr('id')).active;
-        let index = SimHash.CATEGORIES2.findIndex((d) => d.name === $(this).attr('id'));
+        let index = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
         if (_that.getNextActive(index) <= index) {
           setActive = false;
         }
@@ -370,7 +371,7 @@ export class WeightInterface {
       label = label.transition().duration(transitionDuration);
     }
     label.attr('value', function () {
-      return Math.round(SimHash.CATEGORIES2.filter((d) => d.name === $(this).attr('id'))[0].weight) / 100;
+      return Math.round(SimilarityCategories.CATEGORIES.filter((d) => d.name === $(this).attr('id'))[0].weight) / 100;
     });
   }
 
@@ -391,7 +392,7 @@ export class WeightInterface {
     };
 
     const $controlContainer = $('.controlContainer');
-    SimHash.CATEGORIES2.forEach((d) => {
+    SimilarityCategories.CATEGORIES.forEach((d) => {
       $controlContainer.append(categoryUnit(d.name, d.weight, d.icon));
     });
     $('.provenance-similarity-vis').hide();
@@ -406,7 +407,7 @@ export class WeightInterface {
     };
 
     const $catWeightContainer = $('.catWeightContainer');
-    SimHash.CATEGORIES2.forEach((d) => {
+    SimilarityCategories.CATEGORIES.forEach((d) => {
       $catWeightContainer.append(handleHtml(d.name));
     });
 
@@ -416,21 +417,21 @@ export class WeightInterface {
         if (x > 100) {
           x = 100;
         }
-        let id = SimHash.CATEGORIES2.findIndex((d) => d.name === $(this).attr('id'));
+        let id = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('id'));
         let diff = _that.cumSum[id + 1] - x;
-        SimHash.CATEGORIES2[id].weight -= diff;
+        SimilarityCategories.CATEGORIES[id].weight -= diff;
         let next = _that.getNextActive(id);
         let prev = _that.getPreviousActive(id);
         //let isLast = next <= id;
         if (next <= id) {
-          SimHash.CATEGORIES2[prev].weight += diff;
+          SimilarityCategories.CATEGORIES[prev].weight += diff;
         } else {
-          SimHash.CATEGORIES2[next].weight += diff;
+          SimilarityCategories.CATEGORIES[next].weight += diff;
         }
 
         _that.cumSum[0] = 0;
-        for (let i = 1; i <= SimHash.CATEGORIES2.length; i++) {
-          _that.cumSum[i] = _that.cumSum[i - 1] + SimHash.CATEGORIES2[i - 1].weight;
+        for (let i = 1; i <= SimilarityCategories.CATEGORIES.length; i++) {
+          _that.cumSum[i] = _that.cumSum[i - 1] + SimilarityCategories.CATEGORIES[i - 1].weight;
         }
         _that.update(false);
         SimHash.hasher.fire('weights_changed');
@@ -552,26 +553,26 @@ export class WeightInterface {
     this.catContainer.on('mouseleave', this.closeWeightSelection);
 
     d3.selectAll('.categoryUnit label input').on('change', function () {
-      let index = SimHash.CATEGORIES2.findIndex((d) => d.name === $(this).attr('value'));
-      if (SimHash.CATEGORIES2[index].active) {
+      let index = SimilarityCategories.CATEGORIES.findIndex((d) => d.name === $(this).attr('value'));
+      if (SimilarityCategories.CATEGORIES[index].active) {
         //deactivate
-        SimHash.CATEGORIES2[_that.getNextActive(index)].weight += SimHash.CATEGORIES2[index].weight;
-        SimHash.CATEGORIES2[index].weight = 0;
+        SimilarityCategories.CATEGORIES[_that.getNextActive(index)].weight += SimilarityCategories.CATEGORIES[index].weight;
+        SimilarityCategories.CATEGORIES[index].weight = 0;
       } else {
         //activate
         let nextIndex = _that.getNextActive(index);
         if (nextIndex < 0) {
-          SimHash.CATEGORIES2[index].weight = 100;
+          SimilarityCategories.CATEGORIES[index].weight = 100;
         } else {
-          let val = SimHash.CATEGORIES2[nextIndex].weight;
-          SimHash.CATEGORIES2[index].weight = val / 2;
-          SimHash.CATEGORIES2[nextIndex].weight = val / 2;
+          let val = SimilarityCategories.CATEGORIES[nextIndex].weight;
+          SimilarityCategories.CATEGORIES[index].weight = val / 2;
+          SimilarityCategories.CATEGORIES[nextIndex].weight = val / 2;
         }
       }
-      SimHash.CATEGORIES2[index].active = !SimHash.CATEGORIES2[index].active;
+      SimilarityCategories.CATEGORIES[index].active = !SimilarityCategories.CATEGORIES[index].active;
       _that.cumSum[0] = 0;
-      for (let i = 1; i <= SimHash.CATEGORIES2.length; i++) {
-        _that.cumSum[i] = _that.cumSum[i - 1] + SimHash.CATEGORIES2[i - 1].weight;
+      for (let i = 1; i <= SimilarityCategories.CATEGORIES.length; i++) {
+        _that.cumSum[i] = _that.cumSum[i - 1] + SimilarityCategories.CATEGORIES[i - 1].weight;
       }
       _that.update(true);
       SimHash.hasher.fire('weights_changed');
