@@ -17,6 +17,7 @@ import * as utils from './utils';
 import {WeightInterface, LineupStateView, TokenTreeVisualization} from './simvis';
 import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
 import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
+import {SimCats} from '../../phovea_core/src/provenance/SimilarityCategories';
 
 
 
@@ -307,7 +308,7 @@ class StateRepr {
         }
       });
 
-    } while (changed && loop < 5 );
+    } while (changed && loop < SimCats.CATEGORIES.length );
 
     byLevel = byLevel.filter((d) => d.length > 0);
     //boost all states that are on the left side to medium if they are small
