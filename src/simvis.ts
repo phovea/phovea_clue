@@ -685,7 +685,7 @@ export class TokenTreeVisualization {
     this._tree = this.activeState.getMatchedTreeWithOtherState(this.luSelectedState);
     this.partitionAS = (<any>d3.layout).partition();
     this.partitionAS.children(function (d) {
-      return d.childrenAndDummyChilds;
+      return d.childrenAndDummyChildren;
     })
       .value(function (d) {
         return d.getScaledSize;
@@ -775,7 +775,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimCats.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChildren ? SimCats.getCategoryColor(d.categoryName) : 'white';
         let html = '';
         const text = d.name;
         html = `<div title="${text}" class="token center" style="background-color: ${bgcolor}">${text}</div>`;
@@ -838,7 +838,7 @@ export class TokenTreeVisualization {
         if (!isVisible) {
           return `<div class="nonPairedToken">`;
         }
-        const bgcolor:string = d.isLeafNodeWithoutDummyChilds ? SimCats.getCategoryColor(d.categoryName) : 'white';
+        const bgcolor:string = d.isLeafNodeWithoutDummyChildren ? SimCats.getCategoryColor(d.categoryName) : 'white';
         return `<div title="${d.name}" class="token center" style="background-color: ${bgcolor}">${d.name}</div>`;
       });
 
@@ -847,7 +847,7 @@ export class TokenTreeVisualization {
 
 
     const band = this.bandSpace.selectAll('div')
-      .data(nodes.filter((d) => d.isLeafNodeWithoutDummyChilds), (d) => d === undefined ? 0 : d.id)
+      .data(nodes.filter((d) => d.isLeafNodeWithoutDummyChildren), (d) => d === undefined ? 0 : d.id)
       .style('left', (d) => that.stateVizX(d.x) + that.padding + 'px')
       .style('bottom', (d) =>  '-30px')
       .style('height', (d) =>  '92px')
