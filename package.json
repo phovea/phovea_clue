@@ -22,7 +22,7 @@
     "compile": "tsc",
     "lint": "tslint -c tslint.json src/**.ts tests/**.ts",
     "docs": "npm run docs:web && npm run docs:python",
-    "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
+    "prebuild": "echo hybrid",
     "posttest": "echo hybrid",
     "test:watch": "karma start --autoWatch=true --singleRun=false",
     "build:dev": "webpack",
@@ -45,7 +45,9 @@
     "docs:python": "echo todo creating docs...",
     "build:python": "python -c \"from distutils.dir_util import mkpath ; mkpath('./build/source')\" && (tar -c ./phovea_clue --exclude '*.pyc' | tar -xC build/source)",
     "build:web": "webpack --env prod",
-    "predist:python": "npm run build:python && npm run docs:python"
+    "predist:python": "npm run build:python && npm run docs:python",
+    "prebuild:python": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:python",
+    "prebuild:web": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:web"
   },
   "main": "build/phovea_clue.js",
   "engines": {
