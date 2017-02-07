@@ -17,7 +17,7 @@ import * as utils from './utils';
 import {WeightInterface, LineupStateView, TokenTreeVisualization} from './simvis';
 import {SimHash} from 'phovea_core/src/provenance/SimilarityHash';
 import {SimVisStateNode} from 'phovea_core/src/provenance/StateNode';
-import {SimCats} from '../../phovea_core/src/provenance/SimilarityCategories';
+import {SimCats} from 'phovea_core/src/provenance/SimilarityCategories';
 
 
 
