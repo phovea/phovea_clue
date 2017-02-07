@@ -18,8 +18,8 @@ import * as $ from 'jquery';
 
 
 interface ISlideNodeRepr {
-  id: string;
-  i: number;
+  id: number|string;
+  i?: number;
   isPlaceholder?: boolean;
   isLastPlaceholder?: boolean;
   name?: string;
@@ -67,7 +67,7 @@ function isEditAble() {
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node: d3.Selection<any>;
-  private trigger = C.bind(this.update, this);
+  private trigger = this.update.bind(this);
 
   private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string, op: any, extras) => {
     this.$node.selectAll('div.story:not(.placeholder)').classed('phovea-select-' + type, function (d: provenance.SlideNode) {
@@ -341,14 +341,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const that = this;
     elem
       .on('dragenter', function (d) {
-        if (C.hasDnDType(d3.event, 'application/phovea-prov-state') || C.hasDnDType(d3.event, 'application/phovea-prov-story') || C.hasDnDType(d3.event, 'application/phovea-prov-story-text')) {
+        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', (d) => {
-      if (C.hasDnDType(d3.event, 'application/phovea-prov-state') || C.hasDnDType(d3.event, 'application/phovea-prov-story') || C.hasDnDType(d3.event, 'application/phovea-prov-story-text')) {
+      if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
         (<Event>d3.event).preventDefault();
-        C.updateDropEffect(d3.event);
+        C.updateDropEffect(<DragEvent>d3.event);
         return false;
       }
     }).on('dragleave', function (d) {

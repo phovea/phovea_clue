@@ -762,7 +762,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private onStateClick(d: StateRepr) {
     (<Event>d3.event).stopPropagation();
-    this.data.selectState(d.s, idtypes.toSelectOperation(d3.event));
+    this.data.selectState(d.s, idtypes.toSelectOperation(<MouseEvent>d3.event));
     this.data.jumpTo(d.s);
   }
 
@@ -797,14 +797,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         e.dataTransfer.setData('application/phovea-prov-state',String(d.s.id));
       })
       .on('dragenter', function () {
-        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
+        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', () => {
-        if (C.hasDnDType(d3.event, 'application/phovea-prov-state')) {
+        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
           (<Event>d3.event).preventDefault();
-          C.updateDropEffect(d3.event);
+          C.updateDropEffect(<DragEvent>d3.event);
           return false;
         }
       }).on('dragleave', function () {
