@@ -52,7 +52,8 @@
       }
     ],
     "libraries": [
-      "d3"
+      "d3",
+      "lineupjs"
     ],
     "unknown": {
       "requirements": [

@@ -63,7 +63,8 @@
     "phovea_ui": "github:phovea/phovea_ui#provenance_steering",
     "phovea_core": "github:phovea/phovea_core#provenance_steering",
     "phovea_d3": "github:phovea/phovea_d3#provenance_steering",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#provenance_steering"
+    "phovea_security_flask": "github:phovea/phovea_security_flask#provenance_steering",
+    "lineupjs": "github:Caleydo/lineupjs#master"
   },
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
