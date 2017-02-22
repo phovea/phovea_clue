@@ -1,4 +1,4 @@
 -e git+https://github.com/phovea/phovea_security_flask.git@develop#egg=phovea_security_flask
 -e git+https://github.com/phovea/phovea_server.git@develop#egg=phovea_server
 selenium==2.48.0
-python-memcached==1.57
+python-memcached==1.58
