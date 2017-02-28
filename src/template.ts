@@ -94,6 +94,11 @@ export interface ICLUEWrapperOptions {
    * formular used for the login dialog
    */
   loginForm?: string;
+
+  /**
+   * whether to replace the body content with the template or just prepend it
+   */
+  replaceBody?: boolean;
 }
 
 export class CLUEWrapper extends EventHandler {
@@ -106,7 +111,8 @@ export class CLUEWrapper extends EventHandler {
     thumbnails: true,
     appLink: new AppHeaderLink('CLUE'),
     provVisCollapsed: false,
-    headerOptions: {}
+    headerOptions: {},
+    replaceBody: true
   };
 
   private readonly manager: MixedStorageProvenanceGraphManager;
@@ -123,7 +129,11 @@ export class CLUEWrapper extends EventHandler {
     super();
     mixin(this.options, options);
 
-    body.insertAdjacentHTML('afterbegin', TEMPLATE);
+    if (this.options.replaceBody) {
+      body.innerHTML = TEMPLATE;
+    } else {
+      body.insertAdjacentHTML('afterbegin', TEMPLATE);
+    }
     this.$main = select(body).select('main');
 
     handleMagicHashElements(body, this);
