@@ -4,8 +4,6 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import * as template from 'html-loader!./_template.html';
-
 import {hash, mixin} from 'phovea_core/src/index';
 import {IHeaderLink, create as createHeader, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
 import {
@@ -28,6 +26,29 @@ import CLUEGraphManager from './CLUEGraphManager';
 import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
 import LoginMenu from './menu/LoginMenu';
 import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
+
+const TEMPLATE = `<div class="box">
+  <header>
+
+  </header>
+  <div class="content">
+    <main data-anchor="main"></main>
+    <!--annotation toolbar-->
+    <aside class="annotations" style="display:none">
+      <div>
+        <h2>Annotations</h2>
+      </div>
+      <div class="btn-group" role="group" aria-label="annotations">
+        <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
+        </button>
+        <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i>
+        </button>
+        <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i>
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>`;
 
 export interface ICLUEWrapperOptions {
   /**
@@ -100,7 +121,7 @@ export default class CLUEWrapper extends EventHandler {
     super();
     mixin(this.options, options);
 
-    body.insertAdjacentHTML('afterbegin', String(template));
+    body.insertAdjacentHTML('afterbegin', TEMPLATE);
     this.$main = select(body).select('main');
 
     handleMagicHashElements(body, this);
