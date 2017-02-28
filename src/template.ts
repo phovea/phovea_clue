@@ -27,6 +27,8 @@ import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
 import LoginMenu from './menu/LoginMenu';
 import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
 
+export {default as CLUEGraphManager} from './CLUEGraphManager';
+
 const TEMPLATE = `<div class="box">
   <header>
 
@@ -94,7 +96,7 @@ export interface ICLUEWrapperOptions {
   loginForm?: string;
 }
 
-export default class CLUEWrapper extends EventHandler {
+export class CLUEWrapper extends EventHandler {
   private options: ICLUEWrapperOptions = {
     app: 'CLUE',
     application: '/clue',
@@ -382,6 +384,7 @@ export default class CLUEWrapper extends EventHandler {
     });
   }
 }
+export default CLUEWrapper;
 
 /**
  * factory method creating a CLUEWrapper instance
