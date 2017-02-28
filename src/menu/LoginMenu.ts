@@ -9,22 +9,6 @@ import * as $ from 'jquery';
 import {bindLoginForm, form as loginForm, logout} from 'phovea_security_flask/src/login';
 import {setLoggedIn} from '../user';
 
-const LOGIN_DIALOG = ` 
-<!--login dialog-->
-<div class="modal fade" id="loginDialog" tabindex="-1" role="dialog" aria-labelledby="loginDialog" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-          aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Please login</h4>
-      </div>
-      <div class="modal-body">
-
-      </div>
-    </div>
-  </div>
-</div>`;
 
 export interface ILoginMenuOptions {
   /**
@@ -74,20 +58,32 @@ export default class LoginMenu {
 
   private initLoginDialog(body: HTMLElement) {
 
-    body.insertAdjacentHTML('beforeend', LOGIN_DIALOG);
+    body.insertAdjacentHTML('beforeend', ` 
+      <!--login dialog-->
+      <div class="modal fade" id="loginDialog" tabindex="-1" role="dialog" aria-labelledby="loginDialog" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Please login</h4>
+            </div>
+            <div class="modal-body">
+              ${this.options.loginForm || loginForm}
+            </div>
+          </div>
+        </div>
+      </div>`);
 
     const that = this;
     {
-      const $form = $('#loginDialog div.modal-body').html(this.options.loginForm).find('form');
-      const $alert = $form.parent().find('div.alert');
-
-      $alert.hide();
-      bindLoginForm(<HTMLFormElement>$form[0], (error, user) => {
+      const form = <HTMLFormElement>body.querySelector('#loginDialog form');
+      bindLoginForm(form, (error, user) => {
         setLoggedIn(!!(!error && user), user);
         if (!error && user) {
           $('#login_menu').hide();
           const $base = $('#user_menu').show();
-          $form.removeClass('has-error');
+          form.classList.remove('has-error');
           $base.find('> a:first').text(user.name);
 
           (<any>$('#loginDialog')).modal('hide');
@@ -96,8 +92,7 @@ export default class LoginMenu {
           $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
         } else {
           that.header.ready();
-          $form.addClass('has-error');
-          $alert.html(error).show();
+          form.classList.add('has-error');
         }
       });
     }
