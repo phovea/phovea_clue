@@ -87,14 +87,15 @@ export class CLUEWrapper extends ACLUEWrapper {
   $mainRef: IObjectRef<d3.Selection<any>>;
 
   constructor(body: HTMLElement, options: ICLUEWrapperOptions = {}) {
-    super(body, options);
+    super();
     mixin(this.options, options);
+    this.build(body, options);
     this.on('jumped_to,loaded_graph', () => this.header.ready());
 
     this.$main = select(body).select('main');
   }
 
-  protected build(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager} {
+  protected buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager} {
     //create the common header
     const headerOptions = mixin(this.options.headerOptions, {
       showOptionsLink: true, // always activate options

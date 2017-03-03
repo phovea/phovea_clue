@@ -21,6 +21,8 @@ export interface ILoginMenuOptions {
 }
 
 export default class LoginMenu extends EventHandler {
+  static readonly EVENT_LOGGED_IN = 'loggedIn';
+  static readonly EVENT_LOGGED_OUT = 'loggedOut';
 
   readonly node: HTMLUListElement;
   private readonly options: ILoginMenuOptions = {
@@ -52,6 +54,19 @@ export default class LoginMenu extends EventHandler {
                 <li><a href="#" id="logout_link">Logout</a></li>
             </ul>
         </li>`;
+
+
+    $('#logout_link', ul).on('click', () => {
+      this.header.wait();
+      logout().then(() => {
+        setLoggedIn(false);
+        this.fire(LoginMenu.EVENT_LOGGED_OUT);
+        $('#user_menu').hide();
+        $('#login_menu').show();
+        $('.login_required').addClass('disabled');
+        this.header.ready();
+      });
+    });
 
     this.initLoginDialog(ul.ownerDocument.body);
 
@@ -90,7 +105,7 @@ export default class LoginMenu extends EventHandler {
     bindLoginForm(form, (error, user) => {
       setLoggedIn(!!(!error && user), user);
       if (!error && user) {
-        this.fire('logged_in');
+        this.fire(LoginMenu.EVENT_LOGGED_IN);
         $('#login_menu').hide();
         const $base = $('#user_menu').show();
         form.classList.remove('has-error');
@@ -104,17 +119,6 @@ export default class LoginMenu extends EventHandler {
         this.header.ready();
         form.classList.add('has-error');
       }
-    });
-    $('#logout_link').on('click', () => {
-      this.header.wait();
-      logout().then(() => {
-        setLoggedIn(false);
-        this.fire('logged_out');
-        $('#user_menu').hide();
-        $('#login_menu').show();
-        $('.login_required').addClass('disabled');
-        this.header.ready();
-      });
     });
   }
 }

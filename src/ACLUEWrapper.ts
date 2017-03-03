@@ -43,20 +43,18 @@ export interface IACLUEWrapperOptions {
 
 
 export abstract class ACLUEWrapper extends EventHandler {
-  readonly clueManager: CLUEGraphManager;
-  readonly graph: Promise<ProvenanceGraph>;
+  clueManager: CLUEGraphManager;
+  graph: Promise<ProvenanceGraph>;
   private storyVis: Promise<VerticalStoryVis>;
 
-  constructor(body: HTMLElement, options: IACLUEWrapperOptions) {
-    super();
-
+  protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
     if (options.replaceBody !== false) {
       body.innerHTML = TEMPLATE;
     } else {
       body.insertAdjacentHTML('afterbegin', TEMPLATE);
     }
     handleMagicHashElements(body, this);
-    const {graph, storyVis, manager} = this.build(body);
+    const {graph, storyVis, manager} = this.buildImpl(body);
 
     this.graph = graph;
     this.clueManager = manager;
@@ -77,7 +75,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     });
   }
 
-  protected abstract build(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager};
+  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager};
 
   private handleModeChange() {
     const $right = $('aside.provenance-layout-vis');
