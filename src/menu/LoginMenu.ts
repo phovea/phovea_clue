@@ -8,6 +8,7 @@ import {AppHeader} from 'phovea_ui/src/header';
 import * as $ from 'jquery';
 import {bindLoginForm, form as loginForm, logout} from 'phovea_security_flask/src/login';
 import {setLoggedIn} from '../user';
+import {EventHandler} from 'phovea_core/src/event';
 
 
 export interface ILoginMenuOptions {
@@ -19,7 +20,7 @@ export interface ILoginMenuOptions {
   insertIntoHeader?: boolean;
 }
 
-export default class LoginMenu {
+export default class LoginMenu extends EventHandler {
 
   readonly node: HTMLUListElement;
   private readonly options: ILoginMenuOptions = {
@@ -27,6 +28,7 @@ export default class LoginMenu {
     insertIntoHeader: true
   };
   constructor(private readonly header: AppHeader, options: ILoginMenuOptions = {}) {
+    super();
     mixin(this.options, options);
     this.node = this.init();
     if (this.options.insertIntoHeader) {
@@ -56,6 +58,15 @@ export default class LoginMenu {
     return ul;
   }
 
+  forceShowDialog() {
+    const $loginDialog = (<any>$('#loginDialog'));
+    $loginDialog.find('.modal-header .close').addClass('hidden'); // disable closing the dialog
+    $loginDialog.modal('show')
+      .on('shown.bs.modal', function () {
+        (<any>$('#login_username', $loginDialog)).focus();
+      });
+  }
+
   private initLoginDialog(body: HTMLElement) {
 
     body.insertAdjacentHTML('beforeend', ` 
@@ -75,37 +86,34 @@ export default class LoginMenu {
         </div>
       </div>`);
 
-    const that = this;
-    {
-      const form = <HTMLFormElement>body.querySelector('#loginDialog form');
-      bindLoginForm(form, (error, user) => {
-        setLoggedIn(!!(!error && user), user);
-        if (!error && user) {
-          $('#login_menu').hide();
-          const $base = $('#user_menu').show();
-          form.classList.remove('has-error');
-          $base.find('> a:first').text(user.name);
+    const form = <HTMLFormElement>body.querySelector('#loginDialog form');
+    bindLoginForm(form, (error, user) => {
+      setLoggedIn(!!(!error && user), user);
+      if (!error && user) {
+        this.fire('logged_in');
+        $('#login_menu').hide();
+        const $base = $('#user_menu').show();
+        form.classList.remove('has-error');
+        $base.find('> a:first').text(user.name);
 
-          (<any>$('#loginDialog')).modal('hide');
+        (<any>$('#loginDialog')).modal('hide');
 
-          // remove all .login_required magic flags
-          $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
-        } else {
-          that.header.ready();
-          form.classList.add('has-error');
-        }
-      });
-    }
-
-
+        // remove all .login_required magic flags
+        $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
+      } else {
+        this.header.ready();
+        form.classList.add('has-error');
+      }
+    });
     $('#logout_link').on('click', () => {
-      that.header.wait();
-      logout().then(function () {
+      this.header.wait();
+      logout().then(() => {
         setLoggedIn(false);
+        this.fire('logged_out');
         $('#user_menu').hide();
         $('#login_menu').show();
         $('.login_required').addClass('disabled');
-        that.header.ready();
+        this.header.ready();
       });
     });
   }

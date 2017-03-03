@@ -4,15 +4,12 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import {hash, mixin} from 'phovea_core/src/index';
+import {mixin} from 'phovea_core/src/index';
 import {IHeaderLink, create as createHeader, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
 import {
   MixedStorageProvenanceGraphManager,
-  IProvenanceGraphDataDescription,
   ProvenanceGraph,
-  IObjectRef,
-  StateNode,
-  SlideNode
+  IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
 import {create as createSelection} from './selection';
@@ -128,9 +125,9 @@ export class CLUEWrapper extends ACLUEWrapper {
       size: 'sm'
     });
 
-    const graph = this.clueManager.list().then((graphs) => {
+    const graph = clueManager.list().then((graphs) => {
       provenanceMenu.build(graphs);
-      return this.clueManager.choose(graphs);
+      return clueManager.choose(graphs);
     });
 
     graph.then((graph) => {
