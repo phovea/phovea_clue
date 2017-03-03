@@ -79,6 +79,12 @@ export default class CLUEGraphManager {
     });
   }
 
+  importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}) {
+    return this.manager.cloneRemote(graph, extras).then((graph) => {
+      this.loadGraph(graph.desc);
+    });
+  }
+
   setGraph(graph: ProvenanceGraph) {
     hash.setProp('clue_graph', graph.desc.id);
     return graph;
