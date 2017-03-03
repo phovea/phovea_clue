@@ -81,9 +81,10 @@ export default class CLUEGraphManager {
 
   setGraph(graph: ProvenanceGraph) {
     hash.setProp('clue_graph', graph.desc.id);
+    return graph;
   }
 
-  choose(list: IProvenanceGraphDataDescription[]) {
+  private chooseImpl(list: IProvenanceGraphDataDescription[]) {
     const loggedIn = isLoggedIn();
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
@@ -102,6 +103,10 @@ export default class CLUEGraphManager {
     return this.manager.create();
   }
 
+  choose(list: IProvenanceGraphDataDescription[]) {
+    return this.chooseImpl(list).then((g) => this.setGraph(g));
+  }
+
   loadOrClone(graph: IProvenanceGraphDataDescription, isSelect: boolean) {
     if (isSelect) {
       this.loadGraph(graph);
@@ -111,22 +116,11 @@ export default class CLUEGraphManager {
   }
 }
 
-
-
-
-
-
 /**
  * create the provenance graph selection dropdown and handles the graph selection
  * @param manager
- * @param $ul
  * @returns {Promise<U>}
  */
 function choose(manager: CLUEGraphManager): Promise<ProvenanceGraph> {
-  return manager.list().then((list) => {
-    return manager.choose(list);
-  }).then((graph) => {
-    manager.setGraph(graph);
-    return graph;
-  });
+  return manager.list().then((list) => manager.choose(list));
 }
