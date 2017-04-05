@@ -88,9 +88,11 @@ function testPhoveaModules(modules) {
   };
 }
 
+
 // use workspace registry file if available
 const isWorkspaceContext = fs.existsSync(resolve(__dirname, '..', 'phovea_registry.js'));
 const registryFile = isWorkspaceContext ? '../phovea_registry.js' : './phovea_registry.js';
+const actMetaData = `file-loader?name=phoveaMetaData.json!${buildInfo.metaDataTmpFile(pkg)}`;
 const actBuildInfoFile = `file-loader?name=buildInfo.json!${buildInfo.tmpFile()}`;
 
 /**
@@ -99,13 +101,14 @@ const actBuildInfoFile = `file-loader?name=buildInfo.json!${buildInfo.tmpFile()}
  * @returns {*}
  */
 function injectRegistry(entry) {
+  const extraFiles = [registryFile, actBuildInfoFile, actMetaData];
   //build also the registry
   if (typeof entry === 'string') {
-    return [registryFile, actBuildInfoFile].concat(entry);
+    return extraFiles.concat(entry);
   } else {
     const transformed = {};
     Object.keys(entry).forEach((eentry) => {
-      transformed[eentry] = [registryFile, actBuildInfoFile].concat(entry[eentry]);
+      transformed[eentry] = extraFiles.concat(entry[eentry]);
     });
     return transformed;
   }
@@ -139,12 +142,16 @@ function generateWebpack(options) {
       }),
       //define magic constants that are replaced
       new webpack.DefinePlugin({
+        'process.env': {
+          'NODE_ENV': JSON.stringify(options.isProduction ? 'production': 'development')
+        },
         __VERSION__: JSON.stringify(pkg.version),
         __LICENSE__: JSON.stringify(pkg.license),
         __BUILD_ID__: buildId,
         __DEBUG__: options.isDev || options.isTest,
         __TEST__: options.isTest,
-        __PRODUCTION__: options.isProduction
+        __PRODUCTION__: options.isProduction,
+        __APP_CONTEXT__: JSON.stringify('/')
       }),
       new webpack.optimize.MinChunkSizePlugin({
         minChunkSize: 10000 //at least 10.000 characters
@@ -157,10 +164,14 @@ function generateWebpack(options) {
       loaders: webpackloaders.slice()
     },
     devServer: {
+      watchOptions: {
+        ignored: '/node_modules/'
+      },
       proxy: {
         '/api/*': {
           target: 'http://localhost:9000',
-          secure: false
+          secure: false,
+          ws: true
         },
         '/login': {
           target: 'http://localhost:9000',
@@ -296,7 +307,7 @@ function generateWebpackConfig(env) {
   //single generation
   if (isDev) {
     return generateWebpack(base);
-  } else if (type === 'app') { //isProduction app
+  } else if (type.startsWith('app')) { //isProduction app
     return generateWebpack(Object.assign({}, base, {
         min: true,
         nosuffix: true

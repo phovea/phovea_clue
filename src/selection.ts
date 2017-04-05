@@ -12,10 +12,10 @@ const disabler = new events.EventHandler();
 
 
 function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
-  var idtype = idtypes.resolve(parameter.idtype),
+  const idtype = idtypes.resolve(parameter.idtype),
     range = ranges.parse(parameter.range),
     type = parameter.type;
-  var bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
+  const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
 
   if (C.hash.is('debug')) {
     console.log('select', range.toString());
@@ -33,8 +33,8 @@ function capitalize(s: string) {
 
 function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
   const l = range.dim(0).length;
-  var title = type === idtypes.defaultSelectionType ? '' : (capitalize(type)+' ');
-  var p;
+  let title = type === idtypes.defaultSelectionType ? '' : (capitalize(type)+' ');
+  let p;
   if (l === 0) {
     title += 'no '+idtype.names;
     p = Promise.resolve(title);
@@ -69,15 +69,15 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
 export function createSelection(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range = null, animated = false) {
   return meta(idtype, type, range).then((meta) => {
     return {
-      meta: meta,
+      meta,
       id: 'select',
       f: select,
       parameter: {
         idtype: idtype.id,
         range: range.toString(),
-        type: type,
+        type,
         old: old.toString(),
-        animated: animated
+        animated
       }
     };
   });
@@ -107,7 +107,7 @@ export function compressSelection(path: provenance.ActionNode[]) {
 class SelectionTypeRecorder {
   private l = (event, type, sel, added, removed, old) => {
     createSelection(this.idtype, type, sel, old, this.options.animated).then((cmd) => this.graph.push(cmd));
-  };
+  }
 
   private _enable = this.enable.bind(this);
   private _disable = this.disable.bind(this);
@@ -165,7 +165,7 @@ export class SelectionRecorder {
     if (this.options.filter(idtype)) {
       this.handler.push(new SelectionTypeRecorder(idtype, this.graph, this.type, this.options));
     }
-  };
+  }
 
   constructor(private graph:provenance.ProvenanceGraph, private type?:string, private options : any = {}) {
     this.options = C.mixin({

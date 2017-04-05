@@ -40,7 +40,7 @@ for an simple example how to use it.
 ***
 
 <a href="https://caleydo.org"><img src="http://caleydo.org/assets/images/logos/caleydo.svg" align="left" width="200px" hspace="10" vspace="6"></a>
-This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform for developing web-based visualization applications. For tutorials, API docs, and more information about the build and deployment process, see the [documentation page](http://caleydo.org/documentation/).
+This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform for developing web-based visualization applications. For tutorials, API docs, and more information about the build and deployment process, see the [documentation page](http://phovea.caleydo.org).
 
 
 [phovea-image]: https://img.shields.io/badge/Phovea-Client%20Plugin-F47D20.svg
@@ -49,5 +49,5 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 [npm-url]: https://npmjs.org/package/phovea_clue
 [travis-image]: https://travis-ci.org/phovea/phovea_clue.svg?branch=master
 [travis-url]: https://travis-ci.org/phovea/phovea_clue
-[daviddm-image]: https://david-dm.org/phovea/phovea_clue.svg?theme=shields.io
+[daviddm-image]: https://david-dm.org/phovea/phovea_clue/status.svg
 [daviddm-url]: https://david-dm.org/phovea/phovea_clue
