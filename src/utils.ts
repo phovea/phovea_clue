@@ -3,30 +3,33 @@
  */
 
 
-import * as C from 'phovea_core/src/index';
-import * as ajax from 'phovea_core/src/ajax';
-import * as provenance from 'phovea_core/src/provenance';
+import {mixin} from 'phovea_core/src/index';
+import {api2absURL} from 'phovea_core/src/ajax';
+import {ProvenanceGraph, StateNode, SlideNode} from 'phovea_core/src/provenance';
 
-export function thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
+import * as not_available from './assets/not_available.png';
+
+
+export function thumbnail_url(graph: ProvenanceGraph, state: StateNode, options= {}) {
   const o = {
     width: 128,
     format: 'jpg'
   };
-  C.mixin(o, options);
+  mixin(o, options);
   if (state.hasAttr('thumbnail')) {
     return state.getAttr('thumbnail');
   }
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return ajax.api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return 'phovea_clue/assets/src/not_available.png';
+  return not_available;
 }
 
-export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: provenance.SlideNode, options= {}) {
+export function preview_thumbnail_url(graph: ProvenanceGraph, state: SlideNode, options= {}) {
   const o = {
     width: 128,
     format: 'jpg'
@@ -37,14 +40,14 @@ export function preview_thumbnail_url(graph: provenance.ProvenanceGraph, state: 
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return ajax.api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return 'phovea_clue/assets/src/not_available.png';
+  return not_available;
 }
 
-export function screenshot_url(graph: provenance.ProvenanceGraph, state: provenance.StateNode, options= {}) {
+export function screenshot_url(graph: ProvenanceGraph, state: StateNode, options= {}) {
   const o = {
     width: 128,
     format: 'jpg'
@@ -55,14 +58,14 @@ export function screenshot_url(graph: provenance.ProvenanceGraph, state: provena
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return ajax.api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
-  return 'phovea_clue/assets/src/not_available.png';
+  return not_available;
 }
 
-export function areThumbnailsAvailable(graph: provenance.ProvenanceGraph) {
+export function areThumbnailsAvailable(graph: ProvenanceGraph) {
   const d = (<any>graph.desc);
   return (d.attrs && d.attrs.of && !(d.local));
 }
