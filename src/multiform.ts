@@ -9,8 +9,8 @@ import * as C from 'phovea_core/src/index';
 
 const disabled = {};
 
-function transform(inputs:provenance.IObjectRef<any>[], parameter:any):provenance.ICmdResult {
-  const v:vis.IVisInstance = inputs[0].value,
+function transform(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
+  const v: vis.IVisInstance = inputs[0].value,
     transform = parameter.transform,
     bak = parameter.old || v.transform();
 
@@ -21,7 +21,7 @@ function transform(inputs:provenance.IObjectRef<any>[], parameter:any):provenanc
     inverse: createTransform(inputs[0], bak, transform)
   };
 }
-export function createTransform(v:provenance.IObjectRef<vis.IVisInstance>, t:vis.ITransform, old:vis.ITransform = null) {
+export function createTransform(v: provenance.IObjectRef<vis.IVisInstance>, t: vis.ITransform, old: vis.ITransform = null) {
   return {
     meta: provenance.meta('transform ' + v.toString(), provenance.cat.visual),
     id: 'transform',
@@ -34,9 +34,9 @@ export function createTransform(v:provenance.IObjectRef<vis.IVisInstance>, t:vis
   };
 }
 
-function changeVis(inputs:provenance.IObjectRef<any>[], parameter:any):Promise<provenance.ICmdResult> {
-  const v:multiform.IMultiForm = inputs[0].value,
-    to:string = parameter.to,
+function changeVis(inputs: provenance.IObjectRef<any>[], parameter: any): Promise<provenance.ICmdResult> {
+  const v: multiform.IMultiForm = inputs[0].value,
+    to: string = parameter.to,
     from = parameter.from || v.act.id;
   disabled['switch-' + v.id] = true;
   return v.switchTo(to).then(() => {
@@ -46,7 +46,7 @@ function changeVis(inputs:provenance.IObjectRef<any>[], parameter:any):Promise<p
     };
   });
 }
-export function createChangeVis(v:provenance.IObjectRef<multiform.IMultiForm>, to:string, from:string = null) {
+export function createChangeVis(v: provenance.IObjectRef<multiform.IMultiForm>, to: string, from: string = null) {
   return {
     meta: provenance.meta('switch vis ' + v.toString(), provenance.cat.visual),
     id: 'changeVis',
@@ -59,8 +59,8 @@ export function createChangeVis(v:provenance.IObjectRef<multiform.IMultiForm>, t
   };
 }
 
-function setOption(inputs:provenance.IObjectRef<any>[], parameter:any):provenance.ICmdResult {
-  const v:vis.IVisInstance = inputs[0].value,
+function setOption(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
+  const v: vis.IVisInstance = inputs[0].value,
     name = parameter.name,
     value = parameter.value,
     bak = parameter.old || v.option(name);
@@ -72,7 +72,7 @@ function setOption(inputs:provenance.IObjectRef<any>[], parameter:any):provenanc
   };
 }
 
-export function createSetOption(v:provenance.IObjectRef<vis.IVisInstance>, name:string, value:any, old:any = null) {
+export function createSetOption(v: provenance.IObjectRef<vis.IVisInstance>, name: string, value: any, old: any = null) {
   return {
     meta: provenance.meta('set option "' + name + +'" of "' + v.toString() + ' to "' + value + '"', provenance.cat.visual),
     id: 'setOption',
@@ -86,7 +86,7 @@ export function createSetOption(v:provenance.IObjectRef<vis.IVisInstance>, name:
   };
 }
 
-export function attach(graph:provenance.ProvenanceGraph, v:provenance.IObjectRef<vis.IVisInstance>) {
+export function attach(graph: provenance.ProvenanceGraph, v: provenance.IObjectRef<vis.IVisInstance>) {
   const m = v.value, id = m.id;
   if (typeof ((<any>m).switchTo) === 'function') {
     m.on('changed', (event, newValue, old) => {
@@ -110,7 +110,7 @@ export function attach(graph:provenance.ProvenanceGraph, v:provenance.IObjectRef
   });
 }
 
-export function createCmd(id:string): provenance.ICmdFunction {
+export function createCmd(id: string): provenance.ICmdFunction {
   switch (id) {
     case 'transform':
       return transform;

@@ -17,7 +17,7 @@ function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, withi
     type = parameter.type;
   const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
 
-  if (C.hash.is('debug')) {
+  if (C.hash.has('debug')) {
     console.log('select', range.toString());
   }
   disabler.fire('disable-'+idtype.id);
