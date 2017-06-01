@@ -39,6 +39,7 @@
     }
   }
 
+  .btn-search,
   .btn-filter {
     color: $core_colour_text;
     float: right;
@@ -48,6 +49,14 @@
     &:hover {
       font-weight: bold;
     }
+  }
+
+  .btn-filter {
+    margin-right: 10px;
+  }
+
+  .btn-search {
+    margin-right: 15px;
   }
 
   .btn-collapse {

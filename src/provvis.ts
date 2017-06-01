@@ -12,7 +12,6 @@ import * as cmode from './mode';
 import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
-
 import * as utils from './utils';
 
 
@@ -371,8 +370,8 @@ class StateRepr {
 
 export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
   private $node:d3.Selection<any>;
-  private trigger = C.bind(this.update, this);
-  private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
+  private trigger = this.update.bind(this);
+  private triggerStoryHighlight = this.updateStoryHighlight.bind(this);
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   }
@@ -481,7 +480,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       <div>
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
-          <a href="#" class="btn-filter"><i class="fa fa-filter"></i></a>
+          <a href="#" class="btn-search" title="Query similar states"><i class="fa fa-search"></i></a>
+          <a href="#" class="btn-filter" title="Filter provenance graph"><i class="fa fa-filter"></i></a>
         </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
@@ -587,6 +587,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       evt.preventDefault();
       $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', $p.classed('collapsed')).classed('fa-arrow-circle-o-left', !$p.classed('collapsed'));
       $p.classed('collapsed', !$p.classed('collapsed'));
+    });
+
+    jp.find('.btn-search').on('click', (evt) => {
+      evt.preventDefault();
+      jp.parent().find('.prov-retrieval-panel').toggleClass('hidden');
+      return false;
     });
 
     return $p;

@@ -12,8 +12,9 @@ import {
   IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
-import {create as createSelection} from './selection';
 import * as cmode from './mode';
+import {create as createSelection} from './selection';
+import {create as createProvRetrievalPanel} from './prov-retrieval/ProvRetrievalPanel';
 import {create as createProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
 import {IEvent} from 'phovea_core/src/event';
@@ -155,6 +156,9 @@ export class CLUEWrapper extends ACLUEWrapper {
         thumbnails: this.options.thumbnails,
         provVisCollapsed: this.options.provVisCollapsed
       });
+
+      createProvRetrievalPanel(graph, body.querySelector('div.content'), {});
+
       return createStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
         thumbnails: this.options.thumbnails
       });
