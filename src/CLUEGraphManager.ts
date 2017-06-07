@@ -6,7 +6,7 @@ import {hash} from 'phovea_core/src/index';
 import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {isLoggedIn} from 'phovea_core/src/security';
+import {canWrite, isLoggedIn} from 'phovea_core/src/security';
 
 export default class CLUEGraphManager {
   constructor(private manager: MixedStorageProvenanceGraphManager) {
@@ -85,6 +85,10 @@ export default class CLUEGraphManager {
     });
   }
 
+  editGraphMetaData(graph: IProvenanceGraphDataDescription, extras: any = {}) {
+    return this.manager.edit(graph, extras);
+  }
+
   setGraph(graph: ProvenanceGraph) {
     hash.setProp('clue_graph', graph.desc.id);
     return graph;
@@ -101,7 +105,7 @@ export default class CLUEGraphManager {
     }
     const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     if (desc) {
-      if ((<any>desc).local || loggedIn) {
+      if ((<any>desc).local || (loggedIn && canWrite(desc))) {
         return this.manager.get(desc);
       }
       return this.manager.cloneLocal(desc);
