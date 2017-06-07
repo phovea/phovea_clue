@@ -25,13 +25,14 @@ import {VisStateIndex} from './VisStateIndex';
  */
 export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
-  private trigger = this.update.bind(this);
   private $node: d3.Selection<any>;
   private $searchResults: d3.Selection<any>;
 
   private dim: [number, number] = [200, 100];
 
   private stateIndex:VisStateIndex = new VisStateIndex();
+
+  private query:string[] = [];
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
@@ -40,16 +41,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     onDOMNodeRemoved(this.node, this.destroy, this);
 
     this.bind();
-    this.update();
+    this.initStateIndex();
   }
 
   private bind() {
-    this.data.on('switch_state', this.trigger);
+    this.data.on('executed_first', this.addState.bind(this));
   }
 
   destroy() {
     super.destroy();
-    this.data.off('switch_state', this.trigger);
+    this.data.off('executed_first', this.addState.bind(this));
   }
 
   get rawSize(): [number, number] {
@@ -58,6 +59,18 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   get node() {
     return <Element>this.$node.node();
+  }
+
+  private initStateIndex() {
+    this.data.states.forEach((stateNode) => {
+      this.stateIndex.addState(stateNode.visState);
+    });
+    console.log(this.stateIndex, this.data.states.map((s) => s.visState));
+  }
+
+  private addState(evt, action, stateNode) {
+    this.stateIndex.addState(stateNode.visState);
+    this.updateSearchResults(this.query);
   }
 
   private build($parent: d3.Selection<any>) {
@@ -71,21 +84,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <h2><i class="fa fa-search"></i> Search Provenance States</h2>
       </div>
       <div class="body">
-        <form action="#" onsubmit="return false;">
+        <form action="#" onsubmit="return false; ">
           <div class="form-group">
-            <label for="prov-retrieval-select">Filter provenance states by &hellip;</label>
+            <label class="sr-only" for="prov-retrieval-select">Filter provenance states by &hellip;</label>
             <select multiple="multiple" style="width: 100%" class="form-control" id="prov-retrieval-select"></select>
           </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-default">Search</button>
-          </div>
-          <hr> 
-          <div class="form-group">
-            <p><strong>Search Results</strong></p>
-            <ol class="search-results"></ol>
-            <p>No matching states found.</p>
-          </div>
         </form>
+        <ol class="search-results"></ol>
+        <p>No matching states found.</p>
       </div>
     `);
 
@@ -95,18 +101,20 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       const $s2Instance = new Select2();
       const $select2 = $s2Instance.init('#prov-retrieval-select', this.options.app.getVisStateAttrs());
       $select2
-        .on('select2:select', (e) => {
-          //console.log('select2:select', e.params.data);
-          this.updateSearchResults($select2.val());
+        .on('change', (evt) => {
+          this.query = $select2.val();
+          this.updateSearchResults(this.query);
         })
-        .on('select2:unselect', (e) => {
+        //.on('select2:select', (evt) => {
+          //console.log('select2:select', e.params.data);
+        //})
+        .on('select2:unselect', (evt) => {
           //console.log('select2:unselect', e.params.data);
-          this.updateSearchResults($select2.val());
-        });
-
-      $p.select('.body > form')
-        .on('click', () => {
-          this.updateSearchResults($select2.val());
+          // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
+          if (!evt.params.originalEvent) {
+            return;
+          }
+          evt.params.originalEvent.stopPropagation();
         });
 
     } else {
@@ -114,10 +122,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     }
 
     return $p;
-  }
-
-  update() {
-    this.stateIndex.addState(this.data.act.visState);
   }
 
   private updateSearchResults(query) {

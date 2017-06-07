@@ -65,7 +65,7 @@ export class VisStateIndex {
       return this.idfCache.get(term);
     }
 
-    const docsWithTerm = this.states.reduce((count, document) => count + (document.hasTerm(term) ? 1 : 0), 0);
+    const docsWithTerm = this.states.reduce((count, state) => count + (state.hasTerm(term) ? 1 : 0), 0);
 
     const idf: number = 1 + Math.log((this.states.length) / ( 1 + docsWithTerm ));
 

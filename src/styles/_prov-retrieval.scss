@@ -1,5 +1,7 @@
 
 .prov-retrieval-panel {
+  width: 30em;
+
   .body {
     margin: 5px;
   }
@@ -18,10 +20,5 @@
         display: block;
       }
     }
-  }
-
-  hr {
-    border: 0;
-    border-top: 1px solid $core_duration;
   }
 }
