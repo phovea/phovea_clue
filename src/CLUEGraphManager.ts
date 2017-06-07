@@ -6,7 +6,7 @@ import {hash} from 'phovea_core/src/index';
 import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {isLoggedIn} from './user';
+import {isLoggedIn} from 'phovea_core/src/security';
 
 export default class CLUEGraphManager {
   constructor(private manager: MixedStorageProvenanceGraphManager) {

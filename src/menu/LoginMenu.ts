@@ -7,7 +7,6 @@ import {mixin} from 'phovea_core/src/index';
 import {AppHeader} from 'phovea_ui/src/header';
 import * as $ from 'jquery';
 import {bindLoginForm, form as loginForm, logout} from 'phovea_security_flask/src/login';
-import {setLoggedIn} from '../user';
 import {EventHandler} from 'phovea_core/src/event';
 
 
@@ -59,7 +58,6 @@ export default class LoginMenu extends EventHandler {
     $('#logout_link', ul).on('click', () => {
       this.header.wait();
       logout().then(() => {
-        setLoggedIn(false);
         this.fire(LoginMenu.EVENT_LOGGED_OUT);
         $('#user_menu').hide();
         $('#login_menu').show();
@@ -103,8 +101,8 @@ export default class LoginMenu extends EventHandler {
 
     const form = <HTMLFormElement>body.querySelector('#loginDialog form');
     bindLoginForm(form, (error, user) => {
-      setLoggedIn(!!(!error && user), user);
-      if (!error && user) {
+      const success = !error && user;
+      if (success) {
         this.fire(LoginMenu.EVENT_LOGGED_IN);
         $('#login_menu').hide();
         const $base = $('#user_menu').show();
