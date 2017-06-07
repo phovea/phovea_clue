@@ -13,6 +13,7 @@ import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
+import {IVisStateApp} from './prov-retrieval/IVisStateApp';
 
 const TEMPLATE = `<div class="box">
   <header>
@@ -46,6 +47,12 @@ export abstract class ACLUEWrapper extends EventHandler {
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
   private storyVis: Promise<VerticalStoryVis>;
+  private app: IVisStateApp;
+
+  setApplication(app:IVisStateApp) {
+    this.app = app;
+    this.fire('set_application', this.app);
+  }
 
   protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
     if (options.replaceBody !== false) {

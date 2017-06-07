@@ -24,6 +24,7 @@ import LoginMenu from './menu/LoginMenu';
 
 export {default as CLUEGraphManager} from './CLUEGraphManager';
 import ACLUEWrapper, {IACLUEWrapperOptions, createStoryVis} from './ACLUEWrapper';
+import {IVisStateApp} from './prov-retrieval/IVisStateApp';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
@@ -151,13 +152,20 @@ export class CLUEWrapper extends ACLUEWrapper {
       }
     });
 
+    graph.then((graph) => {
+      // `set_application` is fired in ACLUEWrapper
+      this.on('set_application', (evt, app:IVisStateApp) => {
+        createProvRetrievalPanel(graph, body.querySelector('div.content'), {
+          app
+        });
+      });
+    });
+
     const storyVis = graph.then((graph) => {
       createProvVis(graph, body.querySelector('div.content'), {
         thumbnails: this.options.thumbnails,
         provVisCollapsed: this.options.provVisCollapsed
       });
-
-      createProvRetrievalPanel(graph, body.querySelector('div.content'), {});
 
       return createStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
         thumbnails: this.options.thumbnails
