@@ -13,12 +13,13 @@
     display: none;
   }
 
-  > div:first-child {
+  > div.header {
     -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
   }
 
-  > div:nth-of-type(2) {
+  > div.body {
+    position: relative;
     overflow-x: auto;
     max-height: 93vh;
     -webkit-flex: 1 1 auto;

@@ -3,6 +3,7 @@
  */
 import 'select2';
 import * as $ from 'jquery';
+import {VisStateIndex} from './VisStateIndex';
 
 export interface ISelect2Data {
   text: string;
@@ -16,8 +17,6 @@ interface IQuery {
 }
 
 export class Select2 {
-
-  private static TAG_VALUE_SEPARATOR = '=';
 
   private query: IQuery = {
     term: ''
@@ -125,7 +124,7 @@ export class Select2 {
             .find('.select2-search__field');
 
           $searchfield
-            .val(item.text.slice(0, item.text.indexOf(Select2.TAG_VALUE_SEPARATOR) + 2))
+            .val(item.text.slice(0, item.text.indexOf(VisStateIndex.TAG_VALUE_SEPARATOR) + 2))
             .css('width', '12em') // TODO make it flexible based on the text length or automatically by triggering select2.keypress()
             .focus();
 

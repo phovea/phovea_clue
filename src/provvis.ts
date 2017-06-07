@@ -477,7 +477,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     $p.html(`
       <a href="#" class="btn-collapse"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
-      <div>
+      <div class="header">
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
           <a href="#" class="btn-search" title="Query similar states"><i class="fa fa-search"></i></a>
@@ -532,7 +532,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
          </div>
         </form>
       </div>
-      <div style="position: relative">
+      <div class="body">
         <svg>
           <g transform="translate(1,1)" class="edges"></g>
           <g transform="translate(1,1)" class="storyhighlights" style="display:none">

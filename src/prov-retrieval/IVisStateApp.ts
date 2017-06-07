@@ -5,6 +5,6 @@
 import {ISelect2Data} from './Select2';
 
 export interface IVisStateApp {
-  getVisStateAttrs():ISelect2Data[];
-  getCurrVisState():string[];
+  getVisStateAttrs(): ISelect2Data[];
+  getCurrVisState(): string[];
 }

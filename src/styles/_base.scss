@@ -61,14 +61,15 @@ aside {
   &.provenance-layout-vis {
     border-color:$core_border;
     //border-color: $authoring-stage;
-    > div:first-of-type {
+    > div.header {
       background-color: $authoring-stage;
     }
 
   }
   &.provenance-story-vis, &.annotations {
     border-color: $core_border;
-    > div:first-of-type {
+    > div:first-of-type,
+    > div.header {
       background-color: $presentation-stage;
     }
   }

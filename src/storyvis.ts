@@ -224,7 +224,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       'class': 'provenance-story-vis ' + this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
-      <div>
+      <div class="header">
         <h2><i class="fa fa-video-camera"></i> Story <span id="player_controls">
             <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></i>
             <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="Play"></i>
@@ -248,13 +248,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         </div>
         </form>
       </div>
-      <div class="current">
+      <div class="body current">
         <input type="text" class="form-control" placeholder="slide name" disabled="disabled">
         <div class="name"></div>
         <textarea class="form-control" placeholder="slide description" disabled="disabled"></textarea>
         <div class="description"></div>
       </div>
-      <div class="stories ${this.options.class}">
+      <div class="body stories ${this.options.class}">
         <div class="line"></div>
         <div class="time_marker"><i class="fa fa-circle"></i></div>
       </div>

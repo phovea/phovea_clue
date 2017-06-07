@@ -3,4 +3,25 @@
   .body {
     margin: 5px;
   }
+
+  .search-results {
+    display: block;
+
+    + p {
+      display: none;
+    }
+
+    &:empty {
+      display: none;
+
+      + p {
+        display: block;
+      }
+    }
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid $core_duration;
+  }
 }
