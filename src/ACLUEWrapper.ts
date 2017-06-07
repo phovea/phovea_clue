@@ -43,6 +43,9 @@ export interface IACLUEWrapperOptions {
 
 
 export abstract class ACLUEWrapper extends EventHandler {
+  static readonly EVENT_MODE_CHANGED = 'modeChanged';
+  static readonly EVENT_JUMPED_TO = 'jumped_to';
+
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
   private storyVis: Promise<VerticalStoryVis>;
@@ -96,7 +99,7 @@ export abstract class ACLUEWrapper extends EventHandler {
       }
     };
     cmode.on('modeChanged', (event, newMode) => update(newMode));
-    this.fire('modeChanged', cmode.getMode());
+    this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
     update(cmode.getMode());
   }
 
@@ -133,10 +136,10 @@ export abstract class ACLUEWrapper extends EventHandler {
       } else {
         await storyVis.player.render(s);
       }
-      this.fire('jumped_to', s);
+      this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
-    this.fire('jumped_to', null);
+    this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
     return Promise.reject('story not found');
   }
 
@@ -148,10 +151,10 @@ export abstract class ACLUEWrapper extends EventHandler {
       console.log('jump to stored', s.id);
       await graph.jumpTo(s);
       console.log('jumped to stored', s.id);
-      this.fire('jumped_to', s);
+      this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
-    this.fire('jumped_to', null);
+    this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
     return Promise.reject('state not found');
   }
 
@@ -165,7 +168,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     if (targetState !== null) {
       return this.jumpToState(targetState);
     }
-    this.fire('jumped_to', null);
+    this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
     //no stored state nothing to jump to
     return Promise.resolve(this);
   }
