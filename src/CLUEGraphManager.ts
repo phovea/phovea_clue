@@ -73,6 +73,13 @@ export default class CLUEGraphManager {
     return this.manager.delete(graph);
   }
 
+  startFromScratch() {
+    hash.removeProp('clue_slide', false);
+    hash.removeProp('clue_state', false);
+    hash.removeProp('clue_graph');
+    window.location.reload();
+  }
+
   importGraph(dump: any, remote = false) {
     (remote ? this.manager.importRemote(dump) : this.manager.importLocal(dump)).then((graph) => {
       this.loadGraph(graph.desc);
@@ -121,8 +128,12 @@ export default class CLUEGraphManager {
     if (isSelect) {
       this.loadGraph(graph);
     } else {
-      this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
+      this.cloneLocal(graph);
     }
+  }
+
+  cloneLocal(graph: IProvenanceGraphDataDescription) {
+    this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
   }
 }
 
