@@ -9,6 +9,7 @@ import StateNode from 'phovea_core/src/provenance/StateNode';
 import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
 import {VisStateIndex} from './VisStateIndex';
+import ActionNode from 'phovea_core/src/provenance/ActionNode';
 
 
 /**
@@ -67,7 +68,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     });
   }
 
-  private addState(evt, action, stateNode) {
+  private addState(evt, action:ActionNode, stateNode:StateNode) {
     this.stateIndex.addState(stateNode.visState);
     this.updateSearchResults(this.query);
   }
