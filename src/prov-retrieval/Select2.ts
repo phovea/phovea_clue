@@ -4,13 +4,7 @@
 import 'select2';
 import * as $ from 'jquery';
 import {VisStateIndex} from './VisStateIndex';
-
-export interface ISelect2Data {
-  text: string;
-  id?: string;
-  children?: ISelect2Data[];
-  param?: boolean;
-}
+import {IVisStateAttr, IVisStateCategory} from './IVisState';
 
 interface IQuery {
   term: string;
@@ -26,7 +20,7 @@ export class Select2 {
     //
   }
 
-  init(selector: string, data: ISelect2Data[]) {
+  init(selector: string, data: IVisStateCategory[]) {
     return $(selector).select2(<any>{
       theme: 'bootstrap',
       placeholder: 'Add filter by attribute, visualization, value, …',
@@ -113,7 +107,7 @@ export class Select2 {
       }
     })
       .on('select2:selecting', (e) => {
-        const item:ISelect2Data = e.params.args.data;
+        const item:IVisStateAttr = e.params.args.data;
 
         if (item.param === true) {
           // prevent adding items with parameter -> will be added by `createTag()`
@@ -153,7 +147,7 @@ export class Select2 {
     return matches && this.findQueryInText(matches[1], text);
   }
 
-  private filterData(data, query) {
+  private filterData(data:IVisStateCategory[], query) {
     if (!query) {
       return data;
     }
@@ -161,7 +155,7 @@ export class Select2 {
     let result = [];
 
     data.forEach((d) => {
-      const res: ISelect2Data = {text: d.text};
+      const res: IVisStateCategory = {text: d.text};
 
       if (d.id) {
         res.id = d.id;

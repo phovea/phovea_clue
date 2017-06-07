@@ -21,10 +21,10 @@ import {IEvent} from 'phovea_core/src/event';
 import CLUEGraphManager from './CLUEGraphManager';
 import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
 import LoginMenu from './menu/LoginMenu';
+import {IVisStateApp} from './prov-retrieval/IVisState';
 
 export {default as CLUEGraphManager} from './CLUEGraphManager';
 import ACLUEWrapper, {IACLUEWrapperOptions, createStoryVis} from './ACLUEWrapper';
-import {IVisStateApp} from './prov-retrieval/IVisStateApp';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
