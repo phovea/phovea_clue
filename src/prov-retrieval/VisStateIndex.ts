@@ -2,11 +2,11 @@
  * Created by Holger Stitz on 07.06.2017.
  */
 import * as d3 from 'd3';
-import {TermFrequency} from 'phovea_core/src/provenance/retrieval/TermFrequency';
+import {VisState} from 'phovea_core/src/provenance/retrieval/VisState';
 
 interface ISearchResult {
   query: string[];
-  state: TermFrequency;
+  state: VisState;
   similarity: number;
 }
 
@@ -18,7 +18,7 @@ export class VisStateIndex {
 
   public static TAG_VALUE_SEPARATOR = '=';
 
-  private states: TermFrequency[] = [];
+  private states: VisState[] = [];
 
   private idfCache = new Map<string, number>();
 
@@ -36,7 +36,7 @@ export class VisStateIndex {
    * @param state
    * @param restoreCache If restoreCache is set to true, all terms idf scores currently cached will be recomputed. Otherwise, the cache will just be wiped clean
    */
-  addState(state: TermFrequency, restoreCache: boolean = false) {
+  addState(state: VisState, restoreCache: boolean = false) {
     this.states.push(state);
 
     // make sure the cache is invalidated when new documents arrive
