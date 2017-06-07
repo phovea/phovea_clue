@@ -18,7 +18,7 @@ export class VisStateIndex {
 
   public static TAG_VALUE_SEPARATOR = '=';
 
-  private states: VisState[] = [];
+  states: VisState[] = [];
 
   private idfCache = new Map<string, number>();
 

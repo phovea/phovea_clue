@@ -65,7 +65,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     this.data.states.forEach((stateNode) => {
       this.stateIndex.addState(stateNode.visState);
     });
-    console.log(this.stateIndex, this.data.states.map((s) => s.visState));
   }
 
   private addState(evt, action, stateNode) {
@@ -134,17 +133,41 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return;
     }
 
-    results
+    const data = results
       .sort((x, y) => y.similarity - x.similarity)
-      .forEach((d) => {
-        const terms = d.state.terms.map((term) => {
-          return (d.query.indexOf(term) > -1) ? `<span class="select2-rendered__match">${term}</span>` : `${term}`;
+      .map((d) => {
+        d.terms = d.state.terms.map((term) => {
+          return (d.query.indexOf(term) > -1) ? `<span class="match">${term}</span>` : `${term}`;
         });
-
-        this.$searchResults
-          .append('li')
-          .html(`<span style="padding:0 10px 0 5px">(${d.similarity.toFixed(2)})</span> ${terms.join(', ')}`);
+        return d;
       });
+
+    const $li = this.$searchResults.selectAll('li').data(data);
+
+    $li.enter().append('li');
+
+    $li
+      .html((d) => `
+        <span class="title">${d.state.node.name}</span>
+        <span class="label score">${d.similarity.toFixed(2)} </span>
+        <small class="terms">${d.terms.join(', ')}</small>
+      `)
+      .on('mouseenter', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+      })
+      .on('mouseleave', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+      })
+      .on('click', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.jumpTo(d.state.node);
+      });
+
+    $li.exit().remove();
+
   }
 
 }

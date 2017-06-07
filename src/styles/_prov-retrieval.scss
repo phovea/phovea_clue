@@ -8,6 +8,47 @@
 
   .search-results {
     display: block;
+    padding-left: 20px;
+    cursor: pointer;
+
+
+    .title {
+      transition: font-weight .2s ease-in-out;
+    }
+
+    .score {
+      background: white;
+      color: $header-menu-color;
+      opacity: 0.3;
+      transition: opacity .2s ease-in-out;
+    }
+
+    .terms {
+      display: block;
+      color: $header-menu-color;
+      margin-top: 3px;
+      opacity: 0.3;
+      transition: opacity .2s ease-in-out;
+
+      .match {
+        background-color: lighten($select-color, 40%);
+      }
+    }
+
+    li {
+      margin: 10px 0;
+
+      &:hover {
+        .title {
+          font-weight: bold;
+        }
+
+        .terms,
+        .score {
+          opacity: 1;
+        }
+      }
+    }
 
     + p {
       display: none;
