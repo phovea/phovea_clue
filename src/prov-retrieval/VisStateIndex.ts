@@ -35,8 +35,13 @@ export class VisStateIndex {
    *
    * @param state
    * @param restoreCache If restoreCache is set to true, all terms idf scores currently cached will be recomputed. Otherwise, the cache will just be wiped clean
+   * @return Returns `true` if added successfully. Otherwise returns `false`.
    */
   addState(state: VisState, restoreCache: boolean = false) {
+    if(this.states.indexOf(state) > -1) {
+      return false;
+    }
+
     this.states.push(state);
 
     // make sure the cache is invalidated when new documents arrive
@@ -50,6 +55,7 @@ export class VisStateIndex {
     } else {
       this.idfCache.clear();
     }
+    return true;
   }
 
   /**

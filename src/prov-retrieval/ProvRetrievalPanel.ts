@@ -26,6 +26,24 @@ import ActionNode from 'phovea_core/src/provenance/ActionNode';
  */
 export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
+  /**
+   * Capture the `StateNode.visState` that haven not been persisted yet and index them.
+   *
+   * NOTE:
+   * In order to capture a StateNode the application must jump to each state and capture it.
+   * Depending on the machine and number of states that might results in long loading times.
+   *
+   * @type {boolean}
+   */
+  private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = true;
+
+  private executedFirstListner = ((evt:any, action:ActionNode, state:StateNode) => {
+    const success = this.captureAndIndexState(state);
+    if(success) {
+      this.updateSearchResults(this.query);
+    }
+  });
+
   private $node: d3.Selection<any>;
   private $searchResults: d3.Selection<any>;
 
@@ -42,16 +60,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     onDOMNodeRemoved(this.node, this.destroy, this);
 
     this.bind();
-    this.initStateIndex();
+    this.initStateIndex(this.data.states, ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES);
   }
 
   private bind() {
-    this.data.on('executed_first', this.addState.bind(this));
+    this.data.on('executed_first', this.executedFirstListner);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('executed_first', this.addState.bind(this));
+    this.data.off('executed_first', this.executedFirstListner);
   }
 
   get rawSize(): [number, number] {
@@ -62,15 +80,59 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     return <Element>this.$node.node();
   }
 
-  private initStateIndex() {
-    this.data.states.forEach((stateNode) => {
-      this.stateIndex.addState(stateNode.visState);
-    });
+  /**
+   * Build the index of given StateNodes for later retrieval.
+   * The flag determines how to handle states that do not contain a valid visState.
+   *
+   * @param stateNodes List of StateNodes that should be indexed
+   * @param captureAndIndex Capture and index *non-persisted* states?
+   */
+  private initStateIndex(stateNodes:StateNode[], captureAndIndex:boolean) {
+    // already persisted states have to be added to the index only
+    stateNodes
+      .filter((stateNode) => stateNode.visState.isPersisted())
+      .forEach((stateNode) => {
+        //console.log('already persisted', stateNode.name, stateNode.visState.isPersisted());
+        this.stateIndex.addState(stateNode.visState);
+      });
+
+    const nonPersistedStates = stateNodes.filter((stateNode) => !stateNode.visState.isPersisted());
+
+    if(nonPersistedStates.length > 0) {
+      if(captureAndIndex) {
+        this.jumpToAndIndexStates(nonPersistedStates);
+
+      } else {
+        console.warn(`${nonPersistedStates.length} provenance states were not indexed for the provenance state search. You will get incomplete search results.`);
+      }
+    }
   }
 
-  private addState(evt, action:ActionNode, stateNode:StateNode) {
-    this.stateIndex.addState(stateNode.visState);
-    this.updateSearchResults(this.query);
+  /**
+   * Iterates asynchronously over all states, jumps to them, captures the visState and indexes them.
+   * @param stateNodes
+   * @returns {Promise<any>} Will be resolved, once all states are processed.
+   */
+  private async jumpToAndIndexStates(stateNodes:StateNode[]):Promise<any> {
+    const currentState = this.data.act;
+
+    for (const stateNode of stateNodes) {
+      await this.data.jumpTo(stateNode);
+      this.captureAndIndexState(stateNode);
+      //console.log('newly persisted', stateNode.name, stateNode.visState.terms);
+    }
+
+    return this.data.jumpTo(currentState); // jump back to previous state
+  }
+
+  /**
+   * Captures the visState of a node and adds it to the index
+   * @param stateNode
+   * @returns {boolean} Returns `true` if successfully added to index. Otherwise returns `false`.
+   */
+  private captureAndIndexState(stateNode:StateNode):boolean {
+    stateNode.visState.captureAndPersist();
+    return this.stateIndex.addState(stateNode.visState);
   }
 
   private build($parent: d3.Selection<any>) {
