@@ -86,9 +86,10 @@ export default class CLUEGraphManager {
     });
   }
 
-  importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}) {
-    return this.manager.cloneRemote(graph, extras).then((graph) => {
-      this.loadGraph(graph.desc);
+  importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}, cleanUpLocal = false) {
+    return this.manager.cloneRemote(graph, extras).then((newGraph) => {
+      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : Promise.resolve(null);
+      return p.then(() => this.loadGraph(newGraph.desc));
     });
   }
 
