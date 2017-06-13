@@ -102,7 +102,7 @@ export default class CLUEGraphManager {
     return graph;
   }
 
-  private chooseImpl(list: IProvenanceGraphDataDescription[]) {
+  private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
     const loggedIn = isLoggedIn();
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
@@ -118,11 +118,15 @@ export default class CLUEGraphManager {
       }
       return this.manager.cloneLocal(desc);
     }
+    // not found
+    if (rejectOnNotFound) {
+      return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
+    }
     return this.manager.create();
   }
 
-  choose(list: IProvenanceGraphDataDescription[]) {
-    return this.chooseImpl(list).then((g) => this.setGraph(g));
+  choose(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
+    return this.chooseImpl(list, rejectOnNotFound).then((g) => this.setGraph(g));
   }
 
   loadOrClone(graph: IProvenanceGraphDataDescription, isSelect: boolean) {
