@@ -6,7 +6,7 @@ import {hash} from 'phovea_core/src/index';
 import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {isLoggedIn} from './user';
+import {canWrite, isLoggedIn} from 'phovea_core/src/security';
 
 export default class CLUEGraphManager {
   constructor(private manager: MixedStorageProvenanceGraphManager) {
@@ -73,16 +73,28 @@ export default class CLUEGraphManager {
     return this.manager.delete(graph);
   }
 
+  startFromScratch() {
+    hash.removeProp('clue_slide', false);
+    hash.removeProp('clue_state', false);
+    hash.removeProp('clue_graph');
+    window.location.reload();
+  }
+
   importGraph(dump: any, remote = false) {
     (remote ? this.manager.importRemote(dump) : this.manager.importLocal(dump)).then((graph) => {
       this.loadGraph(graph.desc);
     });
   }
 
-  importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}) {
-    return this.manager.cloneRemote(graph, extras).then((graph) => {
-      this.loadGraph(graph.desc);
+  importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}, cleanUpLocal = false) {
+    return this.manager.cloneRemote(graph, extras).then((newGraph) => {
+      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : Promise.resolve(null);
+      return p.then(() => this.loadGraph(newGraph.desc));
     });
+  }
+
+  editGraphMetaData(graph: IProvenanceGraphDataDescription, extras: any = {}) {
+    return this.manager.edit(graph, extras);
   }
 
   setGraph(graph: ProvenanceGraph) {
@@ -90,7 +102,7 @@ export default class CLUEGraphManager {
     return graph;
   }
 
-  private chooseImpl(list: IProvenanceGraphDataDescription[]) {
+  private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
     const loggedIn = isLoggedIn();
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
@@ -101,24 +113,32 @@ export default class CLUEGraphManager {
     }
     const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     if (desc) {
-      if ((<any>desc).local || loggedIn) {
+      if ((<any>desc).local || (loggedIn && canWrite(desc))) {
         return this.manager.get(desc);
       }
       return this.manager.cloneLocal(desc);
     }
+    // not found
+    if (rejectOnNotFound) {
+      return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
+    }
     return this.manager.create();
   }
 
-  choose(list: IProvenanceGraphDataDescription[]) {
-    return this.chooseImpl(list).then((g) => this.setGraph(g));
+  choose(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
+    return this.chooseImpl(list, rejectOnNotFound).then((g) => this.setGraph(g));
   }
 
   loadOrClone(graph: IProvenanceGraphDataDescription, isSelect: boolean) {
     if (isSelect) {
       this.loadGraph(graph);
     } else {
-      this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
+      this.cloneLocal(graph);
     }
+  }
+
+  cloneLocal(graph: IProvenanceGraphDataDescription) {
+    this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
   }
 }
 
