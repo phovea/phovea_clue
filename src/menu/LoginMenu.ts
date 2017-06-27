@@ -99,14 +99,15 @@ export default class LoginMenu extends EventHandler {
         </div>
       </div>`);
 
-    const form = <HTMLFormElement>body.querySelector('#loginDialog form');
+    const dialog = <HTMLDivElement>body.querySelector('#loginDialog');
+    const form = <HTMLFormElement>dialog.querySelector('form');
     bindLoginForm(form, (error, user) => {
       const success = !error && user;
       if (success) {
         this.fire(LoginMenu.EVENT_LOGGED_IN);
         $('#login_menu').hide();
         const $base = $('#user_menu').show();
-        form.classList.remove('has-error');
+        dialog.classList.remove('has-error');
         $base.find('> a:first span').text(user.name);
 
         (<any>$('#loginDialog')).modal('hide');
@@ -115,7 +116,7 @@ export default class LoginMenu extends EventHandler {
         $('.login_required.disabled').removeClass('disabled').attr('disabled', null);
       } else {
         this.header.ready();
-        form.classList.add('has-error');
+        dialog.classList.add('has-error');
       }
     });
   }
