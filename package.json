@@ -14,7 +14,7 @@
     "redhat_packages.txt"
   ],
   "scripts": {
-    "check": "flake8",
+    "check": "flake8 --exclude=.git,venv,deploy,docs,__pycache__,node_modules",
     "pretest": "echo hybrid",
     "test": "npm run test:web && npm run test:python",
     "predist": "echo hybrid",

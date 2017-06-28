@@ -6,9 +6,9 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {event as d3event, select, time} from 'd3';
 import * as $ from 'jquery';
-import {retrieve} from 'phovea_core/src/session';
 import {generateDialog, areyousure} from 'phovea_ui/src/dialogs';
 import CLUEGraphManager from '../CLUEGraphManager';
+import {isLoggedIn} from 'phovea_core/src/security';
 
 export default class ProvenanceGraphMenu {
   private readonly $node: d3.Selection<any>;
@@ -172,9 +172,9 @@ export default class ProvenanceGraphMenu {
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
+                    <button class="btn btn-primary" ${!isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> Select</button>
                     <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone" aria-hidden="true"></span> Clone</button>
-                    <button class="btn btn-danger" ${retrieve('logged_in', <boolean>false) !== true && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                    <button class="btn btn-danger" ${!isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                 </div>
             </div>
         </div>`);
