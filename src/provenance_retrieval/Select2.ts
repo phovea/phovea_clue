@@ -4,7 +4,7 @@
 import 'select2';
 import * as $ from 'jquery';
 import {VisStateIndex} from './VisStateIndex';
-import {IProperty, IPropertyValue, PropertyType} from './VisStateProperty';
+import {IProperty, IPropertyValue, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
 interface IQuery {
   term: string;

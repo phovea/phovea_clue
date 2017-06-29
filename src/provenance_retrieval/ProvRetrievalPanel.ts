@@ -10,7 +10,7 @@ import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
 import {VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IPropertyValue} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
+import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
 
 /**
@@ -53,6 +53,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private stateIndex:VisStateIndex = new VisStateIndex();
 
   private query:string[] = [];
+  private query2:IPropertyValue[] = [];
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
@@ -166,17 +167,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
         $select2
           .on('select2:select', (evt) => {
-            const item:IPropertyValue = evt.params.data.propValue;
-            item.isSelected = true;
+            const propValue:IPropertyValue = evt.params.data.propValue;
+            propValue.isSelected = true;
             //console.log('select2:select', evt.params.data);
+
+            this.query2 = [].concat(this.query2, propValue);
 
             this.query = $select2.val();
             this.updateSearchResults(this.query);
           })
           .on('select2:unselect', (evt) => {
-            const item:IPropertyValue = evt.params.data.propValue;
-            item.isSelected = false;
+            const propValue:IPropertyValue = evt.params.data.propValue;
+            propValue.isSelected = false;
             //console.log('select2:unselect ', evt.params.data);
+
+            this.query2 = this.query2.filter((d) => d !== propValue);
 
             this.query = $select2.val();
             this.updateSearchResults(this.query);
@@ -196,7 +201,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     return $p;
   }
 
-  private updateSearchResults(query) {
+  private updateSearchResults(query:string[]) {
     this.$searchResults.selectAll('*').remove(); // clear DOM list
 
     const results = this.stateIndex.tfidfs(query)

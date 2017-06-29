@@ -1,7 +1,7 @@
 /**
  * Created by Holger Stitz on 28.06.2017.
  */
-import {IProperty} from './VisStateProperty';
+import {IProperty} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
 
 export interface IPropertyComparator {
