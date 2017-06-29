@@ -143,6 +143,7 @@ export class VisStateIndex {
 
       //console.log(term, 'value', value, 'tf', this.states[index].tf(term), 'idf', idf, 'return', value + (this.states[index].tf(term) * idf));
       return value + (this.states[index].tf(term) * idf);
+      //return value + this.states[index].tf(term);
     }, 0.0);
     //console.log('--------------');
 

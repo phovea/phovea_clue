@@ -676,7 +676,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $inner.append('span').classed('slabel',true);
     $inner.append('div').classed('sthumbnail', true);
     const $toolbarEnter = $statesEnter.append('div').classed('toolbar', true);
-    $toolbarEnter.append('i').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
+    $toolbarEnter.append('i').attr('title', 'Bookmark state').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
       const v = !d.s.getAttr('starred',false);
       const e = <Event>d3.event;
       d.s.setAttr('starred', v);
@@ -684,9 +684,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       e.stopPropagation();
       e.preventDefault();
     });
-    $toolbarEnter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+    $toolbarEnter.append('i').attr('title', 'Edit state').attr('class', 'fa fa-edit').on('click', (d) => {
       const e = <Event>d3.event;
       d.showDialog();
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fa fa-search').on('click', (d) => {
+      const e = <Event>d3.event;
+      alert('Not implemented yet');
       e.stopPropagation();
       e.preventDefault();
     });

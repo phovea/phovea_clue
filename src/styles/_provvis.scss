@@ -125,9 +125,11 @@
     .toolbar {
       display: none;
       position: absolute;
-      top: 0;
-      right: 0.1em;
+      top: 3px;
+      right: -4px;
       letter-spacing: 2px;
+      background-image: linear-gradient(to right, transparent, #fafafa 25%);
+      padding: 0 5px 0 20px;
 
       i:hover {
         font-weight: bold;

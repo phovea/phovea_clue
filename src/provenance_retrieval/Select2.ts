@@ -4,10 +4,20 @@
 import 'select2';
 import * as $ from 'jquery';
 import {VisStateIndex} from './VisStateIndex';
-import {IVisStateAttr, IVisStateCategory} from './IVisState';
+import {IProperty, IPropertyValue, isNumericalPropertyValue} from './VisStateProperty';
 
 interface IQuery {
   term: string;
+}
+
+interface ISelect2Attr {
+  text: string;
+  id?: number|string;
+  param?: boolean;
+}
+
+interface ISelect2Category extends ISelect2Attr {
+  children?: ISelect2Attr[];
 }
 
 export class Select2 {
@@ -20,18 +30,35 @@ export class Select2 {
     //
   }
 
-  init(selector: string, data: IVisStateCategory[]) {
+  private prepareData(data : IProperty[]):ISelect2Category[] {
+    return data.map((d) => {
+      return {
+        text: d.text,
+        children: d.values.map((v:IPropertyValue) => {
+          return {
+            text: v.text,
+            id: v.id,
+            param: isNumericalPropertyValue(v)
+          };
+        })
+      };
+    });
+  }
+
+  init(selector: string, data: IProperty[]) {
+    const prepData:ISelect2Category[] = this.prepareData(data);
+
     return $(selector).select2(<any>{
       theme: 'bootstrap',
       placeholder: 'Add filter by attribute, visualization, value, …',
-      data,
+      data: prepData,
       multiple: true,
 
       tags: true,
       // create custom tags for items that have a parameter and that parameter is complete
       createTag: (query) => {
         const queryTerm = query.term;
-        const matchItemWithParam = data.slice(0)
+        const matchItemWithParam = prepData.slice(0)
           .filter((d) => d.children !== undefined)
           .map((d) => d.children)
           .some((d) => {
@@ -91,7 +118,7 @@ export class Select2 {
         // fake ajax call with local data
         transport: (queryParams, success, error) => {
           return success({
-            items: this.filterData(data.slice(0), queryParams.data.term)
+            items: this.filterData(prepData.slice(0), queryParams.data.term)
           });
         },
 
@@ -106,48 +133,48 @@ export class Select2 {
         }
       }
     })
-      .on('select2:selecting', (e) => {
-        const item:IVisStateAttr = e.params.args.data;
+    .on('select2:selecting', (e) => {
+      const item:ISelect2Attr = e.params.args.data;
 
-        if (item.param === true) {
-          // prevent adding items with parameter -> will be added by `createTag()`
-          e.preventDefault();
+      if (item.param === true) {
+        // prevent adding items with parameter -> will be added by `createTag()`
+        e.preventDefault();
 
-          // instead: provide some autocomplete the the user just has to enter the parameter
-          const $searchfield = $(e.currentTarget).next()
-            .find('.select2-search__field');
+        // instead: provide some autocomplete the the user just has to enter the parameter
+        const $searchfield = $(e.currentTarget).next()
+          .find('.select2-search__field');
 
-          $searchfield
-            .val(item.text.slice(0, item.text.indexOf(VisStateIndex.TAG_VALUE_SEPARATOR) + 2))
-            .css('width', '12em') // TODO make it flexible based on the text length or automatically by triggering select2.keypress()
-            .focus();
+        $searchfield
+          .val(item.text.slice(0, item.text.indexOf(VisStateIndex.TAG_VALUE_SEPARATOR) + 2))
+          .css('width', '12em') // TODO make it flexible based on the text length or automatically by triggering select2.keypress()
+          .focus();
 
-          /*if(!findQueryInParam(query.term, item.text)) {
-           $searchfield.get(0)
-           .setSelectionRange(item.text.indexOf(tagValueSeparator) + 2, item.text.length);
-           }*/
-        }
-      })
-      /*.on('change', (e) => { console.log('change', e); })
-       .on('select2:open', function (e) { console.log('select2:open', e); })
-       .on('select2:close', function (e) { console.log('select2:close', e); })
-       .on('select2:select', function (e) { console.log('select2:select', e); })
-       .on('select2:unselect', function (e) { console.log('select2:unselect', e); })*/
-      ;
+        /*if(!findQueryInParam(query.term, item.text)) {
+         $searchfield.get(0)
+         .setSelectionRange(item.text.indexOf(tagValueSeparator) + 2, item.text.length);
+         }*/
+      }
+    })
+    /*.on('change', (e) => { console.log('change', e); })
+     .on('select2:open', function (e) { console.log('select2:open', e); })
+     .on('select2:close', function (e) { console.log('select2:close', e); })
+     .on('select2:select', function (e) { console.log('select2:select', e); })
+     .on('select2:unselect', function (e) { console.log('select2:unselect', e); })*/
+    ;
   }
 
-  private findQueryInText(query, text) {
+  private findQueryInText(query:string, text:string) {
     return text.toLowerCase().indexOf(query.toLowerCase()) > -1;
   }
 
-  private findQueryInParam(query, text) {
+  private findQueryInParam(query:string, text:string) {
     // matching `key=value` pairs with numbers (.4, 0.4, 4) as values
     const regex = /(\w+)\s*\=\s*((?:\d*\.)?\d+)/i;
     const matches = query.match(regex);
     return matches && this.findQueryInText(matches[1], text);
   }
 
-  private filterData(data:IVisStateCategory[], query) {
+  private filterData(data:ISelect2Category[], query:string) {
     if (!query) {
       return data;
     }
@@ -155,7 +182,7 @@ export class Select2 {
     let result = [];
 
     data.forEach((d) => {
-      const res: IVisStateCategory = {text: d.text};
+      const res: ISelect2Category = {text: d.text};
 
       if (d.id) {
         res.id = d.id;

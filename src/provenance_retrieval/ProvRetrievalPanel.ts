@@ -149,7 +149,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <form action="#" onsubmit="return false; ">
           <div class="form-group">
             <label class="sr-only" for="prov-retrieval-select">Filter provenance states by &hellip;</label>
-            <select multiple="multiple" style="width: 100%" class="form-control" id="prov-retrieval-select"></select>
+            <select multiple="multiple" style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
           </div>
         </form>
         <ol class="search-results"></ol>
@@ -159,25 +159,27 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.$searchResults = $p.select('.search-results');
 
-    if(this.options.app && this.options.app.getVisStateAttrs) {
-      const $s2Instance = new Select2();
-      const $select2 = $s2Instance.init('#prov-retrieval-select', this.options.app.getVisStateAttrs());
-      $select2
-        .on('change', (evt) => {
-          this.query = $select2.val();
-          this.updateSearchResults(this.query);
-        })
-        //.on('select2:select', (evt) => {
-          //console.log('select2:select', e.params.data);
-        //})
-        .on('select2:unselect', (evt) => {
-          //console.log('select2:unselect', e.params.data);
-          // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
-          if (!evt.params.originalEvent) {
-            return;
-          }
-          evt.params.originalEvent.stopPropagation();
-        });
+    if(this.options.app && this.options.app.getVisStateProps) {
+      this.options.app.getVisStateProps().then((properties) => {
+        const $s2Instance = new Select2();
+        const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
+        $select2
+          .on('change', (evt) => {
+            this.query = $select2.val();
+            this.updateSearchResults(this.query);
+          })
+          //.on('select2:select', (evt) => {
+            //console.log('select2:select', e.params.data);
+          //})
+          .on('select2:unselect', (evt) => {
+            //console.log('select2:unselect', e.params.data);
+            // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
+            if (!evt.params.originalEvent) {
+              return;
+            }
+            evt.params.originalEvent.stopPropagation();
+          });
+      });
 
     } else {
       $p.select('.body > form').classed('hidden', true);

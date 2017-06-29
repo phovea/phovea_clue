@@ -14,14 +14,14 @@ import {
 import {select} from 'd3';
 import * as cmode from './mode';
 import {create as createSelection} from './selection';
-import {create as createProvRetrievalPanel} from './prov-retrieval/ProvRetrievalPanel';
+import {create as createProvRetrievalPanel} from './provenance_retrieval/ProvRetrievalPanel';
 import {create as createProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
 import {IEvent} from 'phovea_core/src/event';
 import CLUEGraphManager from './CLUEGraphManager';
 import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
 import LoginMenu from './menu/LoginMenu';
-import {IVisStateApp} from './prov-retrieval/IVisState';
+import {IVisStateApp} from './provenance_retrieval/IVisState';
 
 export {default as CLUEGraphManager} from './CLUEGraphManager';
 import ACLUEWrapper, {IACLUEWrapperOptions, createStoryVis} from './ACLUEWrapper';

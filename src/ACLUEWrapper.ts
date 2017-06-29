@@ -13,7 +13,7 @@ import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
-import {IVisStateApp} from './prov-retrieval/IVisState';
+import {IVisStateApp} from './provenance_retrieval/IVisState';
 
 const TEMPLATE = `<div class="box">
   <header>
