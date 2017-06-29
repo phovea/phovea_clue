@@ -35,22 +35,22 @@ class PropertyValue implements IPropertyValue {
     //
   }
 
-  toJSON():string {
-    return JSON.stringify(Object.assign({}, {id: this.id}, this.payload));
+  toJSON():any {
+    const r:any = {
+      type: this.type,
+      text: this.text,
+    };
+
+    if(this.id !== this.text) {
+      r.id = this.id;
+    }
+
+    if(this.payload !== undefined) {
+      r.payload = this.payload;
+    }
+
+    return r;
   }
-}
-
-export function createPropertyValue(type:PropertyType, data:any, textAddon:string = ''):IPropertyValue {
-  let id = data.id || data.text;
-  let text = data.text + textAddon;
-  const payload = data.payload || {};
-
-  if(Object.prototype.toString.call(data) === '[object String]') {
-    id = data;
-    text = data;
-  }
-
-  return new PropertyValue(type, id, text, payload);
 }
 
 export function categoricalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
@@ -69,6 +69,14 @@ export function numericalProperty(text:string, values:string[]|{text:string, id?
   return new Property(PropertyType.NUMERICAL, text, vals);
 }
 
-export function isNumericalPropertyValue(propValue: IPropertyValue): boolean {
-  return propValue.type === PropertyType.NUMERICAL;
+export function createPropertyValue(type:PropertyType, data:any, textAddon:string = ''):IPropertyValue {
+  let id = data.id || data.text;
+  let text = data.text + textAddon;
+
+  if(Object.prototype.toString.call(data) === '[object String]') {
+    id = data;
+    text = data + textAddon;
+  }
+
+  return new PropertyValue(type, id, text, data.payload);
 }

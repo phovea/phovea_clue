@@ -4,7 +4,7 @@
 import 'select2';
 import * as $ from 'jquery';
 import {VisStateIndex} from './VisStateIndex';
-import {IProperty, IPropertyValue, isNumericalPropertyValue} from './VisStateProperty';
+import {IProperty, IPropertyValue, PropertyType} from './VisStateProperty';
 
 interface IQuery {
   term: string;
@@ -40,7 +40,7 @@ export class Select2 {
           return {
             text: propValue.text,
             id: propValue.id,
-            param: isNumericalPropertyValue(propValue),
+            param: propValue.type === PropertyType.NUMERICAL,
             prop,
             propValue
           };
