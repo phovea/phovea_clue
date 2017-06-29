@@ -1,137 +1,74 @@
 /**
  * Created by Holger Stitz on 28.06.2017.
  */
-import {
-  CategoricalPropertyComparator, IPropertyComparator, NumericalPropertyComparator,
-  SetPropertyComparator
-} from './VisStatePropertyComparator';
 
-export interface IProperty {
-  text: string; // must be `text` because of Select2 usage
-  values: IPropertyValue[]; // must be `children` because of Select2 usage
-  comparator: IPropertyComparator;
-
-  clone():IProperty;
+export enum PropertyType {
+  NUMERICAL,
+  CATEGORICAL,
+  SET
 }
 
-export interface INumericalProperty extends IProperty {
-  values: INumericalValue[]; // override with more specific numerical values
+export interface IProperty {
+  type: PropertyType;
+  text: string; // must be `text` because of Select2 usage
+  values: IPropertyValue[]; // must be `children` because of Select2 usage
 }
 
 export interface IPropertyValue {
+  type: PropertyType;
   id: string|number; // must be `id` because of Select2 usage
   text: string; // must be `text` because of Select2 usage
+  payload: any;
   isSelected: boolean;
-
-  clone():IPropertyValue;
-}
-
-export interface INumericalValue extends IPropertyValue {
-  numVal: number;
-
-  clone():INumericalValue;
 }
 
 class Property implements IProperty {
-  constructor(public text:string, public values: IPropertyValue[], public comparator:IPropertyComparator) {
+  constructor(public type: PropertyType, public text:string, public values: IPropertyValue[]) {
     //
   }
-
-  clone():IProperty {
-    return new Property(this.text, this.values.slice(0).map((d) => d.clone()), this.comparator);
-  }
 }
-
-class NumericalProperty extends Property implements INumericalProperty {
-  constructor(public text: string, public values: INumericalValue[], public comparator: IPropertyComparator) {
-    super(text, values, comparator);
-  }
-}
-
 
 class PropertyValue implements IPropertyValue {
-  constructor(public id:string|number, public text:string, public isSelected:boolean = false) {
+  isSelected:boolean = false;
+
+  constructor(public type: PropertyType, public id:string|number, public text:string, public payload:any) {
     //
   }
 
-  clone():IPropertyValue {
-    return new PropertyValue(this.id, this.text, this.isSelected);
-  }
-
   toJSON():string {
-    return JSON.stringify({
-      id: this.id
-    });
+    return JSON.stringify(Object.assign({}, {id: this.id}, this.payload));
   }
 }
 
-class NumericalPropertyValue extends PropertyValue implements INumericalValue {
-  constructor(public id:string|number, public text:string, public isSelected:boolean = false, public numVal = 0) {
-    super(id, text, isSelected);
+export function createPropertyValue(type:PropertyType, data:any, textAddon:string = ''):IPropertyValue {
+  let id = data.id || data.text;
+  let text = data.text + textAddon;
+  const payload = data.payload || {};
+
+  if(Object.prototype.toString.call(data) === '[object String]') {
+    id = data;
+    text = data;
   }
 
-  clone():INumericalValue {
-    return new NumericalPropertyValue(this.id, this.text, this.isSelected, this.numVal);
-  }
-
-  toJSON():string {
-    return JSON.stringify({
-      id: this.id,
-      numVal: this.numVal
-    });
-  }
+  return new PropertyValue(type, id, text, payload);
 }
 
 export function categoricalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
-  const vals:IPropertyValue[] = (<any>values).map((d) => {
-    // case of string array -> use text for both
-    if(Object.prototype.toString.call(d) === '[object String]') {
-      return new PropertyValue(d, d);
-    // case of missing id -> use text for both
-    } else if(d.id === undefined) {
-      return new PropertyValue(d.text, d.text);
-    }
-    // case of id and text
-    return new PropertyValue(d.id, d.text);
-  });
-
-  return new Property(text, vals, new CategoricalPropertyComparator());
+  const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.CATEGORICAL, d));
+  return new Property(PropertyType.CATEGORICAL, text, vals);
 }
 
 export function setProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
-  const vals:IPropertyValue[] = (<any>values).map((d) => {
-    // case of string array -> use text for both
-    if(Object.prototype.toString.call(d) === '[object String]') {
-      return new PropertyValue(d, d);
-    // case of missing id -> use text for both
-    } else if(d.id === undefined) {
-      return new PropertyValue(d.text, d.text);
-    }
-    // case of id and text
-    return new PropertyValue(d.id, d.text);
-  });
-
-  return new Property(text, vals, new SetPropertyComparator());
+  const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.SET, d));
+  return new Property(PropertyType.SET, text, vals);
 }
 
-export function numericalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):INumericalProperty {
+export function numericalProperty(text:string, values:string[]|{text:string, id?:string|number}[]):IProperty {
   const textAddon = ' = <i>&lt;number&gt;</i>';
-
-  const vals:INumericalValue[] = (<any>values).map((d) => {
-    // case of string array -> use text for both
-    if(Object.prototype.toString.call(d) === '[object String]') {
-      return new NumericalPropertyValue(d, d + textAddon);
-    // case of missing id -> use text for both
-    } else if(d.id === undefined) {
-      return new NumericalPropertyValue(d.text, d.text + textAddon);
-    }
-    // case of id and text
-    return new NumericalPropertyValue(d.id, d.text + textAddon);
-  });
-
-  return new NumericalProperty(text, vals, new NumericalPropertyComparator());
+  const vals:IPropertyValue[] = (<any>values).map((d) => createPropertyValue(PropertyType.NUMERICAL, d, textAddon));
+  return new Property(PropertyType.NUMERICAL, text, vals);
 }
 
-export function isNumericalPropertyValue(value: IPropertyValue): value is INumericalValue {
-  return (<INumericalValue>value).numVal !== undefined;
+export function isNumericalPropertyValue(propValue: IPropertyValue): boolean {
+  return propValue.type === PropertyType.NUMERICAL;
 }

@@ -10,6 +10,7 @@ import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
 import {VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
+import {IPropertyValue} from 'phovea_clue/src/provenance_retrieval/VisStateProperty';
 
 
 /**
@@ -164,15 +165,22 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         const $s2Instance = new Select2();
         const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
         $select2
-          .on('change', (evt) => {
+          .on('select2:select', (evt) => {
+            const item:IPropertyValue = evt.params.data.propValue;
+            item.isSelected = true;
+            //console.log('select2:select', evt.params.data);
+
             this.query = $select2.val();
             this.updateSearchResults(this.query);
           })
-          //.on('select2:select', (evt) => {
-            //console.log('select2:select', e.params.data);
-          //})
           .on('select2:unselect', (evt) => {
-            //console.log('select2:unselect', e.params.data);
+            const item:IPropertyValue = evt.params.data.propValue;
+            item.isSelected = false;
+            //console.log('select2:unselect ', evt.params.data);
+
+            this.query = $select2.val();
+            this.updateSearchResults(this.query);
+
             // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
             if (!evt.params.originalEvent) {
               return;

@@ -14,6 +14,8 @@ interface ISelect2Attr {
   text: string;
   id?: number|string;
   param?: boolean;
+  prop?: IProperty;
+  propValue?: IPropertyValue;
 }
 
 interface ISelect2Category extends ISelect2Attr {
@@ -31,14 +33,16 @@ export class Select2 {
   }
 
   private prepareData(data : IProperty[]):ISelect2Category[] {
-    return data.map((d) => {
+    return data.map((prop) => {
       return {
-        text: d.text,
-        children: d.values.map((v:IPropertyValue) => {
+        text: prop.text,
+        children: prop.values.map((propValue:IPropertyValue) => {
           return {
-            text: v.text,
-            id: v.id,
-            param: isNumericalPropertyValue(v)
+            text: propValue.text,
+            id: propValue.id,
+            param: isNumericalPropertyValue(propValue),
+            prop,
+            propValue
           };
         })
       };
