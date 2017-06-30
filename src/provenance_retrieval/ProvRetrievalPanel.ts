@@ -8,7 +8,7 @@ import {onDOMNodeRemoved, mixin} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
-import {VisStateIndex} from './VisStateIndex';
+import {IQuery, ISearchResult, Query, VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
@@ -41,7 +41,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private executedFirstListner = ((evt:any, action:ActionNode, state:StateNode) => {
     const success = this.captureAndIndexState(state);
     if(success) {
-      this.updateSearchResults(this.query);
+      this.performSearch(this.query);
     }
   });
 
@@ -52,8 +52,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private stateIndex:VisStateIndex = new VisStateIndex();
 
-  private query:string[] = [];
-  private query2:IPropertyValue[] = [];
+  private query:IQuery = new Query();
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
@@ -171,20 +170,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             propValue.isSelected = true;
             //console.log('select2:select', evt.params.data);
 
-            this.query2 = [].concat(this.query2, propValue);
-
-            this.query = $select2.val();
-            this.updateSearchResults(this.query);
+            this.query = this.query.addPropValue(propValue);
+            this.performSearch(this.query);
           })
           .on('select2:unselect', (evt) => {
             const propValue:IPropertyValue = evt.params.data.propValue;
             propValue.isSelected = false;
             //console.log('select2:unselect ', evt.params.data);
 
-            this.query2 = this.query2.filter((d) => d !== propValue);
-
-            this.query = $select2.val();
-            this.updateSearchResults(this.query);
+            this.query = this.query.removePropValue(propValue);
+            this.performSearch(this.query);
 
             // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
             if (!evt.params.originalEvent) {
@@ -201,11 +196,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     return $p;
   }
 
-  private updateSearchResults(query:string[]) {
-    this.$searchResults.selectAll('*').remove(); // clear DOM list
+  private performSearch(query:IQuery) {
+    if(!query) {
+      return;
+    }
 
-    const results = this.stateIndex.tfidfs(query)
+    const results:ISearchResult[] = this.stateIndex
+      .compareAll(query)
       .filter((state) => state.similarity > 0);
+
+    this.updateResults(results);
+  }
+
+  private updateResults(results:ISearchResult[]) {
+
+    this.$searchResults.selectAll('*').remove(); // clear DOM list
 
     if(results.length === 0) {
       return;
@@ -214,8 +219,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const data = results
       .sort((x, y) => y.similarity - x.similarity)
       .map((d) => {
-        d.terms = d.state.terms.map((term) => {
-          return (d.query.indexOf(term) > -1) ? `<span class="match">${term}</span>` : `${term}`;
+        (<any>d).terms = d.state.propValues.map((propValue) => {
+          return (d.query.propValues.filter((d) => d.id === propValue.id).length > 0) ? `<span class="match">${propValue.text}</span>` : `${propValue.text}`;
         });
         return d;
       });
@@ -226,22 +231,22 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $li
       .html((d) => `
-        <span class="title">${d.state.node.name}</span>
+        <span class="title">${(<StateNode>d.state.node).name}</span>
         <span class="label score">${d.similarity.toFixed(2)} </span>
-        <small class="terms">${d.terms.join(', ')}</small>
+        <small class="terms">${(<any>d).terms.join(', ')}</small>
       `)
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
-        this.data.selectState(d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
       .on('mouseleave', (d) => {
         (<Event>d3.event).stopPropagation();
-        this.data.selectState(d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       })
       .on('click', (d) => {
         (<Event>d3.event).stopPropagation();
-        this.data.selectState(d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
-        this.data.jumpTo(d.state.node);
+        this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.jumpTo(<StateNode>d.state.node);
       });
 
     $li.exit().remove();

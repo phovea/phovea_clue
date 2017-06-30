@@ -3,8 +3,10 @@
  */
 import 'select2';
 import * as $ from 'jquery';
-import {VisStateIndex} from './VisStateIndex';
-import {IProperty, IPropertyValue, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {
+  IProperty, IPropertyValue, PropertyType,
+  TAG_VALUE_SEPARATOR
+} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
 interface IQuery {
   term: string;
@@ -149,7 +151,7 @@ export class Select2 {
           .find('.select2-search__field');
 
         $searchfield
-          .val(item.text.slice(0, item.text.indexOf(VisStateIndex.TAG_VALUE_SEPARATOR) + 2))
+          .val(item.text.slice(0, item.text.indexOf(TAG_VALUE_SEPARATOR) + 2))
           .css('width', '12em') // TODO make it flexible based on the text length or automatically by triggering select2.keypress()
           .focus();
 
