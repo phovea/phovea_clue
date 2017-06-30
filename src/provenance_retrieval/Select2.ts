@@ -5,7 +5,7 @@ import 'select2';
 import * as $ from 'jquery';
 import {
   IProperty, IPropertyValue, PropertyType,
-  TAG_VALUE_SEPARATOR
+  TAG_VALUE_SEPARATOR, createPropertyValue
 } from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 
 interface IQuery {
@@ -74,10 +74,18 @@ export class Select2 {
           });
 
         if (matchItemWithParam) {
+          const queryParts = queryTerm.split(TAG_VALUE_SEPARATOR).map((d) => d.trim());
           return {
             id: queryTerm,
             text: queryTerm,
-            tag: true
+            tag: true,
+            propValue: createPropertyValue(PropertyType.NUMERICAL, {
+              id: queryParts[0],
+              text: queryTerm,
+              payload: {
+                numVal: parseFloat(queryParts[1])
+              }
+            })
           };
         } else {
           return null; // no match == no tag
@@ -169,11 +177,11 @@ export class Select2 {
     ;
   }
 
-  private findQueryInText(query:string, text:string) {
+  private findQueryInText(query:string, text:string):boolean {
     return text.toLowerCase().indexOf(query.toLowerCase()) > -1;
   }
 
-  private findQueryInParam(query:string, text:string) {
+  private findQueryInParam(query:string, text:string):boolean {
     // matching `key=value` pairs with numbers (.4, 0.4, 4) as values
     const regex = /(\w+)\s*\=\s*((?:\d*\.)?\d+)/i;
     const matches = query.match(regex);
