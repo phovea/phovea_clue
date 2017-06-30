@@ -4,6 +4,7 @@
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {InverseDocumentFrequency} from 'phovea_core/src/provenance/retrieval/tf_idf/InverseDocumentFrequency';
+import {selectComparator} from './VisStatePropertyComparator';
 
 export interface IQuery {
   propValues: IPropertyValue[];
@@ -82,7 +83,7 @@ export class VisStateIndex {
     return <ISearchResult>{
       query,
       state,
-      similarity: state.compare(query.propValues)
+      similarity: state.compare(selectComparator, query.propValues)
     };
   }
 
