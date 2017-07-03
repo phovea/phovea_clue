@@ -38,7 +38,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
   private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = true;
 
-  private executedFirstListner = ((evt:any, action:ActionNode, state:StateNode) => {
+  private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
     const success = this.captureAndIndexState(state);
     if(success) {
       this.performSearch(this.query);
@@ -65,12 +65,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private bind() {
-    this.data.on('executed_first', this.executedFirstListner);
+    this.data.on('executed_first', this.executedFirstListener);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('executed_first', this.executedFirstListner);
+    this.data.off('executed_first', this.executedFirstListener);
   }
 
   get rawSize(): [number, number] {
@@ -138,8 +138,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private build($parent: d3.Selection<any>) {
     const $p = $parent.append('aside')
-      .classed('provenance-layout-vis', true)
-      .classed('prov-retrieval-panel', true)
+      //.classed('provenance-layout-vis', true)
+      .classed('provenance-retrieval-panel', true)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
@@ -153,7 +153,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <select multiple="multiple" style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
           </div>
         </form>
-        <ol class="search-results"></ol>
+      </div>
+      <div class="body scrollable">
+        <ol class="search-results" start="1"></ol>
         <p>No matching states found.</p>
       </div>
     `);
@@ -230,10 +232,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $li.enter().append('li');
 
     $li
-      .html((d) => `
-        <span class="title">${(<StateNode>d.state.node).name}</span>
-        <span class="label score">${d.similarity.toFixed(2)} </span>
-        <small class="terms">${(<any>d).terms.join(', ')}</small>
+      .html((d, i) => `<article data-score="${d.similarity.toFixed(2)}">
+          <span class="rank">${i+1}</span>
+          <span class="title">${(<StateNode>d.state.node).name}</span>
+          <small class="terms hidden">${(<any>d).terms.join(', ')} </small>
+        </article>
+        <ul class="similarity-bar"></ul>
       `)
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
@@ -248,6 +252,32 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
       });
+
+    const $simBar = $li.select('.similarity-bar')
+      .selectAll('li').data((d) => {
+        return d.similarities.map((sim, i) => {
+          const propValue = d.query.propValues[i];
+          return {
+            id: propValue.id,
+            text: propValue.text,
+            weight: d.query.weights[i],
+            color: d.query.colors[i],
+            similarity: sim * 100,
+            width: sim * 100,
+          };
+        });
+      });
+
+    $simBar.enter().append('li');//.append('div').classed('bar', true);
+
+    $simBar
+      .attr('data-weight', (d) => `${d3.round(d.weight, 2)}%`)
+      .attr('title', (d) => `${d.text}: ${d3.round(d.similarity, 2)}%`)
+      //.select('.bar')
+      .style('background-color', (d) => d.color)
+      .style('width', (d) => `${d3.round(d.width, 2)}%`);
+
+    $simBar.exit().remove();
 
     $li.exit().remove();
 

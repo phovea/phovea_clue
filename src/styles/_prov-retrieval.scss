@@ -1,15 +1,30 @@
 
-.prov-retrieval-panel {
+.provenance-retrieval-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 30em;
 
-  .body {
-    margin: 5px;
+  > .header {
+    flex: 0 0 auto;
+  }
+  > .body {
+    padding: 5px;
+
+    &.scrollable {
+      max-height: 90vh;
+      overflow-y: auto;
+    }
   }
 
   .search-results {
     display: block;
-    padding-left: 20px;
-    cursor: pointer;
+    padding-left: 0;
+    list-style: none;
+
+    .rank {
+      font-weight: bold;
+    }
 
     .score {
       background: white;
@@ -30,8 +45,17 @@
       }
     }
 
-    li {
-      margin: 10px 0;
+    > li {
+      color: #555;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+
+      &:not(:first-child) {
+        margin: 10px 0;
+      }
 
       &:hover {
         .title {
@@ -45,6 +69,10 @@
       }
     }
 
+    article {
+      padding: 5px;
+    }
+
     + p {
       display: none;
     }
@@ -55,6 +83,20 @@
       + p {
         display: block;
       }
+    }
+  }
+
+  .similarity-bar {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    width: 101px;
+    border-right: 1px solid black;
+
+    > li {
+      height: 10px;
     }
   }
 }

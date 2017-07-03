@@ -58,6 +58,8 @@ aside {
       line-height: 1;
     }
   }
+
+  &.provenance-retrieval-panel,
   &.provenance-layout-vis {
     border-color:$core_border;
     //border-color: $authoring-stage;
