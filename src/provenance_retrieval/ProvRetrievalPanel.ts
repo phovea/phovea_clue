@@ -207,10 +207,37 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .compareAll(query)
       .filter((state) => state.similarity > 0);
 
-    this.updateResults(results);
+    const groupedResults = this.groupIntoSequences(results);
+    this.updateResults(groupedResults);
   }
 
-  private updateResults(results:ISearchResult[]) {
+  private groupIntoSequences(results:ISearchResult[]):ISearchResult[][] {
+    const snCache = results.map((r) => <StateNode>r.state.node);
+
+    return d3.nest()
+      .key((d:ISearchResult) => d.similarities.filter((d) => d > 0).length + ' matching terms')
+      .key((d:ISearchResult) => {
+        let firstStateNode:StateNode = <StateNode>d.state.node;
+        let bakStateNode:StateNode = firstStateNode;
+        while(snCache.indexOf(firstStateNode) > -1) {
+          bakStateNode = firstStateNode;
+          firstStateNode = firstStateNode.previousState;
+        }
+        return String(bakStateNode.id);
+      })
+      .sortValues((a:ISearchResult, b:ISearchResult) => a.state.node.id - b.state.node.id)
+      .entries(results)
+      // </end> of d3.nest -> continue with nested array
+      // flatten the array
+      .reduce((prev, curr) => prev.concat(curr.values), [])
+      // flatten the array
+      .map((d) => d.values)
+      // sort results by similarity
+      .sort((a, b) => b[0].similarity - a[0].similarity);
+  }
+
+
+  private updateResults(results:ISearchResult[][]) {
 
     this.$searchResults.selectAll('*').remove(); // clear DOM list
 
@@ -219,7 +246,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     }
 
     const data = results
-      .sort((x, y) => y.similarity - x.similarity)
+      // use first result of sequence and add the sequence length
+      .map((d) => {
+        (<any>d[0]).seqLength = d.length;
+        return d[0];
+      })
       .map((d) => {
         (<any>d).terms = d.state.propValues.map((propValue) => {
           return (d.query.propValues.filter((d) => d.id === propValue.id).length > 0) ? `<span class="match">${propValue.text}</span>` : `${propValue.text}`;
@@ -231,14 +262,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $li.enter().append('li');
 
-    $li
-      .html((d, i) => `<article data-score="${d.similarity.toFixed(2)}">
-          <span class="rank hidden">${i+1}</span>
-          <span class="title">${(<StateNode>d.state.node).name}</span>
-          <small class="terms hidden">${(<any>d).terms.join(', ')} </small>
+    $li.html((d, i) => `
+        <article data-score="${d.similarity.toFixed(2)}">
+          <div class="title" href="#">${(<StateNode>d.state.node).name}</div> 
+          <div class="seq-length">${(<any>d).seqLength}</div>
         </article>
         <ul class="similarity-bar"></ul>
       `)
+      .select('.title')
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
@@ -251,6 +282,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
+        return false;
       });
 
     const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/data[0].similarities.length)]);

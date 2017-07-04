@@ -14,6 +14,7 @@
     &.scrollable {
       max-height: 90vh;
       overflow-y: auto;
+      padding-bottom: 50px;
     }
   }
 
@@ -22,55 +23,32 @@
     padding-left: 0;
     list-style: none;
 
-    .rank {
-      font-weight: bold;
-    }
-
-    .score {
-      background: white;
-      color: $header-menu-color;
-      opacity: 0.3;
-      transition: opacity .2s ease-in-out;
-    }
-
-    .terms {
-      display: block;
-      color: $header-menu-color;
-      margin-top: 3px;
-      opacity: 0.3;
-      transition: opacity .2s ease-in-out;
-
-      .match {
-        background-color: lighten($select-color, 40%);
-      }
-    }
-
     > li {
       color: #555;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 4px;
-      cursor: pointer;
       position: relative;
 
       &:not(:first-child) {
         margin: 10px 0;
       }
-
-      &:hover {
-        .title {
-          font-weight: bold;
-        }
-
-        .terms,
-        .score {
-          opacity: 1;
-        }
-      }
     }
 
     article {
       padding: 5px 5px 2px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .title {
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .title:hover {
+        font-weight: bold;
+      }
     }
 
     + p {
