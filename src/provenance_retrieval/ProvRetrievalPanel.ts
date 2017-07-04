@@ -245,31 +245,35 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return;
     }
 
-    const data = results
-      // use first result of sequence and add the sequence length
-      .map((d) => {
-        (<any>d[0]).seqLength = d.length;
-        return d[0];
-      })
-      .map((d) => {
-        (<any>d).terms = d.state.propValues.map((propValue) => {
-          return (d.query.propValues.filter((d) => d.id === propValue.id).length > 0) ? `<span class="match">${propValue.text}</span>` : `${propValue.text}`;
-        });
-        return d;
-      });
+    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/results[0][0].similarities.length)]);
 
-    const $li = this.$searchResults.selectAll('li').data(data);
+    const data = results.map((seq) => {
+      (<any>seq[0]).seqLength = seq.length;
+      return seq;
+    });
 
-    $li.enter().append('li');
+    const $seqLi = this.$searchResults.selectAll('li').data(results);
+    $seqLi.enter().append('li').classed('sequence', true);
+    $seqLi.html((d, i) => `<ol class="states"></ol>`);
+    $seqLi.exit().remove();
 
-    $li.html((d, i) => `
+    const $stateLi = $seqLi.select('.states').selectAll('li').data((seq) => seq); // remove first entry from seq
+
+    $stateLi.enter().append('li')
+      .attr('class', (d, i) => (i === 0) ? '' : 'hidden');
+
+    $stateLi
+      .html((d, i) => `
         <article data-score="${d.similarity.toFixed(2)}">
-          <div class="title" href="#">${(<StateNode>d.state.node).name}</div> 
-          <div class="seq-length">${(<any>d).seqLength}</div>
+          <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
+          <div class="seq-length">${(<any>d).seqLength || ''}</div>
         </article>
         <ul class="similarity-bar"></ul>
-      `)
-      .select('.title')
+      `);
+
+    $stateLi.exit().remove();
+
+    $stateLi.select('.title')
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
@@ -285,9 +289,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         return false;
       });
 
-    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/data[0].similarities.length)]);
+    $stateLi.select('.seq-length')
+      .on('click', (d) => {
+        (<Event>d3.event).stopPropagation();
+        const li:Element = (<any>d3.event).target.parentNode.parentNode;
+        const siblings:Element[] = Array.from(li.parentElement.children).filter((n) => n !== li);
+        siblings.forEach((n) => n.classList.toggle('hidden'));
+        return false;
+      });
 
-    const $simBar = $li.select('.similarity-bar')
+    const $simBar = $stateLi.select('.similarity-bar')
       .attr('data-tooltip', (d) => d.query.propValues.map((p, i) => `${p.text}:\t${d3.round(widthScale(d.similarities[i]), 2)}%`).join('\n'))
       .selectAll('li').data((d) => {
         return d.similarities.map((sim, i) => {
@@ -311,8 +322,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .style('width', (d) => `${d3.round(d.width, 2)}%`);
 
     $simBar.exit().remove();
-
-    $li.exit().remove();
 
   }
 

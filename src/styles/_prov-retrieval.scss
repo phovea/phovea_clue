@@ -44,10 +44,19 @@
       .title {
         cursor: pointer;
         width: 100%;
+
+        &:hover {
+          font-weight: bold;
+        }
       }
 
-      .title:hover {
-        font-weight: bold;
+      .seq-length {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          font-weight: bold;
+        }
       }
     }
 
@@ -64,13 +73,26 @@
     }
   }
 
+  .states {
+    display: block;
+    padding-left: 0;
+    list-style: none;
+
+    > li {
+      border-bottom: 1px solid #eee;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
   .similarity-bar {
     margin: 0;
     padding: 3px 0 0;
     list-style: none;
     display: flex;
     flex-direction: row;
-    border-radius: 4px;
     overflow: hidden;
 
     > li {
