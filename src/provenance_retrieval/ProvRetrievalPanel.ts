@@ -233,7 +233,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $li
       .html((d, i) => `<article data-score="${d.similarity.toFixed(2)}">
-          <span class="rank">${i+1}</span>
+          <span class="rank hidden">${i+1}</span>
           <span class="title">${(<StateNode>d.state.node).name}</span>
           <small class="terms hidden">${(<any>d).terms.join(', ')} </small>
         </article>
@@ -253,7 +253,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         this.data.jumpTo(<StateNode>d.state.node);
       });
 
+    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/data[0].similarities.length)]);
+
     const $simBar = $li.select('.similarity-bar')
+      .attr('data-tooltip', (d) => d.query.propValues.map((p, i) => `${p.text}:\t${d3.round(widthScale(d.similarities[i]), 2)}%`).join('\n'))
       .selectAll('li').data((d) => {
         return d.similarities.map((sim, i) => {
           const propValue = d.query.propValues[i];
@@ -262,18 +265,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             text: propValue.text,
             weight: d.query.weights[i],
             color: d.query.colors[i],
-            similarity: sim * 100,
-            width: sim * 100,
+            similarity: widthScale(sim),
+            width: widthScale(sim),
           };
         });
       });
 
-    $simBar.enter().append('li');//.append('div').classed('bar', true);
+    $simBar.enter().append('li');
 
     $simBar
       .attr('data-weight', (d) => `${d3.round(d.weight, 2)}%`)
-      .attr('title', (d) => `${d.text}: ${d3.round(d.similarity, 2)}%`)
-      //.select('.bar')
       .style('background-color', (d) => d.color)
       .style('width', (d) => `${d3.round(d.width, 2)}%`);
 

@@ -86,16 +86,7 @@ export class VisStateIndex {
   }
 
   static compare(query:IQuery, state: IVisState):ISearchResult {
-    let similarities = state.compare(selectComparator, query.propValues);
-
-    // distribute similarities correctly
-    const distributeFactorRest = 1/query.propValues.length;
-    const distributeFactorSet = 1/query.propValues.filter((p, i) => p.type === PropertyType.SET && similarities[i] > 0).length;
-
-    similarities = similarities.map((sim, i) => {
-      const distributeFactor = (query.propValues[i].type === PropertyType.SET) ? distributeFactorSet : distributeFactorRest;
-      return sim * distributeFactor;
-    });
+    const similarities = state.compare(selectComparator, query.propValues);
 
     return <ISearchResult>{
       query,
