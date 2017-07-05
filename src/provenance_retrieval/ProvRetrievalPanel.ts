@@ -11,6 +11,8 @@ import {Select2} from './Select2';
 import {IQuery, ISearchResult, Query, VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
+import {SelectOperation} from '../../../phovea_core/src/idtype/IIDType';
 
 
 /**
@@ -369,11 +371,27 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         return false;
       });
 
+    const hoverMultipleStateNodes = (elem, operation: SelectOperation) => {
+      const $ol = d3.select(elem.parentNode.parentNode.parentNode);
+      const stateNodeIds:number[] = (<ISearchResult[]>$ol.datum()).map((d) => this.data.states.indexOf(<StateNode>d.state.node));
+      // hover multiple stateNodeIds
+      this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
+    };
+
     $stateLi.select('.seq-length')
+      .on('mouseenter', () => {
+        (<Event>d3.event).stopPropagation();
+        hoverMultipleStateNodes((<any>d3.event).target, idtypes.SelectOperation.SET);
+      })
+      .on('mouseleave', (d) => {
+        (<Event>d3.event).stopPropagation();
+        hoverMultipleStateNodes((<any>d3.event).target, idtypes.SelectOperation.REMOVE);
+      })
       .on('click', (d) => {
         (<Event>d3.event).stopPropagation();
-        (<any>d3.event).target.classList.toggle('active');
-        const li:Element = (<any>d3.event).target.parentNode.parentNode;
+        const seqLengthElem = (<any>d3.event).target;
+        seqLengthElem.classList.toggle('active');
+        const li:Element = seqLengthElem.parentNode.parentNode;
         const siblings:Element[] = Array.from(li.parentElement.children).filter((n) => n !== li);
         siblings.forEach((n) => n.classList.toggle('hidden'));
         return false;
