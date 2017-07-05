@@ -35,7 +35,8 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
       return 0;
     }
     const scale = this.scales.get(propValue1.id);
-    return scale(Math.abs(propValue1.payload.numVal - propValue2.payload.numVal));
+    const r = scale(Math.abs(propValue1.payload.numVal - propValue2.payload.numVal));
+    return (r >= 0.5) ? r : 0; // keep only states that have a high similarity and skip the rest
   }
 
   /**
