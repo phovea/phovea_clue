@@ -155,6 +155,30 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         </form>
       </div>
       <div class="body scrollable">
+        <svg class="hidden">
+          <defs>
+            <g id="one-state">
+              <circle r="15" cx="180" cy="20"/>
+            </g>
+            <g id="two-states">
+              <circle r="15" cx="100" cy="20"/>
+              <circle r="15" cx="180" cy="20"/>
+              <line x1="100" y1="20" x2="180" y2="20" stroke-width="6"/>
+            </g>
+            <g id="three-states">
+              <circle r="15" cx="20" cy="20"/>
+              <circle r="15" cx="100" cy="20"/>
+              <circle r="15" cx="180" cy="20"/>
+              <line x1="20" y1="20" x2="180" y2="20" stroke-width="6"/>
+            </g>
+            <g id="n-states">
+              <circle r="15" cx="20" cy="20"/>
+              <circle r="15" cx="180" cy="20"/>
+              <line x1="20" y1="20" x2="60" y2="20" stroke-width="6"/>
+              <line x1="140" y1="20" x2="180" y2="20" stroke-width="6"/>
+            </g>
+          </defs>
+        </svg>
         <ol class="search-results" start="1"></ol>
         <p>No matching states found.</p>
       </div>
@@ -263,13 +287,37 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .attr('class', (d, i) => (i === 0) ? '' : 'hidden');
 
     $stateLi
-      .html((d, i) => `
-        <article data-score="${d.similarity.toFixed(2)}">
-          <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
-          <div class="seq-length">${(<any>d).seqLength || ''}</div>
-        </article>
-        <ul class="similarity-bar"></ul>
-      `);
+      .html((d, i) => {
+        let seqIconId = 'n-states';
+        let seqLength = (<any>d).seqLength || '';
+        switch(seqLength) {
+          case 1:
+            seqIconId = 'one-state';
+            seqLength = '';
+            break;
+          case 2:
+            seqIconId = 'two-states';
+            seqLength = '';
+            break;
+          case 3:
+            seqIconId = 'three-states';
+            seqLength = '';
+            break;
+        }
+
+        return `
+          <article data-score="${d.similarity.toFixed(2)}">
+            <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
+            <div class="seq-length">
+              <svg viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
+                <use xlink:href="#${seqIconId}"></use>
+              </svg>
+              <span>${seqLength}</span>
+            </div>
+          </article>
+          <ul class="similarity-bar"></ul>
+        `;
+      });
 
     $stateLi.exit().remove();
 
@@ -292,6 +340,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $stateLi.select('.seq-length')
       .on('click', (d) => {
         (<Event>d3.event).stopPropagation();
+        (<any>d3.event).target.classList.toggle('active');
         const li:Element = (<any>d3.event).target.parentNode.parentNode;
         const siblings:Element[] = Array.from(li.parentElement.children).filter((n) => n !== li);
         siblings.forEach((n) => n.classList.toggle('hidden'));

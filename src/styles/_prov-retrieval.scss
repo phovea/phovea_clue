@@ -51,11 +51,38 @@
       }
 
       .seq-length {
+        position: relative;
         cursor: pointer;
         user-select: none;
 
+        > span {
+          pointer-events: none;
+          position: absolute;
+          top: 10%;
+          text-align: center;
+          width: 100%;
+          font-size: 0.9em;
+          color: #aaa;
+        }
+
+        .svg-icon {
+          pointer-events: none;
+          width: 50px;
+          height: 10px;
+          fill: #ccc;
+          stroke: #ccc;
+        }
+
+        &.active,
         &:hover {
-          font-weight: bold;
+          span {
+            color: #949494;
+          }
+
+          .svg-icon {
+            fill: #949494;
+            stroke: #949494;
+          }
         }
       }
     }
@@ -69,6 +96,7 @@
 
       + p {
         display: block;
+        text-align: center;
       }
     }
   }
@@ -89,6 +117,10 @@
       &:last-child {
         border-bottom: none;
       }
+
+       &:not(:first-child) .seq-length {
+         display: none;
+       }
     }
   }
 
