@@ -308,14 +308,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return seq;
     });
 
-    console.log(results);
-
-    const $seqLi = this.$searchResults.selectAll('li').data(results);
+    const $seqLi = this.$searchResults.selectAll('li').data(results, (d) => String(d[0].state.node.id));
     $seqLi.enter().append('li').classed('sequence', true);
     $seqLi.html((d, i) => `<ol class="states"></ol>`);
     $seqLi.exit().remove();
 
-    const $stateLi = $seqLi.select('.states').selectAll('li').data((seq) => seq); // remove first entry from seq
+    const $stateLi = $seqLi.select('.states').selectAll('li').data((seq) => seq, (d) => String(d.state.node.id));
 
     $stateLi.enter().append('li')
       .attr('class', (d, i) => (i === 0) ? '' : 'hidden');
