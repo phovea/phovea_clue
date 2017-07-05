@@ -81,6 +81,11 @@
     > li {
       border-bottom: 1px solid #eee;
 
+      &:first-child + li {
+        border-top: 1px solid #eee;
+      }
+
+      &:first-child,
       &:last-child {
         border-bottom: none;
       }
