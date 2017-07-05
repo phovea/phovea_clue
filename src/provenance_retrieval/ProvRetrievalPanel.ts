@@ -243,7 +243,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .style('border-color', (d, i) => query.colors[i])
       .style('color', (d, i) => query.colors[i])
       .html((d, i) => `
-        <span class="remove" role="presentation">×</span>
+        <span class="remove" role="presentation" title="Remove">×</span>
         <span>${d.text}</span>
       `);
     $terms.select('.remove')
@@ -342,7 +342,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         return `
           <article data-score="${d.similarity.toFixed(2)}">
             <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
-            <div class="seq-length">
+            <div class="seq-length" title="Click to show state sequence">
               <svg viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#${seqIconId}"></use>
               </svg>
