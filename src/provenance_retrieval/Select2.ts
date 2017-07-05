@@ -56,7 +56,7 @@ export class Select2 {
 
     return $(selector).select2(<any>{
       theme: 'bootstrap',
-      placeholder: 'Add filter by attribute, visualization, value, …',
+      placeholder: 'Search for attribute, selection, …',
       data: prepData,
       multiple: true,
 
