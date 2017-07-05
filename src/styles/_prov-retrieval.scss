@@ -12,9 +12,10 @@
     padding: 5px;
 
     &.scrollable {
+      height: 90vh;
       max-height: 90vh;
       overflow-y: auto;
-      padding-bottom: 50px;
+      padding-bottom: 30px;
     }
   }
 
@@ -159,6 +160,35 @@
       opacity: 1;
       visibility: visible;
       transition-delay: 0s, 0.5s;
+    }
+  }
+}
+
+#prov-retrieval-weighting-editor {
+  ul.terms {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+      color: #555;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 0 6px 5px 0;
+      padding: 3px 6px;
+      cursor: default;
+
+      .remove {
+        color: #949494;
+        cursor: pointer;
+
+        &:hover {
+          color: #000;
+        }
+      }
     }
   }
 }

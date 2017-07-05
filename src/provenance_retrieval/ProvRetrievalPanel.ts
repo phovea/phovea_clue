@@ -41,6 +41,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
     const success = this.captureAndIndexState(state);
     if(success) {
+      this.updateWeightingEditor(this.query);
       this.performSearch(this.query);
     }
   });
@@ -153,6 +154,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <select multiple="multiple" style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
           </div>
         </form>
+        <div id="prov-retrieval-weighting-editor">
+          <ul class="terms"></ul>
+        </div>
       </div>
       <div class="body scrollable">
         <svg class="hidden">
@@ -180,7 +184,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           </defs>
         </svg>
         <ol class="search-results" start="1"></ol>
-        <p>No matching states found.</p>
+        <p>No matching states found</p>
       </div>
     `);
 
@@ -197,7 +201,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             //console.log('select2:select', evt.params.data);
 
             this.query = this.query.addPropValue(propValue);
+            this.updateWeightingEditor(this.query);
             this.performSearch(this.query);
+
+            // prevent adding new terms as tags and add them to the weighting editor instead
+            $select2.val(null).trigger('change');
           })
           .on('select2:unselect', (evt) => {
             const propValue:IPropertyValue = evt.params.data.propValue;
@@ -205,6 +213,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             //console.log('select2:unselect ', evt.params.data);
 
             this.query = this.query.removePropValue(propValue);
+            this.updateWeightingEditor(this.query);
             this.performSearch(this.query);
 
             // close drop down on unselect (see https://github.com/select2/select2/issues/3209#issuecomment-149663474)
@@ -220,6 +229,29 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     }
 
     return $p;
+  }
+
+  private updateWeightingEditor(query:IQuery) {
+    const $terms = d3.select('#prov-retrieval-weighting-editor ul')
+      .selectAll('li')
+      .data(query.propValues, (d) => String(d.id));
+
+    $terms.enter().append('li');
+    $terms
+      .style('border-color', (d, i) => query.colors[i])
+      .style('color', (d, i) => query.colors[i])
+      .html((d, i) => `
+        <span class="remove" role="presentation">×</span>
+        <span>${d.text}</span>
+      `);
+    $terms.select('.remove')
+      .on('click', (propValue) => {
+        propValue.isSelected = false;
+        this.query = this.query.removePropValue(propValue);
+        this.updateWeightingEditor(this.query);
+        this.performSearch(this.query);
+      });
+    $terms.exit().remove();
   }
 
   private performSearch(query:IQuery) {
@@ -275,6 +307,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       (<any>seq[0]).seqLength = seq.length;
       return seq;
     });
+
+    console.log(results);
 
     const $seqLi = this.$searchResults.selectAll('li').data(results);
     $seqLi.enter().append('li').classed('sequence', true);
