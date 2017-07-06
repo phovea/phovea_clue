@@ -95,7 +95,15 @@ export default class ProvenanceGraphMenu {
       //create blob and save it
       const blob = new Blob([str], {type: 'application/json;charset=utf-8'});
       const a = new FileReader();
-      a.onload = (e) => window.open((<any>e.target).result, '_blank');
+      a.onload = (e) => {
+        const url = (<any>e.target).result;
+        const helper = parent.ownerDocument.createElement('a');
+        helper.setAttribute('href', url);
+        helper.setAttribute('target', '_blank');
+        helper.setAttribute('download', `${this.graph.desc.name}.json`);
+        helper.click();
+        helper.remove();
+      };
       a.readAsDataURL(blob);
       return false;
     });
