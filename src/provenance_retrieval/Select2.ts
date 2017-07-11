@@ -15,7 +15,7 @@ interface IQuery {
 interface ISelect2Attr {
   text: string;
   id?: number|string;
-  param?: boolean;
+  needsInput?: boolean;
   prop?: IProperty;
   propValue?: IPropertyValue;
 }
@@ -42,7 +42,7 @@ export class Select2 {
           return {
             text: propValue.text,
             id: propValue.id,
-            param: propValue.type === PropertyType.NUMERICAL,
+            needsInput: propValue.needsInput,
             prop,
             propValue
           };
@@ -69,7 +69,7 @@ export class Select2 {
           .map((d) => d.children)
           .some((d) => {
             return d
-              .filter((e) => e.param === true)
+              .filter((e) => e.needsInput === true)
               .some((e) => this.findQueryInParam(queryTerm, e.text));
           });
 
@@ -150,7 +150,7 @@ export class Select2 {
     .on('select2:selecting', (e) => {
       const item:ISelect2Attr = e.params.args.data;
 
-      if (item.param === true) {
+      if (item.needsInput === true) {
         // prevent adding items with parameter -> will be added by `createTag()`
         e.preventDefault();
 
@@ -210,7 +210,7 @@ export class Select2 {
         // otherwise search in children and add only matching
       } else if (d.children) {
         res.children = d.children.filter((item) => {
-          if (item.param && this.findQueryInParam(query, item.text)) {
+          if (item.needsInput && this.findQueryInParam(query, item.text)) {
             return true;
           }
           return this.findQueryInText(query, item.text);

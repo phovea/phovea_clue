@@ -15,7 +15,7 @@ import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 
 class NumericalPropertyComparator implements INumericalPropertyComparator {
 
-  private scales = new Map<string|number, d3.scale.Linear<any, any>>();
+  private minMax = new Map<string|number, number[]>();
 
   constructor() {
     //
@@ -26,17 +26,19 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
     state.propValues
       .filter((d) => d.type === PropertyType.NUMERICAL)
       .forEach((propValue) => {
-        this.updateScale(propValue.id, propValue.payload.numVal);
+        this.updateMinMax(propValue.id, parseFloat(propValue.payload.numVal));
       });
   }
 
   compare(propValue1:IPropertyValue, propValue2:IPropertyValue):number {
-    if(propValue1.id !== propValue2.id || !this.scales.has(propValue1.id)) {
+    if(propValue1.id !== propValue2.id || !this.minMax.has(propValue1.id)) {
       return 0;
     }
-    const scale = this.scales.get(propValue1.id);
-    const r = scale(Math.abs(propValue1.payload.numVal - propValue2.payload.numVal));
-    return (r >= 0.5) ? r : 0; // keep only states that have a high similarity and skip the rest
+    const minMax = this.minMax.get(propValue1.id);
+    const scale = d3.scale.linear().domain([0, Math.abs(minMax[1] - minMax[0])]).range([1, 0]).clamp(true);
+    const diff = Math.abs(parseFloat(propValue1.payload.numVal) - parseFloat(propValue2.payload.numVal));
+    const r = scale(diff);
+    return (r >= 0.8) ? r : 0; // keep only states that have a high similarity and skip the rest
   }
 
   /**
@@ -44,11 +46,10 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
    * @param id
    * @param numVal
    */
-  private updateScale(id:string|number, numVal:number) {
-    const scale = (this.scales.has(id)) ? this.scales.get(id) : d3.scale.linear().domain([0, 0]).range([1, 0]).clamp(true);
-    const domain = scale.domain();
-    scale.domain([Math.min(domain[0], numVal), Math.max(domain[1], numVal)]);
-    this.scales.set(id, scale);
+  private updateMinMax(id:string|number, numVal:number) {
+    const minMax = (this.minMax.has(id)) ? this.minMax.get(id) : [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    const minMax2 = [Math.min(minMax[0], numVal), Math.max(minMax[1], numVal)];
+    this.minMax.set(id, minMax2);
   }
 }
 
