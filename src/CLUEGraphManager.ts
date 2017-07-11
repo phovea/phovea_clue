@@ -96,7 +96,7 @@ export default class CLUEGraphManager {
   migrateGraph(graph: ProvenanceGraph, extras: any = {}): Promise<ProvenanceGraph> {
     return this.manager.migrateRemote(graph, extras).then((newGraph) => {
       return (graph.desc.local ? this.manager.delete(graph.desc) : Promise.resolve(true)).then(() => {
-        CLUEGraphManager.setGraphInUrl(newGraph.desc.id); //just update the reference
+        hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
         return newGraph;
       });
     });
