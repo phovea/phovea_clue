@@ -398,7 +398,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       });
 
     const $simBar = $stateLi.select('.similarity-bar')
-      .attr('data-tooltip', (d) => d.query.propValues.map((p, i) => `${p.text}:\t${d3.round(widthScale(d.similarities[i]), 2)}%`).join('\n'))
+      .attr('data-tooltip', (d) => {
+        const textSim = d.query.propValues.map((p, i) => {
+          return {text: p.text, similarity: d.similarities[i]};
+        });
+        textSim.push({text: 'Total', similarity: d.similarity});
+        return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
+      })
       .selectAll('li').data((d) => {
         return d.similarities.map((sim, i) => {
           const propValue = d.query.propValues[i];
