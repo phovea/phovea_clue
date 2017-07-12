@@ -80,7 +80,7 @@ export class Select2 {
             text: queryTerm,
             tag: true,
             propValue: createPropertyValue(PropertyType.NUMERICAL, {
-              id: queryParts[0],
+              id: queryTerm,
               text: queryTerm,
               payload: {
                 numVal: parseFloat(queryParts[1])

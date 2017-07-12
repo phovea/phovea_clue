@@ -15,7 +15,7 @@ import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 
 class NumericalPropertyComparator implements INumericalPropertyComparator {
 
-  private minMax = new Map<string|number, number[]>();
+  private minMax = new Map<string, number[]>();
 
   constructor() {
     //
@@ -31,7 +31,7 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
   }
 
   compare(propValue1:IPropertyValue, propValue2:IPropertyValue):number {
-    if(propValue1.id !== propValue2.id || !this.minMax.has(propValue1.id)) {
+    if(!this.minMax.has(propValue1.id)) {
       return 0;
     }
     const minMax = this.minMax.get(propValue1.id);
@@ -46,7 +46,10 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
    * @param id
    * @param numVal
    */
-  private updateMinMax(id:string|number, numVal:number) {
+  private updateMinMax(id:string, numVal:number) {
+    if(isNaN(numVal)) {
+      return;
+    }
     const minMax = (this.minMax.has(id)) ? this.minMax.get(id) : [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     const minMax2 = [Math.min(minMax[0], numVal), Math.max(minMax[1], numVal)];
     this.minMax.set(id, minMax2);
