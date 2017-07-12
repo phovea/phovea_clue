@@ -109,13 +109,37 @@
   }
 
   .states {
+    position: relative;
     display: block;
     padding-left: 0;
     list-style: none;
     border-top: 1px solid #ccc;
 
+    // renders the connection line between different state circles in the background
+    &:before {
+      content: '';
+      border: 1px solid #ddd;
+      position: absolute;
+      left: 7px;
+      top: 12px;
+      bottom: 15px;
+      z-index: 0;
+    }
+
+    > li {
+      position: relative;
+      z-index: 1;
+    }
+
     > li:not(:last-child) {
       border-bottom: 1px solid #eee;
+    }
+
+    i.glyph {
+      font-size: 50%;
+      color: #949494;
+      padding-right: 2px;
+      transform: translateY(-50%);
     }
   }
 

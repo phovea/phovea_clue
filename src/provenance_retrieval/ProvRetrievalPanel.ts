@@ -172,22 +172,22 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <svg class="hidden">
           <defs>
             <g id="one-state">
-              <circle r="15" cx="180" cy="20"/>
+              <circle r="10" cx="180" cy="20"/>
             </g>
             <g id="two-states">
-              <circle r="15" cx="100" cy="20"/>
-              <circle r="15" cx="180" cy="20"/>
+              <circle r="10" cx="100" cy="20"/>
+              <circle r="10" cx="180" cy="20"/>
               <line x1="100" y1="20" x2="180" y2="20" stroke-width="6"/>
             </g>
             <g id="three-states">
-              <circle r="15" cx="20" cy="20"/>
-              <circle r="15" cx="100" cy="20"/>
-              <circle r="15" cx="180" cy="20"/>
+              <circle r="10" cx="20" cy="20"/>
+              <circle r="10" cx="100" cy="20"/>
+              <circle r="10" cx="180" cy="20"/>
               <line x1="20" y1="20" x2="180" y2="20" stroke-width="6"/>
             </g>
             <g id="n-states">
-              <circle r="15" cx="20" cy="20"/>
-              <circle r="15" cx="180" cy="20"/>
+              <circle r="10" cx="20" cy="20"/>
+              <circle r="10" cx="180" cy="20"/>
               <line x1="20" y1="20" x2="60" y2="20" stroke-width="6"/>
               <line x1="140" y1="20" x2="180" y2="20" stroke-width="6"/>
             </g>
@@ -455,7 +455,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .html((d) => {
         return `
           <article data-score="${d.similarity.toFixed(2)}">
-            <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
+            <div class="title" href="#">
+              <i class="fa fa-circle glyph"></i>
+              ${(<StateNode>d.state.node).name}
+            </div>
           </article>
           <ul class="similarity-bar"></ul>
         `;
