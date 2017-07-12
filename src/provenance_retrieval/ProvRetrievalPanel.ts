@@ -12,7 +12,7 @@ import {IQuery, ISearchResult, Query, VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
-import {SelectOperation} from '../../../phovea_core/src/idtype/IIDType';
+import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 
 
 /**
@@ -313,49 +313,149 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/results[0][0].similarities.length)]);
 
+    const $seqLi = this.createSequenceDOM(this.$searchResults, results, widthScale);
+    this.createStateListDOM($seqLi.select('.states'), widthScale);
+  }
+
+  private createSequenceDOM($parent, results:ISearchResult[][], widthScale) {
+
     const data = results.map((seq) => {
-      (<any>seq[0]).seqLength = seq.length;
+      // get top result which is the first state with the highest similarity score
+      (<any>seq).topResult = seq.reduce((a,b) => ((a.similarity >= b.similarity) ? a : b));
       return seq;
     });
 
-    const $seqLi = this.$searchResults.selectAll('li').data(results, (d) => String(d[0].state.node.id));
+    const $seqLi = $parent
+      .selectAll('li')
+      .data(data, (d) => String((<any>d).topResult.state.node.id));
+
     $seqLi.enter().append('li').classed('sequence', true);
-    $seqLi.html((d, i) => `<ol class="states"></ol>`);
+    $seqLi.html((d) => {
+      const topResult = (<any>d).topResult;
+      let seqIconId = 'n-states';
+      let seqLength = d.length || '';
+      switch(seqLength) {
+        case 1:
+          seqIconId = 'one-state';
+          seqLength = '';
+          break;
+        case 2:
+          seqIconId = 'two-states';
+          seqLength = '';
+          break;
+        case 3:
+          seqIconId = 'three-states';
+          seqLength = '';
+          break;
+      }
+
+      return `
+        <article data-score="${topResult.similarity.toFixed(2)}">
+          <div class="title" href="#">${(<StateNode>topResult.state.node).name}</div>
+          <div class="seq-length" title="Click to show state sequence">
+            <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
+              <use xlink:href="#${seqIconId}"></use>
+            </svg>
+            <span>${seqLength}</span>
+          </div>
+        </article>
+        <ul class="similarity-bar"></ul>
+        <ol class="states hidden"></ol>
+      `;
+    });
+
     $seqLi.exit().remove();
 
-    const $stateLi = $seqLi.select('.states').selectAll('li').data((seq) => seq, (d) => String(d.state.node.id));
+    $seqLi.select('.title')
+      .on('mouseenter', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+      })
+      .on('mouseleave', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+      })
+      .on('click', (d) => {
+        (<Event>d3.event).stopPropagation();
+        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.jumpTo(<StateNode>(<any>d).topResult.state.node);
+        return false;
+      });
 
-    $stateLi.enter().append('li')
-      .attr('class', (d, i) => (i === 0) ? '' : 'hidden');
+    const hoverMultipleStateNodes = (seq:ISearchResult[], operation: SelectOperation) => {
+      const stateNodeIds:number[] = seq.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
+      // hover multiple stateNodeIds
+      this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
+    };
+
+    $seqLi.select('.seq-length')
+      .on('mouseenter', (d:ISearchResult[]) => {
+        (<Event>d3.event).stopPropagation();
+        hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
+      })
+      .on('mouseleave', (d:ISearchResult[]) => {
+        (<Event>d3.event).stopPropagation();
+        hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
+      })
+      .on('click', (d) => {
+        (<Event>d3.event).stopPropagation();
+        // expand/collapse only for sequence length > 1
+        if(d.length > 1) {
+          const li = (<any>d3.event).target.parentNode.parentNode;
+          li.classList.toggle('active');
+          li.querySelector('.states').classList.toggle('hidden');
+        }
+        return false;
+      });
+
+    const $seqSimBar = $seqLi.select('.similarity-bar')
+      .attr('data-tooltip', (d) => {
+        const textSim = (<any>d).topResult.query.propValues.map((p, i) => {
+          return {text: p.text, similarity: (<any>d).topResult.similarities[i]};
+        });
+        textSim.push({text: 'Total', similarity: (<any>d).topResult.similarity});
+        return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
+      })
+      .selectAll('li')
+      .data((d) => {
+        return (<any>d).topResult.similarities.map((sim, i) => {
+          const propValue = (<any>d).topResult.query.propValues[i];
+          return {
+            id: propValue.id,
+            text: propValue.text,
+            weight: (<any>d).topResult.query.weights[i],
+            color: (<any>d).topResult.query.colors[i],
+            similarity: widthScale(sim),
+            width: widthScale(sim),
+          };
+        });
+      });
+
+    $seqSimBar.enter().append('li');
+
+    $seqSimBar
+      .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
+      .style('background-color', (d:any) => d.color)
+      .style('width', (d:any) => `${d3.round(d.width, 2)}%`);
+
+    $seqSimBar.exit().remove();
+
+    return $seqLi;
+  }
+
+  private createStateListDOM($parent:d3.Selection<any>, widthScale) {
+
+    const $stateLi = $parent
+      .selectAll('li')
+      .data((seq) => [seq[0], ...seq], (d) => String(d.state.node.id));
+
+    $stateLi.enter().append('li');
 
     $stateLi
-      .html((d, i) => {
-        let seqIconId = 'n-states';
-        let seqLength = (<any>d).seqLength || '';
-        switch(seqLength) {
-          case 1:
-            seqIconId = 'one-state';
-            seqLength = '';
-            break;
-          case 2:
-            seqIconId = 'two-states';
-            seqLength = '';
-            break;
-          case 3:
-            seqIconId = 'three-states';
-            seqLength = '';
-            break;
-        }
-
+      .html((d) => {
         return `
           <article data-score="${d.similarity.toFixed(2)}">
             <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
-            <div class="seq-length" title="Click to show state sequence">
-              <svg viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
-                <use xlink:href="#${seqIconId}"></use>
-              </svg>
-              <span>${seqLength}</span>
-            </div>
           </article>
           <ul class="similarity-bar"></ul>
         `;
@@ -376,32 +476,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
-        return false;
-      });
-
-    const hoverMultipleStateNodes = (elem, operation: SelectOperation) => {
-      const $ol = d3.select(elem.parentNode.parentNode.parentNode);
-      const stateNodeIds:number[] = (<ISearchResult[]>$ol.datum()).map((d) => this.data.states.indexOf(<StateNode>d.state.node));
-      // hover multiple stateNodeIds
-      this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
-    };
-
-    $stateLi.select('.seq-length')
-      .on('mouseenter', () => {
-        (<Event>d3.event).stopPropagation();
-        hoverMultipleStateNodes((<any>d3.event).target, idtypes.SelectOperation.SET);
-      })
-      .on('mouseleave', (d) => {
-        (<Event>d3.event).stopPropagation();
-        hoverMultipleStateNodes((<any>d3.event).target, idtypes.SelectOperation.REMOVE);
-      })
-      .on('click', (d) => {
-        (<Event>d3.event).stopPropagation();
-        const seqLengthElem = (<any>d3.event).target;
-        seqLengthElem.classList.toggle('active');
-        const li:Element = seqLengthElem.parentNode.parentNode;
-        const siblings:Element[] = Array.from(li.parentElement.children).filter((n) => n !== li);
-        siblings.forEach((n) => n.classList.toggle('hidden'));
         return false;
       });
 
@@ -430,12 +504,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $simBar.enter().append('li');
 
     $simBar
-      .attr('data-weight', (d) => `${d3.round(d.weight, 2)}%`)
-      .style('background-color', (d) => d.color)
-      .style('width', (d) => `${d3.round(d.width, 2)}%`);
+      .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
+      .style('background-color', (d:any) => d.color)
+      .style('width', (d:any) => `${d3.round(d.width, 2)}%`);
 
     $simBar.exit().remove();
-
   }
 
 }

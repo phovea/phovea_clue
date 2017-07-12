@@ -24,15 +24,16 @@
     padding-left: 0;
     list-style: none;
 
-    > li {
-      color: #555;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      position: relative;
+    + p {
+      display: none;
+    }
 
-      &:not(:first-child) {
-        margin: 10px 0;
+    &:empty {
+      display: none;
+
+      + p {
+        display: block;
+        text-align: center;
       }
     }
 
@@ -50,54 +51,59 @@
           font-weight: bold;
         }
       }
+    }
 
-      .seq-length {
-        position: relative;
-        cursor: pointer;
-        user-select: none;
+    .seq-length {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
 
-        > span {
-          pointer-events: none;
-          position: absolute;
-          top: 10%;
-          text-align: center;
-          width: 100%;
-          font-size: 0.9em;
-          color: #aaa;
-        }
+      > span {
+        pointer-events: none;
+        position: absolute;
+        top: 10%;
+        text-align: center;
+        width: 100%;
+        font-size: 0.9em;
+        color: #aaa;
+      }
 
-        .svg-icon {
-          pointer-events: none;
-          width: 50px;
-          height: 10px;
-          fill: #ccc;
-          stroke: #ccc;
-        }
-
-        &.active,
-        &:hover {
-          span {
-            color: #949494;
-          }
-
-          .svg-icon {
-            fill: #949494;
-            stroke: #949494;
-          }
-        }
+      .svg-icon {
+        pointer-events: none;
+        width: 50px;
+        height: 10px;
+        fill: #ccc;
+        stroke: #ccc;
       }
     }
 
-    + p {
-      display: none;
-    }
+    > li {
+      color: #555;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      position: relative;
 
-    &:empty {
-      display: none;
+      &:not(:first-child) {
+        margin: 10px 0;
+      }
 
-      + p {
-        display: block;
-        text-align: center;
+      &.active {
+        > .states {
+          background-color: #fafafa;
+        }
+      }
+
+      &.active,
+      .seq-length:hover {
+        span {
+          color: #949494;
+        }
+
+        .svg-icon {
+          fill: #949494;
+          stroke: #949494;
+        }
       }
     }
   }
@@ -106,22 +112,10 @@
     display: block;
     padding-left: 0;
     list-style: none;
+    border-top: 1px solid #ccc;
 
-    > li {
+    > li:not(:last-child) {
       border-bottom: 1px solid #eee;
-
-      &:first-child + li {
-        border-top: 1px solid #eee;
-      }
-
-      &:first-child,
-      &:last-child {
-        border-bottom: none;
-      }
-
-       &:not(:first-child) .seq-length {
-         display: none;
-       }
     }
   }
 
