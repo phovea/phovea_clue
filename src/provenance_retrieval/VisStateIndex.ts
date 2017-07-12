@@ -13,6 +13,8 @@ export interface IQuery {
 
   addPropValue(propValue:IPropertyValue):IQuery;
   removePropValue(propValue:IPropertyValue):IQuery;
+
+  replacePropValues(propValue:IPropertyValue[]):IQuery;
 }
 
 export interface ISearchResult {
@@ -54,6 +56,12 @@ export class Query implements IQuery {
   removePropValue(propValue:IPropertyValue):IQuery {
     const q = new Query();
     q._propValues = this.propValues.filter((d) => d !== propValue);
+    return q;
+  }
+
+  replacePropValues(propValue:IPropertyValue[]):IQuery {
+    const q = new Query();
+    q._propValues = [].concat(...propValue);
     return q;
   }
 

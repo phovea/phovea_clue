@@ -692,9 +692,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
     $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fa fa-search').on('click', (d) => {
       const e = <Event>d3.event;
-      alert('Not implemented yet');
       e.stopPropagation();
       e.preventDefault();
+      this.data.fire('search_state', d.s);
     });
 
     $states.call(StateRepr.render);
