@@ -24,7 +24,9 @@ class Screenshotter(object):
 
   def _timed_out(self):
     try:
+      _log.info('quiting driver')
       self._driver.quit()
+      _log.info('quitted driver')
     finally:
       self._driver = None
 
@@ -36,10 +38,11 @@ class Screenshotter(object):
       self._timeout = None
 
     if self._driver is None:
+      _log.info('create driver')
       options = webdriver.ChromeOptions()
       options.debugger_address = conf.chromeAddress
       self._driver = webdriver.Chrome(chrome_options=options)
-      self._driver.implicitly_wait(20)  # wait at most 20 seconds
+      self._driver.implicitly_wait(30)  # wait at most 30 seconds
     return self._driver
 
   def _free(self):
@@ -48,31 +51,49 @@ class Screenshotter(object):
 
   def take(self, url, body=None):
     with self._lock:
-      driver = self._get()
-      _log.info('url %s', url)
-      driver.get(url)
+      try:
+        driver = self._get()
+        _log.info('url %s', url)
+        driver.get(url)
 
-      if body is not None:
-        try:
-          body(driver)
-        except Exception as e:
-          _log.exception('cannot fullfil query %s', e)
-      _log.info('take screenshot')
-      obj = driver.get_screenshot_as_png()
-      self._free()
-      return obj
+        if body is not None:
+          try:
+            body(driver)
+          except Exception as e:
+            _log.exception('cannot fullfil query %s', e)
+        _log.info('take screenshot')
+        obj = driver.get_screenshot_as_png()
+        return obj
+      finally:
+        self._free()
 
 
 screenshotter = Screenshotter()
 
+
+def randomword(length):
+  import random, string
+  return ''.join(random.choice(string.lowercase) for i in range(length))
+
+
 def generate_url(app, prov_id, state):
-  base = '{s}/#clue_graph={g}&clue_state={n}&clue=P&clue_store=remote&clue_headless=Y'
-  return base.format(s=conf.server, g=prov_id, n=state)
+  # add a random parameter to force a proper reload
+  base = '{s}/?clue_random={r}#clue_graph={g}&clue_state={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=state, r=randomword(5))
+
+
+def generate_key(app, prov_id, state):
+  return 'a={a},p={g},s={s}'.format(a=app, g=prov_id, s=state)
 
 
 def generate_slide_url(app, prov_id, slide):
-  base = '{s}/#clue_graph={g}&clue_slide={n}&clue=P&clue_store=remote&clue_headless=Y'
-  return base.format(s=conf.server, g=prov_id, n=slide)
+  base = '{s}/?clue_random={r}#clue_graph={g}&clue_slide={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=slide, r=randomword(5))
+
+
+def generate_slide_key(app, prov_id, slide):
+  return 'a={a},p={g},u={s}'.format(a=app, g=prov_id, s=slide)
+
 
 @app.route('/dump/<path:page>')
 def test(page):
@@ -83,20 +104,18 @@ def test(page):
 def create_via_selenium(url, width, height):
   def eval_clue(driver):
     driver.find_element_by_css_selector('main')
-    for entry in driver.get_log('browser'):
-      _log.info(entry)
-    body = driver.find_element_by_css_selector('body.clue_jumped')
-    _log.info('found jumped flag: {}'.format(body))
-    # try:
-    # we have to wait for the page to refresh, the last thing that seems to be updated is the title
-    # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
+    found = None
+    tries = 0
+    while not found and tries < 3:
+      tries += 1
+      for entry in driver.get_log('browser'):
+        _log.info(entry)
+      found = driver.find_element_by_css_selector('body.clue_jumped')
 
-    # You should see "cheese! - Google Search"
-    # print driver.title
-
-    # finally:
-    #    driver.quit()
-    # obj = main_elem.screenshot_as_png()
+    if found:
+      _log.info('found jumped flag: {}'.format(found.get_attribute('class')))
+    else:
+      _log.warn('cannnot find jumped flag after 3 x 30 seconds, give up and take a screenshot')
 
   return screenshotter.take(url, eval_clue)
 
@@ -165,9 +184,7 @@ def create_thumbnail(app, prov_id, state, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  url = generate_url(app, prov_id, state)
-
-  key = mc_prefix + url + 't' + str(width)
+  key = mc_prefix + generate_key(app, prov_id, state) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:
@@ -194,9 +211,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  url = generate_slide_url(app, prov_id, slide)
-
-  key = mc_prefix + url + 't' + str(width)
+  key = mc_prefix + generate_slide_key(app, prov_id, slide) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:
