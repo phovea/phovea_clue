@@ -72,7 +72,8 @@ screenshotter = Screenshotter()
 
 
 def randomword(length):
-  import random, string
+  import random
+  import string
   return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
