@@ -10,6 +10,4 @@ services:
   db_memcached:
     image: memcached:1.4-alpine
   util_chrome:
-    image: 'giggio/chrome'
-    cap_drop:
-    - SYS_ADMIN
+    image: 'alpeware/chrome-headless-trunk'
