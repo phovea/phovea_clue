@@ -1,0 +1,15 @@
+version: '2.0'
+services:
+  _host:
+    depends_on:
+      - db_memcached
+      - util_chrome
+    links:
+      - 'db_memcached:memcached'
+      - 'util_chrome:chrome'
+  db_memcached:
+    image: memcached:1.4-alpine
+  util_chrome:
+    image: 'giggio/chrome'
+    cap_drop:
+    - SYS_ADMIN

@@ -33,7 +33,10 @@ def generate_slide_url(app, prov_id, slide):
 def create_via_selenium(url, width, height):
   from selenium import webdriver
 
-  driver = webdriver.PhantomJS(executable_path=conf.phantomjs2)  # or add to your PATH
+  options = webdriver.ChromeOptions()
+  options.debugger_address = conf.chromeAddress
+  driver = webdriver.Chrome(chrome_options=options, service_args=['--verbose', '--log-path=/phovea/chrome.txt'])
+
   driver.implicitly_wait(20)  # wait at most 20 seconds
   driver.set_window_size(width, height)  # optional
   _log.debug('url %s', url)
@@ -59,26 +62,6 @@ def create_via_selenium(url, width, height):
   driver.quit()
   return obj
 
-
-# def create_via_phantomjs(url, width, height, format):
-#  import tempfile, os, gevent.subprocess as subprocess
-#
-#  name = tempfile.mkstemp('.' + format)
-#
-#  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
-#          '2' + name[1], str(width), str(height)]
-#  _log.debug(' '.join(args))
-#  proc = subprocess.Popen(args)
-#  _log.debug('pre wait')
-#  proc.wait()
-#  _log.debug('here')
-#
-#  with open('2' + name[1], 'rb') as f:
-#    obj = f.readall()
-#  os.remove(name)
-#  return obj
-
-
 def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
   url = generate_url(app, prov_id, state)
 
@@ -88,7 +71,6 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
   if not obj or force:
     _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
-    # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
   return obj
 
@@ -102,7 +84,6 @@ def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, f
   if not obj or force:
     _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
-    # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
   return obj
 
