@@ -2,6 +2,8 @@ from phovea_server import ns
 from phovea_server.config import view as config_view
 import memcache
 import logging
+import gevent
+import gevent.lock
 
 __author__ = 'Samuel Gratzl'
 app = ns.Namespace(__name__)
@@ -13,56 +15,78 @@ mc_prefix = 'clue_'
 _log = logging.getLogger(__name__)
 
 
-def generate_url(app, prov_id, state):
-  base = '{0}{1}/#clue_graph={2}&clue_state={3}&clue=P&clue_store=remote&clue_headless=Y'
+class Screenshotter(object):
+  def __init__(self):
+    self._lock = gevent.lock.BoundedSemaphore(1)
+    self._timeout = None
+    self._driver = None
+    pass
 
-  return base.format(conf.server, app,
-                     prov_id,
-                     state)
+  def _timed_out(self):
+    try:
+      self._driver.quit()
+    finally:
+      self._driver = None
+
+  def _get(self):
+    from selenium import webdriver
+
+    if self._timeout is not None:
+      gevent.kill(self._timeout)
+      self._timeout = None
+
+    if self._driver is None:
+      options = webdriver.ChromeOptions()
+      options.debugger_address = conf.chromeAddress
+      self._driver = webdriver.Chrome(chrome_options=options)
+      self._driver.implicitly_wait(20)  # wait at most 20 seconds
+    return self._driver
+
+  def _free(self):
+    # schedule that the driver will be cleaned up if not used
+    self._timeout = gevent.spawn_later(600, self._timed_out)
+
+  def take(self, url, body=None):
+    with self._lock:
+      driver = self._get()
+      _log.info('url %s', url)
+      driver.get(url)
+
+      if body is not None:
+        try:
+          body(driver)
+        except Exception as e:
+          _log.exception('cannot fullfil query %s', e)
+      _log.info('take screenshot')
+      obj = driver.get_screenshot_as_png()
+      self._free()
+      return obj
+
+
+screenshotter = Screenshotter()
+
+def generate_url(app, prov_id, state):
+  base = '{s}/#clue_graph={g}&clue_state={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=state)
 
 
 def generate_slide_url(app, prov_id, slide):
-  base = '{0}{1}/#clue_graph={2}&clue_slide={3}&clue=P&clue_store=remote&clue_headless=Y'
-
-  return base.format(conf.server, app,
-                     prov_id,
-                     slide)
-
+  base = '{s}/#clue_graph={g}&clue_slide={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=slide)
 
 @app.route('/dump/<path:page>')
 def test(page):
-  from selenium import webdriver
-
-  options = webdriver.ChromeOptions()
-  options.debugger_address = conf.chromeAddress
-  driver = webdriver.Chrome(chrome_options=options)
-
-  driver.implicitly_wait(20)  # wait at most 20 seconds
-  _log.info('url %s', page)
-  driver.get('http://' + page)
-  _log.info('take screenshot')
-  obj = driver.get_screenshot_as_png()
-  driver.quit()
+  obj = screenshotter.take('http://' + page)
   return ns.Response(obj, mimetype='image/png')
 
 
 def create_via_selenium(url, width, height):
-  from selenium import webdriver
-
-  options = webdriver.ChromeOptions()
-  options.debugger_address = conf.chromeAddress
-  # TODO width, height not supported in remote by default 1920x1080
-  driver = webdriver.Chrome(chrome_options=options)
-
-  driver.implicitly_wait(20)  # wait at most 20 seconds
-  _log.info('url %s', url)
-  driver.get(url)
-  try:
+  def eval_clue(driver):
     driver.find_element_by_css_selector('main')
     for entry in driver.get_log('browser'):
       _log.info(entry)
-    driver.find_element_by_css_selector('body.clue_jumped')
-    _log.info('found jumped flag')
+    body = driver.find_element_by_css_selector('body.clue_jumped')
+    _log.info('found jumped flag: {}'.format(body))
     # try:
     # we have to wait for the page to refresh, the last thing that seems to be updated is the title
     # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
@@ -73,12 +97,8 @@ def create_via_selenium(url, width, height):
     # finally:
     #    driver.quit()
     # obj = main_elem.screenshot_as_png()
-  except Exception as e:
-    _log.exception('cant fullfil query %s', e)
-  _log.info('take screenshot')
-  obj = driver.get_screenshot_as_png()
-  driver.quit()
-  return obj
+
+  return screenshotter.take(url, eval_clue)
 
 
 def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
@@ -86,8 +106,8 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
-  obj = mc.get(key)
-  if not obj or force:
+  obj = mc.get(key) if not force else None
+  if not obj:
     _log.info('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
     mc.set(key, obj)
@@ -99,8 +119,8 @@ def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, f
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
-  obj = mc.get(key)
-  if not obj or force:
+  obj = mc.get(key) if not force else None
+  if not obj:
     _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
     mc.set(key, obj)
