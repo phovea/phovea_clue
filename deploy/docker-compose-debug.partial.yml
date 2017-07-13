@@ -3,3 +3,6 @@ services:
   db_memcached:
     ports:
       - '11211:11211'
+  util_chrome:
+    ports:
+      - '9222:9222'

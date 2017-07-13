@@ -3,7 +3,6 @@ from phovea_server.config import view as config_view
 import memcache
 import logging
 
-
 __author__ = 'Samuel Gratzl'
 app = ns.Namespace(__name__)
 conf = config_view('phovea_clue')
@@ -30,22 +29,40 @@ def generate_slide_url(app, prov_id, slide):
                      slide)
 
 
+@app.route('/dump/<path:page>')
+def test(page):
+  from selenium import webdriver
+
+  options = webdriver.ChromeOptions()
+  options.debugger_address = conf.chromeAddress
+  driver = webdriver.Chrome(chrome_options=options)
+
+  driver.implicitly_wait(20)  # wait at most 20 seconds
+  _log.info('url %s', page)
+  driver.get('http://' + page)
+  _log.info('take screenshot')
+  obj = driver.get_screenshot_as_png()
+  driver.quit()
+  return ns.Response(obj, mimetype='image/png')
+
+
 def create_via_selenium(url, width, height):
   from selenium import webdriver
 
   options = webdriver.ChromeOptions()
   options.debugger_address = conf.chromeAddress
-  driver = webdriver.Chrome(chrome_options=options, service_args=['--verbose', '--log-path=/phovea/chrome.txt'])
+  # TODO width, height not supported in remote by default 1920x1080
+  driver = webdriver.Chrome(chrome_options=options)
 
   driver.implicitly_wait(20)  # wait at most 20 seconds
-  driver.set_window_size(width, height)  # optional
-  _log.debug('url %s', url)
+  _log.info('url %s', url)
   driver.get(url)
   try:
     driver.find_element_by_css_selector('main')
     for entry in driver.get_log('browser'):
-      _log.debug(entry)
+      _log.info(entry)
     driver.find_element_by_css_selector('body.clue_jumped')
+    _log.info('found jumped flag')
     # try:
     # we have to wait for the page to refresh, the last thing that seems to be updated is the title
     # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
@@ -58,9 +75,11 @@ def create_via_selenium(url, width, height):
     # obj = main_elem.screenshot_as_png()
   except Exception as e:
     _log.exception('cant fullfil query %s', e)
+  _log.info('take screenshot')
   obj = driver.get_screenshot_as_png()
   driver.quit()
   return obj
+
 
 def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
   url = generate_url(app, prov_id, state)
@@ -69,7 +88,7 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
 
   obj = mc.get(key)
   if not obj or force:
-    _log.debug('requesting url %s', url)
+    _log.info('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
     mc.set(key, obj)
   return obj
