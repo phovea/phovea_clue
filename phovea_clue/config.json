@@ -1,5 +1,5 @@
 {
-  "server": "http://api/",
+  "server": "http://web/",
   "chromeAddress": "chrome:9222",
   "memcached": [
     "127.0.0.1:11211"
