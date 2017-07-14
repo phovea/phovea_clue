@@ -391,7 +391,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $seqLi.exit().remove();
 
-    $seqLi.select('.title, .img')
+    $seqLi.select('.title, .prov-ret-thumbnail')
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
