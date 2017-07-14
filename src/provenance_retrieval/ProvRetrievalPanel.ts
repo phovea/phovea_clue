@@ -192,6 +192,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
               <line x1="20" y1="20" x2="60" y2="20" stroke-width="6"/>
               <line x1="140" y1="20" x2="180" y2="20" stroke-width="6"/>
             </g>
+            <g id="loading-animation">
+              <circle r="11" transform="translate(16 16)" class="a">
+                <animateTransform attributeName="transform" type="scale" additive="sum" values="1;1.42;1;1;1;1;1;1;1;1" dur="1500ms" repeatCount="indefinite"/>
+              </circle>
+              <circle r="11" transform="translate(64 16)" class="a">
+                <animateTransform attributeName="transform" type="scale" additive="sum" values="1;1;1;1;1.42;1;1;1;1;1" dur="1500ms" repeatCount="indefinite"/>
+              </circle>
+              <circle r="11" transform="translate(112 16)" class="a">
+                <animateTransform attributeName="transform" type="scale" additive="sum" values="1;1;1;1;1;1;1;1.42;1;1" dur="1500ms" repeatCount="indefinite"/>
+              </circle>
+            </g>
           </defs>
         </svg>
         <ol class="search-results" start="1"></ol>
@@ -358,7 +369,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
       return `
         <div class="top-result" data-score="${topResult.similarity.toFixed(2)}">
-          <div class="img" style="background-image: url(${utils.thumbnail_url(this.data, (<StateNode>topResult.state.node))})"></div>
+          <div class="prov-ret-thumbnail">
+            <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
+              <use xlink:href="#loading-animation"></use>
+            </svg>
+            <div class="img" style="background-image: url(${utils.thumbnail_url(this.data, (<StateNode>topResult.state.node))})"></div>
+          </div>
           <div class="title" href="#" title="${(<StateNode>topResult.state.node).name}">${(<StateNode>topResult.state.node).name}</div>
           <small class="result-terms">${terms.join(', ')}</small>
           <div class="seq-length" title="Click to show state sequence">
