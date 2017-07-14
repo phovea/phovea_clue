@@ -2,7 +2,8 @@ from phovea_server import ns
 from phovea_server.config import view as config_view
 import memcache
 import logging
-
+import gevent
+import gevent.lock
 
 __author__ = 'Samuel Gratzl'
 app = ns.Namespace(__name__)
@@ -14,69 +15,110 @@ mc_prefix = 'clue_'
 _log = logging.getLogger(__name__)
 
 
-def generate_url(app, prov_id, state):
-  base = '{0}{1}/#clue_graph={2}&clue_state={3}&clue=P&clue_store=remote&clue_headless=Y'
+class Screenshotter(object):
+  def __init__(self):
+    self._lock = gevent.lock.BoundedSemaphore(1)
+    self._timeout = None
+    self._driver = None
+    pass
 
-  return base.format(conf.server, app,
-                     prov_id,
-                     state)
+  def _timed_out(self):
+    try:
+      _log.info('quiting driver')
+      self._driver.quit()
+      _log.info('quitted driver')
+    finally:
+      self._driver = None
+
+  def _get(self):
+    from selenium import webdriver
+
+    if self._timeout is not None:
+      gevent.kill(self._timeout)
+      self._timeout = None
+
+    if self._driver is None:
+      _log.info('create driver')
+      options = webdriver.ChromeOptions()
+      options.debugger_address = conf.chromeAddress
+      self._driver = webdriver.Chrome(chrome_options=options)
+      self._driver.implicitly_wait(30)  # wait at most 30 seconds
+    return self._driver
+
+  def _free(self):
+    # schedule that the driver will be cleaned up if not used
+    self._timeout = gevent.spawn_later(600, self._timed_out)
+
+  def take(self, url, body=None):
+    with self._lock:
+      try:
+        driver = self._get()
+        _log.info('url %s', url)
+        driver.get(url)
+
+        if body is not None:
+          try:
+            body(driver)
+          except Exception as e:
+            _log.exception('cannot fullfil query %s', e)
+        _log.info('take screenshot')
+        obj = driver.get_screenshot_as_png()
+        return obj
+      finally:
+        self._free()
+
+
+screenshotter = Screenshotter()
+
+
+def randomword(length):
+  import random
+  import string
+  return ''.join(random.choice(string.lowercase) for i in range(length))
+
+
+def generate_url(app, prov_id, state):
+  # add a random parameter to force a proper reload
+  base = '{s}/?clue_random={r}#clue_graph={g}&clue_state={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=state, r=randomword(5))
+
+
+def generate_key(app, prov_id, state):
+  return 'a={a},p={g},s={s}'.format(a=app, g=prov_id, s=state)
 
 
 def generate_slide_url(app, prov_id, slide):
-  base = '{0}{1}/#clue_graph={2}&clue_slide={3}&clue=P&clue_store=remote&clue_headless=Y'
+  base = '{s}/?clue_random={r}#clue_graph={g}&clue_slide={n}&clue=P&clue_store=remote&clue_headless=Y'
+  return base.format(s=conf.server, g=prov_id, n=slide, r=randomword(5))
 
-  return base.format(conf.server, app,
-                     prov_id,
-                     slide)
+
+def generate_slide_key(app, prov_id, slide):
+  return 'a={a},p={g},u={s}'.format(a=app, g=prov_id, s=slide)
+
+
+@app.route('/dump/<path:page>')
+def test(page):
+  obj = screenshotter.take('http://' + page)
+  return ns.Response(obj, mimetype='image/png')
 
 
 def create_via_selenium(url, width, height):
-  from selenium import webdriver
-
-  driver = webdriver.PhantomJS(executable_path=conf.phantomjs2)  # or add to your PATH
-  driver.implicitly_wait(20)  # wait at most 20 seconds
-  driver.set_window_size(width, height)  # optional
-  _log.debug('url %s', url)
-  driver.get(url)
-  try:
+  def eval_clue(driver):
     driver.find_element_by_css_selector('main')
-    for entry in driver.get_log('browser'):
-      _log.debug(entry)
-    driver.find_element_by_css_selector('body.clue_jumped')
-    # try:
-    # we have to wait for the page to refresh, the last thing that seems to be updated is the title
-    # WebDriverWait(driver, 10).until(EC.title_contains("cheese!"))
+    found = None
+    tries = 0
+    while not found and tries < 3:
+      tries += 1
+      for entry in driver.get_log('browser'):
+        _log.info(entry)
+      found = driver.find_element_by_css_selector('body.clue_jumped')
 
-    # You should see "cheese! - Google Search"
-    # print driver.title
+    if found:
+      _log.info('found jumped flag: {}'.format(found.get_attribute('class')))
+    else:
+      _log.warn('cannnot find jumped flag after 3 x 30 seconds, give up and take a screenshot')
 
-    # finally:
-    #    driver.quit()
-    # obj = main_elem.screenshot_as_png()
-  except Exception as e:
-    _log.exception('cant fullfil query %s', e)
-  obj = driver.get_screenshot_as_png()
-  driver.quit()
-  return obj
-
-
-# def create_via_phantomjs(url, width, height, format):
-#  import tempfile, os, gevent.subprocess as subprocess
-#
-#  name = tempfile.mkstemp('.' + format)
-#
-#  args = [conf.phantomjs2, os.path.join(os.getcwd(), 'plugins/clue/_phantom2_rasterize.js'), '' + url + '',
-#          '2' + name[1], str(width), str(height)]
-#  _log.debug(' '.join(args))
-#  proc = subprocess.Popen(args)
-#  _log.debug('pre wait')
-#  proc.wait()
-#  _log.debug('here')
-#
-#  with open('2' + name[1], 'rb') as f:
-#    obj = f.readall()
-#  os.remove(name)
-#  return obj
+  return screenshotter.take(url, eval_clue)
 
 
 def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
@@ -84,11 +126,10 @@ def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
-  obj = mc.get(key)
-  if not obj or force:
-    _log.debug('requesting url %s', url)
+  obj = mc.get(key) if not force else None
+  if not obj:
+    _log.info('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
-    # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
   return obj
 
@@ -98,11 +139,10 @@ def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, f
 
   key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
 
-  obj = mc.get(key)
-  if not obj or force:
+  obj = mc.get(key) if not force else None
+  if not obj:
     _log.debug('requesting url %s', url)
     obj = create_via_selenium(url, width, height)
-    # obj = create_via_phantomjs(url, width, height, format)
     mc.set(key, obj)
   return obj
 
@@ -145,9 +185,7 @@ def create_thumbnail(app, prov_id, state, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  url = generate_url(app, prov_id, state)
-
-  key = mc_prefix + url + 't' + str(width)
+  key = mc_prefix + generate_key(app, prov_id, state) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:
@@ -174,9 +212,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  url = generate_slide_url(app, prov_id, slide)
-
-  key = mc_prefix + url + 't' + str(width)
+  key = mc_prefix + generate_slide_key(app, prov_id, slide) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:

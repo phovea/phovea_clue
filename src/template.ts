@@ -117,7 +117,7 @@ export class CLUEWrapper extends ACLUEWrapper {
       loginForm: this.options.loginForm,
       insertIntoHeader: true
     });
-    const provenanceMenu = new ProvenanceGraphMenu(this.clueManager, body, false);
+    const provenanceMenu = new ProvenanceGraphMenu(clueManager, body, false);
     this.header.insertCustomRightMenu(provenanceMenu.node);
 
     const modeSelector = body.querySelector('header');
