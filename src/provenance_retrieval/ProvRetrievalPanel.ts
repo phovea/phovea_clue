@@ -13,6 +13,7 @@ import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
+import * as utils from './../utils';
 
 
 /**
@@ -357,7 +358,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
       return `
         <div class="top-result" data-score="${topResult.similarity.toFixed(2)}">
-          <div class="img" style="background-image: url(https://via.placeholder.com/120x80/ffffff/333333)"></div>
+          <div class="img" style="background-image: url(${utils.thumbnail_url(this.data, (<StateNode>topResult.state.node))})"></div>
           <div class="title" href="#" title="${(<StateNode>topResult.state.node).name}">${(<StateNode>topResult.state.node).name}</div>
           <small class="result-terms">${terms.join(', ')}</small>
           <div class="seq-length" title="Click to show state sequence">
