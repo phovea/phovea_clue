@@ -10,7 +10,7 @@ import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
 import {IQuery, ISearchResult, Query, VisStateIndex} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 
@@ -332,6 +332,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $seqLi.enter().append('li').classed('sequence', true);
     $seqLi.html((d) => {
       const topResult = (<any>d).topResult;
+
+      const terms = topResult.state.propValues.map((prop) => {
+        const match = topResult.query.propValues.find((p) => p.id.split(TAG_VALUE_SEPARATOR)[0].trim() === prop.id.split(TAG_VALUE_SEPARATOR)[0].trim());
+        return (match) ? `<span class="match">${prop.text}</span>` : `${prop.text}`;
+      });
+
       let seqIconId = 'n-states';
       let seqLength = d.length || '';
       switch(seqLength) {
@@ -350,23 +356,25 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       }
 
       return `
-        <article data-score="${topResult.similarity.toFixed(2)}">
-          <div class="title" href="#">${(<StateNode>topResult.state.node).name}</div>
+        <div class="top-result" data-score="${topResult.similarity.toFixed(2)}">
+          <div class="img" style="background-image: url(https://via.placeholder.com/120x80/ffffff/333333)"></div>
+          <div class="title" href="#" title="${(<StateNode>topResult.state.node).name}">${(<StateNode>topResult.state.node).name}</div>
+          <small class="result-terms">${terms.join(', ')}</small>
           <div class="seq-length" title="Click to show state sequence">
             <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
               <use xlink:href="#${seqIconId}"></use>
             </svg>
             <span>${seqLength}</span>
           </div>
-        </article>
-        <ul class="similarity-bar"></ul>
+          <ul class="similarity-bar"></ul>
+        </div>
         <ol class="states hidden"></ol>
       `;
     });
 
     $seqLi.exit().remove();
 
-    $seqLi.select('.title')
+    $seqLi.select('.title, .img')
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
@@ -454,19 +462,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $stateLi
       .html((d) => {
         return `
-          <article data-score="${d.similarity.toFixed(2)}">
-            <div class="title" href="#">
-              <i class="fa fa-circle glyph"></i>
-              ${(<StateNode>d.state.node).name}
-            </div>
-          </article>
-          <ul class="similarity-bar"></ul>
+          <div class="seq-state-result" data-score="${d.similarity.toFixed(2)}">
+            <div class="circle"><i class="fa fa-circle glyph"></i></div>
+            <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
+            <ul class="similarity-bar"></ul>
+          </div>
         `;
       });
 
     $stateLi.exit().remove();
 
-    $stateLi.select('.title')
+    $stateLi.select('.seq-state-result')
       .on('mouseenter', (d) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
