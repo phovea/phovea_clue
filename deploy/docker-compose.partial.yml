@@ -1,0 +1,15 @@
+version: '2.0'
+services:
+  _host:
+    depends_on:
+      - db_memcached
+      - util_chrome
+    links:
+      - 'db_memcached:memcached'
+      - 'util_chrome:chrome'
+  db_memcached:
+    image: memcached:1.4-alpine
+  util_chrome:
+    image: 'alpeware/chrome-headless-trunk'
+    environment:
+      - CHROME_OPTS=--window-size=1920,1080
