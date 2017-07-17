@@ -12,7 +12,7 @@ import {lastOnly} from './compress';
 const disabler = new events.EventHandler();
 
 
-function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
+export function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
   const idtype = idtypes.resolve(parameter.idtype),
     range = ranges.parse(parameter.range),
     type = parameter.type;
@@ -175,12 +175,4 @@ export class SelectionRecorder {
 
 export function create(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
   return new SelectionRecorder(graph, type, options);
-}
-
-export function createCmd(id:string) {
-  switch (id) {
-    case 'select':
-      return select;
-  }
-  return null;
 }
