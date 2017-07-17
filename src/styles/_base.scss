@@ -124,12 +124,17 @@ header.clue-modeselector {
   position: absolute;
   left: 30vw;
   width: 45vw;
+  transition: top 1s;
   top: 2px;
   text-align: center;
 
   label {
     //padding: 1em 5px;
     width: 10em;
+  }
+
+  &.collapsed {
+    top: -40px;
   }
 }
 

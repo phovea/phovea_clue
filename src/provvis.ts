@@ -413,7 +413,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     super();
     this.options = C.mixin({
       thumbnails: true,
-      provVisCollapsed: false
+      provVisCollapsed: false,
+      hideCLUEButtonsOnCollapse: false
     }, options);
     this.options.scale = [1, 1];
     this.options.rotate = 0;
@@ -476,8 +477,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .classed('collapsed', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
+
+
+    if (this.options.hideCLUEButtonsOnCollapse && this.options.provVisCollapsed) {
+      d3.select('header.clue-modeselector').classed('collapsed', true);
+    }
+
     $p.html(`
-      <a href="#" class="btn-collapse"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
+      <a href="#" class="btn-collapse" title="${(this.options.provVisCollapsed) ? 'Show Provenance Graph' : 'Hide Provenance Graph'}"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
       <div>
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
@@ -585,8 +592,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     jp.find('.btn-collapse').on('click', (evt) => {
       evt.preventDefault();
-      $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', $p.classed('collapsed')).classed('fa-arrow-circle-o-left', !$p.classed('collapsed'));
-      $p.classed('collapsed', !$p.classed('collapsed'));
+      const collapsed = !$p.classed('collapsed');
+      $p.select('.btn-collapse').attr('title', collapsed ? 'Show Provenance Graph' : 'Hide Provenance Graph');
+      $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', !collapsed).classed('fa-arrow-circle-o-left', collapsed);
+      $p.classed('collapsed', collapsed);
+
+      if (this.options.hideCLUEButtonsOnCollapse) {
+        d3.select('header.clue-modeselector').classed('collapsed', collapsed);
+      }
     });
 
     return $p;
