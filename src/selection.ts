@@ -7,6 +7,7 @@ import * as events from 'phovea_core/src/event';
 import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
+import {lastOnly} from './compress';
 
 const disabler = new events.EventHandler();
 
@@ -84,21 +85,7 @@ export function createSelection(idtype:idtypes.IDType, type:string, range:ranges
 }
 
 export function compressSelection(path: provenance.ActionNode[]) {
-  const lastByIDType : any = {};
-  path.forEach((p) => {
-    if (p.f_id === 'select') {
-      const para = p.parameter;
-      lastByIDType[para.idtype+'@'+para.type] = p;
-    }
-  });
-  return path.filter((p) => {
-    if (p.f_id !== 'select') {
-      return true;
-    }
-    const para = p.parameter;
-    //last one remains
-    return lastByIDType[para.idtype+'@'+para.type] === p;
-  });
+  return lastOnly(path, 'select', (p) => p.parameter.idtype + '@' + p.parameter.type);
 }
 
 /**
