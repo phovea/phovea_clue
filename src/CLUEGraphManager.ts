@@ -7,6 +7,7 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
+import {useInMemoryGraph} from './internal';
 
 export default class CLUEGraphManager {
   constructor(private manager: MixedStorageProvenanceGraphManager) {
@@ -114,6 +115,9 @@ export default class CLUEGraphManager {
 
   private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
     const loggedIn = isLoggedIn();
+    if (useInMemoryGraph()) {
+      return Promise.resolve(this.manager.createInMemory());
+    }
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
       return this.manager.createRemote();
@@ -148,6 +152,10 @@ export default class CLUEGraphManager {
   }
 
   cloneLocal(graph: IProvenanceGraphDataDescription) {
+    if (useInMemoryGraph()) {
+      CLUEGraphManager.setGraphInUrl('memory');
+      return this.manager.cloneInMemory(graph);
+    }
     this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
   }
 }
