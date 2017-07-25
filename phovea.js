@@ -8,9 +8,8 @@
 module.exports = function(registry) {
   //registry.push('extension-type', 'extension-id', function() { return System.import('./src/extension_impl'); }, {});
   // generator-phovea:begin
-  registry.push('actionFactory', 'idtype-selection', function() { return System.import('./src/selection'); }, {
-    'factory': 'createCmd',
-    'creates': 'select'
+  registry.push('actionFunction', 'select', function() { return System.import('./src/selection'); }, {
+    'factory': 'select'
   });
 
   registry.push('actionCompressor', 'idtype-selection', function() { return System.import('./src/selection'); }, {
@@ -18,9 +17,14 @@ module.exports = function(registry) {
     'matches': 'select'
   });
 
-  registry.push('actionFactory', 'multiform', function() { return System.import('./src/multiform'); }, {
-    'factory': 'createCmd',
-    'creates': '(transform|changeVis|setOption)'
+  registry.push('actionFunction', 'transform', function() { return System.import('./src/multiform'); }, {
+    'factory': 'transform'
+  });
+  registry.push('actionFunction', 'changeVis', function() { return System.import('./src/multiform'); }, {
+    'factory': 'changeVis'
+  });
+  registry.push('actionFunction', 'select', function() { return System.import('./src/multiform'); }, {
+    'factory': 'select'
   });
   // generator-phovea:end
 };
