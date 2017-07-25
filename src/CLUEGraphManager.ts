@@ -115,18 +115,24 @@ export default class CLUEGraphManager {
 
   private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
     const loggedIn = isLoggedIn();
-    if (useInMemoryGraph()) {
+    const graph = hash.getProp('clue_graph', null);
+    if (graph === 'memory') {
       return Promise.resolve(this.manager.createInMemory());
     }
-    const graph = hash.getProp('clue_graph', null);
     if (graph === 'new_remote' && loggedIn) {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
+      if (useInMemoryGraph()) {
+        return Promise.resolve(this.manager.createInMemory());
+      }
       return this.manager.createLocal();
     }
     const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     if (desc) {
+      if (useInMemoryGraph()) {
+        return this.manager.cloneInMemory(desc);
+      }
       if ((<any>desc).local || (loggedIn && canWrite(desc))) {
         return this.manager.get(desc);
       }
@@ -135,6 +141,9 @@ export default class CLUEGraphManager {
     // not found
     if (rejectOnNotFound) {
       return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
+    }
+    if (useInMemoryGraph()) {
+      return Promise.resolve(this.manager.createInMemory());
     }
     return this.manager.create();
   }
