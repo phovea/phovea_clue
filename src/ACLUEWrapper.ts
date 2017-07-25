@@ -107,7 +107,21 @@ export abstract class ACLUEWrapper extends EventHandler {
     };
     cmode.on('modeChanged', (event, newMode) => update(newMode));
     this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
-    update(cmode.getMode());
+    { //no animation initially
+      const mode = cmode.getMode();
+      $('body').attr('data-clue', mode.toString());
+      //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
+      if (mode.presentation > 0.8) {
+        $right.css('display', 'none');
+      } else {
+        $right.css('display', null);
+      }
+      if (mode.exploration > 0.8) {
+        $rightStory.css('display', 'none');
+      } else {
+        $rightStory.css('display', null);
+      }
+    }
   }
 
 

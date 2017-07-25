@@ -9,7 +9,7 @@ import * as C from 'phovea_core/src/index';
 
 const disabled = {};
 
-function transform(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
+export function transform(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
   const v: vis.IVisInstance = inputs[0].value,
     transform = parameter.transform,
     bak = parameter.old || v.transform();
@@ -34,7 +34,7 @@ export function createTransform(v: provenance.IObjectRef<vis.IVisInstance>, t: v
   };
 }
 
-function changeVis(inputs: provenance.IObjectRef<any>[], parameter: any): Promise<provenance.ICmdResult> {
+export function changeVis(inputs: provenance.IObjectRef<any>[], parameter: any): Promise<provenance.ICmdResult> {
   const v: multiform.IMultiForm = inputs[0].value,
     to: string = parameter.to,
     from = parameter.from || v.act.id;
@@ -59,7 +59,7 @@ export function createChangeVis(v: provenance.IObjectRef<multiform.IMultiForm>, 
   };
 }
 
-function setOption(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
+export function setOption(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
   const v: vis.IVisInstance = inputs[0].value,
     name = parameter.name,
     value = parameter.value,
@@ -109,16 +109,3 @@ export function attach(graph: provenance.ProvenanceGraph, v: provenance.IObjectR
     }
   });
 }
-
-export function createCmd(id: string): provenance.ICmdFunction {
-  switch (id) {
-    case 'transform':
-      return transform;
-    case 'changeVis' :
-      return changeVis;
-    case 'setOption' :
-      return setOption;
-  }
-  return null;
-}
-
