@@ -402,21 +402,26 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $seqLi.exit().remove();
 
-    $seqLi.select('.title, .prov-ret-thumbnail')
-      .on('mouseenter', (d) => {
-        (<Event>d3.event).stopPropagation();
-        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
-      })
-      .on('mouseleave', (d) => {
-        (<Event>d3.event).stopPropagation();
-        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
-      })
-      .on('click', (d) => {
-        (<Event>d3.event).stopPropagation();
-        this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
-        this.data.jumpTo(<StateNode>(<any>d).topResult.state.node);
-        return false;
-      });
+    const addMouseListener = ($elem) => {
+      $elem
+        .on('mouseenter', (d) => {
+          (<Event>d3.event).stopPropagation();
+          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        })
+        .on('mouseleave', (d) => {
+          (<Event>d3.event).stopPropagation();
+          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        })
+        .on('click', (d) => {
+          (<Event>d3.event).stopPropagation();
+          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+          this.data.jumpTo(<StateNode>(<any>d).topResult.state.node);
+          return false;
+        });
+    };
+
+    addMouseListener($seqLi.select('.title'));
+    addMouseListener($seqLi.select('.prov-ret-thumbnail'));
 
     const hoverMultipleStateNodes = (seq:ISearchResult[], operation: SelectOperation) => {
       const stateNodeIds:number[] = seq.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
