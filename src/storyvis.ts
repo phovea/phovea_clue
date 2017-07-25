@@ -15,7 +15,7 @@ import * as utils from './utils';
 import * as marked from 'marked';
 import * as player from './player';
 import * as $ from 'jquery';
-import * as textPNG from './assets/src/text.png';
+import * as textPNG from './assets/text.png';
 
 
 interface ISlideNodeRepr {
@@ -670,7 +670,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.attr('data-id', (d) => d.id);
     $stories.attr('title', (d) => d.name + '\n' + (d.transition > 0 ? '(' + to_duration(d.transition) + ')' : '') + '(' + to_duration(d.duration) + ')');
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? 'url(${textPNG})' : `url(${utils.thumbnail_url(this.data, d.state)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? `url(${textPNG})` : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d, storyRaw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration) + 'px');
