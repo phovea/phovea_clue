@@ -330,6 +330,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private createSequenceDOM($parent, results:ISearchResult[][], widthScale) {
+    const that = this;
 
     const data = results.map((seq) => {
       // get top result which is the first state with the highest similarity score
@@ -342,7 +343,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .data(data, (d) => String((<any>d).topResult.state.node.id));
 
     $seqLi.enter().append('li').classed('sequence', true);
-    $seqLi.html((d) => {
+    $seqLi.html(function(d) {
       const topResult = (<any>d).topResult;
 
       const terms = topResult.state.propValues.map((prop) => {
@@ -367,13 +368,23 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           break;
       }
 
+      const url = utils.thumbnail_url(that.data, (<StateNode>topResult.state.node));
+      const img = new Image();
+      img.onload = () => {
+        d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
+      };
+      img.src = url;
+      if (img.complete) {
+        (<any>img).onload();
+      }
+
       return `
         <div class="top-result" data-score="${topResult.similarity.toFixed(2)}">
           <div class="prov-ret-thumbnail">
             <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
               <use xlink:href="#loading-animation"></use>
             </svg>
-            <div class="img" style="background-image: url(${utils.thumbnail_url(this.data, (<StateNode>topResult.state.node))})"></div>
+            <div class="img" style="background-image: url(${url})"></div>
           </div>
           <div class="title" href="#" title="${(<StateNode>topResult.state.node).name}">${(<StateNode>topResult.state.node).name}</div>
           <small class="result-terms">${terms.join(', ')}</small>
