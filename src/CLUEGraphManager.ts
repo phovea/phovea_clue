@@ -7,6 +7,7 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
+import {useInMemoryGraph} from './internal';
 
 export default class CLUEGraphManager {
   constructor(private manager: MixedStorageProvenanceGraphManager) {
@@ -115,14 +116,23 @@ export default class CLUEGraphManager {
   private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
     const loggedIn = isLoggedIn();
     const graph = hash.getProp('clue_graph', null);
+    if (graph === 'memory') {
+      return Promise.resolve(this.manager.createInMemory());
+    }
     if (graph === 'new_remote' && loggedIn) {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
+      if (useInMemoryGraph()) {
+        return Promise.resolve(this.manager.createInMemory());
+      }
       return this.manager.createLocal();
     }
     const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     if (desc) {
+      if (useInMemoryGraph()) {
+        return this.manager.cloneInMemory(desc);
+      }
       if ((<any>desc).local || (loggedIn && canWrite(desc))) {
         return this.manager.get(desc);
       }
@@ -131,6 +141,9 @@ export default class CLUEGraphManager {
     // not found
     if (rejectOnNotFound) {
       return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
+    }
+    if (useInMemoryGraph()) {
+      return Promise.resolve(this.manager.createInMemory());
     }
     return this.manager.create();
   }
@@ -148,6 +161,10 @@ export default class CLUEGraphManager {
   }
 
   cloneLocal(graph: IProvenanceGraphDataDescription) {
+    if (useInMemoryGraph()) {
+      CLUEGraphManager.setGraphInUrl('memory');
+      return this.manager.cloneInMemory(graph);
+    }
     this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
   }
 }

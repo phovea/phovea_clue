@@ -87,6 +87,10 @@ export function handleMagicHashElements(body: HTMLElement, manager: ICLUEWrapper
   }
 }
 
+export function useInMemoryGraph() {
+  return hash.has('clue_headless') || hash.getProp('clue_graph', '') === 'memory';
+}
+
 /**
  * enables keyboard shortcuts to undo and change mode
  * @param graph
