@@ -19,8 +19,11 @@ export interface IQuery {
 
 export interface ISearchResult {
   id: string;
-  query: IQuery;
   state: IVisState;
+
+  query: IQuery;
+  numMatchingTerms: number;
+
   similarities: number[];
   weightedSimilarities: number[];
   similarity: number;
@@ -109,6 +112,7 @@ export class Query implements IQuery {
 
 class SearchResult implements ISearchResult {
 
+  numMatchingTerms: number;
   similarity: number;
 
   private _weightedSimilarities: number[];
@@ -116,6 +120,7 @@ class SearchResult implements ISearchResult {
 
   constructor(public query: IQuery, public state: IVisState, public similarities: number[]) {
     this.similarity = this.similarities.reduce((a,b) => a + b, 0.0);
+    this.numMatchingTerms = this.similarities.filter((d) => d > 0).length;
     this.update();
   }
 

@@ -330,29 +330,92 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     const results = this.stateIndex
       .compareAll(query)
-      .filter((state) => state.similarity > 0);
+      .filter((state) => state.similarity > 0); // filter results that does not match at all
 
     this.currentSequences = this.groupIntoSequences(results);
     this.updateResults(this.currentSequences, true);
   }
 
+  /**
+   * Given a list of search results cluster the results into sequences
+   * A sequence is a subset (list) of consecutive states.
+   * Note that every search result can only be sorted into one sequence (no duplicate states).
+   *
+   * Sequence Algorithm:
+   * 1. Partition search results by the number of matching terms (1, 2, 3, ...)
+   * 2. Within each group: Run through all search results.
+   *    Going backward in the graph find a previous state that is...
+   *    a) ... part of the result set and ...
+   *    b) ... has the same number of matching terms.
+   *
+   * The algorithm tend to produce multiple short sequences.
+   *
+   * List of consecutive states from the provenance graph:
+   * ```
+   * [
+   *    {id: 0, num: 2},
+   *    {id: 1, num: 1},
+   *    {id: 2, num: 1},
+   *    {id: 3, num: 0}, // just for demonstration, should be excluded from the result set before
+   *    {id: 4, num: 1},
+   *    {id: 5, num: 2},
+   *    {id: 6, num: 2},
+   * ]
+   * ```
+   *
+   * Results in the following sequences (ordered by number of matching terms):
+   * ```
+   * [
+   *    // 2 matching terms:
+   *    [
+   *      [{id: 0, num: 2}], // sequence 1
+   *      [{id: 5, num: 2}, {id: 6, num: 2}], // sequence 2
+   *    ],
+   *    // 1 matching term:
+   *    [
+   *      [{id: 1, num: 1}, {id: 2, num: 1}], // sequence 3
+   *      [{id: 4, num: 1}], // sequence 4
+   *    ],
+   *    // 0 matching terms:
+   *    [
+   *      [{id: 3, num: 0}],
+   *    ]
+   * ]
+   * ```
+   *
+   * @param {ISearchResult[]} results
+   * @returns {ISearchResultSequence[]}
+   */
+
   private groupIntoSequences(results:ISearchResult[]):ISearchResultSequence[] {
-    const snCache = results.map((r) => <StateNode>r.state.node);
+    const lookup:Map<StateNode, number> = new Map();
+    // create lookup for faster access of matching terms per state node
+    results.forEach((r) => {
+      lookup.set(<StateNode>r.state.node, r.numMatchingTerms);
+    });
 
     return d3.nest()
-      .key((d:ISearchResult) => d.similarities.filter((d) => d > 0).length + ' matching terms')
+      .key((d:ISearchResult) => d.numMatchingTerms + ' matching terms')
+      .sortKeys(d3.descending)
       .key((d:ISearchResult) => {
         let firstStateNode:StateNode = <StateNode>d.state.node;
         let bakStateNode:StateNode = firstStateNode;
-        while(snCache.indexOf(firstStateNode) > -1) {
+        // continue as long as previous state is still available in the search results and
+        // the number of matching terms are still equal. Otherwise create a new sequence.
+        while(lookup.has(firstStateNode) && lookup.get(firstStateNode) === d.numMatchingTerms) {
           bakStateNode = firstStateNode;
           firstStateNode = firstStateNode.previousState;
         }
         return String(bakStateNode.id);
       })
+      .sortKeys(d3.ascending)
       .sortValues((a:ISearchResult, b:ISearchResult) => a.state.node.id - b.state.node.id)
       .entries(results)
       // </end> of d3.nest -> continue with nested array
+      //.map((d) => { // debug
+      //  console.log(d );
+      //  return d;
+      //})
       // flatten the array
       .reduce((prev, curr) => prev.concat(curr.values), [])
       // flatten once more and create a sequence from search results array
