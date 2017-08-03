@@ -558,11 +558,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .on('click', (d:ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         // expand/collapse only for sequence length > 1
-        if(d.searchResults.length > 1) {
+        //if(d.searchResults.length > 1) {
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('active');
           li.querySelector('.states').classList.toggle('hidden');
-        }
+        //}
         return false;
       });
 
