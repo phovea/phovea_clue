@@ -370,7 +370,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return;
     }
 
-    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/sequences[0].topResult.weightedSimilarities.length)]);
+    const widthScale = d3.scale.linear().domain([0, 1]).range([0, 100]);
 
     const $seqLi = this.createSequenceDOM(this.$searchResults, sequences, widthScale);
     this.createStateListDOM($seqLi.select('.states'), widthScale);
