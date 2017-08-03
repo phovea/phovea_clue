@@ -313,7 +313,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           .style('width', (d, j) => `${widthScale(query.weights[j])}px`);
       })
       .on('dragend', () => {
-        console.log('dragend', query.weights);
         this.currentSequences.forEach((seq) => seq.update());
         this.updateResults(this.currentSequences, false);
       });
