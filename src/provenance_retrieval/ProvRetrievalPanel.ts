@@ -401,7 +401,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     return d3.nest()
       .key((d:ISearchResult) => d.numMatchingTerms + ' matching terms')
-      .sortKeys(d3.descending)
       .key((d:ISearchResult) => {
         let firstStateNode:StateNode = <StateNode>d.state.node;
         let bakStateNode:StateNode = firstStateNode;
@@ -413,7 +412,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         }
         return String(bakStateNode.id);
       })
-      .sortKeys(d3.ascending)
       .sortValues((a:ISearchResult, b:ISearchResult) => a.state.node.id - b.state.node.id)
       .entries(results)
       // </end> of d3.nest -> continue with nested array
