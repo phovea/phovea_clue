@@ -13,6 +13,8 @@ import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
+import {ISearchResult} from './provenance_retrieval/VisStateIndex';
+import {GraphNode} from 'phovea_core/src/graph/graph';
 
 
 function extractTags(text: string) {
@@ -372,9 +374,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private $node:d3.Selection<any>;
   private trigger = this.update.bind(this);
   private triggerStoryHighlight = this.updateStoryHighlight.bind(this);
+
   private onStateAdded = (event:any, state:provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   }
+
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
     this.$node.selectAll('div.state').classed('phovea-select-'+type, function (d: StateRepr) {
@@ -384,6 +388,23 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       }
       return isSelected;
     });
+  }
+
+  private onSearchCleared = (event:any) => {
+    this.$node.selectAll('div.state').style('opacity', null);
+  }
+
+  private onSearchPerformed = (event:any, searchResults: ISearchResult[]) => {
+    const stateSimilarityMap:Map<GraphNode, number> = new Map();
+    searchResults.forEach((d) => {
+      stateSimilarityMap.set(d.state.node, d.weightedSimilarity);
+    });
+
+    const opacityScale = d3.scale.linear().domain([0, 1]).range([0.5, 1]);
+
+    this.$node.selectAll('div.state').style('opacity', (d) => {
+        return (stateSimilarityMap.has(d.s)) ? opacityScale(stateSimilarityMap.get(d.s)) : 0.25;
+      });
   }
 
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
@@ -429,6 +450,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.on('add_slide,move_slide,remove_slide', this.triggerStoryHighlight);
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
+    this.data.on('search_complete', this.onSearchPerformed);
+    this.data.on('search_clear', this.onSearchCleared);
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
     });
@@ -441,6 +464,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.off('add_slide,move_slidey,remove_slide', this.triggerStoryHighlight);
     this.data.off('add_state', this.onStateAdded);
     this.data.off('select', this.onSelectionChanged);
+    this.data.off('search_complete', this.onSearchPerformed);
+    this.data.off('search_clear', this.onSearchCleared);
     this.data.states.forEach((s) => {
       s.off('setAttr', this.trigger);
     });
@@ -707,7 +732,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       const e = <Event>d3.event;
       e.stopPropagation();
       e.preventDefault();
-      this.data.fire('search_state', d.s);
+      this.data.fire('search_for_state', d.s);
     });
 
     $states.call(StateRepr.render);

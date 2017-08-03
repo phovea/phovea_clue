@@ -80,13 +80,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private bind() {
-    this.data.on('search_state', this.searchForStateListener);
+    this.data.on('search_for_state', this.searchForStateListener);
     this.data.on('executed_first', this.executedFirstListener);
   }
 
   destroy() {
     super.destroy();
-    this.data.off('search_state', this.searchForStateListener);
+    this.data.off('search_for_state', this.searchForStateListener);
     this.data.off('executed_first', this.executedFirstListener);
   }
 
@@ -330,6 +330,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const results = this.stateIndex
       .compareAll(query)
       .filter((state) => state.similarity > 0); // filter results that does not match at all
+
+    if(results.length > 0) {
+      this.data.fire('search_complete', results);
+    } else {
+      this.data.fire('search_clear');
+    }
 
     this.currentSequences = this.groupIntoSequences(results);
     this.updateResults(this.currentSequences, true);
