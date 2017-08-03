@@ -99,6 +99,9 @@ export class Query implements IQuery {
   replacePropValues(propValue:IPropertyValue[]):IQuery {
     const q = new Query();
     q._propValues = [].concat(...propValue);
+    const newPercentage = 1 / q._propValues.length;
+    q._weights = Array.apply(null, Array(q._propValues.length)).map(() => newPercentage);
+
     return q;
   }
 
