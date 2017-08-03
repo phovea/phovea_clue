@@ -271,8 +271,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .html((d, i) => `
         <span class="remove" role="presentation" title="Remove">×</span>
         <span>${d.text}</span>
-      `);
-    $terms.select('.remove')
+      `)//;
+    //$terms.select('.remove')
       .on('click', (propValue) => {
         propValue.isSelected = false;
         this.query = this.query.removePropValue(propValue);
