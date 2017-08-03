@@ -8,7 +8,10 @@ import {onDOMNodeRemoved, mixin} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
-import {IQuery, ISearchResult, Query, VisStateIndex} from './VisStateIndex';
+import {
+  IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
+  VisStateIndex
+} from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
@@ -63,6 +66,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private stateIndex:VisStateIndex = new VisStateIndex();
 
   private query:IQuery = new Query();
+
+  private currentSequences: ISearchResultSequence[] = [];
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
@@ -167,6 +172,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         </form>
         <div id="prov-retrieval-weighting-editor">
           <ul class="terms"></ul>
+          <ul class="weighting-editor"></ul>
         </div>
       </div>
       <div class="body scrollable">
@@ -254,7 +260,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private updateWeightingEditor(query:IQuery) {
-    const $terms = d3.select('#prov-retrieval-weighting-editor ul')
+    const $terms = d3.select('#prov-retrieval-weighting-editor ul.terms')
       .selectAll('li')
       .data(query.propValues, (d) => String(d.id));
 
@@ -274,6 +280,47 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         this.performSearch(this.query);
       });
     $terms.exit().remove();
+
+    const $weightingEditor = d3.select('#prov-retrieval-weighting-editor .weighting-editor');
+    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (<Element>$weightingEditor.node()).clientWidth]);
+
+    const $editorLi = $weightingEditor.selectAll('li')
+      .data(query.propValues, (d) => String(d.id));
+
+    $editorLi.enter().append('li');
+    $editorLi
+      .style('width', (d, i) => `${widthScale(query.weights[i])}px`)
+      .style('background-color', (d, i) => query.colors[i])
+      .attr('title', (d, i) => `${d.text}: ${d3.round(query.weights[i]*100, 2)}%`)
+      .html((d, i) => `<span class="draggable"></span>`);
+
+    const drag = d3.behavior.drag()
+      .on('drag', (d, i) => {
+        const newWeight = widthScale.invert((<any>d3.event).x); // px to %
+        const diffWeight = (query.weights[i] - newWeight) / (query.weights.length - 1 - i);
+
+        query.weights = query.weights.map((d, j) => {
+          if(i === j) {
+            return newWeight; // apply new weight to current element
+          } else if(j > i) {
+            return d + diffWeight; // shift all upcoming elements
+          }
+          return d; // keep previous elements the same
+        });
+
+        $editorLi
+          .attr('title', (d, j) => `${d.text}: ${d3.round(query.weights[j]*100, 2)}%`)
+          .style('width', (d, j) => `${widthScale(query.weights[j])}px`);
+      })
+      .on('dragend', () => {
+        console.log('dragend', query.weights);
+        this.currentSequences.forEach((seq) => seq.update());
+        this.updateResults(this.currentSequences, false);
+      });
+
+    $editorLi.select('.draggable').call(drag);
+
+    $editorLi.exit().remove();
   }
 
   private performSearch(query:IQuery) {
@@ -281,15 +328,15 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return;
     }
 
-    const results:ISearchResult[] = this.stateIndex
+    const results = this.stateIndex
       .compareAll(query)
       .filter((state) => state.similarity > 0);
 
-    const groupedResults = this.groupIntoSequences(results);
-    this.updateResults(groupedResults);
+    this.currentSequences = this.groupIntoSequences(results);
+    this.updateResults(this.currentSequences, true);
   }
 
-  private groupIntoSequences(results:ISearchResult[]):ISearchResult[][] {
+  private groupIntoSequences(results:ISearchResult[]):ISearchResultSequence[] {
     const snCache = results.map((r) => <StateNode>r.state.node);
 
     return d3.nest()
@@ -308,114 +355,116 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       // </end> of d3.nest -> continue with nested array
       // flatten the array
       .reduce((prev, curr) => prev.concat(curr.values), [])
-      // flatten the array
-      .map((d) => d.values)
-      // sort results by similarity
-      .sort((a, b) => b[0].similarity - a[0].similarity);
+      // flatten once more and create a sequence from search results array
+      .map((d) => new SearchResultSequence(d.values));
   }
 
 
-  private updateResults(results:ISearchResult[][]) {
+  private updateResults(sequences:ISearchResultSequence[], clearContent:boolean = false) {
 
-    this.$searchResults.selectAll('*').remove(); // clear DOM list
+    if(clearContent) {
+      this.$searchResults.selectAll('*').remove(); // clear DOM list
+    }
 
-    if(results.length === 0) {
+    if(sequences.length === 0) {
       return;
     }
 
-    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/results[0][0].similarities.length)]);
+    const widthScale = d3.scale.linear().domain([0, 1]).range([0, (100/sequences[0].topResult.weightedSimilarities.length)]);
 
-    const $seqLi = this.createSequenceDOM(this.$searchResults, results, widthScale);
+    const $seqLi = this.createSequenceDOM(this.$searchResults, sequences, widthScale);
     this.createStateListDOM($seqLi.select('.states'), widthScale);
   }
 
-  private createSequenceDOM($parent, results:ISearchResult[][], widthScale) {
+  /**
+   *
+   * @param $parent
+   * @param sequences
+   * @param widthScale
+   * @returns {selection.Update<ISearchResultSequence>}
+   */
+  private createSequenceDOM($parent, sequences:ISearchResultSequence[], widthScale):d3.Selection<ISearchResultSequence> {
     const that = this;
 
-    const data = results.map((seq) => {
-      // get top result which is the first state with the highest similarity score
-      (<any>seq).topResult = seq.reduce((a,b) => ((a.similarity >= b.similarity) ? a : b));
-      return seq;
-    });
-
     const $seqLi = $parent
-      .selectAll('li')
-      .data(data, (d) => String((<any>d).topResult.state.node.id));
+      .selectAll('li.sequence')
+      .data(sequences, (d:ISearchResultSequence) => d.id)
+      .sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
 
-    $seqLi.enter().append('li').classed('sequence', true);
-    $seqLi.html(function(d) {
-      const topResult = (<any>d).topResult;
+    $seqLi.enter().append('li')
+      .classed('sequence', true)
+      // set child elements here to avoid reloading when manipulating the weights
+      .html(function(d:ISearchResultSequence) {
+        const terms = d.topResult.state.propValues.map((prop) => {
+          const match = d.topResult.query.propValues.find((p) => p.id.split(TAG_VALUE_SEPARATOR)[0].trim() === prop.id.split(TAG_VALUE_SEPARATOR)[0].trim());
+          return (match) ? `<span class="match">${prop.text}</span>` : `${prop.text}`;
+        });
 
-      const terms = topResult.state.propValues.map((prop) => {
-        const match = topResult.query.propValues.find((p) => p.id.split(TAG_VALUE_SEPARATOR)[0].trim() === prop.id.split(TAG_VALUE_SEPARATOR)[0].trim());
-        return (match) ? `<span class="match">${prop.text}</span>` : `${prop.text}`;
+        let seqIconId = 'n-states';
+        let seqLength = d.searchResults.length || '';
+        switch(seqLength) {
+          case 1:
+            seqIconId = 'one-state';
+            seqLength = '';
+            break;
+          case 2:
+            seqIconId = 'two-states';
+            seqLength = '';
+            break;
+          case 3:
+            seqIconId = 'three-states';
+            seqLength = '';
+            break;
+        }
+
+        const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node));
+        const img = new Image();
+        img.onload = () => {
+          d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
+        };
+        img.src = url;
+        if (img.complete) {
+          (<any>img).onload();
+        }
+
+        return `
+          <div class="top-result" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
+            <div class="prov-ret-thumbnail">
+              <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
+                <use xlink:href="#loading-animation"></use>
+              </svg>
+              <div class="img" style="background-image: url(${url})"></div>
+            </div>
+            <div class="title" href="#" title="${(<StateNode>d.topResult.state.node).name}">${(<StateNode>d.topResult.state.node).name}</div>
+            <small class="result-terms">${terms.join(', ')}</small>
+            <div class="seq-length" title="Click to show state sequence">
+              <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
+                <use xlink:href="#${seqIconId}"></use>
+              </svg>
+              <span>${seqLength}</span>
+            </div>
+            <ul class="similarity-bar"></ul>
+          </div>
+          <ol class="states hidden"></ol>
+        `;
       });
-
-      let seqIconId = 'n-states';
-      let seqLength = d.length || '';
-      switch(seqLength) {
-        case 1:
-          seqIconId = 'one-state';
-          seqLength = '';
-          break;
-        case 2:
-          seqIconId = 'two-states';
-          seqLength = '';
-          break;
-        case 3:
-          seqIconId = 'three-states';
-          seqLength = '';
-          break;
-      }
-
-      const url = utils.thumbnail_url(that.data, (<StateNode>topResult.state.node));
-      const img = new Image();
-      img.onload = () => {
-        d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
-      };
-      img.src = url;
-      if (img.complete) {
-        (<any>img).onload();
-      }
-
-      return `
-        <div class="top-result" data-score="${topResult.similarity.toFixed(2)}">
-          <div class="prov-ret-thumbnail">
-            <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
-              <use xlink:href="#loading-animation"></use>
-            </svg>
-            <div class="img" style="background-image: url(${url})"></div>
-          </div>
-          <div class="title" href="#" title="${(<StateNode>topResult.state.node).name}">${(<StateNode>topResult.state.node).name}</div>
-          <small class="result-terms">${terms.join(', ')}</small>
-          <div class="seq-length" title="Click to show state sequence">
-            <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
-              <use xlink:href="#${seqIconId}"></use>
-            </svg>
-            <span>${seqLength}</span>
-          </div>
-          <ul class="similarity-bar"></ul>
-        </div>
-        <ol class="states hidden"></ol>
-      `;
-    });
 
     $seqLi.exit().remove();
 
     const addMouseListener = ($elem) => {
       $elem
-        .on('mouseenter', (d) => {
+        .on('mouseenter', (d:ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
         })
-        .on('mouseleave', (d) => {
+        .on('mouseleave', (d:ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
         })
-        .on('click', (d) => {
+        .on('click', (d:ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>(<any>d).topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
-          this.data.jumpTo(<StateNode>(<any>d).topResult.state.node);
+          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+          this.data.jumpTo(<StateNode>d.topResult.state.node);
           return false;
         });
     };
@@ -423,25 +472,25 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     addMouseListener($seqLi.select('.title'));
     addMouseListener($seqLi.select('.prov-ret-thumbnail'));
 
-    const hoverMultipleStateNodes = (seq:ISearchResult[], operation: SelectOperation) => {
-      const stateNodeIds:number[] = seq.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
+    const hoverMultipleStateNodes = (seq:ISearchResultSequence, operation: SelectOperation) => {
+      const stateNodeIds:number[] = seq.searchResults.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
       // hover multiple stateNodeIds
       this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
     };
 
     $seqLi.select('.seq-length')
-      .on('mouseenter', (d:ISearchResult[]) => {
+      .on('mouseenter', (d:ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
       })
-      .on('mouseleave', (d:ISearchResult[]) => {
+      .on('mouseleave', (d:ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
       })
-      .on('click', (d) => {
+      .on('click', (d:ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         // expand/collapse only for sequence length > 1
-        if(d.length > 1) {
+        if(d.searchResults.length > 1) {
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('active');
           li.querySelector('.states').classList.toggle('hidden');
@@ -450,29 +499,28 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       });
 
     const $seqSimBar = $seqLi.select('.similarity-bar')
-      .attr('data-tooltip', (d) => {
-        const textSim = (<any>d).topResult.query.propValues.map((p, i) => {
-          return {text: p.text, similarity: (<any>d).topResult.similarities[i]};
+      .attr('data-tooltip', (d:ISearchResultSequence) => {
+        const textSim = d.topResult.query.propValues.map((p, i) => {
+          return {text: p.text, similarity: d.topResult.weightedSimilarities[i]};
         });
-        textSim.push({text: 'Total', similarity: (<any>d).topResult.similarity});
+        textSim.push({text: 'Total', similarity: d.topResult.weightedSimilarity});
         return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
       })
-      .selectAll('li')
-      .data((d) => {
-        return (<any>d).topResult.similarities.map((sim, i) => {
+      .selectAll('li.bar')
+      .data((d:ISearchResultSequence) => {
+        return d.topResult.weightedSimilarities.map((sim, i) => {
           const propValue = (<any>d).topResult.query.propValues[i];
           return {
             id: propValue.id,
             text: propValue.text,
             weight: (<any>d).topResult.query.weights[i],
             color: (<any>d).topResult.query.colors[i],
-            similarity: widthScale(sim),
             width: widthScale(sim),
           };
         });
       });
 
-    $seqSimBar.enter().append('li');
+    $seqSimBar.enter().append('li').classed('bar', true);
 
     $seqSimBar
       .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
@@ -484,18 +532,23 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     return $seqLi;
   }
 
-  private createStateListDOM($parent:d3.Selection<any>, widthScale) {
+  /**
+   *
+   * @param $parent
+   * @param widthScale
+   */
+  private createStateListDOM($parent:d3.Selection<ISearchResultSequence>, widthScale) {
 
     const $stateLi = $parent
-      .selectAll('li')
-      .data((seq) => [seq[0], ...seq], (d) => String(d.state.node.id));
+      .selectAll('li.state')
+      .data((seq:ISearchResultSequence) => seq.searchResults, (d) => d.id)
+      .order();
 
-    $stateLi.enter().append('li');
-
-    $stateLi
-      .html((d) => {
+    $stateLi.enter().append('li')
+      .classed('state', true)
+      .html((d:ISearchResult) => {
         return `
-          <div class="seq-state-result" data-score="${d.similarity.toFixed(2)}">
+          <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}">
             <div class="circle"><i class="fa fa-circle glyph"></i></div>
             <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
             <ul class="similarity-bar"></ul>
@@ -506,15 +559,15 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $stateLi.exit().remove();
 
     $stateLi.select('.seq-state-result')
-      .on('mouseenter', (d) => {
+      .on('mouseenter', (d:ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
-      .on('mouseleave', (d) => {
+      .on('mouseleave', (d:ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       })
-      .on('click', (d) => {
+      .on('click', (d:ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
@@ -522,28 +575,28 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       });
 
     const $simBar = $stateLi.select('.similarity-bar')
-      .attr('data-tooltip', (d) => {
+      .attr('data-tooltip', (d:ISearchResult) => {
         const textSim = d.query.propValues.map((p, i) => {
-          return {text: p.text, similarity: d.similarities[i]};
+          return {text: p.text, similarity: d.weightedSimilarities[i]};
         });
-        textSim.push({text: 'Total', similarity: d.similarity});
+        textSim.push({text: 'Total', similarity: d.weightedSimilarity});
         return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
       })
-      .selectAll('li').data((d) => {
-        return d.similarities.map((sim, i) => {
+      .selectAll('li.bar')
+      .data((d:ISearchResult) => {
+        return d.weightedSimilarities.map((sim, i) => {
           const propValue = d.query.propValues[i];
           return {
             id: propValue.id,
             text: propValue.text,
             weight: d.query.weights[i],
             color: d.query.colors[i],
-            similarity: widthScale(sim),
             width: widthScale(sim),
           };
         });
       });
 
-    $simBar.enter().append('li');
+    $simBar.enter().append('li').classed('bar', true);
 
     $simBar
       .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
