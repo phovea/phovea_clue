@@ -8,7 +8,7 @@ import {
   TAG_VALUE_SEPARATOR, createPropertyValue
 } from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import StateNode from 'phovea_core/src/provenance/StateNode';
-import {IVisState} from '../../../phovea_core/src/provenance/retrieval/VisState';
+import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 
 interface IQuery {
   term: string;
