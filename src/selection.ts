@@ -28,35 +28,26 @@ export function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph
   return createSelection(idtype, type, bak, range, parameter.animated).then((cmd) => ({ inverse: cmd, consumed : parameter.animated ? within : 0 }));
 }
 
-function capitalize(s: string) {
-  return s.split(' ').map((d) => d[0].toUpperCase()+d.slice(1)).join(' ');
-}
-
-function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
+function meta(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range) {
   const l = range.dim(0).length;
-  let title = type === idtypes.defaultSelectionType ? '' : (capitalize(type)+' ');
-  let p;
-  if (l === 0) {
-    title += 'no '+idtype.names;
-    p = Promise.resolve(title);
-  } else if (l === 1) {
-    title += idtype.name+' ';
+  let promise;
 
-    p = idtype.unmap(range).then((r) => {
-      title += r[0];
-      return title;
-    });
-  } else if (l < 3) {
-    title += idtype.names+' (';
-    p = idtype.unmap(range).then((r) => {
-      title += r.join(', ') + ')';
-      return title;
+  if (l === 0) {
+    promise = Promise.resolve(`No ${idtype.names} Selected`);
+  } else if (l === 1) {
+    promise = idtype.unmap(range).then((r) => {
+      return `Selected ${r[0]}`;
     });
   } else {
-    title += `${range.dim(0).length} ${idtype.names}`;
-    p = Promise.resolve(title);
+    promise = Promise.all([idtype.unmap(range.without(old)), idtype.unmap(old.without(range))]).then((names) => {
+      // name select/deselect <item>, since the previously added item remains unclear
+      const name = (names[0].length > 0) ? 'Selected ' + names[0][0] : 'Deselected ' + names[1][0];
+      return `${name} (${l} ${idtype.names})`;
+    });
   }
-  return p.then((title) => provenance.meta(title, provenance.cat.selection));
+  return promise.then((title) => {
+    return provenance.meta(title, provenance.cat.selection);
+  });
 }
 
 /**
@@ -68,7 +59,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
  * @returns {Cmd}
  */
 export function createSelection(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range = null, animated = false) {
-  return meta(idtype, type, range).then((meta) => {
+  return meta(idtype, type, range, old).then((meta) => {
     return {
       meta,
       id: 'select',
