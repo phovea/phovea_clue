@@ -2,7 +2,7 @@
  * Created by Holger Stitz on 28.06.2017.
  */
 import * as d3 from 'd3';
-import {IPropertyValue, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IPropertyValue, PropertyType, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {
 ICategoricalPropertyComparator, INumericalPropertyComparator,
 IPropertyComparator, ISetPropertyComparator
@@ -26,15 +26,15 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
     state.propValues
       .filter((d) => d.type === PropertyType.NUMERICAL)
       .forEach((propValue) => {
-        this.updateMinMax(propValue.id, parseFloat(propValue.payload.numVal));
+        this.updateMinMax(propValue.id.split(TAG_VALUE_SEPARATOR)[0].trim(), parseFloat(propValue.payload.numVal));
       });
   }
 
   compare(propValue1:IPropertyValue, propValue2:IPropertyValue):number {
-    if(!this.minMax.has(propValue1.id)) {
+    if(!this.minMax.has(propValue1.id.split(TAG_VALUE_SEPARATOR)[0].trim())) {
       return 0;
     }
-    const minMax = this.minMax.get(propValue1.id);
+    const minMax = this.minMax.get(propValue1.id.split(TAG_VALUE_SEPARATOR)[0].trim());
     const scale = d3.scale.linear().domain([0, Math.abs(minMax[1] - minMax[0])]).range([1, 0]).clamp(true);
     const diff = Math.abs(parseFloat(propValue1.payload.numVal) - parseFloat(propValue2.payload.numVal));
     const r = scale(diff);
