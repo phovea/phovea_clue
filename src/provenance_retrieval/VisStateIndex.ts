@@ -15,6 +15,7 @@ export interface IQuery {
   removePropValue(propValue:IPropertyValue):IQuery;
 
   replacePropValues(propValue:IPropertyValue[]):IQuery;
+  clear():IQuery;
 }
 
 export interface ISearchResult {
@@ -106,6 +107,10 @@ export class Query implements IQuery {
     q._weights = Array.apply(null, Array(q._propValues.length)).map(() => newPercentage);
 
     return q;
+  }
+
+  clear():IQuery {
+    return new Query();
   }
 
 }

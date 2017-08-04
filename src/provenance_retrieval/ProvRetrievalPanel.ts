@@ -167,11 +167,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <form action="#" onsubmit="return false; ">
           <div class="form-group">
             <label class="sr-only" for="prov-retrieval-select">Filter provenance states by &hellip;</label>
-            <select multiple="multiple" style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
+            <select multiple style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
           </div>
         </form>
         <div id="prov-retrieval-weighting-editor">
-          <ul class="terms"></ul>
+          <ul class="terms">
+            <li class="remove-all" title="Remove all">×</li>            
+          </ul>
           <ul class="weighting-editor"></ul>
         </div>
       </div>
@@ -260,11 +262,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private updateWeightingEditor(query:IQuery) {
-    const $terms = d3.select('#prov-retrieval-weighting-editor ul.terms')
-      .selectAll('li')
-      .data(query.propValues, (d) => String(d.id));
+    const $ul = d3.select('#prov-retrieval-weighting-editor ul.terms');
+    const $terms = $ul.selectAll('li.term')
+      .data(query.propValues, (d) => String(d.id) );
 
-    $terms.enter().append('li');
+    $terms.enter().insert('li', 'li.remove-all').classed('term', true);
     $terms
       .style('border-color', (d, i) => query.colors[i])
       .style('color', (d, i) => query.colors[i])
@@ -280,6 +282,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         this.performSearch(this.query);
       });
     $terms.exit().remove();
+
+    $ul.select('li.remove-all')
+      .on('click', () => {
+        this.query = this.query.clear();
+        this.updateWeightingEditor(this.query);
+        this.performSearch(this.query);
+      });
 
     const $weightingEditor = d3.select('#prov-retrieval-weighting-editor .weighting-editor');
     const widthScale = d3.scale.linear().domain([0, 1]).range([0, (<Element>$weightingEditor.node()).clientWidth]);
