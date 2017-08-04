@@ -463,10 +463,19 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .classed('sequence', true)
       // set child elements here to avoid reloading when manipulating the weights
       .html(function(d:ISearchResultSequence) {
-        const terms = d.topResult.state.propValues.map((prop) => {
+        let matchedTerms = [];
+        let otherTerms = [];
+
+        d.topResult.state.propValues.forEach((prop) => {
           const match = d.topResult.query.propValues.find((p) => p.id.split(TAG_VALUE_SEPARATOR)[0].trim() === prop.id.split(TAG_VALUE_SEPARATOR)[0].trim());
-          return (match) ? `<span class="match">${prop.text}</span>` : `${prop.text}`;
+          if(match) {
+            matchedTerms = [...matchedTerms, `<span class="match">${prop.text}</span>`];
+          } else {
+            otherTerms = [...otherTerms, prop.text];
+          }
         });
+
+        const terms = [...matchedTerms, ...otherTerms];
 
         let seqIconId = 'n-states';
         let seqLength = d.searchResults.length || '';
