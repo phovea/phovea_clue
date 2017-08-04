@@ -13,7 +13,7 @@ import {
   VisStateIndex
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
@@ -220,8 +220,27 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.$searchResults = $p.select('.search-results');
 
+    const prepareSelect2Properties = (properties:IProperty[], states:StateNode[]):IProperty[] => {
+      const usedPropIdsLookup = states
+        .filter((s) => s.visState !== undefined || s.visState !== null)
+        .map((s) => s.visState.propValues)
+        .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
+        .map((p) => p.id);
+
+      return properties.map((property) => {
+        // note: mutable action (modifies original property data)
+        property.values.map((propVal) => {
+          propVal.isDisabled = !(usedPropIdsLookup.indexOf(propVal.id) > -1);
+          return propVal;
+        });
+        return property;
+      });
+    };
+
     if(this.options.app && this.options.app.getVisStateProps) {
-      this.options.app.getVisStateProps().then((properties) => {
+      this.options.app.getVisStateProps().then((properties:IProperty[]) => {
+        properties = prepareSelect2Properties(properties, this.data.states);
+
         const $s2Instance = new Select2();
         const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
         $select2

@@ -27,6 +27,10 @@
   color: #ccc;
 }
 
-.select2-container--bootstrap .select2-results >.select2-results__options {
+.select2-container--bootstrap .select2-results > .select2-results__options {
   max-height:300px;
+}
+
+.select2-container--bootstrap .select2-results__option[aria-disabled=true] {
+  opacity: 0.5;
 }

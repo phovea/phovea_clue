@@ -43,6 +43,7 @@ export class Select2 {
             text: propValue.text,
             id: propValue.id,
             needsInput: propValue.needsInput,
+            disabled: propValue.isDisabled,
             prop,
             propValue
           };
