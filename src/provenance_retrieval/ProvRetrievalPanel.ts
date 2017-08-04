@@ -513,7 +513,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
               <div class="img" style="background-image: url(${url})"></div>
             </div>
             <div class="title" href="#" title="${(<StateNode>d.topResult.state.node).name}">${(<StateNode>d.topResult.state.node).name}</div>
-            <small class="result-terms">${terms.join(', ')}</small>
+            <div class="result-terms"><small>${terms.join(', ')}</small></div>
             <div class="seq-length" title="Click to show state sequence">
               <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#${seqIconId}"></use>
