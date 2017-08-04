@@ -7,6 +7,8 @@ import {
   IProperty, IPropertyValue, PropertyType,
   TAG_VALUE_SEPARATOR, createPropertyValue
 } from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import StateNode from 'phovea_core/src/provenance/StateNode';
+import {IVisState} from '../../../phovea_core/src/provenance/retrieval/VisState';
 
 interface IQuery {
   term: string;
@@ -16,6 +18,7 @@ interface ISelect2Attr {
   text: string;
   id?: number|string;
   needsInput?: boolean;
+  disabled?: boolean;
   prop?: IProperty;
   propValue?: IPropertyValue;
 }
@@ -132,8 +135,11 @@ export class Select2 {
 
         // fake ajax call with local data
         transport: (queryParams, success, error) => {
+          let items = prepData.slice(0);
+          items = this.filterData(items, queryParams.data.term);
+          items = this.updateDisabled(items);
           return success({
-            items: this.filterData(prepData.slice(0), queryParams.data.term)
+            items
           });
         },
 
@@ -189,12 +195,12 @@ export class Select2 {
     return matches && this.findQueryInText(matches[1], text);
   }
 
-  private filterData(data:ISelect2Category[], query:string) {
+  private filterData(data:ISelect2Category[], query:string):ISelect2Category[] {
     if (!query) {
       return data;
     }
 
-    let result = [];
+    let result:ISelect2Category[] = [];
 
     data.forEach((d) => {
       const res: ISelect2Category = {text: d.text};
@@ -226,6 +232,24 @@ export class Select2 {
     return result;
   }
 
+  /**
+   * Updates Select2 field according to the PropertyValue setting.
+   * Important: This function mutates the original data.
+   * @param {ISelect2Category[]} data
+   * @returns {ISelect2Category[]}
+   */
+  private updateDisabled(data:ISelect2Category[]):ISelect2Category[] {
+    data.forEach((d) => {
+      if (d.children) {
+        d.children.forEach((item) => {
+          // sets the Select2 disabled field based on the propValue
+          item.disabled = item.propValue.isDisabled;
+        });
+      }
+    });
+    return data;
+  }
+
   // from http://stackoverflow.com/a/29018243/940219
   private markMatch(text, term) {
     // Find where the match is
@@ -252,6 +276,59 @@ export class Select2 {
     $result.append(text.substring(match + term.length));
 
     return $result;
+  }
+
+}
+
+export class PropertyModifier {
+
+  private _properties:IProperty[];
+
+  private usedPropIdsLookup:string[] = [];
+
+  constructor(visStates:IVisState[]) {
+    this.initStateLookup(visStates);
+  }
+
+  addState(visState:IVisState) {
+    this.usedPropIdsLookup = [...this.usedPropIdsLookup, ...visState.propValues.map((p) => p.id)];
+    this.modifyProperties();
+  }
+
+  get properties():IProperty[] {
+    return this._properties;
+  }
+
+  set properties(value:IProperty[]) {
+    this._properties = value;
+    this.modifyProperties();
+  }
+
+  private initStateLookup(visStates:IVisState[]) {
+    this.usedPropIdsLookup = visStates
+      .filter((s) => s !== undefined || s !== null)
+      .map((s) => s.propValues)
+      .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
+      .map((p) => p.id);
+  }
+
+  private modifyProperties() {
+    if(this.properties.length === 0) {
+      return;
+    }
+
+    this.updateDisabled(this.properties, this.usedPropIdsLookup);
+  }
+
+  private updateDisabled(properties:IProperty[], idLookup:string[]):IProperty[] {
+    return properties.map((property) => {
+      // important: mutable action (modifies original property data)
+      property.values.map((propVal) => {
+        propVal.isDisabled = !(idLookup.indexOf(propVal.id) > -1);
+        return propVal;
+      });
+      return property;
+    });
   }
 
 }

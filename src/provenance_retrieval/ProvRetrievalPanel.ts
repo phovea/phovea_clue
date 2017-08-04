@@ -7,7 +7,7 @@ import {AVisInstance, IVisInstance} from 'phovea_core/src/vis';
 import {onDOMNodeRemoved, mixin} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import * as idtypes from 'phovea_core/src/idtype';
-import {Select2} from './Select2';
+import {PropertyModifier, Select2} from './Select2';
 import {
   IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
   VisStateIndex
@@ -69,6 +69,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private currentSequences: ISearchResultSequence[] = [];
 
+  private propertyModifier:PropertyModifier;
+
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
     this.options = mixin({}, options);
@@ -77,6 +79,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.bind();
     this.initStateIndex(this.data.states, ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES);
+
+    this.propertyModifier = new PropertyModifier(this.data.states.map((s) => s.visState));
   }
 
   private bind() {
@@ -150,6 +154,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
   private captureAndIndexState(stateNode:StateNode):boolean {
     stateNode.visState.captureAndPersist();
+    this.propertyModifier.addState(stateNode.visState);
     return this.stateIndex.addState(stateNode.visState);
   }
 
@@ -220,26 +225,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.$searchResults = $p.select('.search-results');
 
-    const prepareSelect2Properties = (properties:IProperty[], states:StateNode[]):IProperty[] => {
-      const usedPropIdsLookup = states
-        .filter((s) => s.visState !== undefined || s.visState !== null)
-        .map((s) => s.visState.propValues)
-        .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
-        .map((p) => p.id);
-
-      return properties.map((property) => {
-        // note: mutable action (modifies original property data)
-        property.values.map((propVal) => {
-          propVal.isDisabled = !(usedPropIdsLookup.indexOf(propVal.id) > -1);
-          return propVal;
-        });
-        return property;
-      });
-    };
-
     if(this.options.app && this.options.app.getVisStateProps) {
       this.options.app.getVisStateProps().then((properties:IProperty[]) => {
-        properties = prepareSelect2Properties(properties, this.data.states);
+        this.propertyModifier.properties = properties;
 
         const $s2Instance = new Select2();
         const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
