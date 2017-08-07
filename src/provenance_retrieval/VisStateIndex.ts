@@ -341,7 +341,7 @@ export class PropertyModifier {
 
   private updateDisabled(propVal:IPropertyValue) {
     // important: mutable action (modifies original property data)
-    propVal.isDisabled = !this.idLookup.has(propVal.baseId);
+    propVal.isDisabled = !this.idLookup.has(PropertyModifier.getPropId(propVal));
   }
 
   private updateActive(propVal:IPropertyValue) {
