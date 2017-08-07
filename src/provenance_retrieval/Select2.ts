@@ -142,7 +142,6 @@ export class Select2 {
         transport: (queryParams, success, error) => {
           let items = this.prepData.slice(0);
           items = this.filterData(items, queryParams.data.term);
-          items = this.updateDisabled(items);
           return success({
             items
           });
@@ -235,24 +234,6 @@ export class Select2 {
     });
 
     return result;
-  }
-
-  /**
-   * Updates Select2 field according to the PropertyValue setting.
-   * Important: This function mutates the original data.
-   * @param {ISelect2Category[]} data
-   * @returns {ISelect2Category[]}
-   */
-  private updateDisabled(data:ISelect2Category[]):ISelect2Category[] {
-    data.forEach((d) => {
-      if (d.children) {
-        d.children.forEach((item) => {
-          // sets the Select2 disabled field based on the propValue
-          item.disabled = item.propValue.isDisabled;
-        });
-      }
-    });
-    return data;
   }
 
   // mark match code from http://stackoverflow.com/a/29018243/940219

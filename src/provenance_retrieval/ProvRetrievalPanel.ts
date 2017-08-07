@@ -13,7 +13,7 @@ import {
   VisStateIndex, PropertyModifier
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IProperty, IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
@@ -60,6 +60,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private switchStateListener = ((evt:any, state:StateNode) => {
     this.propertyModifier.activeVisState = state.visState;
+    this.$select2Instance.updateData(this.propertyModifier.properties);
   });
 
   private $node: d3.Selection<any>;
@@ -163,6 +164,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private captureAndIndexState(stateNode:StateNode):boolean {
     stateNode.visState.captureAndPersist();
     this.propertyModifier.addState(stateNode.visState);
+    this.$select2Instance.updateData(this.propertyModifier.properties);
     return this.stateIndex.addState(stateNode.visState);
   }
 
