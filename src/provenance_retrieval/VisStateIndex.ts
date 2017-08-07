@@ -2,7 +2,10 @@
  * Created by Holger Stitz on 07.06.2017.
  */
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
-import {IProperty, IPropertyValue, Property, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {
+  IProperty, IPropertyValue, Property, PropertyType,
+  TAG_VALUE_SEPARATOR
+} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {COMPARATORS, selectComparator} from './VisStatePropertyComparator';
 import * as d3 from 'd3';
 
@@ -230,9 +233,14 @@ export class PropertyModifier {
       .map((s) => s.propValues)
       .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
       .forEach((p) => {
-        this.idLookup.set(p.id, p);
-        const counter = (this.idCounter.has(p.id)) ? this.idCounter.get(p.id) : 0;
-        this.idCounter.set(p.id, counter+1);
+        const id = PropertyModifier.getPropId(p);
+        // filter None values
+        if(id === 'None') {
+          return;
+        }
+        this.idLookup.set(id, p);
+        const counter = (this.idCounter.has(id)) ? this.idCounter.get(id) : 0;
+        this.idCounter.set(id, counter+1);
       });
   }
 
@@ -249,17 +257,34 @@ export class PropertyModifier {
     properties.map((property) => {
       // important: mutable action (modifies original property data)
       property.values.map((propVal) => {
-        propVal.isDisabled = !this.idLookup.has(propVal.id);
+        propVal.isDisabled = !this.idLookup.has(PropertyModifier.getPropId(propVal));
         return propVal;
       });
       return property;
     });
   }
 
-  private generateTopProperties(properties:IProperty[]) {
-    const vals = Array.from(this.idCounter.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10).map((d) => this.idLookup.get(d[0]));
-    const topProperties = new Property(PropertyType.SET, 'Top 10', vals);
-    properties.unshift(topProperties);
+  private generateTopProperties(properties:IProperty[], numTop:number = 10) {
+    const vals = Array.from(this.idCounter.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, numTop)
+      .map((d) => this.idLookup.get(d[0]));
+
+    const topProperties = new Property(PropertyType.SET, `Top ${numTop}`, vals);
+
+    // replace if exists
+    if(properties[0].text === topProperties.text) {
+      properties.splice(0, 1, topProperties);
+
+    // add as first
+    } else {
+      properties.unshift(topProperties);
+    }
+  }
+
+  private static getPropId(propVal:IPropertyValue):string {
+    // use p.text for numerical properties to consider the numVal and distinguish between `skinny = 0.21` and `skinny = 0.22`
+    return (propVal.type === PropertyType.NUMERICAL && propVal.payload) ? `${propVal.baseId} ${TAG_VALUE_SEPARATOR} ${propVal.payload.numVal}` : propVal.id;
   }
 
 }
