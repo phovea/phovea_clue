@@ -204,7 +204,8 @@ export class VisStateIndex {
 
 export class PropertyModifier {
 
-  private _properties:IProperty[];
+  private _properties:IProperty[] = [];
+  private _searchResults:ISearchResult[] = [];
   private _activeVisState:IVisState;
 
   private idLookup:Map<string, IPropertyValue> = new Map();
@@ -216,6 +217,16 @@ export class PropertyModifier {
 
   addState(visState:IVisState) {
     this.addStatesToLookup([visState]);
+    this.modifyProperties();
+  }
+
+  get searchResults():ISearchResult[] {
+    return this._searchResults;
+  }
+
+  set searchResults(value:ISearchResult[]) {
+    this._searchResults = value;
+    this.generateSimilarResultProps(this.properties, this.searchResults, 10);
     this.modifyProperties();
   }
 
@@ -260,7 +271,7 @@ export class PropertyModifier {
       return;
     }
 
-    this.generateTopProperties(this.properties);
+    this.generateTopProperties(this.properties, this.idCounter, this.idLookup, 10);
 
     this.properties.map((property) => {
       property.values.map((propVal) => {
@@ -273,22 +284,59 @@ export class PropertyModifier {
     });
   }
 
-  private generateTopProperties(properties:IProperty[], numTop:number = 10) {
-    const vals = Array.from(this.idCounter.entries())
+  private generateTopProperties(properties:IProperty[], idCounter:Map<string, number>, idLookup:Map<string, IPropertyValue>, numTop:number = 10, propText = `Top ${numTop}`) {
+    const vals = Array.from(idCounter.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, numTop)
-      .map((d) => this.idLookup.get(d[0]));
+      .map((d) => idLookup.get(d[0]));
 
-    const topProperties = new Property(PropertyType.SET, `Top ${numTop}`, vals);
+    const topProperties = new Property(PropertyType.SET, propText, vals);
 
+    const index = properties.findIndex((p) => p.text === topProperties.text);
     // replace if exists
-    if(properties[0].text === topProperties.text) {
-      properties.splice(0, 1, topProperties);
+    if(index > -1) {
+      properties.splice(index, 1, topProperties);
 
     // add as first
     } else {
       properties.unshift(topProperties);
     }
+  }
+
+  private generateSimilarResultProps(properties:IProperty[], results:ISearchResult[], numTop:number = 10) {
+    const propText = `Related Search Terms`;
+    const index = properties.findIndex((p) => p.text === propText);
+
+    if(results.length === 0) {
+      // remove existing element
+      if(index > -1) {
+        properties.splice(index, 1);
+      }
+      return;
+    }
+
+    const queryPropVals = results[0].query.propValues;
+
+    const idLookup:Map<string, IPropertyValue> = new Map();
+    const idCounter:Map<string, number> = new Map();
+
+    results
+      .map((r) => r.state.propValues)
+      .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
+      .filter((p) => !queryPropVals.find((qp) => qp.baseId === p.baseId))
+      .forEach((p) => {
+        const id = PropertyModifier.getPropId(p);
+        // filter None values
+        if(id === 'None') {
+          return;
+        }
+        idLookup.set(id, p);
+        idLookup.set(p.baseId, p); // add baseId for correct disabled setting
+        const counter = (idCounter.has(id)) ? idCounter.get(id) : 0;
+        idCounter.set(id, counter+1);
+      });
+
+    this.generateTopProperties(properties, idCounter, idLookup, numTop, propText);
   }
 
   private updateDisabled(propVal:IPropertyValue) {
@@ -306,7 +354,7 @@ export class PropertyModifier {
 
   private static getPropId(propVal:IPropertyValue):string {
     // use p.text for numerical properties to consider the numVal and distinguish between `skinny = 0.21` and `skinny = 0.22`
-    return (propVal.type === PropertyType.NUMERICAL && propVal.payload) ? `${propVal.baseId} ${TAG_VALUE_SEPARATOR} ${propVal.payload.numVal}` : propVal.id;
+    return (propVal.type === PropertyType.NUMERICAL && propVal.payload) ? `${propVal.baseId} ${TAG_VALUE_SEPARATOR} ${d3.round(propVal.payload.numVal, 2)}` : propVal.id;
   }
 
 }

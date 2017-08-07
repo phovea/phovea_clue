@@ -27,6 +27,8 @@ interface ISelect2Category extends ISelect2Attr {
 
 export class Select2 {
 
+  private prepData:ISelect2Category[] = [];
+
   private query: IQuery = {
     term: ''
   };
@@ -53,20 +55,25 @@ export class Select2 {
     });
   }
 
-  init(selector: string, data: IProperty[]) {
-    const prepData:ISelect2Category[] = this.prepareData(data);
+  updateData(data:IProperty[]) {
+    this.prepData = this.prepareData(data);
+  }
 
-    return $(selector).select2(<any>{
+  init(selector: string, data: IProperty[]) {
+    this.updateData(data);
+
+    const $instance = $(selector);
+    return $instance.select2(<any>{
       theme: 'bootstrap',
       placeholder: 'Search for attribute, selection, …',
-      data: prepData,
+      data: this.prepData,
       multiple: true,
 
       tags: true,
       // create custom tags for items that have a parameter and that parameter is complete
       createTag: (query) => {
         const queryTerm = query.term;
-        const matchItemWithParam = prepData.slice(0)
+        const matchItemWithParam = this.prepData.slice(0)
           .filter((d) => d.children !== undefined)
           .map((d) => d.children)
           .some((d) => {
@@ -133,7 +140,7 @@ export class Select2 {
 
         // fake ajax call with local data
         transport: (queryParams, success, error) => {
-          let items = prepData.slice(0);
+          let items = this.prepData.slice(0);
           items = this.filterData(items, queryParams.data.term);
           items = this.updateDisabled(items);
           return success({

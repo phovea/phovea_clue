@@ -65,6 +65,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private $node: d3.Selection<any>;
   private $searchResults: d3.Selection<any>;
 
+  private $select2Instance:Select2 = new Select2();
+
   private dim: [number, number] = [200, 100];
 
   private stateIndex:VisStateIndex = new VisStateIndex();
@@ -235,8 +237,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       this.options.app.getVisStateProps().then((properties:IProperty[]) => {
         this.propertyModifier.properties = properties;
 
-        const $s2Instance = new Select2();
-        const $select2 = $s2Instance.init('#prov-retrieval-select', properties);
+        const $select2 = this.$select2Instance.init('#prov-retrieval-select', this.propertyModifier.properties);
         $select2
           .on('select2:select', (evt) => {
             const propValue:IPropertyValue = evt.params.data.propValue;
@@ -358,6 +359,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     } else {
       this.data.fire('search_clear');
     }
+
+    // update select2 properties
+    this.propertyModifier.searchResults = results;
+    this.$select2Instance.updateData(this.propertyModifier.properties);
 
     this.currentSequences = this.groupIntoSequences(results);
     this.updateResults(this.currentSequences, true);
