@@ -7,8 +7,6 @@ import {
   IProperty, IPropertyValue, PropertyType,
   TAG_VALUE_SEPARATOR, createPropertyValue
 } from 'phovea_core/src/provenance/retrieval/VisStateProperty';
-import StateNode from 'phovea_core/src/provenance/StateNode';
-import {IVisState} from '../../../phovea_core/src/provenance/retrieval/VisState';
 
 interface IQuery {
   term: string;
@@ -276,59 +274,6 @@ export class Select2 {
     $result.append(text.substring(match + term.length));
 
     return $result;
-  }
-
-}
-
-export class PropertyModifier {
-
-  private _properties:IProperty[];
-
-  private usedPropIdsLookup:string[] = [];
-
-  constructor(visStates:IVisState[]) {
-    this.initStateLookup(visStates);
-  }
-
-  addState(visState:IVisState) {
-    this.usedPropIdsLookup = [...this.usedPropIdsLookup, ...visState.propValues.map((p) => p.id)];
-    this.modifyProperties();
-  }
-
-  get properties():IProperty[] {
-    return this._properties;
-  }
-
-  set properties(value:IProperty[]) {
-    this._properties = value;
-    this.modifyProperties();
-  }
-
-  private initStateLookup(visStates:IVisState[]) {
-    this.usedPropIdsLookup = visStates
-      .filter((s) => s !== undefined || s !== null)
-      .map((s) => s.propValues)
-      .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
-      .map((p) => p.id);
-  }
-
-  private modifyProperties() {
-    if(this.properties.length === 0) {
-      return;
-    }
-
-    this.updateDisabled(this.properties, this.usedPropIdsLookup);
-  }
-
-  private updateDisabled(properties:IProperty[], idLookup:string[]):IProperty[] {
-    return properties.map((property) => {
-      // important: mutable action (modifies original property data)
-      property.values.map((propVal) => {
-        propVal.isDisabled = !(idLookup.indexOf(propVal.id) > -1);
-        return propVal;
-      });
-      return property;
-    });
   }
 
 }

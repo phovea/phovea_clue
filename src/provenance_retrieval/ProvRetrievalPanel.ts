@@ -7,10 +7,10 @@ import {AVisInstance, IVisInstance} from 'phovea_core/src/vis';
 import {onDOMNodeRemoved, mixin} from 'phovea_core/src/index';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import * as idtypes from 'phovea_core/src/idtype';
-import {PropertyModifier, Select2} from './Select2';
+import {Select2} from './Select2';
 import {
   IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
-  VisStateIndex
+  VisStateIndex, PropertyModifier
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IProperty, IPropertyValue, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
