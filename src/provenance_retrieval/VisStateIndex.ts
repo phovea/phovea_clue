@@ -2,7 +2,7 @@
  * Created by Holger Stitz on 07.06.2017.
  */
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
-import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue, Property, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {COMPARATORS, selectComparator} from './VisStatePropertyComparator';
 import * as d3 from 'd3';
 
@@ -203,14 +203,15 @@ export class PropertyModifier {
 
   private _properties:IProperty[];
 
-  private usedPropIdsLookup:string[] = [];
+  private idLookup:Map<string, IPropertyValue> = new Map();
+  private idCounter:Map<string, number> = new Map();
 
   constructor(visStates:IVisState[]) {
-    this.initStateLookup(visStates);
+    this.addStatesToLookup(visStates);
   }
 
   addState(visState:IVisState) {
-    this.usedPropIdsLookup = [...this.usedPropIdsLookup, ...visState.propValues.map((p) => p.id)];
+    this.addStatesToLookup([visState]);
     this.modifyProperties();
   }
 
@@ -223,12 +224,16 @@ export class PropertyModifier {
     this.modifyProperties();
   }
 
-  private initStateLookup(visStates:IVisState[]) {
-    this.usedPropIdsLookup = visStates
+  private addStatesToLookup(visStates:IVisState[]) {
+    visStates
       .filter((s) => s !== undefined || s !== null)
       .map((s) => s.propValues)
-      .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
-      .map((p) => p.id);
+      .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
+      .forEach((p) => {
+        this.idLookup.set(p.id, p);
+        const counter = (this.idCounter.has(p.id)) ? this.idCounter.get(p.id) : 0;
+        this.idCounter.set(p.id, counter+1);
+      });
   }
 
   private modifyProperties() {
@@ -236,18 +241,25 @@ export class PropertyModifier {
       return;
     }
 
-    this.updateDisabled(this.properties, this.usedPropIdsLookup);
+    this.generateTopProperties(this.properties);
+    this.updateDisabled(this.properties);
   }
 
-  private updateDisabled(properties:IProperty[], idLookup:string[]):IProperty[] {
-    return properties.map((property) => {
+  private updateDisabled(properties:IProperty[]) {
+    properties.map((property) => {
       // important: mutable action (modifies original property data)
       property.values.map((propVal) => {
-        propVal.isDisabled = !(idLookup.indexOf(propVal.id) > -1);
+        propVal.isDisabled = !this.idLookup.has(propVal.id);
         return propVal;
       });
       return property;
     });
+  }
+
+  private generateTopProperties(properties:IProperty[]) {
+    const vals = Array.from(this.idCounter.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10).map((d) => this.idLookup.get(d[0]));
+    const topProperties = new Property(PropertyType.SET, 'Top 10', vals);
+    properties.unshift(topProperties);
   }
 
 }
