@@ -114,7 +114,7 @@ export class Select2 {
         }
 
         const term = this.query.term || '';
-        return this.markMatch(item.text, term);
+        return this.templateResult(item, term);
       },
       templateSelection: (item: any) => {
         if (!item.id) {
@@ -248,32 +248,37 @@ export class Select2 {
     return data;
   }
 
-  // from http://stackoverflow.com/a/29018243/940219
-  private markMatch(text, term) {
-    // Find where the match is
-    const match = text.toUpperCase().indexOf(term.toUpperCase());
+  // mark match code from http://stackoverflow.com/a/29018243/940219
+  private templateResult(item, searchTerm) {
+    const text = item.text;
+    const isActive = (item.propValue) ? item.propValue.isActive : false;
 
-    const $result = $('<span></span>');
+    // Find where the match is
+    const match = text.toUpperCase().indexOf(searchTerm.toUpperCase());
+
+    const $template = $('<div></div>');
 
     // If there is no match, move on
     if (match < 0) {
-      return $result.html(text);
+      return $template.html(text);
     }
 
-    // Put in whatever text is before the match
-    $result.html(text.substring(0, match));
+    const $result = $(`
+      <div>
+        <span>${text.substring(0, match)}</span>
+        <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length)}</span>
+        <span>${text.substring(match + searchTerm.length)}</span>
+      </div>
+    `);
 
-    // Mark the match
-    const $match = $(`<span class="select2-rendered__match"></span>`);
-    $match.html(text.substring(match, match + term.length));
+    $template.append($result);
 
-    // Append the matching text
-    $result.append($match);
+    if(isActive) {
+      const $isActive = $(`<div class="select2-rendered__is-active"></div>`);
+      $template.append($isActive);
+    }
 
-    // Put in whatever is after the match
-    $result.append(text.substring(match + term.length));
-
-    return $result;
+    return $template;
   }
 
 }

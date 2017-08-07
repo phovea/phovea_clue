@@ -58,6 +58,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     this.performSearch(this.query);
   });
 
+  private switchStateListener = ((evt:any, state:StateNode) => {
+    this.propertyModifier.activeVisState = state.visState;
+  });
+
   private $node: d3.Selection<any>;
   private $searchResults: d3.Selection<any>;
 
@@ -86,12 +90,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private bind() {
     this.data.on('search_for_state', this.searchForStateListener);
     this.data.on('executed_first', this.executedFirstListener);
+    this.data.on('switch_state', this.switchStateListener);
   }
 
   destroy() {
     super.destroy();
     this.data.off('search_for_state', this.searchForStateListener);
     this.data.off('executed_first', this.executedFirstListener);
+    this.data.off('switch_state', this.switchStateListener);
   }
 
   get rawSize(): [number, number] {

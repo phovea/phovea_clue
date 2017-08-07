@@ -15,6 +15,24 @@
   color: black;
 }
 
+.select2-results__option[role=treeitem] > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.select2-results__option[role=treeitem] > div > div {
+  display: flex;
+}
+
+.select2-rendered__is-active {
+  display: block;
+  background-color: $select-color;
+  border-radius: 6px;
+  width: 6px;
+  height: 6px;
+}
+
 .select2-container--bootstrap .select2-results__group {
   color: #444;
   background: #efefef;

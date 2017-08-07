@@ -205,6 +205,7 @@ export class VisStateIndex {
 export class PropertyModifier {
 
   private _properties:IProperty[];
+  private _activeVisState:IVisState;
 
   private idLookup:Map<string, IPropertyValue> = new Map();
   private idCounter:Map<string, number> = new Map();
@@ -224,6 +225,15 @@ export class PropertyModifier {
 
   set properties(value:IProperty[]) {
     this._properties = value;
+    this.modifyProperties();
+  }
+
+  get activeVisState():IVisState {
+    return this._activeVisState;
+  }
+
+  set activeVisState(visState:IVisState) {
+    this._activeVisState = visState;
     this.modifyProperties();
   }
 
@@ -250,14 +260,12 @@ export class PropertyModifier {
     }
 
     this.generateTopProperties(this.properties);
-    this.updateDisabled(this.properties);
-  }
 
-  private updateDisabled(properties:IProperty[]) {
-    properties.map((property) => {
-      // important: mutable action (modifies original property data)
+    this.properties.map((property) => {
       property.values.map((propVal) => {
-        propVal.isDisabled = !this.idLookup.has(PropertyModifier.getPropId(propVal));
+        // important: mutable action (modifies original property data)
+        this.updateActive(propVal);
+        this.updateDisabled(propVal);
         return propVal;
       });
       return property;
@@ -280,6 +288,17 @@ export class PropertyModifier {
     } else {
       properties.unshift(topProperties);
     }
+  }
+
+  private updateDisabled(propVal:IPropertyValue) {
+    // important: mutable action (modifies original property data)
+    propVal.isDisabled = !this.idLookup.has(PropertyModifier.getPropId(propVal));
+  }
+
+  private updateActive(propVal:IPropertyValue) {
+    if(this.activeVisState)
+    // important: mutable action (modifies original property data)
+    propVal.isActive = (this.activeVisState.propValues.filter((p) => PropertyModifier.getPropId(propVal) === PropertyModifier.getPropId(p)).length > 0);
   }
 
   private static getPropId(propVal:IPropertyValue):string {
