@@ -249,6 +249,7 @@ export class PropertyModifier {
           return;
         }
         this.idLookup.set(id, p);
+        this.idLookup.set(p.baseId, p); // add baseId for correct disabled setting
         const counter = (this.idCounter.has(id)) ? this.idCounter.get(id) : 0;
         this.idCounter.set(id, counter+1);
       });
@@ -292,11 +293,13 @@ export class PropertyModifier {
 
   private updateDisabled(propVal:IPropertyValue) {
     // important: mutable action (modifies original property data)
-    propVal.isDisabled = !this.idLookup.has(PropertyModifier.getPropId(propVal));
+    propVal.isDisabled = !this.idLookup.has(propVal.baseId);
   }
 
   private updateActive(propVal:IPropertyValue) {
-    if(this.activeVisState)
+    if(!this.activeVisState) {
+      return;
+    }
     // important: mutable action (modifies original property data)
     propVal.isActive = (this.activeVisState.propValues.filter((p) => PropertyModifier.getPropId(propVal) === PropertyModifier.getPropId(p)).length > 0);
   }
