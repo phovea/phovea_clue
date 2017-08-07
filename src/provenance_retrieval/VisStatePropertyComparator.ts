@@ -26,15 +26,15 @@ class NumericalPropertyComparator implements INumericalPropertyComparator {
     state.propValues
       .filter((d) => d.type === PropertyType.NUMERICAL)
       .forEach((propValue) => {
-        this.updateMinMax(propValue.id.split(TAG_VALUE_SEPARATOR)[0].trim(), parseFloat(propValue.payload.numVal));
+        this.updateMinMax(propValue.baseId, parseFloat(propValue.payload.numVal));
       });
   }
 
   compare(propValue1:IPropertyValue, propValue2:IPropertyValue):number {
-    if(!this.minMax.has(propValue1.id.split(TAG_VALUE_SEPARATOR)[0].trim())) {
+    if(!this.minMax.has(propValue1.baseId)) {
       return 0;
     }
-    const minMax = this.minMax.get(propValue1.id.split(TAG_VALUE_SEPARATOR)[0].trim());
+    const minMax = this.minMax.get(propValue1.baseId);
     const scale = d3.scale.linear().domain([0, Math.abs(minMax[1] - minMax[0])]).range([1, 0]).clamp(true);
     const diff = Math.abs(parseFloat(propValue1.payload.numVal) - parseFloat(propValue2.payload.numVal));
     const r = scale(diff);
