@@ -21,6 +21,7 @@
   align-items: center;
 }
 
+.select2-results__group > div > div,
 .select2-results__option[role=treeitem] > div > div {
   display: flex;
 }
