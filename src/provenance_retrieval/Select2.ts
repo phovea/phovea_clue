@@ -253,9 +253,9 @@ export class Select2 {
 
     const $result = $(`
       <div>
-        <span>${text.substring(0, match)}</span>
-        <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length)}</span>
-        <span>${text.substring(match + searchTerm.length)}</span>
+        <span>${text.substring(0, match).replace(' ', '&nbsp;')}</span> 
+        <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length).replace(' ', '&nbsp;')}</span> 
+        <span>${text.substring(match + searchTerm.length).replace(' ', '&nbsp;')}</span>
       </div>
     `);
 
