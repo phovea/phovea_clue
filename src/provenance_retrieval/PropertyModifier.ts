@@ -125,6 +125,7 @@ export class PropertyModifier {
       .slice(0, numTop)
       .map((d) => idLookup.get(d[0]))
       .filter((d) => d !== undefined)
+      .map((d) => d.clone())
       .map((d) => {
         if(!d.payload) {
           d.payload = {};
