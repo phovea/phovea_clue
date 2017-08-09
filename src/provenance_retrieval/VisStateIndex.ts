@@ -208,6 +208,7 @@ export class PropertyModifier {
   private _searchResults:ISearchResult[] = [];
   private _activeVisState:IVisState;
 
+  private propertyLookup:Map<string, IProperty> = new Map();
   private idLookup:Map<string, IPropertyValue> = new Map();
   private idCounter:Map<string, number> = new Map();
 
@@ -236,6 +237,11 @@ export class PropertyModifier {
 
   set properties(value:IProperty[]) {
     this._properties = value;
+    this._properties.forEach((prop) => {
+      prop.values.forEach((propVal) => {
+        this.propertyLookup.set(propVal.baseId, prop);
+      });
+    });
     this.modifyProperties();
   }
 
@@ -288,7 +294,14 @@ export class PropertyModifier {
     const vals = Array.from(idCounter.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, numTop)
-      .map((d) => idLookup.get(d[0]));
+      .map((d) => idLookup.get(d[0]))
+      .map((d) => {
+        if(!d.payload) {
+          d.payload = {};
+        }
+        d.payload.propText = this.propertyLookup.get(d.baseId).text;
+        return d;
+      });
 
     const topProperties = new Property(PropertyType.SET, propText, vals);
 

@@ -221,10 +221,11 @@ export class Select2 {
         // otherwise search in children and add only matching
       } else if (d.children) {
         res.children = d.children.filter((item) => {
-          if (item.needsInput && this.findQueryInParam(query, item.text)) {
+          const propText = (item.propValue && item.propValue.payload && item.propValue.payload.propText) ? item.propValue.payload.propText : '';
+          if (item.needsInput && (this.findQueryInParam(query, item.text) || this.findQueryInParam(query, propText))) {
             return true;
           }
-          return this.findQueryInText(query, item.text);
+          return (this.findQueryInText(query, item.text) || this.findQueryInText(query, propText));
         });
 
         if (res.children.length > 0) {
@@ -238,30 +239,37 @@ export class Select2 {
 
   // mark match code from http://stackoverflow.com/a/29018243/940219
   private templateResult(item, searchTerm) {
-    const text = item.text;
-    const isActive = (item.propValue) ? item.propValue.isActive : false;
+    function markMatch($template:JQuery, cssClass:string, text:string, searchTerm:string) {
+      // Find where the match is
+      const match = text.toUpperCase().indexOf(searchTerm.toUpperCase());
 
-    // Find where the match is
-    const match = text.toUpperCase().indexOf(searchTerm.toUpperCase());
+      const $result = $(`<div class="${cssClass}"></div>`);
 
-    const $template = $('<div></div>');
+      // If there is no match, move on
+      if (match < 0 || searchTerm === '') {
+        $result.html(text);
 
-    // If there is no match, move on
-    if (match < 0) {
-      return $template.html(text);
+      } else {
+        $result.html(` 
+          <span>${text.substring(0, match).replace(' ', '&nbsp;')}</span> 
+          <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length).replace(' ', '&nbsp;')}</span> 
+          <span>${text.substring(match + searchTerm.length).replace(' ', '&nbsp;')}</span>
+        `);
+      }
+
+      $template.append($result);
     }
 
-    const $result = $(`
-      <div>
-        <span>${text.substring(0, match).replace(' ', '&nbsp;')}</span> 
-        <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length).replace(' ', '&nbsp;')}</span> 
-        <span>${text.substring(match + searchTerm.length).replace(' ', '&nbsp;')}</span>
-      </div>
-    `);
+    const $template = $('<div></div>');
+    const $searchResults = $('<div class="select2-rendered__result-text"></div>');
+    markMatch($searchResults, 'select2-rendered__item-text', item.text, searchTerm);
 
-    $template.append($result);
+    if(item.propValue && item.propValue.payload && item.propValue.payload.propText) {
+      markMatch($searchResults, 'select2-rendered__prop-text', `${item.propValue.payload.propText}`, searchTerm);
+    }
+    $template.append($searchResults);
 
-    if(isActive) {
+    if(item.propValue && item.propValue.isActive) {
       const $isActive = $(`<div class="select2-rendered__is-active"></div>`);
       $template.append($isActive);
     }
