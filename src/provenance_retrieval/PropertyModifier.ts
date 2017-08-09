@@ -49,6 +49,7 @@ export class PropertyModifier {
         this.propertyLookup.set(propVal.baseId, prop);
       });
     });
+    this.sortPropertyValues();
     this.modifyProperties();
   }
 
@@ -77,6 +78,20 @@ export class PropertyModifier {
         const counter = (this.idCounter.has(id)) ? this.idCounter.get(id) : 0;
         this.idCounter.set(id, counter+1);
       });
+
+    this.sortPropertyValues();
+  }
+
+  private sortPropertyValues() {
+    this.properties.forEach((prop) => {
+      prop.values.sort((a, b) => {
+        const aId = PropertyModifier.getPropId(a);
+        const bId = PropertyModifier.getPropId(b);
+        const aVal = (this.idCounter.has(aId)) ? this.idCounter.get(aId) : 0; // undefined = count of 0
+        const bVal = (this.idCounter.has(bId)) ? this.idCounter.get(bId) : 0;
+        return bVal - aVal; // desc
+      });
+    });
   }
 
   private modifyProperties() {
