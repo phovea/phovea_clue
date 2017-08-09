@@ -15,6 +15,7 @@ import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
 import {ISearchResult} from './provenance_retrieval/VisStateIndex';
 import {GraphNode} from 'phovea_core/src/graph/graph';
+import StateNode from '../../phovea_core/src/provenance/StateNode';
 
 
 function extractTags(text: string) {
@@ -135,19 +136,20 @@ class StateRepr {
   }
 
 
-  static toRepr(graph : provenance.ProvenanceGraph, highlight: any, options : any = {}) {
+  static toRepr(graph : provenance.ProvenanceGraph, highlight: any, searchResults:ISearchResult[], options : any = {}) {
     //assign doi
     const lookup : any = {};
 
     //mark selected
     const selected = graph.act;
     const selectedPath = selected.path.reverse();
+    const searchResultStates = searchResults.map((d) => d.state.node);
 
     const lod = getLevelOfDetail();
 
     const size = graph.states.length;
 
-    const toState = (s) => {
+    const toState = (s:StateNode) => {
       const r = new StateRepr(s, graph);
       const a = s.creator;
       const meta = a ? a.meta : provenance.meta('No','none','none');
@@ -157,6 +159,7 @@ class StateRepr {
       const bookmark = (s.getAttr('starred', false) ? 1: 0);
       const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
       const isSelected = s === selected ? 3: 0;
+      const isSearchResult = (searchResultStates.indexOf(s) >= 0) ? 1: 0;
       const inpath = selectedPath.indexOf(s) >= 0 ? Math.max(-2.5,6-selectedPath.indexOf(s)) : -2.5;
 
       const sizePenality = Math.max(-1, -size/10);
@@ -164,7 +167,7 @@ class StateRepr {
       const sum = 6 + isSelected + inpath + sizePenality;
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
 
-      if ((category + operation + bookmark + tags) > 0) {
+      if ((category + operation + bookmark + tags + isSearchResult) > 0) {
         //boost to next level if any of the filters apply
         r.doi = Math.max(r.doi, DOI_SMALL);
       }
@@ -392,6 +395,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private onSearchCleared = (event:any) => {
     this.$node.selectAll('div.state').style('opacity', null);
+    // update DOI for state representation
+    this.searchResults = [];
+    this.update();
   }
 
   private onSearchPerformed = (event:any, searchResults: ISearchResult[]) => {
@@ -403,8 +409,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const opacityScale = d3.scale.linear().domain([0, 1]).range([0.5, 1]);
 
     this.$node.selectAll('div.state').style('opacity', (d) => {
-        return (stateSimilarityMap.has(d.s)) ? opacityScale(stateSimilarityMap.get(d.s)) : 0.25;
-      });
+      return (stateSimilarityMap.has(d.s)) ? opacityScale(stateSimilarityMap.get(d.s)) : 0.25;
+    });
+
+    // update DOI for state representation
+    this.searchResults = searchResults;
+    this.update();
   }
 
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
@@ -428,6 +438,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     },
     tags: []
   };
+
+  private searchResults:ISearchResult[] = [];
 
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
@@ -652,7 +664,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('small', lod  === LevelOfDetail.Small);
     this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
-    const states = StateRepr.toRepr(graph, this.highlight, { thumbnails: this.options.thumbnails });
+    const states = StateRepr.toRepr(graph, this.highlight, this.searchResults, { thumbnails: this.options.thumbnails });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $statesEnter = $states.enter().append('div')
       .classed('state', true)
