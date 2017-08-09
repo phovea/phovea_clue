@@ -280,7 +280,7 @@ export class Select2 {
     }
 
     if(item.propValue && item.propValue.numCount !== undefined) {
-      const $numCount = $(`<div class="select2-rendered__num-count" title="${item.propValue.numCount} occurrences" data-num-count="${item.propValue.numCount}"><div style="width: ${this.numCountScale(item.propValue.numCount)}%;"></div></div>`);
+      const $numCount = $(`<div class="select2-rendered__num-count" title="Found in ${item.propValue.numCount} states" data-num-count="${item.propValue.numCount}"><div style="width: ${this.numCountScale(item.propValue.numCount)}%;"></div></div>`);
       $template.append($numCount);
     }
 

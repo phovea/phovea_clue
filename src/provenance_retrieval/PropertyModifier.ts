@@ -66,7 +66,16 @@ export class PropertyModifier {
     visStates
       .filter((s) => s !== undefined || s !== null)
       .map((s) => s.propValues)
-      .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
+      .map((propVals) => {
+        const terms = propVals.map((p) => PropertyModifier.getPropId(p));
+        const uniqueTerms = Array.from(new Set(terms));
+        uniqueTerms.forEach((t) => {
+          const counter = (this.idCounter.has(t)) ? this.idCounter.get(t) : 0;
+          this.idCounter.set(t, counter+1);
+        });
+        return propVals;
+      })
+      .reduce((prev, curr) => prev.concat(curr), []) // flatten the array
       .forEach((p) => {
         const id = PropertyModifier.getPropId(p);
         // filter None values
@@ -75,8 +84,6 @@ export class PropertyModifier {
         }
         this.idLookup.set(id, p);
         this.idLookup.set(p.baseId, p); // add baseId for correct disabled setting
-        const counter = (this.idCounter.has(id)) ? this.idCounter.get(id) : 0;
-        this.idCounter.set(id, counter+1);
       });
 
     this.sortPropertyValues();
@@ -117,6 +124,7 @@ export class PropertyModifier {
       .sort((a, b) => b[1] - a[1])
       .slice(0, numTop)
       .map((d) => idLookup.get(d[0]))
+      .filter((d) => d !== undefined)
       .map((propVal) => {
         const id = PropertyModifier.getPropId(propVal);
         propVal.numCount = (idCounter.has(id)) ? idCounter.get(id) : 0; // undefined = count of 0
@@ -162,6 +170,15 @@ export class PropertyModifier {
 
     results
       .map((r) => r.state.propValues)
+      .map((propVals) => {
+        const terms = propVals.map((p) => PropertyModifier.getPropId(p));
+        const uniqueTerms = Array.from(new Set(terms));
+        uniqueTerms.forEach((t) => {
+          const counter = (idCounter.has(t)) ? idCounter.get(t) : 0;
+          idCounter.set(t, counter+1);
+        });
+        return propVals;
+      })
       .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
       .filter((p) => !queryPropVals.find((qp) => qp.baseId === p.baseId))
       .forEach((p) => {
@@ -172,8 +189,6 @@ export class PropertyModifier {
         }
         idLookup.set(id, p);
         idLookup.set(p.baseId, p); // add baseId for correct disabled setting
-        const counter = (idCounter.has(id)) ? idCounter.get(id) : 0;
-        idCounter.set(id, counter+1);
       });
 
     this.generateTopProperties(properties, idCounter, idLookup, numTop, propText);
