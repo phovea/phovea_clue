@@ -7,6 +7,7 @@ import {
   IProperty, IPropertyValue, PropertyType,
   TAG_VALUE_SEPARATOR, createPropertyValue
 } from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import * as d3 from 'd3';
 
 interface IQuery {
   term: string;
@@ -28,6 +29,7 @@ interface ISelect2Category extends ISelect2Attr {
 export class Select2 {
 
   private prepData:ISelect2Category[] = [];
+  private numCountScale: d3.scale.Linear<number, number> = d3.scale.linear().domain([0, 1, 1]).range([0, 2, 100]);
 
   private query: IQuery = {
     term: ''
@@ -42,6 +44,9 @@ export class Select2 {
       return {
         text: prop.text,
         children: prop.values.map((propValue:IPropertyValue) => {
+          // adapt scale with maximum value
+          this.numCountScale.domain([0, 1, Math.max(...this.numCountScale.domain(), propValue.numCount)]);
+
           return {
             text: propValue.text,
             id: propValue.id,
@@ -270,8 +275,13 @@ export class Select2 {
     $template.append($searchResults);
 
     if(item.propValue && item.propValue.isActive) {
-      const $isActive = $(`<div class="select2-rendered__is-active" title="Active in Current State"></div>`);
+      const $isActive = $(`<div class="select2-rendered__is-active" title="Active in current state"></div>`);
       $template.append($isActive);
+    }
+
+    if(item.propValue && item.propValue.numCount !== undefined) {
+      const $numCount = $(`<div class="select2-rendered__num-count" title="${item.propValue.numCount} occurrences" data-num-count="${item.propValue.numCount}"><div style="width: ${this.numCountScale(item.propValue.numCount)}%;"></div></div>`);
+      $template.append($numCount);
     }
 
     return $template;

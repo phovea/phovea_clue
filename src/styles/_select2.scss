@@ -52,6 +52,18 @@
   height: 6px;
 }
 
+.select2-rendered__num-count {
+  width: 30px;
+  margin-left: 10px;
+  position: relative;
+
+  > div {
+    background-color: #e0e0e0;
+    height: 6px;
+    border-radius: 2px;
+  }
+}
+
 .select2-container--bootstrap .select2-results__group {
   color: #444;
   background: #efefef;
