@@ -191,6 +191,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <li class="remove-all" title="Remove all">×</li>            
           </ul>
           <ul class="weighting-editor"></ul>
+          <div class="number-of-results"></div>
         </div>
       </div>
       <div class="body scrollable">
@@ -358,8 +359,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .filter((state) => state.similarity > 0); // filter results that does not match at all
 
     if(results.length > 0) {
+      this.$node.select('.number-of-results').html(`<b>${results.length}</b> Provenance States found`);
       this.data.fire('search_complete', results);
+
     } else {
+      this.$node.select('.number-of-results').html('');
       this.data.fire('search_clear');
     }
 

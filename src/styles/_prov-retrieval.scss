@@ -400,4 +400,14 @@
       display: none;
     }
   }
+
+  .number-of-results {
+    color: #aaa;
+    font-size: 12px;
+    margin: 3px 0;
+
+    &:empty {
+      display: none;
+    }
+  }
 }
