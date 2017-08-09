@@ -10,13 +10,14 @@ import * as idtypes from 'phovea_core/src/idtype';
 import {Select2} from './Select2';
 import {
   IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
-  VisStateIndex, PropertyModifier
+  VisStateIndex,
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
 import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
+import {PropertyModifier} from './PropertyModifier';
 
 
 /**
