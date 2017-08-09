@@ -84,13 +84,13 @@ export class PropertyModifier {
 
   private sortPropertyValues() {
     this.properties.forEach((prop) => {
-      prop.values.sort((a, b) => {
-        const aId = PropertyModifier.getPropId(a);
-        const bId = PropertyModifier.getPropId(b);
-        const aVal = (this.idCounter.has(aId)) ? this.idCounter.get(aId) : 0; // undefined = count of 0
-        const bVal = (this.idCounter.has(bId)) ? this.idCounter.get(bId) : 0;
-        return bVal - aVal; // desc
-      });
+      prop.values = prop.values
+        .map((propVal) => {
+          const id = PropertyModifier.getPropId(propVal);
+          propVal.numCount = (this.idCounter.has(id)) ? this.idCounter.get(id) : 0; // undefined = count of 0
+          return propVal;
+        })
+        .sort((a, b) => b.numCount - a.numCount); // desc
     });
   }
 
@@ -117,6 +117,11 @@ export class PropertyModifier {
       .sort((a, b) => b[1] - a[1])
       .slice(0, numTop)
       .map((d) => idLookup.get(d[0]))
+      .map((propVal) => {
+        const id = PropertyModifier.getPropId(propVal);
+        propVal.numCount = (idCounter.has(id)) ? idCounter.get(id) : 0; // undefined = count of 0
+        return propVal;
+      })
       .map((d) => {
         if(!d.payload) {
           d.payload = {};
