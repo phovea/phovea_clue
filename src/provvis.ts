@@ -15,7 +15,6 @@ import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
 import {ISearchResult} from './provenance_retrieval/VisStateIndex';
 import {GraphNode} from 'phovea_core/src/graph/graph';
-import StateNode from '../../phovea_core/src/provenance/StateNode';
 
 
 function extractTags(text: string) {
@@ -149,7 +148,7 @@ class StateRepr {
 
     const size = graph.states.length;
 
-    const toState = (s:StateNode) => {
+    const toState = (s:provenance.StateNode) => {
       const r = new StateRepr(s, graph);
       const a = s.creator;
       const meta = a ? a.meta : provenance.meta('No','none','none');
