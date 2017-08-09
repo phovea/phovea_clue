@@ -125,11 +125,6 @@ export class PropertyModifier {
       .slice(0, numTop)
       .map((d) => idLookup.get(d[0]))
       .filter((d) => d !== undefined)
-      .map((propVal) => {
-        const id = PropertyModifier.getPropId(propVal);
-        propVal.numCount = (idCounter.has(id)) ? idCounter.get(id) : 0; // undefined = count of 0
-        return propVal;
-      })
       .map((d) => {
         if(!d.payload) {
           d.payload = {};
@@ -139,6 +134,13 @@ export class PropertyModifier {
       });
 
     const topProperties = new Property(PropertyType.SET, propText, vals);
+
+    topProperties.values = topProperties.values
+      .map((propVal) => {
+        const id = PropertyModifier.getPropId(propVal);
+        propVal.numCount = (idCounter.has(id)) ? idCounter.get(id) : 0; // undefined = count of 0
+        return propVal;
+      });
 
     const index = properties.findIndex((p) => p.text === topProperties.text);
     // replace if exists
