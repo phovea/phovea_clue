@@ -126,10 +126,12 @@ export class PropertyModifier {
       .filter((d) => d !== undefined)
       .map((d) => d.clone())
       .map((d) => {
-        if(!d.payload) {
-          d.payload = {};
+        if(this.propertyLookup.has(d.baseId)) {
+          if(!d.payload) {
+            d.payload = {};
+          }
+          d.payload.propText = this.propertyLookup.get(d.baseId).text;
         }
-        d.payload.propText = this.propertyLookup.get(d.baseId).text;
         return d;
       });
 
