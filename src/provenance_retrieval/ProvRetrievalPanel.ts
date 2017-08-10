@@ -18,7 +18,13 @@ import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
 import {PropertyModifier} from './PropertyModifier';
+import {IVisStateApp} from './IVisState';
 
+interface IProvRetrievalPanelOptions {
+  captureNonPersistedStates?: boolean;
+  rotate?: number;
+  app?: IVisStateApp;
+}
 
 /**
  * To enable the Provenance Retrieval Panel the application must set to the ACLUEWrapper.
@@ -44,6 +50,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @type {boolean}
    */
   private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = true;
+
+  private defaultOptions:IProvRetrievalPanelOptions = {
+    captureNonPersistedStates: ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES,
+    rotate: 0,
+    app: null,
+  };
 
   private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
     const success = this.captureAndIndexState(state);
@@ -79,15 +91,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private propertyModifier:PropertyModifier = new PropertyModifier();
 
-  constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
+  constructor(public data: ProvenanceGraph, public parent: Element, private options: IProvRetrievalPanelOptions) {
     super();
-    this.options = mixin({}, options);
+    this.options = mixin({}, this.defaultOptions, options);
     this.$node = this.build(d3.select(parent));
     onDOMNodeRemoved(this.node, this.destroy, this);
 
     this.bind();
-    this.initStateIndex(this.data.states, ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES);
-
+    this.initStateIndex(this.data.states, this.options.captureNonPersistedStates);
   }
 
   private bind() {
@@ -719,6 +730,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
 }
 
-export function create(data: ProvenanceGraph, parent: Element, options = {}) {
+export function create(data: ProvenanceGraph, parent: Element, options:IProvRetrievalPanelOptions = {}) {
   return new ProvRetrievalPanel(data, parent, options);
 }
