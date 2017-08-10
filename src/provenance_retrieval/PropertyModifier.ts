@@ -19,8 +19,7 @@ export class PropertyModifier {
   private idLookup:Map<string, IPropertyValue> = new Map();
   private idCounter:Map<string, number> = new Map();
 
-  constructor(visStates:IVisState[]) {
-    this.addStatesToLookup(visStates);
+  constructor() {
   }
 
   addState(visState:IVisState) {

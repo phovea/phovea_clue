@@ -77,7 +77,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private currentSequences: ISearchResultSequence[] = [];
 
-  private propertyModifier:PropertyModifier;
+  private propertyModifier:PropertyModifier = new PropertyModifier();
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
@@ -88,7 +88,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     this.bind();
     this.initStateIndex(this.data.states, ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES);
 
-    this.propertyModifier = new PropertyModifier(this.data.states.map((s) => s.visState));
   }
 
   private bind() {
@@ -126,6 +125,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .forEach((stateNode) => {
         //console.log('already persisted', stateNode.name, stateNode.visState.isPersisted());
         this.stateIndex.addState(stateNode.visState);
+        this.propertyModifier.addState(stateNode.visState);
       });
 
     const nonPersistedStates = stateNodes.filter((stateNode) => !stateNode.visState.isPersisted());
