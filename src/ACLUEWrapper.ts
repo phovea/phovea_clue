@@ -50,11 +50,11 @@ export abstract class ACLUEWrapper extends EventHandler {
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
   private storyVis: Promise<VerticalStoryVis>;
-  private app: IVisStateApp;
+  private visStateApp: IVisStateApp;
 
   setApplication(app:IVisStateApp) {
-    this.app = app;
-    this.fire('set_application', this.app);
+    this.visStateApp = app;
+    this.fire('set_application', this.visStateApp);
   }
 
   protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
