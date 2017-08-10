@@ -523,7 +523,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       <div class="header">
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
-          <a href="#" class="btn-search" title="Query similar states"><i class="fa fa-search"></i></a>
+          <a href="#" class="btn-search" title="Search similar provenance states"><i class="fa fa-search"></i></a>
           <a href="#" class="btn-filter" title="Filter provenance graph"><i class="fa fa-filter"></i></a>
         </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
@@ -640,7 +640,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     jp.find('.btn-search').on('click', (evt) => {
       evt.preventDefault();
-      jp.parent().find('.prov-retrieval-panel').toggleClass('hidden');
+      jp.parent().find('.provenance-retrieval-panel').toggleClass('hidden');
       return false;
     });
 
