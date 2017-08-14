@@ -179,6 +179,7 @@ export class ButtonModeSelector {
     this.$node = this.build(d3.select(parent));
 
     const listener = (event:events.IEvent, newMode:CLUEMode) => {
+      this.$node.attr('data-mode', newMode.toString());
       this.$node.selectAll('label').classed('active', (d) => d === newMode).select('input').property('checked', (d) => d === newMode);
     };
     _instance.on('modeChanged', listener);
@@ -189,6 +190,7 @@ export class ButtonModeSelector {
 
   private build($parent:d3.Selection<any>) {
     const $root = $parent.append('div').classed('clue_buttonmodeselector', true).classed('btn-group', true).attr('data-toggle', 'buttons');
+    $root.attr('data-mode', getMode().toString());
     const $modes = $root.selectAll('label').data([modes.Exploration, modes.Authoring, modes.Presentation]);
     $modes.enter().append('label')
       .attr('class', (d) => 'btn btn-' + this.options.size + ' clue-' + d.toString())
