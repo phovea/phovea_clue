@@ -5,6 +5,6 @@ import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/Vi
 
 export interface IVisStateApp {
   getVisStateProps(): Promise<IProperty[]>;
-  getCurrVisState(): IPropertyValue[];
+  getCurrVisState(): Promise<IPropertyValue[]>;
 }
 

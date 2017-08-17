@@ -19,6 +19,7 @@ import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
 import {PropertyModifier} from './PropertyModifier';
 import {IVisStateApp} from './IVisState';
+import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 
 interface IProvRetrievalPanelOptions {
   captureNonPersistedStates?: boolean;
@@ -58,11 +59,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   };
 
   private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
-    const success = this.captureAndIndexState(state);
-    if(success) {
-      this.updateWeightingEditor(this.query);
-      this.performSearch(this.query);
-    }
+    this.captureAndIndexState(state)
+      .then((success) => {
+        if(success) {
+          this.updateWeightingEditor(this.query);
+          this.performSearch(this.query);
+        }
+      });
   });
 
   private searchForStateListener = ((evt:any, state:StateNode) => {
@@ -161,7 +164,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     for (const stateNode of stateNodes) {
       await this.data.jumpTo(stateNode);
-      this.captureAndIndexState(stateNode);
+      await this.captureAndIndexState(stateNode);
       //console.log('newly persisted', stateNode.name, stateNode.visState.terms);
     }
 
@@ -171,13 +174,15 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   /**
    * Captures the visState of a node and adds it to the index
    * @param stateNode
-   * @returns {boolean} Returns `true` if successfully added to index. Otherwise returns `false`.
+   * @returns {Promise<boolean>} Returns `true` if successfully added to index. Otherwise returns `false`.
    */
-  private captureAndIndexState(stateNode:StateNode):boolean {
-    stateNode.visState.captureAndPersist();
-    this.propertyModifier.addState(stateNode.visState);
-    this.$select2Instance.updateData(this.propertyModifier.properties);
-    return this.stateIndex.addState(stateNode.visState);
+  private captureAndIndexState(stateNode:StateNode):Promise<boolean> {
+    return stateNode.visState.captureAndPersist()
+      .then((visState:IVisState) => {
+        this.propertyModifier.addState(visState);
+        this.$select2Instance.updateData(this.propertyModifier.properties);
+        return this.stateIndex.addState(visState);
+      });
   }
 
   private build($parent: d3.Selection<any>) {

@@ -204,7 +204,7 @@ export class PropertyModifier {
   }
 
   private updateActive(propVal:IPropertyValue) {
-    if(!this.activeVisState) {
+    if(!this.activeVisState || !this.activeVisState.propValues) {
       return;
     }
     // important: mutable action (modifies original property data)
