@@ -502,7 +502,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private createSequenceDOM($parent, sequences:ISearchResultSequence[], widthScale):d3.Selection<ISearchResultSequence> {
     const that = this;
 
-    const data = sequences.sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
+    sequences.sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
 
     const $seqLi = $parent
       .selectAll('li.sequence')
