@@ -517,7 +517,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         let otherTerms = [];
 
         d.topResult.state.propValues.forEach((prop) => {
-          const match = d.topResult.query.propValues.find((p) => p.baseId === prop.baseId);
+          const match = d.topResult.query.propValues.find((p) => p.id === prop.id);
           if(match) {
             matchedTerms = [...matchedTerms, `<span class="match">${prop.text}</span>`];
           } else {
