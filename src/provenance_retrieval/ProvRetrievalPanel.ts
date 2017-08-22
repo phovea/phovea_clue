@@ -176,13 +176,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param stateNode
    * @returns {Promise<boolean>} Returns `true` if successfully added to index. Otherwise returns `false`.
    */
-  private captureAndIndexState(stateNode:StateNode):Promise<boolean> {
-    return stateNode.visState.captureAndPersist()
-      .then((visState:IVisState) => {
-        this.propertyModifier.addState(visState);
-        this.$select2Instance.updateData(this.propertyModifier.properties);
-        return this.stateIndex.addState(visState);
-      });
+  private async captureAndIndexState(stateNode:StateNode):Promise<boolean> {
+    const visState:IVisState = await stateNode.visState.captureAndPersist();
+    this.propertyModifier.properties = await this.options.app.getVisStateProps();
+    this.propertyModifier.addState(visState);
+    this.$select2Instance.updateData(this.propertyModifier.properties);
+    return this.stateIndex.addState(visState);
   }
 
   private build($parent: d3.Selection<any>) {

@@ -20,6 +20,7 @@ export class PropertyModifier {
   private idCounter:Map<string, number> = new Map();
 
   constructor() {
+    //
   }
 
   addState(visState:IVisState) {
@@ -42,7 +43,19 @@ export class PropertyModifier {
   }
 
   set properties(value:IProperty[]) {
-    this._properties = value;
+    value.forEach((prop) => {
+      const index = this._properties.findIndex((p) => p.text === prop.text);
+
+      // replace if exists
+      if(index > -1) {
+        this._properties.splice(index, 1, prop);
+
+      // add as last
+      } else {
+        this._properties.push(prop);
+      }
+    });
+
     this._properties.forEach((prop) => {
       prop.values.forEach((propVal) => {
         this.propertyLookup.set(propVal.baseId, prop);
