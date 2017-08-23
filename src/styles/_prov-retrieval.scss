@@ -54,7 +54,7 @@
     }
   }
 
-  .top-result {
+  .top-result[data-has-thumbs="1"] {
     display: grid;
     grid-template-columns: [thumbnail-start] 120px [margin] 5px [text-start] auto [seq-start] 50px [margin-right] 5px [seq-end];
     grid-template-rows: [simbar-start] auto [margin-top] 5px [text-start] auto [terms-start] auto [margin-bottom] 5px [text-end];
@@ -64,6 +64,18 @@
       "thumbnail . title seq-length ."
       "thumbnail . terms terms ."
       "thumbnail . . . .";
+  }
+
+  .top-result[data-has-thumbs="0"] {
+    display: grid;
+    grid-template-columns: [margin] 5px [text-start] auto [seq-start] 50px [margin-right] 5px [seq-end];
+    grid-template-rows: [simbar-start] auto [margin-top] 5px [text-start] auto [terms-start] auto [margin-bottom] 5px [text-end];
+    grid-template-areas:
+      "similarity-bar similarity-bar similarity-bar similarity-bar"
+      ". . . ."
+      ". title seq-length ."
+      ". terms terms ."
+      ". . . .";
   }
 
   .seq-state-result {
@@ -89,7 +101,11 @@
     }
   }
 
-  .prov-ret-thumbnail {
+  [data-has-thumbs="0"] .prov-ret-thumbnail {
+    display: none;
+  }
+
+  [data-has-thumbs="1"] .prov-ret-thumbnail {
     position: relative;
     grid-area: thumbnail;
     display: flex;

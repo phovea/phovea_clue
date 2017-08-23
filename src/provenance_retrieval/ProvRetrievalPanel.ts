@@ -20,6 +20,7 @@ import * as utils from './../utils';
 import {PropertyModifier} from './PropertyModifier';
 import {IVisStateApp} from './IVisState';
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
+import {areThumbnailsAvailable} from '../utils';
 
 interface IProvRetrievalPanelOptions {
   captureNonPersistedStates?: boolean;
@@ -500,6 +501,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
   private createSequenceDOM($parent, sequences:ISearchResultSequence[], widthScale):d3.Selection<ISearchResultSequence> {
     const that = this;
+    const hasThumbnails = (areThumbnailsAvailable(this.data)) ? '1' : '0';
 
     sequences.sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
 
@@ -554,7 +556,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         }
 
         return `
-          <div class="top-result" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
+          <div class="top-result" data-has-thumbs="${hasThumbnails}" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
             <div class="prov-ret-thumbnail">
               <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#loading-animation"></use>
