@@ -87,6 +87,17 @@ export class PropertyModifier {
   set searchForStateProperty(property:IProperty) {
     this._searchForStateProperty = property;
     if(this._searchForStateProperty) {
+      this._searchForStateProperty.values = this._searchForStateProperty.values
+        .map((d) => d.clone())
+        .map((d) => {
+          if(this.propertyLookup.has(d.baseId)) {
+            if(!d.payload) {
+              d.payload = {};
+            }
+            d.payload.propText = this.propertyLookup.get(d.baseId).text;
+          }
+          return d;
+        });
       this.sortValuesAndAddCount([this._searchForStateProperty]);
       this.updateActiveAndDisabled([this._searchForStateProperty]);
     }
