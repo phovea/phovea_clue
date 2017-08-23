@@ -28,6 +28,8 @@ interface ISelect2Category extends ISelect2Attr {
 
 export class Select2 {
 
+  $instance:JQuery;
+
   private prepData:ISelect2Category[] = [];
   private numCountScale: d3.scale.Linear<number, number> = d3.scale.linear().domain([0, 1, 1]).range([0, 2, 100]);
 
@@ -37,6 +39,20 @@ export class Select2 {
 
   constructor() {
     //
+  }
+
+  open() {
+    if(!this.$instance) {
+      return;
+    }
+    this.$instance.select2('open');
+  }
+
+  close() {
+    if(!this.$instance) {
+      return;
+    }
+    this.$instance.select2('close');
   }
 
   private prepareData(data : IProperty[]):ISelect2Category[] {
@@ -67,8 +83,8 @@ export class Select2 {
   init(selector: string, data: IProperty[]) {
     this.updateData(data);
 
-    const $instance = $(selector);
-    return $instance.select2(<any>{
+    this.$instance = $(selector);
+    return this.$instance.select2(<any>{
       theme: 'bootstrap',
       placeholder: 'Search for attribute, selection, …',
       data: this.prepData,

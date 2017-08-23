@@ -72,6 +72,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private searchForStateListener = ((evt:any, state:StateNode) => {
     this.propertyModifier.searchForStateProperty = (state) ? setProperty(`Search for State '${state.name}'`, state.visState.propValues) : null;
     this.$select2Instance.updateData(this.propertyModifier.properties);
+
+    if(state) {
+      this.$select2Instance.open();
+    } else {
+      this.$select2Instance.close();
+    }
+
     // add properties directly instead of new property to select2
     //this.query = this.query.replacePropValues(state.visState.propValues);
     //this.updateWeightingEditor(this.query);
