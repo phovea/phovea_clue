@@ -158,12 +158,13 @@ class StateRepr {
       const bookmark = (s.getAttr('starred', false) ? 1: 0);
       const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
       const isSelected = s === selected ? 3: 0;
+      const isSearchForState = s === options.searchForState ? 3: 0;
       const isSearchResult = (searchResultStates.indexOf(s) >= 0) ? 1: 0;
       const inpath = selectedPath.indexOf(s) >= 0 ? Math.max(-2.5,6-selectedPath.indexOf(s)) : -2.5;
 
       const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
-      const sum = 6 + isSelected + inpath + sizePenality;
+      const sum = 6 + isSelected + isSearchForState + inpath + sizePenality;
       r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
 
       if ((category + operation + bookmark + tags + isSearchResult) > 0) {
@@ -440,6 +441,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private searchResults:ISearchResult[] = [];
 
+  private searchForState: provenance.StateNode = null;
+
   constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
     super();
     this.options = C.mixin({
@@ -663,7 +666,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node.classed('small', lod  === LevelOfDetail.Small);
     this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
 
-    const states = StateRepr.toRepr(graph, this.highlight, this.searchResults, { thumbnails: this.options.thumbnails });
+    const states = StateRepr.toRepr(graph, this.highlight, this.searchResults, { thumbnails: this.options.thumbnails, searchForState: this.searchForState });
     const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
     const $statesEnter = $states.enter().append('div')
       .classed('state', true)
@@ -739,11 +742,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       e.stopPropagation();
       e.preventDefault();
     });
-    $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fa fa-search').on('click', (d) => {
+    $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fa fa-search').on('click', (td) => {
       const e = <Event>d3.event;
       e.stopPropagation();
       e.preventDefault();
-      this.data.fire('search_for_state', d.s);
+      this.searchForState = (this.searchForState === td.s) ? null : td.s;
+      $states.classed('activeSearchForState', (sd) => this.searchForState !== null && sd.s === td.s);
+      that.data.fire('search_for_state', this.searchForState);
+      this.update();
     });
 
     $states.call(StateRepr.render);

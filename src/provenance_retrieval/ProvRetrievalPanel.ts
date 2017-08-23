@@ -13,7 +13,7 @@ import {
   VisStateIndex,
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue, setProperty} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
@@ -70,9 +70,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   });
 
   private searchForStateListener = ((evt:any, state:StateNode) => {
-    this.query = this.query.replacePropValues(state.visState.propValues);
-    this.updateWeightingEditor(this.query);
-    this.performSearch(this.query);
+    this.propertyModifier.searchForStateProperty = (state) ? setProperty(`Search for State '${state.name}'`, state.visState.propValues) : null;
+    this.$select2Instance.updateData(this.propertyModifier.properties);
+    // add properties directly instead of new property to select2
+    //this.query = this.query.replacePropValues(state.visState.propValues);
+    //this.updateWeightingEditor(this.query);
+    //this.performSearch(this.query);
   });
 
   private switchStateListener = ((evt:any, state:StateNode) => {

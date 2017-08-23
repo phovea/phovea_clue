@@ -141,15 +141,6 @@
       color: #949494;
     }
 
-
-    &.phovea-select-selected {
-      font-weight: bold;
-      //background-color: $select-color;
-
-      .glyph, .icon, .slabel {
-        color: $select-color;
-      }
-    }
     &.phovea-select-hovered {
       font-weight: bold;
       //background-color: $hover-color;
@@ -158,6 +149,15 @@
         color: $hover-color;
       }
 
+    }
+
+    &.phovea-select-selected {
+      font-weight: bold;
+      //background-color: $select-color;
+
+      .glyph, .icon, .slabel {
+        color: $select-color;
+      }
     }
 
     &.doi-xs {
@@ -232,8 +232,24 @@
       }
     }
 
+    &.activeSearchForState {
+      .toolbar {
+        display: block;
 
+        i.fa-search {
+          color: $select-color;
+        }
 
+        i:not(.fa-search) {
+          display: none;
+        }
+      }
+      > div:hover .toolbar {
+        i:not(.fa-search) {
+          display: inline-block;
+        }
+      }
+    }
 
   }
 

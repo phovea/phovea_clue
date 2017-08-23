@@ -14,6 +14,7 @@ export class PropertyModifier {
   private _properties:IProperty[] = [];
   private _searchResults:ISearchResult[] = [];
   private _activeVisState:IVisState;
+  private _searchForStateProperty:IProperty;
 
   private propertyLookup:Map<string, IProperty> = new Map();
   private idLookup:Map<string, IPropertyValue> = new Map();
@@ -34,12 +35,16 @@ export class PropertyModifier {
 
   set searchResults(value:ISearchResult[]) {
     this._searchResults = value;
-    this.generateSimilarResultProps(this.properties, this.searchResults, 10);
+    this.generateSimilarResultProps(this._properties, this.searchResults, 10);
     this.modifyProperties();
   }
 
   get properties():IProperty[] {
-    return this._properties;
+    if(this.searchForStateProperty) {
+      return [this.searchForStateProperty, ...this._properties];
+    } else {
+      return [...this._properties];
+    }
   }
 
   set properties(value:IProperty[]) {
@@ -61,7 +66,8 @@ export class PropertyModifier {
         this.propertyLookup.set(propVal.baseId, prop);
       });
     });
-    this.sortPropertyValues();
+
+    this.sortValuesAndAddCount(this._properties);
     this.modifyProperties();
   }
 
@@ -72,6 +78,18 @@ export class PropertyModifier {
   set activeVisState(visState:IVisState) {
     this._activeVisState = visState;
     this.modifyProperties();
+  }
+
+  get searchForStateProperty():IProperty {
+    return this._searchForStateProperty;
+  }
+
+  set searchForStateProperty(property:IProperty) {
+    this._searchForStateProperty = property;
+    if(this._searchForStateProperty) {
+      this.sortValuesAndAddCount([this._searchForStateProperty]);
+      this.updateActiveAndDisabled([this._searchForStateProperty]);
+    }
   }
 
   private addStatesToLookup(visStates:IVisState[]) {
@@ -98,11 +116,11 @@ export class PropertyModifier {
         this.idLookup.set(p.baseId, p); // add baseId for correct disabled setting
       });
 
-    this.sortPropertyValues();
+    this.sortValuesAndAddCount(this._properties);
   }
 
-  private sortPropertyValues() {
-    this.properties.forEach((prop) => {
+  private sortValuesAndAddCount(properties:IProperty[]) {
+    properties.forEach((prop) => {
       prop.values = prop.values
         .map((propVal) => {
           const id = PropertyModifier.getPropId(propVal);
@@ -114,13 +132,16 @@ export class PropertyModifier {
   }
 
   private modifyProperties() {
-    if(this.properties.length === 0) {
+    if(this._properties.length === 0) {
       return;
     }
 
-    this.generateTopProperties(this.properties, this.idCounter, this.idLookup, 10);
+    this.generateTopProperties(this._properties, this.idCounter, this.idLookup, 10);
+    this.updateActiveAndDisabled(this._properties);
+  }
 
-    this.properties.map((property) => {
+  private updateActiveAndDisabled(properties:IProperty[]) {
+    properties.map((property) => {
       property.values.map((propVal) => {
         // important: mutable action (modifies original property data)
         this.updateActive(propVal);
