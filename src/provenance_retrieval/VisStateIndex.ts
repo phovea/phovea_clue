@@ -7,9 +7,9 @@ import {COMPARATORS, selectComparator} from './VisStatePropertyComparator';
 import * as d3 from 'd3';
 
 export interface IQuery {
-  propValues: IPropertyValue[];
+  readonly propValues: IPropertyValue[];
+  readonly colors: string[];
   weights: number[];
-  colors: string[];
 
   addPropValue(propValue:IPropertyValue):IQuery;
   removePropValue(propValue:IPropertyValue):IQuery;
@@ -19,24 +19,25 @@ export interface IQuery {
 }
 
 export interface ISearchResult {
-  id: string;
-  state: IVisState;
+  readonly id: string;
+  readonly state: IVisState;
 
-  query: IQuery;
-  numMatchingTerms: number;
+  readonly query: IQuery;
+  readonly numMatchingTerms: number;
+  readonly matchingIndices: number[];
 
-  similarities: number[];
-  weightedSimilarities: number[];
-  similarity: number;
-  weightedSimilarity: number;
+  readonly similarities: number[];
+  readonly weightedSimilarities: number[];
+  readonly similarity: number;
+  readonly weightedSimilarity: number;
 
   update();
 }
 
 export interface ISearchResultSequence {
-  id: string;
-  topResult: ISearchResult;
-  searchResults: ISearchResult[];
+  readonly id: string;
+  readonly topResult: ISearchResult;
+  readonly searchResults: ISearchResult[];
 
   update();
 }
@@ -117,20 +118,26 @@ export class Query implements IQuery {
 
 class SearchResult implements ISearchResult {
 
-  numMatchingTerms: number;
-  similarity: number;
-
+  private _similarity: number;
   private _weightedSimilarities: number[];
   private _weightedSimilarity: number;
+  private _matchingIndices: number[];
 
-  constructor(public query: IQuery, public state: IVisState, public similarities: number[]) {
-    this.similarity = this.similarities.reduce((a,b) => a + b, 0.0);
-    this.numMatchingTerms = this.similarities.filter((d) => d > 0).length;
+  constructor(public readonly query: IQuery, public readonly state: IVisState, public readonly similarities: number[]) {
+    this._similarity = this.similarities.reduce((a,b) => a + b, 0.0);
+    this._matchingIndices = this.similarities
+          .map((d, i) => (d > 0) ? i : null)
+          .filter((d) => d !== null);
+
     this.update();
   }
 
   get id(): string {
     return String(this.state.node.id);
+  }
+
+  get similarity(): number {
+    return this._similarity;
   }
 
   get weightedSimilarities(): number[] {
@@ -141,6 +148,14 @@ class SearchResult implements ISearchResult {
     return this._weightedSimilarity;
   }
 
+  get matchingIndices(): number[] {
+    return this._matchingIndices;
+  }
+
+  get numMatchingTerms(): number {
+    return this.matchingIndices.length;
+  }
+
   update() {
     this._weightedSimilarities = this.similarities.map((d, i) => d * this.query.weights[i]);
     this._weightedSimilarity = this.weightedSimilarities.reduce((a,b) => a + b, 0.0);
@@ -149,20 +164,28 @@ class SearchResult implements ISearchResult {
 
 export class SearchResultSequence implements ISearchResultSequence {
 
-  topResult:ISearchResult;
-  id: string;
+  private _topResult:ISearchResult;
+  private _id: string;
 
-  constructor(public searchResults: ISearchResult[]) {
+  constructor(public readonly searchResults: ISearchResult[]) {
     this.update();
+  }
+
+  get id():string {
+    return this._id;
+  }
+
+  get topResult():ISearchResult {
+    return this._topResult;
   }
 
   update() {
     this.searchResults.forEach((d) => d.update());
 
     // get top result which is the first state with the highest similarity score
-    this.topResult = this.searchResults.reduce((a,b) => ((a.weightedSimilarity >= b.weightedSimilarity) ? a : b));
+    this._topResult = this.searchResults.reduce((a,b) => ((a.weightedSimilarity >= b.weightedSimilarity) ? a : b));
     // create sequence id from list of all states
-    this.id = this.searchResults.map((d) => d.state.node.id).join(',');
+    this._id = this.searchResults.map((d) => d.state.node.id).join(',');
   }
 }
 

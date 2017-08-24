@@ -461,6 +461,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     return d3.nest()
       .key((d:ISearchResult) => d.numMatchingTerms + ' matching terms')
+      .key((d:ISearchResult) => d.matchingIndices.join('_'))
       .key((d:ISearchResult) => {
         let firstStateNode:StateNode = <StateNode>d.state.node;
         let bakStateNode:StateNode = firstStateNode;
@@ -479,7 +480,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       //  console.log(d );
       //  return d;
       //})
-      // flatten the array
+      // flatten the array twice
+      .reduce((prev, curr) => prev.concat(curr.values), [])
       .reduce((prev, curr) => prev.concat(curr.values), [])
       // flatten once more and create a sequence from search results array
       .map((d) => new SearchResultSequence(d.values));
