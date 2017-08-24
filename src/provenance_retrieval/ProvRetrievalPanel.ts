@@ -51,7 +51,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    *
    * @type {boolean}
    */
-  private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = true;
+  private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = false;
 
   private defaultOptions:IProvRetrievalPanelOptions = {
     captureNonPersistedStates: ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES,
@@ -159,7 +159,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       if(captureAndIndex) {
         this.jumpToAndIndexStates(nonPersistedStates);
 
-      } else {
+      } else if(nonPersistedStates.length > 1) { // message only if more than 1 state
         console.warn(`${nonPersistedStates.length} provenance states were not indexed for the provenance state search. You will get incomplete search results.`);
       }
     }
