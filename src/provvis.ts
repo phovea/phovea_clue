@@ -160,12 +160,15 @@ class StateRepr {
       const isSelected = s === selected ? 3: 0;
       const isSearchForState = s === options.searchForState ? 3: 0;
       const isSearchResult = (searchResultStates.indexOf(s) >= 0) ? 1: 0;
-      const inpath = selectedPath.indexOf(s) >= 0 ? Math.max(-2.5,6-selectedPath.indexOf(s)) : -2.5;
+
+      // number of states that should be expanded previously to the selected one (if there are no search results)
+      const numShowPrevStates = (searchResultStates.length > 0) ? -1 : 6;
+      const inpath = (selectedPath.indexOf(s) >= 0) ? Math.max(-2.5, numShowPrevStates-selectedPath.indexOf(s)) : -2.5;
 
       const sizePenality = Math.max(-1, -size/10);
       //combine to a doi value
       const sum = 6 + isSelected + isSearchForState + inpath + sizePenality;
-      r.doi = d3.round(Math.max(0,Math.min(10,sum))/10,1);
+      r.doi = d3.round(Math.max(0, Math.min(10, sum))/10,1);
 
       if ((category + operation + bookmark + tags + isSearchResult) > 0) {
         //boost to next level if any of the filters apply
