@@ -32,6 +32,8 @@ export interface ISearchResult {
   readonly weightedSimilarity: number;
 
   update();
+
+  matchingIndicesStr(separator?:string);
 }
 
 export interface ISearchResultSequence {
@@ -159,6 +161,10 @@ class SearchResult implements ISearchResult {
   update() {
     this._weightedSimilarities = this.similarities.map((d, i) => d * this.query.weights[i]);
     this._weightedSimilarity = this.weightedSimilarities.reduce((a,b) => a + b, 0.0);
+  }
+
+  matchingIndicesStr(separator = '') {
+    return this._matchingIndices.join(separator);
   }
 }
 

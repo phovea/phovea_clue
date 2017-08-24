@@ -453,21 +453,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
 
   private groupIntoSequences(results:ISearchResult[]):ISearchResultSequence[] {
-    const lookup:Map<StateNode, number> = new Map();
+    const lookup:Map<StateNode, string> = new Map();
     // create lookup for faster access of matching terms per state node
     results.forEach((r) => {
-      lookup.set(<StateNode>r.state.node, r.numMatchingTerms);
+      lookup.set(<StateNode>r.state.node, r.matchingIndicesStr());
     });
 
     return d3.nest()
       .key((d:ISearchResult) => d.numMatchingTerms + ' matching terms')
-      .key((d:ISearchResult) => d.matchingIndices.join('_'))
+      .key((d:ISearchResult) => d.matchingIndicesStr())
       .key((d:ISearchResult) => {
         let firstStateNode:StateNode = <StateNode>d.state.node;
         let bakStateNode:StateNode = firstStateNode;
         // continue as long as previous state is still available in the search results and
         // the number of matching terms are still equal. Otherwise create a new sequence.
-        while(lookup.has(firstStateNode) && lookup.get(firstStateNode) === d.numMatchingTerms) {
+        while(lookup.has(firstStateNode) && lookup.get(firstStateNode) === d.matchingIndicesStr()) {
           bakStateNode = firstStateNode;
           firstStateNode = firstStateNode.previousState;
         }
