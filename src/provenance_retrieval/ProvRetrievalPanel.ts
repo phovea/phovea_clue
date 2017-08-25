@@ -60,13 +60,19 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   };
 
   private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
-    this.captureAndIndexState(state)
-      .then((success) => {
+    const promise = this.captureAndIndexState(state)
+      .then((success:boolean) => {
         if(success) {
           this.updateWeightingEditor(this.query);
           this.performSearch(this.query);
         }
+        return success;
+      })
+      .catch((error) => {
+        console.error(`Error while indexing state ${state.name} (#${state.id}).`, error);
       });
+    // store promise for switchState listener
+    this.executedFirstPromises.set(state, promise);
   });
 
   private searchForStateListener = ((evt:any, state:StateNode) => {
@@ -86,8 +92,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   });
 
   private switchStateListener = ((evt:any, state:StateNode) => {
-    this.propertyModifier.activeVisState = state.visState;
-    this.$select2Instance.updateData(this.propertyModifier.properties);
+    // if the state is executed once wait until this has finished, otherwise switch directly
+    const promise = (this.executedFirstPromises.has(state)) ? this.executedFirstPromises.get(state) : Promise.resolve(true);
+    promise.then((success) => {
+      if(success) {
+        this.propertyModifier.activeVisState = state.visState;
+        this.$select2Instance.updateData(this.propertyModifier.properties);
+      }
+    });
   });
 
   private $node: d3.Selection<any>;
@@ -104,6 +116,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private currentSequences: ISearchResultSequence[] = [];
 
   private propertyModifier:PropertyModifier = new PropertyModifier();
+
+  private executedFirstPromises:Map<StateNode, Promise<boolean>> = new Map();
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: IProvRetrievalPanelOptions) {
     super();
@@ -188,6 +202,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @returns {Promise<boolean>} Returns `true` if successfully added to index. Otherwise returns `false`.
    */
   private async captureAndIndexState(stateNode:StateNode):Promise<boolean> {
+    if(stateNode.visState.isPersisted()) {
+      return Promise.resolve(true);
+    }
     const visState:IVisState = await stateNode.visState.captureAndPersist();
     this.propertyModifier.properties = await this.options.app.getVisStateProps();
     this.propertyModifier.addState(visState);
