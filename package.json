@@ -65,9 +65,9 @@
     "select2-bootstrap-theme": "0.1.0-beta.9",
     "@types/jquery": "2.0.33",
     "jquery": "3.1.1",
-    "phovea_ui": "github:phovea/phovea_ui#thinkh/provenance_retrieval",
+    "phovea_ui": "github:phovea/phovea_ui#develop",
     "phovea_core": "github:phovea/phovea_core#thinkh/provenance_retrieval",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#thinkh/provenance_retrieval"
+    "phovea_security_flask": "github:phovea/phovea_security_flask#develop"
   },
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
