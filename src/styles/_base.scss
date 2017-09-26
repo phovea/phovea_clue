@@ -135,10 +135,10 @@ header.clue-modeselector {
     //padding: 1em 5px;
     width: 10em;
   }
+}
 
-  &.collapsed {
-    top: -40px;
-  }
+[data-clue=E] header.clue-modeselector.collapsed {
+  top: -40px;
 }
 
 // #player_duration{
