@@ -526,10 +526,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     $p.html(`
       <a href="#" class="btn-collapse" title="${(this.options.provVisCollapsed) ? 'Show Provenance Graph' : 'Hide Provenance Graph'}"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
+      <a href="#" class="btn-search" title="Search previous states"><i class="fa fa-search"></i></a>
       <div class="header">
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
-          <a href="#" class="btn-search" title="Search similar provenance states"><i class="fa fa-search"></i></a>
           <a href="#" class="btn-filter" title="Filter provenance graph"><i class="fa fa-filter"></i></a>
         </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
