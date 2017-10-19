@@ -615,7 +615,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             </div>
             <div class="title" href="#" title="${(<StateNode>d.topResult.state.node).name}">${(<StateNode>d.topResult.state.node).name}</div>
             <div class="result-terms"><small>${terms.join(', ')}</small></div>
-            <div class="seq-length" title="Click to show state sequence">
+            <div class="seq-length" title="Click to show sequence of matching states">
               <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#${seqIconId}"></use>
               </svg>
@@ -733,9 +733,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .classed('state', true)
       .html((d:ISearchResult) => {
         return `
-          <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}">
+          <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}" data-is-top="${d.isTopResult ? 1 : 0}">
             <div class="circle"><i class="fa fa-circle glyph"></i></div>
             <div class="title" href="#">${(<StateNode>d.state.node).name}</div>
+            <div class="best-match" title="Best match in this sequence">#1</div>
             <ul class="similarity-bar"></ul>
           </div>
         `;

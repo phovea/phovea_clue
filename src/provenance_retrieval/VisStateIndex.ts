@@ -31,6 +31,8 @@ export interface ISearchResult {
   readonly similarity: number;
   readonly weightedSimilarity: number;
 
+  isTopResult: boolean;
+
   update();
 
   matchingIndicesStr(separator?:string);
@@ -125,6 +127,8 @@ class SearchResult implements ISearchResult {
   private _weightedSimilarity: number;
   private _matchingIndices: number[];
 
+  public isTopResult: boolean = false;
+
   constructor(public readonly query: IQuery, public readonly state: IVisState, public readonly similarities: number[]) {
     this._similarity = this.similarities.reduce((a,b) => a + b, 0.0);
     this._matchingIndices = this.similarities
@@ -190,6 +194,8 @@ export class SearchResultSequence implements ISearchResultSequence {
 
     // get top result which is the first state with the highest similarity score
     this._topResult = this.searchResults.reduce((a,b) => ((a.weightedSimilarity >= b.weightedSimilarity) ? a : b));
+    this._topResult.isTopResult = true;
+
     // create sequence id from list of all states
     this._id = this.searchResults.map((d) => d.state.node.id).join(',');
   }
