@@ -139,7 +139,7 @@
     text-overflow: ellipsis;
   }
 
-  .hover .title,
+  .hover > .top-result > .title, // hover on top-result should only affect the direct title
   .title:hover {
     font-weight: bold;
   }
