@@ -53,20 +53,20 @@
   }
 
   .btn-filter {
-    margin-right: 40px;
+    margin-right: 30px;
   }
 
   .btn-search {
     position: absolute;
-    right: 12px;
-    top: 11px;
+    right: 7px;
+    top: 6px;
   }
 
   .btn-collapse {
     color: $core_colour_text;
     position: absolute;
-    right: 7px;
-    top: 11px;
+    right: 5px;
+    top: 6px;
   }
 
   &.collapsed > .btn-collapse {
