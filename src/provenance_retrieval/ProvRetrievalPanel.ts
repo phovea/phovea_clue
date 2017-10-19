@@ -608,27 +608,6 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $seqLi.exit().remove();
 
-    const addMouseListener = ($elem) => {
-      $elem
-        .on('mouseenter', (d:ISearchResultSequence) => {
-          (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
-        })
-        .on('mouseleave', (d:ISearchResultSequence) => {
-          (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
-        })
-        .on('click', (d:ISearchResultSequence) => {
-          (<Event>d3.event).stopPropagation();
-          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
-          this.data.jumpTo(<StateNode>d.topResult.state.node);
-          return false;
-        });
-    };
-
-    addMouseListener($seqLi.select('.title'));
-    addMouseListener($seqLi.select('.prov-ret-thumbnail'));
-
     const hoverMultipleStateNodes = (seq:ISearchResultSequence, operation: SelectOperation) => {
       const stateNodeIds:number[] = seq.searchResults.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
       // hover multiple stateNodeIds
@@ -654,6 +633,34 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         //}
         return false;
       });
+
+    const addMouseListener = ($elem) => {
+      $elem
+        .on('mouseenter', (d:ISearchResultSequence) => {
+          (<Event>d3.event).stopPropagation();
+          //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+          hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
+          const li = (<any>d3.event).target.parentNode.parentNode;
+          li.classList.toggle('hover');
+        })
+        .on('mouseleave', (d:ISearchResultSequence) => {
+          (<Event>d3.event).stopPropagation();
+          //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+          hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
+          const li = (<any>d3.event).target.parentNode.parentNode;
+          li.classList.toggle('hover');
+        })
+        .on('click', (d:ISearchResultSequence) => {
+          (<Event>d3.event).stopPropagation();
+          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+          this.data.jumpTo(<StateNode>d.topResult.state.node);
+          return false;
+        });
+    };
+
+    addMouseListener($seqLi.select('.title'));
+    addMouseListener($seqLi.select('.result-terms'));
+    addMouseListener($seqLi.select('.prov-ret-thumbnail'));
 
     const $seqSimBar = $seqLi.select('.similarity-bar')
       .attr('data-tooltip', (d:ISearchResultSequence) => {
