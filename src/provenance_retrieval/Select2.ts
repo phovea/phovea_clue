@@ -291,7 +291,7 @@ export class Select2 {
     $template.append($searchResults);
 
     if(item.propValue && item.propValue.isActive) {
-      const $isActive = $(`<div class="select2-rendered__is-active" title="Active in current state"></div>`);
+      const $isActive = $(`<div class="select2-rendered__is-active" title="Active in current view"></div>`);
       $template.append($isActive);
     }
 
