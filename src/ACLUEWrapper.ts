@@ -22,19 +22,22 @@ const TEMPLATE = `<div class="box">
   <div class="content">
     <main data-anchor="main"></main>
     <!--annotation toolbar-->
-    <aside class="annotations" style="display:none">
-      <div>
-        <h2>Annotations</h2>
-      </div>
-      <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
-        </button>
-        <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i>
-        </button>
-        <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i>
-        </button>
-      </div>
-    </aside>
+    <div class="asides">
+      <div class="panel-selector"></div>
+      <aside class="annotations" style="display:none">
+        <div>
+          <h2>Annotations</h2>
+        </div>
+        <div class="btn-group" role="group" aria-label="annotations">
+          <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
+          </button>
+          <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i>
+          </button>
+          <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i>
+          </button>
+        </div>
+      </aside>
+    </div>
   </div>
 </div>`;
 

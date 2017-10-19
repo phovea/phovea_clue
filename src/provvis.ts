@@ -515,23 +515,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //  scale = this.options.scale;
     const $p = $parent.append('aside')
       .classed('provenance-layout-vis', true)
-      .classed('collapsed', this.options.provVisCollapsed)
+      .classed('hidden', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
-
-
 
     if (this.options.hideCLUEButtonsOnCollapse && this.options.provVisCollapsed) {
       d3.select('header.clue-modeselector').classed('collapsed', true);
     }
 
     $p.html(`
-      <a href="#" class="btn-collapse" title="${(this.options.provVisCollapsed) ? 'Show Provenance Graph' : 'Hide Provenance Graph'}"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
-      <a href="#" class="btn-search" title="Search previous states"><i class="fa fa-search"></i></a>
       <div class="header">
         <h2>
-          <i class="fa fa-code-fork fa-rotate-180"></i> Provenance
-          <a href="#" class="btn-filter" title="Filter provenance graph"><i class="fa fa-filter"></i></a>
+          <i class="fa fa-code-fork fa-rotate-180"></i> Current Session History 
+          <a href="#" class="btn-filter" title="Filter current session history"><i class="fa fa-filter"></i></a>
         </h2>
+        <button type="button" class="close" aria-label="Close" title="Close history panel"><span aria-hidden="true">×</span></button>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs" title="data actions">
@@ -632,23 +629,28 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       return false;
     });
 
-    jp.find('.btn-collapse').on('click', (evt) => {
-      evt.preventDefault();
-      const collapsed = !$p.classed('collapsed');
-      $p.select('.btn-collapse').attr('title', collapsed ? 'Show Provenance Graph' : 'Hide Provenance Graph');
-      $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', !collapsed).classed('fa-arrow-circle-o-left', collapsed);
-      $p.classed('collapsed', collapsed);
+    const $panelSelector = $parent.select('.panel-selector');
+    $panelSelector.append(`a`)
+      .attr('title', 'Open Session History Panel')
+      .classed('btn-collapse', true)
+      .classed('hidden', !this.options.provVisCollapsed)
+      .html(`<i class="fa fa-code-fork fa-rotate-180"></i>`)
+      .on('click', () => {
+        $parent.select('.provenance-layout-vis').classed('hidden', false);
+        $panelSelector.select('.btn-collapse').classed('hidden', true);
+        if (this.options.hideCLUEButtonsOnCollapse) {
+          d3.select('header.clue-modeselector').classed('collapsed', false);
+        }
+      });
 
-      if (this.options.hideCLUEButtonsOnCollapse) {
-        d3.select('header.clue-modeselector').classed('collapsed', collapsed);
-      }
-    });
-
-    jp.find('.btn-search').on('click', (evt) => {
-      evt.preventDefault();
-      jp.parent().find('.provenance-retrieval-panel').toggleClass('hidden');
-      return false;
-    });
+    $p.select('.close')
+      .on('click', () => {
+        $parent.select('.provenance-layout-vis').classed('hidden', true);
+        $panelSelector.select('.btn-collapse').classed('hidden', false);
+        if (this.options.hideCLUEButtonsOnCollapse) {
+          d3.select('header.clue-modeselector').classed('collapsed', true);
+        }
+      });
 
     return $p;
   }

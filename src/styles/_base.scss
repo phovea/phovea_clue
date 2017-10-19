@@ -35,6 +35,26 @@ label {
   }
 }
 
+.asides {
+  display: flex;
+  position: relative;
+
+  > .panel-selector {
+    display: flex;
+    position: absolute;
+    right: 0;
+    margin-right: 100%;
+    top: 6px;
+    padding: 0 5px;
+
+    > a {
+      padding: 5px;
+      cursor: pointer;
+      color: $header-menu-color;
+    }
+  }
+}
+
 aside {
   border: 2px solid $core_colour;
   border-radius: 5px;
@@ -42,6 +62,13 @@ aside {
 
   * {
     border: none;
+  }
+
+  .header > .close {
+    position: absolute;
+    right: 8px;
+    top: 9px;
+    float: none;
   }
 
   div h2 {

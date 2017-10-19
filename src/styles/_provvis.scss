@@ -8,6 +8,7 @@
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
+  min-width: 20em;
 
   &.collapsed > div {
     display: none;
@@ -40,37 +41,15 @@
     }
   }
 
-  .btn-search,
   .btn-filter {
     color: $core_colour_text;
     float: right;
     cursor: pointer;
-    margin-right: 15px;
+    margin-right: 20px;
 
     &:hover {
       font-weight: bold;
     }
-  }
-
-  .btn-filter {
-    margin-right: 30px;
-  }
-
-  .btn-search {
-    position: absolute;
-    right: 7px;
-    top: 6px;
-  }
-
-  .btn-collapse {
-    color: $core_colour_text;
-    position: absolute;
-    right: 5px;
-    top: 6px;
-  }
-
-  &.collapsed > .btn-collapse {
-    color: $header-menu-color;
   }
 
   div.state {

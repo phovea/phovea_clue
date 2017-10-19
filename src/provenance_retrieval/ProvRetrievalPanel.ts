@@ -213,14 +213,18 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private build($parent: d3.Selection<any>) {
+    const asideName = 'provenance-retrieval-panel';
+
     const $p = $parent.append('aside')
       //.classed('provenance-layout-vis', true)
-      .classed('provenance-retrieval-panel', true)
+      //.classed('hidden', true)
+      .classed(asideName, true)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
       <div class="header">
-        <h2><i class="fa fa-search"></i> Search Provenance States</h2>
+        <h2><i class="fa fa-search"></i> Search in Current Session</h2>
+        <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
       </div>
       <div class="body">
         <form action="#" onsubmit="return false; ">
@@ -277,6 +281,23 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <p>No matching states found</p>
       </div>
     `);
+
+    const $panelSelector = $parent.select('.panel-selector');
+    $panelSelector.append(`a`)
+      .attr('title', 'Open Search Panel')
+      .classed('btn-search', true)
+      .classed('hidden', !$p.classed('hidden'))
+      .html(`<i class="fa fa-search"></i>`)
+      .on('click', () => {
+        $parent.select(`.${asideName}`).classed('hidden', false);
+        $panelSelector.select('.btn-search').classed('hidden', true);
+      });
+
+    $p.select('.close')
+      .on('click', () => {
+        $parent.select(`.${asideName}`).classed('hidden', true);
+        $panelSelector.select('.btn-search').classed('hidden', false);
+      });
 
     this.$searchResults = $p.select('.search-results');
 
