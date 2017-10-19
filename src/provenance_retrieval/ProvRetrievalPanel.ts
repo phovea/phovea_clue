@@ -235,7 +235,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         </form>
         <div id="prov-retrieval-weighting-editor">
           <ul class="terms">
-            <li class="remove-all" title="Remove all">×</li>            
+            <li class="remove-all" data-tooltip="Remove all">×</li>    
           </ul>
           <ul class="weighting-editor"></ul>
           <div class="number-of-results"></div>
