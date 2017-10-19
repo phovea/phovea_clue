@@ -56,11 +56,12 @@
   width: 30px;
   margin-left: 10px;
   position: relative;
+  border-left: 1px solid #aaa;
+  padding: 2px 0;
 
   > div {
     background-color: #e0e0e0;
     height: 6px;
-    border-radius: 2px;
   }
 }
 
