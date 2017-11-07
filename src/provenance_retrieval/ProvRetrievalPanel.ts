@@ -406,6 +406,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .on('dragend', () => {
         this.currentSequences.forEach((seq) => seq.update());
         this.updateResults(this.currentSequences, false);
+        const searchResults = this.currentSequences
+          .map((d) => d.searchResults)
+          .reduce((prev, curr) => prev.concat(curr), []); // flatten the array
+        this.data.fire('search_modified_weights', searchResults);
       });
 
     $editorLi.select('.draggable').call(drag);

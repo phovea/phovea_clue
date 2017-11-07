@@ -404,20 +404,23 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 
   private onSearchPerformed = (event:any, searchResults: ISearchResult[]) => {
+    this.onSearchModifiedWeights(event, searchResults);
+    // update DOI for state representation
+    this.searchResults = searchResults;
+    this.update();
+  }
+
+  private onSearchModifiedWeights = (event:any, searchResults: ISearchResult[]) => {
     const stateSimilarityMap:Map<GraphNode, number> = new Map();
     searchResults.forEach((d) => {
       stateSimilarityMap.set(d.state.node, d.weightedSimilarity);
     });
 
-    const opacityScale = d3.scale.linear().domain([0, 1]).range([0.5, 1]);
+    const opacityScale = d3.scale.linear().domain([0, 1]).range([0.75, 1]);
 
     this.$node.selectAll('div.state').style('opacity', (d) => {
-      return (stateSimilarityMap.has(d.s)) ? opacityScale(stateSimilarityMap.get(d.s)) : 0.25;
+      return (stateSimilarityMap.has(d.s)) ? opacityScale(stateSimilarityMap.get(d.s)) : 0.3;
     });
-
-    // update DOI for state representation
-    this.searchResults = searchResults;
-    this.update();
   }
 
   private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
@@ -468,6 +471,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.on('add_state', this.onStateAdded);
     this.data.on('select', this.onSelectionChanged);
     this.data.on('search_complete', this.onSearchPerformed);
+    this.data.on('search_modified_weights', this.onSearchModifiedWeights);
     this.data.on('search_clear', this.onSearchCleared);
     this.data.states.forEach((s) => {
       s.on('setAttr', this.trigger);
@@ -482,6 +486,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.data.off('add_state', this.onStateAdded);
     this.data.off('select', this.onSelectionChanged);
     this.data.off('search_complete', this.onSearchPerformed);
+    this.data.off('search_modified_weights', this.onSearchModifiedWeights);
     this.data.off('search_clear', this.onSearchCleared);
     this.data.states.forEach((s) => {
       s.off('setAttr', this.trigger);
