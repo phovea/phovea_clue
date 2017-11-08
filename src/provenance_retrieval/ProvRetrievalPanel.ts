@@ -111,6 +111,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   private stateIndex:VisStateIndex = new VisStateIndex();
 
+  private lastStateBeforeSearch:StateNode = null;
+
   private query:IQuery = new Query();
 
   private currentSequences: ISearchResultSequence[] = [];
@@ -148,6 +150,22 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   get node() {
     return <Element>this.$node.node();
+  }
+
+  private setLastStateBeforeSearch() {
+    if(this.lastStateBeforeSearch) {
+      return;
+    }
+
+    this.lastStateBeforeSearch = this.data.act;
+    this.$node.select('.btn-return-to-last-state').classed('hidden', false);
+    this.$node.select('.return-to-last-state').classed('hidden', false);
+  }
+
+  private resetLastStateBeforeSearch() {
+    this.lastStateBeforeSearch = null;
+    this.$node.select('.btn-return-to-last-state').classed('hidden', true);
+    this.$node.select('.return-to-last-state').classed('hidden', true);
   }
 
   /**
@@ -223,7 +241,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $p.html(`
       <div class="header">
-        <h2><i class="fa fa-search"></i> Search in Current Session</h2>
+        <h2><i class="fa fa-search"></i> Search in Current Session 
+        <a href="#" class="hidden btn-return-to-last-state" title="Return to the view you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
       </div>
       <div class="body">
@@ -278,7 +297,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           </defs>
         </svg>
         <ol class="search-results" start="1"></ol>
-        <p>No matching states found</p>
+        <div>
+          <div class="return-to-last-state hidden">
+            <p>Do you want to return to the view,<br>
+            where you left off before the last search?</p>
+            <p><a class="yes btn btn-default" href="#"><i class="fa fa-step-backward" aria-hidden="true"></i>
+ Yes, please bring me back!</a></p>
+            <p><a class="no" href="#">No, thanks. Hide this message.</a></p>
+          </div>  
+          <p class="start-searching">Enter a search term to find similar views.</p>
+        </div>
       </div>
     `);
 
@@ -297,6 +325,28 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .on('click', () => {
         $parent.select(`.${asideName}`).classed('hidden', true);
         $panelSelector.select('.btn-search').classed('hidden', false);
+      });
+
+    $p.select('.btn-return-to-last-state')
+      .on('click', () => {
+        (<Event>d3.event).preventDefault();
+        this.data.selectState(this.lastStateBeforeSearch, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.jumpTo(this.lastStateBeforeSearch);
+        this.resetLastStateBeforeSearch();
+      });
+
+    $p.select('.return-to-last-state .yes')
+      .on('click', () => {
+        (<Event>d3.event).preventDefault();
+        this.data.selectState(this.lastStateBeforeSearch, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.jumpTo(this.lastStateBeforeSearch);
+        this.resetLastStateBeforeSearch();
+      });
+
+    $p.select('.return-to-last-state .no')
+      .on('click', () => {
+        (<Event>d3.event).preventDefault();
+        this.resetLastStateBeforeSearch();
       });
 
     this.$searchResults = $p.select('.search-results');
@@ -677,6 +727,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         })
         .on('click', (d:ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
+          this.setLastStateBeforeSearch();
           this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
           this.data.jumpTo(<StateNode>d.topResult.state.node);
           return false;
@@ -759,6 +810,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       })
       .on('click', (d:ISearchResult) => {
         (<Event>d3.event).stopPropagation();
+        this.setLastStateBeforeSearch();
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
         return false;

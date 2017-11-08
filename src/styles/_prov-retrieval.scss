@@ -9,6 +9,17 @@
 
   > .header {
     flex: 0 0 auto;
+
+    .btn-return-to-last-state {
+      color: $core_colour_text;
+      float: right;
+      cursor: pointer;
+      margin-right: 20px;
+
+      &:hover {
+        font-weight: bold;
+      }
+    }
   }
   > .body {
     padding: 5px;
@@ -26,16 +37,25 @@
     padding-left: 0;
     list-style: none;
 
-    + p {
+    + div {
       display: none;
     }
 
     &:empty {
       display: none;
 
-      + p {
+      + div {
         display: block;
         text-align: center;
+
+        .return-to-last-state + p {
+          display: none;
+        }
+
+        .return-to-last-state.hidden + p {
+          display: block;
+        }
+
       }
     }
 
