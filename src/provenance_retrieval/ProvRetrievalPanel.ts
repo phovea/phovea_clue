@@ -647,19 +647,25 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .classed('sequence', true)
       // set child elements here to avoid reloading when manipulating the weights
       .html(function(d:ISearchResultSequence) {
-        let matchedTerms = [];
-        let otherTerms = [];
 
-        d.topResult.state.propValues.forEach((prop) => {
-          const match = d.topResult.query.propValues.find((p) => p.id === prop.id);
-          if(match) {
-            matchedTerms = [...matchedTerms, `<span class="match">${prop.text}</span>`];
-          } else {
-            otherTerms = [...otherTerms, prop.text];
-          }
-        });
+        const groups = d3.nest()
+          .key((d:IPropertyValue) => d.group)
+          .key((prop:IPropertyValue) => d.topResult.query.propValues.find((p) => p.id === prop.id) ? 'match' : 'no_match').sortKeys(d3.ascending)
+          .entries(d.topResult.state.propValues);
 
-        const terms = [...matchedTerms, ...otherTerms];
+        const terms = groups
+          .map((group) => {
+            const key = (group.key) ? `<b>${group.key}</b>: ` : '';
+            const values = group.values
+              .map((group) => {
+                return group.values
+                  .map((prop) => (group.key === 'match') ? `<span class="match">${prop.text}</span>` : prop.text)
+                  .join(', ');
+              });
+
+            return key + values.join(', ');
+          })
+          .join('<br>');
 
         let seqIconId = 'n-states';
         let seqLength = d.searchResults.length || '';
@@ -697,7 +703,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
               <div class="img" style="background-image: url(${url})"></div>
             </div>
             <div class="title" href="#" title="${(<StateNode>d.topResult.state.node).name}">${(<StateNode>d.topResult.state.node).name}</div>
-            <div class="result-terms"><small>${terms.join(', ')}</small></div>
+            <div class="result-terms"><small>${terms}</small></div>
             <div class="seq-length" title="Click to show sequence of matching states">
               <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#${seqIconId}"></use>
