@@ -48,6 +48,14 @@
 
       > a {
         cursor: pointer;
+        color: #444;
+
+        &:active,
+        &:focus,
+        &:hover {
+          color: #777;
+        }
+
       }
     }
 
