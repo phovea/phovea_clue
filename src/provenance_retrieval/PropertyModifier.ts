@@ -15,6 +15,7 @@ export class PropertyModifier {
   private _searchResults:ISearchResult[] = [];
   private _activeVisState:IVisState;
   private _searchForStateProperty:IProperty;
+  private _showActiveStateOnly: boolean = false;
 
   private propertyLookup:Map<string, IProperty> = new Map();
   private idLookup:Map<string, IPropertyValue> = new Map();
@@ -99,9 +100,19 @@ export class PropertyModifier {
           return d;
         });
       this.sortValuesAndAddCount([this._searchForStateProperty]);
-      this.updateActiveAndDisabled([this._searchForStateProperty]);
+      this.updatePropertyValues([this._searchForStateProperty]);
     }
   }
+
+  get showActiveStateOnly():boolean {
+    return this._showActiveStateOnly;
+  }
+
+  set showActiveStateOnly(value:boolean) {
+    this._showActiveStateOnly = value;
+    this.updatePropertyValues(this._properties);
+  }
+
 
   private addStatesToLookup(visStates:IVisState[]) {
     visStates
@@ -148,15 +159,16 @@ export class PropertyModifier {
     }
 
     this.generateTopProperties(this._properties, this.idCounter, this.idLookup, 10);
-    this.updateActiveAndDisabled(this._properties);
+    this.updatePropertyValues(this._properties);
   }
 
-  private updateActiveAndDisabled(properties:IProperty[]) {
+  private updatePropertyValues(properties:IProperty[]) {
     properties.map((property) => {
       property.values.map((propVal) => {
         // important: mutable action (modifies original property data)
         this.updateActive(propVal);
         this.updateDisabled(propVal);
+        this.updateVisibility(propVal);
         return propVal;
       });
       return property;
@@ -254,6 +266,11 @@ export class PropertyModifier {
     }
     // important: mutable action (modifies original property data)
     propVal.isActive = (this.activeVisState.propValues.filter((p) => PropertyModifier.getPropId(propVal) === PropertyModifier.getPropId(p)).length > 0);
+  }
+
+  private updateVisibility(propVal:IPropertyValue) {
+    // important: mutable action (modifies original property data)
+    propVal.isVisible = (this.showActiveStateOnly) ? (propVal.isActive) : true;
   }
 
   private static getPropId(propVal:IPropertyValue):string {

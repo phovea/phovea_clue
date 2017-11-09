@@ -59,19 +59,21 @@ export class Select2 {
     return data.map((prop) => {
       return {
         text: prop.text,
-        children: prop.values.map((propValue:IPropertyValue) => {
-          // adapt scale with maximum value
-          this.numCountScale.domain([0, 1, Math.max(...this.numCountScale.domain(), propValue.numCount)]);
+        children: prop.values
+          .filter((propValue:IPropertyValue) => propValue.isVisible === true)
+          .map((propValue:IPropertyValue) => {
+            // adapt scale with maximum value
+            this.numCountScale.domain([0, 1, Math.max(...this.numCountScale.domain(), propValue.numCount)]);
 
-          return {
-            text: propValue.text,
-            id: propValue.id,
-            needsInput: propValue.needsInput,
-            disabled: propValue.isDisabled,
-            prop,
-            propValue
-          };
-        })
+            return {
+              text: propValue.text,
+              id: propValue.id,
+              needsInput: propValue.needsInput,
+              disabled: propValue.isDisabled,
+              prop,
+              propValue
+            };
+          })
       };
     });
   }

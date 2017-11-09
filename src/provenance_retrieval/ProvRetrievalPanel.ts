@@ -246,10 +246,20 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
       </div>
       <div class="body">
-        <form action="#" onsubmit="return false; ">
+        <form class="search-form" action="#" onsubmit="return false; ">
           <div class="form-group">
             <label class="sr-only" for="prov-retrieval-select">Filter provenance states by &hellip;</label>
             <select multiple style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
+            <div class="btn-group">
+              <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-cog" aria-hidden="true"></i> 
+              </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li><span>Search term suggestions based on &hellip;</span></li> 
+                <li class="active"><a href="#" class="suggestion-filter-all">Whole history</a></li>
+                <li class=""><a href="#" class="suggestion-filter-active"><span>Active view only</span></a></li>
+              </ul>
+            </div>
           </div>
         </form>
         <div id="prov-retrieval-weighting-editor">
@@ -325,6 +335,25 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .on('click', () => {
         $parent.select(`.${asideName}`).classed('hidden', true);
         $panelSelector.select('.btn-search').classed('hidden', false);
+      });
+
+    const filterSelect2SuggestionsListener = (showActiveStateOnly:boolean) => {
+      (<Event>d3.event).preventDefault();
+      $p.selectAll('.dropdown-menu li').classed('active', false);
+      d3.select((<Event>d3.event).srcElement.parentElement).classed('active', true);
+      this.propertyModifier.showActiveStateOnly = showActiveStateOnly;
+      this.$select2Instance.updateData(this.propertyModifier.properties);
+      this.$select2Instance.open();
+    };
+
+    $p.select('.dropdown-menu a.suggestion-filter-all')
+      .on('click', () => {
+        filterSelect2SuggestionsListener(false);
+      });
+
+    $p.select('.dropdown-menu a.suggestion-filter-active')
+      .on('click', () => {
+        filterSelect2SuggestionsListener(true);
       });
 
     $p.select('.btn-return-to-last-state')

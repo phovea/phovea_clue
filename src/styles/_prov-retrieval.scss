@@ -32,6 +32,75 @@
     }
   }
 
+  .search-form {
+    display: flex;
+
+    .form-group:first-child {
+      flex: 1;
+      margin-right: 5px;
+      position: relative;
+    }
+
+    .btn-group {
+      position: absolute;
+      right: 10px;
+      top: 25%;
+
+      > a {
+        cursor: pointer;
+      }
+    }
+
+    .dropdown-menu {
+      li {
+        position: relative;
+
+        > span {
+          display: block;
+          color: #444;
+          background: #efefef;
+          padding: 5px 20px 5px 7px;
+          font-size: 12px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        a {
+          padding-left: 25px;
+        }
+
+        a:before {
+          font-family: FontAwesome, sans-serif;
+          position: absolute;
+          left: 7px;
+          top: 3px;
+          content: '\f1db';
+        }
+
+        &.active a:before {
+          content: '\f058';
+        }
+
+        a.suggestion-filter-active > span {
+          display: flex;
+          align-items: center;
+          pointer-events: none;
+
+          &:before {
+            content: '';
+            display: block;
+            margin-right: 5px;
+            background-color: $select-color;
+            border-radius: 6px;
+            width: 6px;
+            height: 6px;
+          }
+        }
+
+      }
+    }
+  }
+
   .search-results {
     display: block;
     padding-left: 0;
