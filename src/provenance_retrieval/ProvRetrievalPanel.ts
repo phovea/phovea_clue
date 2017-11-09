@@ -703,7 +703,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
               <div class="img" style="background-image: url(${url})"></div>
             </div>
             <div class="title" href="#" title="${(<StateNode>d.topResult.state.node).name}">${(<StateNode>d.topResult.state.node).name}</div>
-            <div class="result-terms"><small>${terms}</small></div>
+            <div class="result-terms"><div><small>${terms}</small></div></div>
             <div class="seq-length" title="Click to show sequence of matching states">
               <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#${seqIconId}"></use>
@@ -714,6 +714,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           </div>
           <ol class="states hidden"></ol>
         `;
+      })
+      .each(function() {
+        const $this = d3.select(this);
+        $this.select('.result-terms').classed('expandable',
+          (<Element>$this.select('.result-terms small').node()).getBoundingClientRect().height >
+           (<Element>$this.select('.result-terms > div').node()).getBoundingClientRect().height
+        );
       });
 
     $seqLi.exit().remove();
