@@ -98,6 +98,12 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       if(success) {
         this.propertyModifier.activeVisState = state.visState;
         this.$select2Instance.updateData(this.propertyModifier.properties);
+        // update active search result
+        this.currentSequences
+          .forEach((seq) => {
+            seq.searchResults.forEach((d) => d.isActiveInMainView = (d.state.node === state));
+          });
+        this.updateResults(this.currentSequences, false);
       }
     });
   });
@@ -274,24 +280,24 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <svg class="hidden">
           <defs>
             <g id="one-state">
-              <circle r="10" cx="180" cy="20"/>
+              <circle r="10" cx="180" cy="20" stroke-width="0" style="fill: var(--active-state-first)" />
             </g>
             <g id="two-states">
-              <circle r="10" cx="100" cy="20"/>
-              <circle r="10" cx="180" cy="20"/>
-              <line x1="100" y1="20" x2="180" y2="20" stroke-width="6"/>
+              <line x1="100" y1="20" x2="180" y2="20" stroke-width="6" style="stroke: var(--stroke-color)" />
+              <circle r="10" cx="100" cy="20" stroke-width="0" style="fill: var(--active-state-first)" />
+              <circle r="10" cx="180" cy="20" stroke-width="0" style="fill: var(--active-state-last)"/>
             </g>
             <g id="three-states">
-              <circle r="10" cx="20" cy="20"/>
-              <circle r="10" cx="100" cy="20"/>
-              <circle r="10" cx="180" cy="20"/>
-              <line x1="20" y1="20" x2="180" y2="20" stroke-width="6"/>
+              <line x1="20" y1="20" x2="180" y2="20" stroke-width="6" style="stroke: var(--stroke-color)" />
+              <circle r="10" cx="20" cy="20" stroke-width="0" style="fill: var(--active-state-first)" />
+              <circle r="10" cx="100" cy="20" stroke-width="0" style="fill: var(--active-state-center)" />
+              <circle r="10" cx="180" cy="20" stroke-width="0" style="fill: var(--active-state-last)" />
             </g>
             <g id="n-states">
-              <circle r="10" cx="20" cy="20"/>
-              <circle r="10" cx="180" cy="20"/>
-              <line x1="20" y1="20" x2="60" y2="20" stroke-width="6"/>
-              <line x1="140" y1="20" x2="180" y2="20" stroke-width="6"/>
+              <line x1="20" y1="20" x2="60" y2="20" stroke-width="6" style="stroke: var(--stroke-color)" />
+              <line x1="140" y1="20" x2="180" y2="20" stroke-width="6" style="stroke: var(--stroke-color)" />
+              <circle r="10" cx="20" cy="20" stroke-width="0" style="fill: var(--active-state-first)" />
+              <circle r="10" cx="180" cy="20" stroke-width="0" style="fill: var(--active-state-last)" />
             </g>
             <g id="loading-animation">
               <circle r="11" transform="translate(16 16)" class="a">
@@ -622,7 +628,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const widthScale = d3.scale.linear().domain([0, 1]).range([0, 100]);
 
     const $seqLi = this.createSequenceDOM(this.$searchResults, sequences, widthScale);
-    this.createStateListDOM($seqLi.select('.states'), widthScale);
+     this.createStateListDOM($seqLi.select('.states'), widthScale);
   }
 
   /**
@@ -694,8 +700,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           (<any>img).onload();
         }
 
+        const topResultActive = (d.topResult.isActiveInMainView || that.data.act === d.topResult.state.node) ? 'active' : '' ;
+
         return `
-          <div class="top-result" data-has-thumbs="${hasThumbnails}" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
+          <div class="top-result ${topResultActive}" data-has-thumbs="${hasThumbnails}" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
             <div class="prov-ret-thumbnail">
               <svg role="img" viewBox="0 0 128 32" class="loading" preserveAspectRatio="xMinYMin meet">
                 <use xlink:href="#loading-animation"></use>
@@ -706,7 +714,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <div class="result-terms"><small>${terms}</small></div>
             <div class="seq-length" title="Click to show sequence of matching states">
               <svg role="img" viewBox="0 0 100 40" class="svg-icon" preserveAspectRatio="xMinYMin meet">
-                <use xlink:href="#${seqIconId}"></use>
+                <use xlink:href="#${seqIconId}" id="blabla"></use>
               </svg>
               <span>${seqLength}</span>
             </div>
@@ -722,6 +730,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
            (<Element>$terms.node()).getBoundingClientRect().height
         );
       });
+
+    $seqLi.each(function(d:ISearchResultSequence) {
+      const containsActive = (searchResults:ISearchResult[]) => {
+        return searchResults.some((e) => e.isActiveInMainView || that.data.act === e.state.node);
+      };
+
+      d3.select(this).select('.top-result')
+        .classed('active', () => containsActive([d.topResult]));
+
+      d3.select(this).select('.seq-length')
+        .classed('active', () => containsActive(d.searchResults))
+        .classed('first', () => containsActive(d.searchResults.slice(0, 1)))
+        .classed('center', () => containsActive(d.searchResults.slice(1, -1)))
+        .classed('last', () => containsActive(d.searchResults.slice(-1)));
+    });
 
     $seqLi.exit().remove();
 
@@ -828,6 +851,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $stateLi.enter().append('li')
       .classed('state', true)
+      .classed('active', (d) => d.isActiveInMainView || this.data.act === d.state.node)
       .html((d:ISearchResult) => {
         return `
           <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}" data-is-top="${d.isTopResult ? 1 : 0}">
@@ -838,6 +862,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           </div>
         `;
       });
+
+    $stateLi.classed('active', (d) => d.isActiveInMainView || this.data.act === d.state.node);
 
     $stateLi.exit().remove();
 

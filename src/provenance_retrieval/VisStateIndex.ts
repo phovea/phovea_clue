@@ -32,6 +32,7 @@ export interface ISearchResult {
   readonly weightedSimilarity: number;
 
   isTopResult: boolean;
+  isActiveInMainView: boolean;
 
   update();
 
@@ -128,6 +129,7 @@ class SearchResult implements ISearchResult {
   private _matchingIndices: number[];
 
   public isTopResult: boolean = false;
+  public isActiveInMainView: boolean = false;
 
   constructor(public readonly query: IQuery, public readonly state: IVisState, public readonly similarities: number[]) {
     this._similarity = this.similarities.reduce((a,b) => a + b, 0.0);
