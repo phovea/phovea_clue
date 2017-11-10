@@ -256,7 +256,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           <div class="form-group">
             <label class="sr-only" for="prov-retrieval-select">Filter provenance states by &hellip;</label>
             <select multiple style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
-            <div class="btn-group">
+            <div class="btn-group hidden">
               <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-cog" aria-hidden="true"></i> 
               </a>
@@ -388,6 +388,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     if(this.options.app && this.options.app.getVisStateProps) {
       this.options.app.getVisStateProps().then((properties:IProperty[]) => {
+        $p.select('.body > form .btn-group').classed('hidden', false);
+
         this.propertyModifier.properties = properties;
 
         const $select2 = this.$select2Instance.init('#prov-retrieval-select', this.propertyModifier.properties);
@@ -419,6 +421,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             }
             evt.params.originalEvent.stopPropagation();
           });
+
       });
 
     } else {
