@@ -263,7 +263,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><span>Search term suggestions based on &hellip;</span></li> 
                 <li class="active"><a href="#" class="suggestion-filter-all">Whole history</a></li>
-                <li class=""><a href="#" class="suggestion-filter-active"><span>Active view only</span></a></li>
+                <li class=""><a href="#" class="suggestion-filter-active"><span>Active session state only</span></a></li> 
               </ul>
             </div>
           </div>
