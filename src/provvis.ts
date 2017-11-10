@@ -531,9 +531,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       <div class="header">
         <h2>
           <i class="fa fa-code-fork fa-rotate-180"></i> Current Session History 
+          <button type="button" class="close" aria-label="Close" title="Close history panel"><span aria-hidden="true">×</span></button>
           <a href="#" class="btn-filter" title="Filter current session history"><i class="fa fa-filter"></i></a>
         </h2>
-        <button type="button" class="close" aria-label="Close" title="Close history panel"><span aria-hidden="true">×</span></button>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-default btn-xs" title="data actions">

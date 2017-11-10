@@ -248,8 +248,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $p.html(`
       <div class="header">
         <h2><i class="fa fa-search"></i> Search in Current Session 
-        <a href="#" class="hidden btn-return-to-last-state" title="Return to the view you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
+        <a href="#" class="hidden btn-return-to-last-state" title="Return to the view you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
       </div>
       <div class="body">
         <form class="search-form" action="#" onsubmit="return false; ">
