@@ -165,7 +165,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.lastStateBeforeSearch = this.data.act;
     this.$node.select('.btn-return-to-last-state').classed('hidden', false);
-    this.$node.select('.return-to-last-state').classed('hidden', false);
+    this.$node.select('.return-to-last-state').classed('hidden', false)
+      .select('.state-title').text(this.lastStateBeforeSearch.name);
   }
 
   private resetLastStateBeforeSearch() {
@@ -249,7 +250,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       <div class="header">
         <h2><i class="fa fa-search"></i> Search in Current Session 
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
-        <a href="#" class="hidden btn-return-to-last-state" title="Return to the view you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
+        <a href="#" class="hidden btn-return-to-last-state" title="Return to the state you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
       </div>
       <div class="body">
         <form class="search-form" action="#" onsubmit="return false; ">
@@ -315,8 +316,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <ol class="search-results" start="1"></ol>
         <div>
           <div class="return-to-last-state hidden">
-            <p>Do you want to return to the view,<br>
-            where you left off before the last search?</p>
+            <p>Do you want to return to the following state?
+            <i class="state-title"></i>
+            You have stopped the analysis at that state before the last search.</p>
             <p><a class="yes btn btn-default" href="#"><i class="fa fa-step-backward" aria-hidden="true"></i>
  Yes, please bring me back!</a></p>
             <p><a class="no" href="#">No, thanks. Hide this message.</a></p>

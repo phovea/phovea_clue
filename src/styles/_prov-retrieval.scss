@@ -124,6 +124,11 @@
         display: block;
         text-align: center;
 
+        .return-to-last-state .state-title {
+          display: block;
+          margin: 5px 0;
+        }
+
         .return-to-last-state + p {
           display: none;
         }
