@@ -83,8 +83,8 @@ def generate_url(app, prov_id, state):
   return base.format(s=conf.server, g=prov_id, n=state, r=randomword(5))
 
 
-def generate_key(app, prov_id, state):
-  return 'a={a},p={g},s={s}'.format(a=app, g=prov_id, s=state)
+def generate_key(app, prov_id, state, format):
+  return 'a={a},p={g},s={s},f={f}'.format(a=app, g=prov_id, s=state, f=format)
 
 
 def generate_slide_url(app, prov_id, slide):
@@ -92,8 +92,8 @@ def generate_slide_url(app, prov_id, slide):
   return base.format(s=conf.server, g=prov_id, n=slide, r=randomword(5))
 
 
-def generate_slide_key(app, prov_id, slide):
-  return 'a={a},p={g},u={s}'.format(a=app, g=prov_id, s=slide)
+def generate_slide_key(app, prov_id, slide, force):
+  return 'a={a},p={g},u={s},f={f}'.format(a=app, g=prov_id, s=slide, f=format)
 
 
 @app.route('/dump/<path:page>')
@@ -185,7 +185,7 @@ def create_thumbnail(app, prov_id, state, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  key = mc_prefix + generate_key(app, prov_id, state) + 't' + str(width)
+  key = mc_prefix + generate_key(app, prov_id, state, format) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:
@@ -212,7 +212,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
   width = int(ns.request.args.get('width', 128))
   force = ns.request.args.get('force', None) is not None
 
-  key = mc_prefix + generate_slide_key(app, prov_id, slide) + 't' + str(width)
+  key = mc_prefix + generate_slide_key(app, prov_id, slide, format) + 't' + str(width)
 
   obj = mc.get(key)
   if not obj or force:
