@@ -1,0 +1,3 @@
+libnss3
+libgconf2-dev
+libfontconfig
