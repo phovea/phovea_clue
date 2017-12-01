@@ -102,7 +102,7 @@ def test(page):
   return ns.Response(obj, mimetype='image/png')
 
 
-def create_via_selenium(url, width, height):
+def create_via_selenium(url):
   def eval_clue(driver):
     driver.find_element_by_css_selector('main')
     found = None
@@ -121,28 +121,28 @@ def create_via_selenium(url, width, height):
   return screenshotter.take(url, eval_clue)
 
 
-def _create_screenshot_impl(app, prov_id, state, format, width=1920, height=1080, force=False):
+def _create_screenshot_impl(app, prov_id, state, force=False):
   url = generate_url(app, prov_id, state)
 
-  key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
+  key = mc_prefix + url
 
   obj = mc.get(key) if not force else None
   if not obj:
     _log.info('requesting url %s', url)
-    obj = create_via_selenium(url, width, height)
+    obj = create_via_selenium(url)
     mc.set(key, obj)
   return obj
 
 
-def _create_preview_impl(app, prov_id, slide, format, width=1920, height=1080, force=False):
+def _create_preview_impl(app, prov_id, slide, force=False):
   url = generate_slide_url(app, prov_id, slide)
 
-  key = mc_prefix + url + 'w' + str(width) + 'h' + str(height)
+  key = mc_prefix + url
 
   obj = mc.get(key) if not force else None
   if not obj:
     _log.debug('requesting url %s', url)
-    obj = create_via_selenium(url, width, height)
+    obj = create_via_selenium(url)
     mc.set(key, obj)
   return obj
 
@@ -157,7 +157,7 @@ def create_screenshot(app, prov_id, state, format):
   height = ns.request.args.get('height', 1080)
   force = ns.request.args.get('force', None) is not None
 
-  s = _create_screenshot_impl(app, prov_id, state, format, width, height, force)
+  s = _create_screenshot_impl(app, prov_id, state, force)
   return ns.Response(s, mimetype='image/' + fix_format(format))
 
 
@@ -189,7 +189,7 @@ def create_thumbnail(app, prov_id, state, format):
 
   obj = mc.get(key)
   if not obj or force:
-    s = _create_screenshot_impl(app, prov_id, state, format, force=force)
+    s = _create_screenshot_impl(app, prov_id, state, force=force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
@@ -202,7 +202,7 @@ def create_preview(app, prov_id, slide, format):
   height = ns.request.args.get('height', 1080)
   force = ns.request.args.get('force', None) is not None
 
-  s = _create_preview_impl(app, prov_id, slide, format, width, height, force)
+  s = _create_preview_impl(app, prov_id, slide, force)
   return ns.Response(s, mimetype='image/' + fix_format(format))
 
 
@@ -216,7 +216,7 @@ def create_preview_thumbnail(app, prov_id, slide, format):
 
   obj = mc.get(key)
   if not obj or force:
-    s = _create_preview_impl(app, prov_id, slide, format, force=force)
+    s = _create_preview_impl(app, prov_id, slide, force=force)
     obj = to_thumbnail(s, width, format)
     mc.set(key, obj)
 
