@@ -8,7 +8,7 @@
  * generates and object that contain all modules in the src folder accessible as properties
  */
 
-/***
+/**
  * magic file name for the pseudo root file
  * @type {string}
  */
@@ -28,19 +28,19 @@ function byName(a, b) {
   }
   return a.toLowerCase().localeCompare(b.toLowerCase());
 }
-//list all modules in the src folder excluding the one starting with _
+// list all modules in the src folder excluding the one starting with _
 var req = require.context('./src', true, /^\.\/(?!internal)(([^_][\w]+)|(\w+\/index))\.tsx?$/);
 
 var files = req.keys().sort(byName);
 
-//root file exists? else use anonymous root object
+// root file exists? else use anonymous root object
 if (files[0] === INDEX_FILE) {
   module.exports = req(files.shift());
 } else {
   module.exports = {};
 }
 
-//generate getter for all modules
+// generate getter for all modules
 files.forEach(function (f) {
   Object.defineProperty(module.exports, f.substring(2, f.lastIndexOf('/index.') > 0 ? f.lastIndexOf('/index.') : f.lastIndexOf('.')), {
     get: function () {
