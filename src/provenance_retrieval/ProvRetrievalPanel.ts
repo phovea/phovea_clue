@@ -678,9 +678,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           })
           .join('<br>');
 
-        let seqIconId = 'n-states';
-        let seqLength = d.searchResults.length || '';
-        switch(seqLength) {
+        let seqIconId = '';
+        let seqLength = '';
+        switch(d.searchResults.length) {
           case 1:
             seqIconId = 'one-state';
             seqLength = '';
@@ -693,6 +693,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             seqIconId = 'three-states';
             seqLength = '';
             break;
+          default:
+            seqIconId = 'n-states';
+            seqLength = d.searchResults.length - 2; // -2 because start and end state are explicitly displayed
         }
 
         const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node));
