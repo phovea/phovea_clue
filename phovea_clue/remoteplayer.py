@@ -153,8 +153,6 @@ def fix_format(format):
 
 @app.route('/screenshot/<app>/<prov_id>/<state>.<format>')
 def create_screenshot(app, prov_id, state, format):
-  width = ns.request.args.get('width', 1920)
-  height = ns.request.args.get('height', 1080)
   force = ns.request.args.get('force', None) is not None
 
   s = _create_screenshot_impl(app, prov_id, state, force)
@@ -198,8 +196,6 @@ def create_thumbnail(app, prov_id, state, format):
 
 @app.route('/preview/<app>/<prov_id>/<slide>.<format>')
 def create_preview(app, prov_id, slide, format):
-  width = ns.request.args.get('width', 1920)
-  height = ns.request.args.get('height', 1080)
   force = ns.request.args.get('force', None) is not None
 
   s = _create_preview_impl(app, prov_id, slide, force)
