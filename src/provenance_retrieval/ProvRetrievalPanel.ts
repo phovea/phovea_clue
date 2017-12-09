@@ -695,7 +695,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             break;
           default:
             seqIconId = 'n-states';
-            seqLength = d.searchResults.length - 2; // -2 because start and end state are explicitly displayed
+            seqLength = String(d.searchResults.length - 2); // -2 because start and end state are explicitly displayed
         }
 
         const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node));
