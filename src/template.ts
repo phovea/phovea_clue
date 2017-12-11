@@ -26,6 +26,11 @@ import {IVisStateApp} from './provenance_retrieval/IVisState';
 export {default as CLUEGraphManager} from './CLUEGraphManager';
 import ACLUEWrapper, {IACLUEWrapperOptions, createStoryVis} from './ACLUEWrapper';
 
+export class ClueSidePanelEvents {
+  static OPEN = 'open';
+  static CLOSE = 'close';
+  static TOGGLE = 'toggle';
+}
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
   /**
@@ -157,6 +162,14 @@ export class CLUEWrapper extends ACLUEWrapper {
       this.on('set_application', (evt, app:IVisStateApp) => {
         createProvRetrievalPanel(graph, body.querySelector('div.content'), {
           app
+        })
+        .on(ClueSidePanelEvents.OPEN, () => {
+          this.fire(ClueSidePanelEvents.OPEN);
+          this.fire(ClueSidePanelEvents.TOGGLE);
+        })
+        .on(ClueSidePanelEvents.CLOSE, () => {
+          this.fire(ClueSidePanelEvents.CLOSE);
+          this.fire(ClueSidePanelEvents.TOGGLE);
         });
       });
     });
@@ -165,6 +178,14 @@ export class CLUEWrapper extends ACLUEWrapper {
       createProvVis(graph, body.querySelector('div.content'), {
         thumbnails: this.options.thumbnails,
         provVisCollapsed: this.options.provVisCollapsed
+      })
+      .on(ClueSidePanelEvents.OPEN, () => {
+        this.fire(ClueSidePanelEvents.OPEN);
+        this.fire(ClueSidePanelEvents.TOGGLE);
+      })
+      .on(ClueSidePanelEvents.CLOSE, () => {
+        this.fire(ClueSidePanelEvents.CLOSE);
+        this.fire(ClueSidePanelEvents.TOGGLE);
       });
 
       return createStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {

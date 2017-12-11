@@ -21,6 +21,7 @@ import {PropertyModifier} from './PropertyModifier';
 import {IVisStateApp} from './IVisState';
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 import {areThumbnailsAvailable} from '../utils';
+import {ClueSidePanelEvents} from '../template';
 
 interface IProvRetrievalPanelOptions {
   captureNonPersistedStates?: boolean;
@@ -337,12 +338,14 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .on('click', () => {
         $parent.select(`.${asideName}`).classed('hidden', false);
         $panelSelector.select('.btn-search').classed('hidden', true);
+        this.fire(ClueSidePanelEvents.OPEN);
       });
 
     $p.select('.close')
       .on('click', () => {
         $parent.select(`.${asideName}`).classed('hidden', true);
         $panelSelector.select('.btn-search').classed('hidden', false);
+        this.fire(ClueSidePanelEvents.CLOSE);
       });
 
     const filterSelect2SuggestionsListener = (showActiveStateOnly:boolean) => {

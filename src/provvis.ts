@@ -15,6 +15,7 @@ import * as vis from 'phovea_core/src/vis';
 import * as utils from './utils';
 import {ISearchResult} from './provenance_retrieval/VisStateIndex';
 import {GraphNode} from 'phovea_core/src/graph/graph';
+import {ClueSidePanelEvents} from './template';
 
 
 function extractTags(text: string) {
@@ -646,6 +647,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         if (this.options.hideCLUEButtonsOnCollapse) {
           d3.select('header.clue-modeselector').classed('collapsed', false);
         }
+        this.fire(ClueSidePanelEvents.OPEN);
       });
 
     $p.select('.close')
@@ -655,6 +657,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         if (this.options.hideCLUEButtonsOnCollapse) {
           d3.select('header.clue-modeselector').classed('collapsed', true);
         }
+        this.fire(ClueSidePanelEvents.CLOSE);
       });
 
     return $p;
