@@ -122,8 +122,9 @@ aside {
 
 header.clue-modeselector {
   position: absolute;
-  left: 30vw;
-  width: 45vw;
+  left: 50%;
+  width: 40em;
+  margin-left: -20em;
   transition: top 1s;
   top: 2px;
   text-align: center;
