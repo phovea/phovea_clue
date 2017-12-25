@@ -8,21 +8,18 @@ import {mixin} from 'phovea_core/src/index';
 import {IHeaderLink, create as createHeader, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
 import {
   MixedStorageProvenanceGraphManager,
-  ProvenanceGraph,
   IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
 import {create as createSelection} from './selection';
 import * as cmode from './mode';
-import {create as createProvVis} from './provvis';
-import {VerticalStoryVis} from './storyvis';
+import {loadProvenanceGraphVis, loadStoryVis} from './vis_loader';
 import {IEvent} from 'phovea_core/src/event';
 import CLUEGraphManager from './CLUEGraphManager';
 import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
 import LoginMenu from './menu/LoginMenu';
-
 export {default as CLUEGraphManager} from './CLUEGraphManager';
-import ACLUEWrapper, {IACLUEWrapperOptions, createStoryVis} from './ACLUEWrapper';
+import ACLUEWrapper, {IACLUEWrapperOptions} from './ACLUEWrapper';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
@@ -95,7 +92,7 @@ export class CLUEWrapper extends ACLUEWrapper {
     this.$main = select(body).select('main');
   }
 
-  protected buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager} {
+  protected buildImpl(body: HTMLElement) {
     //create the common header
     const headerOptions = mixin(this.options.headerOptions, {
       showOptionsLink: true, // always activate options
@@ -150,17 +147,15 @@ export class CLUEWrapper extends ACLUEWrapper {
       }
     });
 
-    const storyVis = graph.then((graph) => {
-      createProvVis(graph, body.querySelector('div.content'), {
-        thumbnails: this.options.thumbnails,
-        provVisCollapsed: this.options.provVisCollapsed
-      });
-      return createStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
-        thumbnails: this.options.thumbnails
-      });
+    const provVis = loadProvenanceGraphVis(graph, body.querySelector('div.content'), {
+      thumbnails: this.options.thumbnails,
+      provVisCollapsed: this.options.provVisCollapsed
+    });
+    const storyVis = loadStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
+      thumbnails: this.options.thumbnails
     });
 
-    return {graph, manager: clueManager, storyVis};
+    return {graph, manager: clueManager, storyVis, provVis};
   }
 
   reset() {

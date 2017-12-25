@@ -472,8 +472,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    const $p = $parent.append('aside')
-      .classed('provenance-layout-vis', true)
+    let $p = $parent.select('aside.provenance-layout-vis');
+    if ($p.empty()) {
+      $p = $parent.append('aside').classed('provenance-layout-vis', true);
+    }
+
+    $p
       .classed('collapsed', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
