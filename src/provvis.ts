@@ -421,8 +421,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
 
-    this.bind();
-    this.update();
+    if (!this.options.provVisCollapsed) {
+      this.bind();
+      this.update();
+    }
   }
 
   private bind() {
@@ -436,8 +438,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     cmode.on('modeChanged', this.trigger);
   }
 
-  destroy() {
-    super.destroy();
+  private unbind() {
     this.data.off('switch_state,clear', this.trigger);
     this.data.off('add_slide,move_slidey,remove_slide', this.triggerStoryHighlight);
     this.data.off('add_state', this.onStateAdded);
@@ -446,6 +447,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       s.off('setAttr', this.trigger);
     });
     cmode.off('modeChanged', this.trigger);
+  }
+
+  private toggleBinding(enable: boolean) {
+    if (enable) {
+      this.bind();
+      this.update();
+    } else {
+      this.unbind();
+    }
+  }
+
+  destroy() {
+    super.destroy();
+    this.unbind();
   }
 
   get rawSize():[number, number] {
@@ -597,6 +612,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     jp.find('.btn-collapse').on('click', (evt) => {
       evt.preventDefault();
       const collapsed = !$p.classed('collapsed');
+      this.toggleBinding(!collapsed);
       $p.select('.btn-collapse').attr('title', collapsed ? 'Show Provenance Graph' : 'Hide Provenance Graph');
       $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', !collapsed).classed('fa-arrow-circle-o-left', collapsed);
       $p.classed('collapsed', collapsed);
