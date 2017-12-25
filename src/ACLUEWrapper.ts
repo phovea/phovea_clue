@@ -2,7 +2,6 @@
  * Created by sam on 03.03.2017.
  */
 
-import * as $ from 'jquery';
 import * as cmode from './mode';
 import {LayoutedProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
@@ -87,23 +86,26 @@ export abstract class ACLUEWrapper extends EventHandler {
     this.propagate(cmode, 'modeChanged');
     const update = (newMode: cmode.CLUEMode) => {
       document.body.dataset.clue = newMode.toString();
-      //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
-      if (newMode.presentation > 0.8) {
-        $($right).animate({width: 'hide'}, 'fast');
-      } else {
-        $($right).animate({width: 'show'}, 'fast');
-        if (this.provVis) {
-          this.provVis();
+      // lazy jquery
+      System.import('jquery').then(($: JQueryStatic) => {
+        //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
+        if (newMode.presentation > 0.8) {
+          $($right).animate({width: 'hide'}, 'fast');
+        } else {
+          $($right).animate({width: 'show'}, 'fast');
+          if (this.provVis) {
+            this.provVis();
+          }
         }
-      }
-      if (newMode.exploration > 0.8) {
-        $($rightStory).animate({width: 'hide'}, 'fast');
-      } else {
-        $($rightStory).animate({width: 'show'}, 'fast');
-        if (this.storyVis) {
-          this.storyVis();
+        if (newMode.exploration > 0.8) {
+          $($rightStory).animate({width: 'hide'}, 'fast');
+        } else {
+          $($rightStory).animate({width: 'show'}, 'fast');
+          if (this.storyVis) {
+            this.storyVis();
+          }
         }
-      }
+      });
     };
     cmode.on('modeChanged', (event, newMode) => update(newMode));
     this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
