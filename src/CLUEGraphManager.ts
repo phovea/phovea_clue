@@ -113,13 +113,12 @@ export default class CLUEGraphManager {
     return graph;
   }
 
-  private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
-    const loggedIn = isLoggedIn();
+  private chooseNew() {
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'memory') {
       return Promise.resolve(this.manager.createInMemory());
     }
-    if (graph === 'new_remote' && loggedIn) {
+    if (graph === 'new_remote' && isLoggedIn()) {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
@@ -128,12 +127,15 @@ export default class CLUEGraphManager {
       }
       return this.manager.createLocal();
     }
-    const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
+    return null;
+  }
+
+  private loadChosen(graph: string, desc?: IProvenanceGraphDataDescription, rejectOnNotFound: boolean = false) {
     if (desc) {
       if (useInMemoryGraph()) {
         return this.manager.cloneInMemory(desc);
       }
-      if ((<any>desc).local || (loggedIn && canWrite(desc))) {
+      if ((<any>desc).local || (isLoggedIn() && canWrite(desc))) {
         return this.manager.get(desc);
       }
       return this.manager.cloneLocal(desc);
@@ -146,6 +148,38 @@ export default class CLUEGraphManager {
       return Promise.resolve(this.manager.createInMemory());
     }
     return this.manager.create();
+  }
+
+  private chooseImpl(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
+    const r = this.chooseNew();
+    if (r) {
+      return r;
+    }
+    const graph = hash.getProp('clue_graph', null);
+    const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
+    return this.loadChosen(graph, desc, rejectOnNotFound);
+  }
+
+  private chooseLazyImpl(rejectOnNotFound: boolean = false) {
+    const r = this.chooseNew();
+    if (r) {
+      return r;
+    }
+    const graph = hash.getProp('clue_graph', null);
+    const locals = this.manager.listLocalSync();
+    const desc = locals.find((d) => d.id === graph);
+    if (desc) {
+      return this.loadChosen(graph, desc, rejectOnNotFound);
+    }
+    // also check remote
+    return this.manager.listRemote().then((list) => {
+      const desc = locals.find((d) => d.id === graph);
+      return this.loadChosen(graph, desc, rejectOnNotFound);
+    });
+  }
+
+  chooseLazy(rejectOnNotFound: boolean = false) {
+    return this.chooseLazyImpl(rejectOnNotFound).then((g) => this.setGraph(g));
   }
 
   choose(list: IProvenanceGraphDataDescription[], rejectOnNotFound: boolean = false) {
