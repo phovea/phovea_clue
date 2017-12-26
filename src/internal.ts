@@ -4,7 +4,6 @@
 
 import {hash} from 'phovea_core/src';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {event as d3event, select} from 'd3';
 import * as cmode from './mode';
 import {IEventHandler} from 'phovea_core/src/event';
 
@@ -97,8 +96,7 @@ export function useInMemoryGraph() {
  */
 export function enableKeyboardShortcuts(graph: ProvenanceGraph) {
   //undo using ctrl-z
-  select(document).on('keydown.player', () => {
-    const k = <KeyboardEvent>d3event;
+  document.addEventListener('keydown', (k) => {
     if (k.keyCode === 90 && k.ctrlKey) {
       //ctrl-z
       k.preventDefault();
