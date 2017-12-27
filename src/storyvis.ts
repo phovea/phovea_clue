@@ -8,7 +8,7 @@ import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
-import ProvenanceGraph from '../../phovea_core/src/provenance/ProvenanceGraph';
+import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {create as createAnnotation} from './annotation';
 import * as cmode from './mode';
 import * as dialogs from 'phovea_ui/src/dialogs';
