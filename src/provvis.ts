@@ -462,8 +462,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.$node = this.build(d3.select(parent));
     C.onDOMNodeRemoved(this.node, this.destroy, this);
 
-    this.bind();
-    this.update();
+    if (!this.options.provVisCollapsed) {
+      this.bind();
+      this.update();
+    }
   }
 
   private bind() {
@@ -480,8 +482,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     cmode.on('modeChanged', this.trigger);
   }
 
-  destroy() {
-    super.destroy();
+  private unbind() {
     this.data.off('switch_state,clear', this.trigger);
     this.data.off('add_slide,move_slidey,remove_slide', this.triggerStoryHighlight);
     this.data.off('add_state', this.onStateAdded);
@@ -493,6 +494,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       s.off('setAttr', this.trigger);
     });
     cmode.off('modeChanged', this.trigger);
+  }
+
+  private toggleBinding(enable: boolean) {
+    if (enable) {
+      this.bind();
+      this.update();
+    } else {
+      this.unbind();
+    }
+  }
+
+  destroy() {
+    super.destroy();
+    this.unbind();
   }
 
   get rawSize():[number, number] {
@@ -519,9 +534,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private build($parent:d3.Selection<any>) {
     //  scale = this.options.scale;
-    const $p = $parent.append('aside')
-      .classed('provenance-layout-vis', true)
-      .classed('hidden', this.options.provVisCollapsed)
+    let $p = $parent.select('aside.provenance-layout-vis');
+    if ($p.empty()) {
+      $p = $parent.append('aside').classed('provenance-layout-vis', true);
+    }
+
+    $p
+      .classed('collapsed', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     if (this.options.hideCLUEButtonsOnCollapse && this.options.provVisCollapsed) {
@@ -642,6 +661,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .classed('hidden', !this.options.provVisCollapsed)
       .html(`<i class="fa fa-code-fork fa-rotate-180"></i>`)
       .on('click', () => {
+        this.toggleBinding(true); // bind + update
         $parent.select('.provenance-layout-vis').classed('hidden', false);
         $panelSelector.select('.btn-collapse').classed('hidden', true);
         if (this.options.hideCLUEButtonsOnCollapse) {
@@ -657,6 +677,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         if (this.options.hideCLUEButtonsOnCollapse) {
           d3.select('header.clue-modeselector').classed('collapsed', true);
         }
+        this.toggleBinding(false); // unbind
         this.fire(ClueSidePanelEvents.CLOSE);
       });
 

@@ -2,12 +2,10 @@
  * Created by sam on 03.03.2017.
  */
 
-import {select, selectAll, mouse as d3mouse, behavior} from 'd3';
-import * as $ from 'jquery';
 import * as cmode from './mode';
-import {create as createStory, VerticalStoryVis} from './storyvis';
+import {LayoutedProvVis} from './provvis';
+import {VerticalStoryVis} from './storyvis';
 import {EventHandler} from 'phovea_core/src/event';
-import {create as createAnnotation}  from './annotation';
 import CLUEGraphManager from './CLUEGraphManager';
 import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
 import StateNode from 'phovea_core/src/provenance/StateNode';
@@ -52,7 +50,8 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
-  private storyVis: Promise<VerticalStoryVis>;
+  private storyVis: ()=>Promise<VerticalStoryVis>;
+  private provVis: ()=>Promise<LayoutedProvVis>;
   private visStateApp: IVisStateApp;
 
   setApplication(app:IVisStateApp) {
@@ -67,11 +66,12 @@ export abstract class ACLUEWrapper extends EventHandler {
       body.insertAdjacentHTML('afterbegin', TEMPLATE);
     }
     handleMagicHashElements(body, this);
-    const {graph, storyVis, manager} = this.buildImpl(body);
+    const {graph, storyVis, manager, provVis} = this.buildImpl(body);
 
     this.graph = graph;
     this.clueManager = manager;
     this.storyVis = storyVis;
+    this.provVis = provVis;
 
     this.graph.then((graph) => {
       graph.on('switch_state', (event: any, state: StateNode) => {
@@ -88,41 +88,56 @@ export abstract class ACLUEWrapper extends EventHandler {
     });
   }
 
-  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: Promise<VerticalStoryVis>, manager: CLUEGraphManager};
+  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: ()=>Promise<VerticalStoryVis>, provVis: ()=>Promise<LayoutedProvVis>, manager: CLUEGraphManager};
 
   private handleModeChange() {
-    const $right = $('aside.provenance-layout-vis');
-    const $rightStory = $('aside.provenance-story-vis');
+    const $right = <HTMLElement>document.querySelector('aside.provenance-layout-vis');
+    const $rightStory = <HTMLElement>document.querySelector('aside.provenance-story-vis');
     this.propagate(cmode, 'modeChanged');
     const update = (newMode: cmode.CLUEMode) => {
-      $('body').attr('data-clue', newMode.toString());
-      //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
-      if (newMode.presentation > 0.8) {
-        $right.animate({width: 'hide'}, 'fast');
-      } else {
-        $right.animate({width: 'show'}, 'fast');
-      }
-      if (newMode.exploration > 0.8) {
-        $rightStory.animate({width: 'hide'}, 'fast');
-      } else {
-        $rightStory.animate({width: 'show'}, 'fast');
-      }
+      document.body.dataset.clue = newMode.toString();
+      // lazy jquery
+      System.import('jquery').then(($: JQueryStatic) => {
+        //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
+        if (newMode.presentation > 0.8) {
+          $($right).animate({width: 'hide'}, 'fast');
+        } else {
+          $($right).animate({width: 'show'}, 'fast');
+          if (this.provVis) {
+            this.provVis();
+          }
+        }
+        if (newMode.exploration > 0.8) {
+          $($rightStory).animate({width: 'hide'}, 'fast');
+        } else {
+          $($rightStory).animate({width: 'show'}, 'fast');
+          if (this.storyVis) {
+            this.storyVis();
+          }
+        }
+      });
     };
     cmode.on('modeChanged', (event, newMode) => update(newMode));
     this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
     { //no animation initially
       const mode = cmode.getMode();
-      $('body').attr('data-clue', mode.toString());
+      document.body.dataset.clue = mode.toString();
       //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
       if (mode.presentation > 0.8) {
-        $right.css('display', 'none');
+        $right.style.display = 'none';
       } else {
-        $right.css('display', null);
+        $right.style.display = null;
+        if (this.provVis) {
+          this.provVis();
+        }
       }
       if (mode.exploration > 0.8) {
-        $rightStory.css('display', 'none');
+        $rightStory.style.display = 'none';
       } else {
-        $rightStory.css('display', null);
+        $rightStory.style.display = null;
+        if (this.storyVis) {
+          this.storyVis();
+        }
       }
     }
   }
@@ -132,7 +147,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     if (!this.storyVis) {
       return Promise.reject('no player available');
     }
-    const story = await this.storyVis;
+    const story = await this.storyVis();
     return story.player.forward();
   }
 
@@ -140,7 +155,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     if (!this.storyVis) {
       return Promise.reject('no player available');
     }
-    const story = await this.storyVis;
+    const story = await this.storyVis();
     return story.player.backward();
   }
 
@@ -150,7 +165,7 @@ export abstract class ACLUEWrapper extends EventHandler {
       return Promise.reject('no player available');
     }
     const graph = await this.graph;
-    const storyVis = await this.storyVis;
+    const storyVis = await this.storyVis();
     const s = graph.getSlideById(story);
     if (s) {
       console.log('jump to stored story', s.id);
@@ -213,60 +228,6 @@ export abstract class ACLUEWrapper extends EventHandler {
       return this.jumpToState(maxId);
     });
   }
-}
-
-export function createStoryVis(graph: ProvenanceGraph, parent: HTMLElement, main: HTMLElement, options: {thumbnails: boolean}) {
-  const r = createAnnotation(main, graph);
-
-  const storyvis = createStory(graph, parent, {
-    render: r.render,
-    thumbnails: options.thumbnails
-  });
-
-  graph.on('select_slide_selected', (event, state) => {
-    select('aside.annotations').style('display', state ? null : 'none');
-  });
-  select('aside.annotations > div:first-of-type').call(behavior.drag().on('drag', function () {
-    const mouse = d3mouse(this.parentElement.parentElement);
-    select(this.parentElement).style({
-      left: mouse[0] + 'px',
-      top: mouse[1] + 'px'
-    });
-  }));
-
-  selectAll('aside.annotations button[data-ann]').on('click', function () {
-    const create = this.dataset.ann;
-    let ann;
-    switch (create) {
-      case 'text':
-        ann = {
-          type: 'text',
-          pos: [10, 10],
-          text: ''
-        };
-        break;
-      case 'arrow':
-        ann = {
-          type: 'arrow',
-          pos: [10, 10],
-          at: [200, 200]
-        };
-        //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
-        //this.actStory.addText();
-        break;
-      case 'frame':
-        ann = {
-          type: 'frame',
-          pos: [10, 10],
-          size: [20, 20]
-        };
-        break;
-    }
-    if (storyvis && ann) {
-      storyvis.pushAnnotation(ann);
-    }
-  });
-  return storyvis;
 }
 
 export default ACLUEWrapper;

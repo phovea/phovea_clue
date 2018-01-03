@@ -3,10 +3,13 @@
  */
 
 
+import {behavior, mouse as d3mouse, select, selectAll} from 'd3';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
+import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
+import {create as createAnnotation} from './annotation';
 import * as cmode from './mode';
 import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
@@ -221,7 +224,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
 
   private build($parent: d3.Selection<any>) {
-    const $node = $parent.append('aside').attr({
+    let $node = $parent.select('aside.provenance-story-vis');
+    if ($node.empty()) {
+      $node = $parent.append('aside').classed('provenance-story-vis', true);
+    }
+    $node.attr({
       'class': 'provenance-story-vis ' + this.options.class
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
@@ -708,4 +715,60 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
 export function create(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
   return new VerticalStoryVis(data, parent, options);
+}
+
+
+
+export function createStoryVis(graph: ProvenanceGraph, parent: HTMLElement, main: HTMLElement, options: {thumbnails: boolean}) {
+  const r = createAnnotation(main, graph);
+
+  const storyvis = create(graph, parent, {
+    render: r.render,
+    thumbnails: options.thumbnails
+  });
+
+  graph.on('select_slide_selected', (event, state) => {
+    select('aside.annotations').style('display', state ? null : 'none');
+  });
+  select('aside.annotations > div:first-of-type').call(behavior.drag().on('drag', function () {
+    const mouse = d3mouse(this.parentElement.parentElement);
+    select(this.parentElement).style({
+      left: mouse[0] + 'px',
+      top: mouse[1] + 'px'
+    });
+  }));
+
+  selectAll('aside.annotations button[data-ann]').on('click', function () {
+    const create = this.dataset.ann;
+    let ann;
+    switch (create) {
+      case 'text':
+        ann = {
+          type: 'text',
+          pos: [10, 10],
+          text: ''
+        };
+        break;
+      case 'arrow':
+        ann = {
+          type: 'arrow',
+          pos: [10, 10],
+          at: [200, 200]
+        };
+        //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
+        //this.actStory.addText();
+        break;
+      case 'frame':
+        ann = {
+          type: 'frame',
+          pos: [10, 10],
+          size: [20, 20]
+        };
+        break;
+    }
+    if (storyvis && ann) {
+      storyvis.pushAnnotation(ann);
+    }
+  });
+  return storyvis;
 }
