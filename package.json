@@ -57,9 +57,9 @@
   },
   "dependencies": {
     "@types/d3": "3.5.36",
-    "@types/marked": "0.0.28",
+    "@types/marked": "0.3.0",
     "d3": "3.5.17",
-    "marked": "0.3.6",
+    "marked": "0.3.9",
     "@types/select2": "4.0.30",
     "select2": "4.0.3",
     "select2-bootstrap-theme": "0.1.0-beta.9",
