@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "phovea_ui": {
+      "from": "github:phovea/phovea_ui#develop",
+      "dependencies": {
+        "phovea_core": {
+          "from": "github:phovea/phovea_core#hash_listener"
+        }
+      }
+    },
+    "phovea_security_flask": {
+      "from": "github:phovea/phovea_security_flask#develop",
+      "dependencies": {
+        "phovea_core": {
+          "from": "github:phovea/phovea_core#hash_listener"
+        }
+      }
+    }
+  }
+}

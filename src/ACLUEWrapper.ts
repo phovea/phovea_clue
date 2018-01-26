@@ -6,7 +6,7 @@ import * as cmode from './mode';
 import {LayoutedProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
 import {EventHandler} from 'phovea_core/src/event';
-import CLUEGraphManager from './CLUEGraphManager';
+import CLUEGraphManager, {IClueState} from './CLUEGraphManager';
 import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
@@ -69,6 +69,22 @@ export abstract class ACLUEWrapper extends EventHandler {
       });
       graph.on('select_slide_selected', (event: any, state: SlideNode) => {
         manager.storedSlide = state ? state.id : null;
+      });
+
+      manager.on(CLUEGraphManager.EVENT_EXTERNAL_STATE_CHANGE, (_, state: IClueState) => {
+        if (state.graph !== graph.desc.id) {
+          // switch to a completely different graph -> reload page
+          CLUEGraphManager.reloadPage();
+        }
+        const slide = graph.selectedSlides()[0];
+        const currentSlide = slide ? slide.id : null;
+        if (state.slide !== null && currentSlide !== state.slide) {
+          return this.jumpToStory(state.state, false);
+        }
+        const currentState = graph.act ? graph.act.id : null;
+        if (state.state !== null && currentState !== state.state) {
+          return this.jumpToState(state.state);
+        }
       });
 
       enableKeyboardShortcuts(graph);
@@ -149,7 +165,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     return story.player.backward();
   }
 
-  async jumpToStory(story: number) {
+  async jumpToStory(story: number, autoPlay = this.clueManager.isAutoPlay) {
     console.log('jump to stored story', story);
     if (!this.storyVis) {
       return Promise.reject('no player available');
@@ -160,7 +176,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     if (s) {
       console.log('jump to stored story', s.id);
       storyVis.switchTo(s);
-      if (this.clueManager.isAutoPlay) {
+      if (autoPlay) {
         storyVis.player.start();
       } else {
         await storyVis.player.render(s);
