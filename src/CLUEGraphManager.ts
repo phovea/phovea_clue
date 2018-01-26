@@ -172,8 +172,8 @@ export default class CLUEGraphManager {
       return this.loadChosen(graph, desc, rejectOnNotFound);
     }
     // also check remote
-    return this.manager.listRemote().then((list) => {
-      const desc = locals.find((d) => d.id === graph);
+    return this.manager.listRemote().then((remotes) => {
+      const desc = remotes.find((d) => d.id === graph);
       return this.loadChosen(graph, desc, rejectOnNotFound);
     });
   }
