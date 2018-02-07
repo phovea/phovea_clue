@@ -39,6 +39,12 @@ export interface IACLUEWrapperOptions {
   replaceBody?: boolean;
 }
 
+enum EUrlTracking {
+  ENABLE,
+  DISABLE_JUMPING,
+  DISABLE_RESTORING
+}
+
 
 export abstract class ACLUEWrapper extends EventHandler {
   static readonly EVENT_MODE_CHANGED = 'modeChanged';
@@ -48,6 +54,7 @@ export abstract class ACLUEWrapper extends EventHandler {
   graph: Promise<ProvenanceGraph>;
   private storyVis: ()=>Promise<VerticalStoryVis>;
   private provVis: ()=>Promise<LayoutedProvVis>;
+  private urlTracking = EUrlTracking.ENABLE;
 
   protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
     if (options.replaceBody !== false) {
@@ -64,11 +71,26 @@ export abstract class ACLUEWrapper extends EventHandler {
     this.provVis = provVis;
 
     this.graph.then((graph) => {
+      graph.on('run_chain', () => {
+        if (this.urlTracking === EUrlTracking.ENABLE) {
+          this.urlTracking = EUrlTracking.DISABLE_JUMPING;
+        }
+      });
+      graph.on('ran_chain', (event: any, state: StateNode) => {
+        if (this.urlTracking === EUrlTracking.DISABLE_JUMPING) {
+          manager.storedState = state ? state.id : null;
+          this.urlTracking = EUrlTracking.ENABLE;
+        }
+      });
       graph.on('switch_state', (event: any, state: StateNode) => {
-        manager.storedState = state ? state.id : null;
+        if (this.urlTracking === EUrlTracking.ENABLE) {
+          manager.storedState = state ? state.id : null;
+        }
       });
       graph.on('select_slide_selected', (event: any, state: SlideNode) => {
-        manager.storedSlide = state ? state.id : null;
+        if (this.urlTracking === EUrlTracking.ENABLE) {
+          manager.storedSlide = state ? state.id : null;
+        }
       });
 
       manager.on(CLUEGraphManager.EVENT_EXTERNAL_STATE_CHANGE, (_, state: IClueState) => {
@@ -78,11 +100,11 @@ export abstract class ACLUEWrapper extends EventHandler {
         }
         const slide = graph.selectedSlides()[0];
         const currentSlide = slide ? slide.id : null;
-        if (state.slide !== null && currentSlide !== state.slide) {
-          return this.jumpToStory(state.state, false);
+        if (state.slide != null && currentSlide !== state.slide) {
+          return this.jumpToStory(state.slide, false);
         }
         const currentState = graph.act ? graph.act.id : null;
-        if (state.state !== null && currentState !== state.state) {
+        if (state.state != null && currentState !== state.state) {
           return this.jumpToState(state.state);
         }
       });
@@ -175,12 +197,16 @@ export abstract class ACLUEWrapper extends EventHandler {
     const s = graph.getSlideById(story);
     if (s) {
       console.log('jump to stored story', s.id);
+      this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       storyVis.switchTo(s);
       if (autoPlay) {
         storyVis.player.start();
       } else {
         await storyVis.player.render(s);
       }
+      this.urlTracking = EUrlTracking.ENABLE;
+      this.clueManager.storedState = graph.act.id;
+      this.clueManager.storedSlide = s.id;
       this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
@@ -194,7 +220,10 @@ export abstract class ACLUEWrapper extends EventHandler {
     const s = graph.getStateById(state);
     if (s) {
       console.log('jump to stored', s.id);
+      this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       await graph.jumpTo(s);
+      this.urlTracking = EUrlTracking.ENABLE;
+      this.clueManager.storedState = graph.act.id;
       console.log('jumped to stored', s.id);
       this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
