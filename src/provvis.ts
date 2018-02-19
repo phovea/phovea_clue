@@ -5,6 +5,7 @@
 
 import * as C from 'phovea_core/src/index';
 import * as $ from 'jquery';
+import lazyBootstrap from 'phovea_ui/src/_lazyBootstrap';
 import * as ranges from 'phovea_core/src/range';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
@@ -647,7 +648,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       that.update();
     });
     //initialize bootstrap
-    (<any>jp.find('*[data-toggle="buttons"],.btn[data-toggle="button"]')).button();
+    lazyBootstrap().then(($$) => {
+      $$($p.node()).find('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
+    });
 
     jp.find('.btn-filter').on('click', () => {
       jp.find('form.toolbar').toggle('fast');

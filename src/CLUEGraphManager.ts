@@ -2,15 +2,33 @@
  * Created by Samuel Gratzl on 28.02.2017.
  */
 
-import {hash} from 'phovea_core/src/index';
+import {hash, HashProperties} from 'phovea_core/src/index';
 import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
 import {useInMemoryGraph} from './internal';
+import {EventHandler} from 'phovea_core/src/event';
 
-export default class CLUEGraphManager {
+export interface IClueState {
+  graph: string;
+  slide: number;
+  state: number;
+}
+
+export default class CLUEGraphManager extends EventHandler {
+  static readonly EVENT_EXTERNAL_STATE_CHANGE = 'externalStateChanged';
+
+  /**
+   * update hash in 100ms to prevent to frequent updates
+   * @type {number}
+   */
+  static readonly DEBOUNCE_UPDATE_DELAY = 100;
+
+  private onHashChanged = () => this.onHashChangedImpl();
+
   constructor(private manager: MixedStorageProvenanceGraphManager) {
+    super();
     //selected by url
   }
 
@@ -20,22 +38,37 @@ export default class CLUEGraphManager {
     hash.setProp('clue_graph', value);
   }
 
+  static reloadPage() {
+    window.location.reload();
+  }
+
+  private onHashChangedImpl() {
+    const graph = hash.getProp('clue_graph');
+    const slide = hash.getInt('clue_slide', null);
+    const state = hash.getInt('clue_state', null);
+
+    this.fire(CLUEGraphManager.EVENT_EXTERNAL_STATE_CHANGE, <IClueState>{graph, slide, state});
+  }
+
   newRemoteGraph() {
     if (isLoggedIn()) {
+      hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
       CLUEGraphManager.setGraphInUrl('new_remote');
-      window.location.reload();
+      CLUEGraphManager.reloadPage();
     }
   }
 
   newGraph() {
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     CLUEGraphManager.setGraphInUrl('new');
-    window.location.reload();
+      CLUEGraphManager.reloadPage();
   }
 
   loadGraph(desc: any) {
     // reset
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     CLUEGraphManager.setGraphInUrl(desc.id);
-    window.location.reload();
+    CLUEGraphManager.reloadPage();
   }
 
   get storedSlide() {
@@ -43,11 +76,13 @@ export default class CLUEGraphManager {
   }
 
   set storedSlide(value: number) {
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
-      hash.setInt('clue_slide', value);
+      hash.setInt('clue_slide', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
     } else {
       hash.removeProp('clue_slide');
     }
+    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
   }
 
   get storedState() {
@@ -55,11 +90,13 @@ export default class CLUEGraphManager {
   }
 
   set storedState(value: number) {
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
-      hash.setInt('clue_state', value);
+      hash.setInt('clue_state', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
     } else {
       hash.removeProp('clue_state');
     }
+    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
   }
 
   get isAutoPlay() {
@@ -75,6 +112,7 @@ export default class CLUEGraphManager {
   }
 
   startFromScratch() {
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     hash.removeProp('clue_slide', false);
     hash.removeProp('clue_state', false);
     hash.removeProp('clue_graph');
@@ -109,7 +147,9 @@ export default class CLUEGraphManager {
   }
 
   setGraph(graph: ProvenanceGraph) {
+    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     hash.setProp('clue_graph', graph.desc.id);
+    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     return graph;
   }
 
@@ -172,8 +212,8 @@ export default class CLUEGraphManager {
       return this.loadChosen(graph, desc, rejectOnNotFound);
     }
     // also check remote
-    return this.manager.listRemote().then((list) => {
-      const desc = locals.find((d) => d.id === graph);
+    return this.manager.listRemote().then((remotes) => {
+      const desc = remotes.find((d) => d.id === graph);
       return this.loadChosen(graph, desc, rejectOnNotFound);
     });
   }
