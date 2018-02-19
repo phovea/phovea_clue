@@ -8,6 +8,7 @@ import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
 import {lastOnly} from './compress';
+import {resolveImmediately} from 'phovea_core/src';
 
 const disabler = new events.EventHandler();
 
@@ -38,7 +39,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
   let p;
   if (l === 0) {
     title += 'no '+idtype.names;
-    p = Promise.resolve(title);
+    p = resolveImmediately(title);
   } else if (l === 1) {
     title += idtype.name+' ';
 
@@ -54,7 +55,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
     });
   } else {
     title += `${range.dim(0).length} ${idtype.names}`;
-    p = Promise.resolve(title);
+    p = resolveImmediately(title);
   }
   return p.then((title) => provenance.meta(title, provenance.cat.selection));
 }
