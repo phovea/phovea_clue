@@ -12,6 +12,7 @@ import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {IVisStateApp} from './provenance_retrieval/IVisState';
+import {resolveImmediately} from 'phovea_core/src';
 
 const TEMPLATE = `<div class="box">
   <header>
@@ -254,7 +255,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
     //no stored state nothing to jump to
-    return Promise.resolve(this);
+    return resolveImmediately(this);
   }
 
   jumpToStoredOrLastState() {

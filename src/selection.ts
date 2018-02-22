@@ -8,6 +8,7 @@ import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
 import {lastOnly} from './compress';
+import {resolveImmediately} from 'phovea_core/src';
 
 const disabler = new events.EventHandler();
 
@@ -33,7 +34,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges
   let promise;
 
   if (l === 0) {
-    promise = Promise.resolve(`No ${idtype.names} Selected`);
+    promise = resolveImmediately(`No ${idtype.names} Selected`);
   } else if (l === 1) {
     promise = idtype.unmap(range).then((r) => {
       return `Selected ${r[0]}`;

@@ -9,6 +9,7 @@ import * as d3 from 'd3';
 import * as marked from 'marked';
 import {defaultSelectionType} from 'phovea_core/src/idtype';
 import * as player from './player';
+import {resolveImmediately} from 'phovea_core/src';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -200,7 +201,7 @@ export class Renderer {
     subtitlePattern: '${description}'
   };
 
-  private prev = Promise.resolve(null);
+  private prev = resolveImmediately(null);
 
   private l = (event, state, type, op, extras) => this.render(state, extras.withTransition !== false);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
@@ -311,7 +312,7 @@ export class Renderer {
       }
       //wait 1sec till the previous annotations are removed
       return takedown.then(() => C.resolveIn(waitBetweenTakeDown ? 1000 : 0)).then(() => {
-        let next = Promise.resolve(null);
+        let next = resolveImmediately(null);
         if (state.isTextOnly) { //no state jump
           next = this.renderText(state);
         } else {

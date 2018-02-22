@@ -19,6 +19,7 @@ import * as marked from 'marked';
 import * as player from './player';
 import * as $ from 'jquery';
 import * as textPNG from './assets/text.png';
+import {resolveImmediately} from 'phovea_core/src';
 
 
 interface ISlideNodeRepr {

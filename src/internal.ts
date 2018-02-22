@@ -90,6 +90,14 @@ export function useInMemoryGraph() {
   return hash.has('clue_headless') || hash.getProp('clue_graph', '') === 'memory';
 }
 
+function triggeredByInputField(evt: KeyboardEvent) {
+  const src = evt.srcElement;
+  const elem = <HTMLElement>evt.target;
+  const inputTypes = ['input', 'select', 'textarea'];
+
+  return (src && inputTypes.includes(src.nodeName.toLowerCase())) || (elem.nodeName && inputTypes.includes(elem.nodeName.toLowerCase()));
+}
+
 /**
  * enables keyboard shortcuts to undo and change mode
  * @param graph
@@ -97,6 +105,9 @@ export function useInMemoryGraph() {
 export function enableKeyboardShortcuts(graph: ProvenanceGraph) {
   //undo using ctrl-z
   document.addEventListener('keydown', (k) => {
+    if (triggeredByInputField(k)) {
+      return;
+    }
     if (k.keyCode === 90 && k.ctrlKey) {
       //ctrl-z
       k.preventDefault();

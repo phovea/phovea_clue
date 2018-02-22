@@ -9,6 +9,7 @@ import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
 import {useInMemoryGraph} from './internal';
 import {EventHandler} from 'phovea_core/src/event';
+import {resolveImmediately} from 'phovea_core/src';
 
 export interface IClueState {
   graph: string;
@@ -127,15 +128,15 @@ export default class CLUEGraphManager extends EventHandler {
 
   importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}, cleanUpLocal = false) {
     return this.manager.cloneRemote(graph, extras).then((newGraph) => {
-      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : Promise.resolve(null);
+      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : resolveImmediately(null);
       return p.then(() => this.loadGraph(newGraph.desc));
     });
   }
 
-  migrateGraph(graph: ProvenanceGraph, extras: any = {}): Promise<ProvenanceGraph> {
+  migrateGraph(graph: ProvenanceGraph, extras: any = {}): PromiseLike<ProvenanceGraph> {
     const old = graph.desc;
     return this.manager.migrateRemote(graph, extras).then((newGraph) => {
-      return (old.local ? this.manager.delete(old) : Promise.resolve(true)).then(() => {
+      return (old.local ? this.manager.delete(old) : resolveImmediately(true)).then(() => {
         hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
         return newGraph;
       });
@@ -156,14 +157,14 @@ export default class CLUEGraphManager extends EventHandler {
   private chooseNew() {
     const graph = hash.getProp('clue_graph', null);
     if (graph === 'memory') {
-      return Promise.resolve(this.manager.createInMemory());
+      return resolveImmediately(this.manager.createInMemory());
     }
     if (graph === 'new_remote' && isLoggedIn()) {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
       if (useInMemoryGraph()) {
-        return Promise.resolve(this.manager.createInMemory());
+        return resolveImmediately(this.manager.createInMemory());
       }
       return this.manager.createLocal();
     }
@@ -185,7 +186,7 @@ export default class CLUEGraphManager extends EventHandler {
       return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
     }
     if (useInMemoryGraph()) {
-      return Promise.resolve(this.manager.createInMemory());
+      return resolveImmediately(this.manager.createInMemory());
     }
     return this.manager.create();
   }

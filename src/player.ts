@@ -5,6 +5,7 @@
 import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as d3 from 'd3';
+import {resolveImmediately} from 'phovea_core/src';
 
 export const FACTOR = 1;
 export const MIN_DURATION = -1;
@@ -94,7 +95,7 @@ export class Player {
     //render by selecting the slide
     this.graph.selectSlide(story);
     //TODO transition time
-    return Promise.resolve(story);
+    return resolveImmediately(story);
   }
 
   private stopAnim() {
