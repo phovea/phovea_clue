@@ -61,7 +61,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   };
 
   private executedFirstListener = ((evt: any, action: ActionNode, state: StateNode) => {
-    const promise = this.captureAndIndexState(state)
+    const promise: Promise<boolean> = this.captureAndIndexState(state)
       .then((success: boolean) => {
         if (success) {
           this.updateWeightingEditor(this.query);
@@ -71,6 +71,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       })
       .catch((error) => {
         console.error(`Error while indexing state ${state.name} (#${state.id}).`, error);
+        return false;
       });
     // store promise for switchState listener
     this.executedFirstPromises.set(state, promise);
