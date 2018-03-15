@@ -54,16 +54,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
   private static CAPTURE_AND_INDEX_NON_PERSISTED_STATES = false;
 
-  private defaultOptions:IProvRetrievalPanelOptions = {
+  private defaultOptions: IProvRetrievalPanelOptions = {
     captureNonPersistedStates: ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES,
     rotate: 0,
     app: null,
   };
 
-  private executedFirstListener = ((evt:any, action:ActionNode, state:StateNode) => {
+  private executedFirstListener = ((evt: any, action: ActionNode, state: StateNode) => {
     const promise = this.captureAndIndexState(state)
-      .then((success:boolean) => {
-        if(success) {
+      .then((success: boolean) => {
+        if (success) {
           this.updateWeightingEditor(this.query);
           this.performSearch(this.query);
         }
@@ -76,11 +76,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     this.executedFirstPromises.set(state, promise);
   });
 
-  private searchForStateListener = ((evt:any, state:StateNode) => {
+  private searchForStateListener = ((evt: any, state: StateNode) => {
     this.propertyModifier.searchForStateProperty = (state) ? setProperty(`Search for State '${state.name}'`, state.visState.propValues) : null;
     this.$select2Instance.updateData(this.propertyModifier.properties);
 
-    if(state) {
+    if (state) {
       this.$select2Instance.open();
     } else {
       this.$select2Instance.close();
@@ -92,11 +92,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     //this.performSearch(this.query);
   });
 
-  private switchStateListener = ((evt:any, state:StateNode) => {
+  private switchStateListener = ((evt: any, state: StateNode) => {
     // if the state is executed once wait until this has finished, otherwise switch directly
     const promise = (this.executedFirstPromises.has(state)) ? this.executedFirstPromises.get(state) : Promise.resolve(true);
     promise.then((success) => {
-      if(success) {
+      if (success) {
         this.propertyModifier.activeVisState = state.visState;
         this.$select2Instance.updateData(this.propertyModifier.properties);
         // update active search result
@@ -112,21 +112,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   private $node: d3.Selection<any>;
   private $searchResults: d3.Selection<any>;
 
-  private $select2Instance:Select2 = new Select2();
+  private $select2Instance: Select2 = new Select2();
 
   private dim: [number, number] = [200, 100];
 
-  private stateIndex:VisStateIndex = new VisStateIndex();
+  private stateIndex: VisStateIndex = new VisStateIndex();
 
-  private lastStateBeforeSearch:StateNode = null;
+  private lastStateBeforeSearch: StateNode = null;
 
-  private query:IQuery = new Query();
+  private query: IQuery = new Query();
 
   private currentSequences: ISearchResultSequence[] = [];
 
-  private propertyModifier:PropertyModifier = new PropertyModifier();
+  private propertyModifier: PropertyModifier = new PropertyModifier();
 
-  private executedFirstPromises:Map<StateNode, Promise<boolean>> = new Map();
+  private executedFirstPromises: Map<StateNode, Promise<boolean>> = new Map();
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: IProvRetrievalPanelOptions) {
     super();
@@ -160,7 +160,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
   private setLastStateBeforeSearch() {
-    if(this.lastStateBeforeSearch) {
+    if (this.lastStateBeforeSearch) {
       return;
     }
 
@@ -183,7 +183,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param stateNodes List of StateNodes that should be indexed
    * @param captureAndIndex Capture and index *non-persisted* states?
    */
-  private initStateIndex(stateNodes:StateNode[], captureAndIndex:boolean) {
+  private initStateIndex(stateNodes: StateNode[], captureAndIndex: boolean) {
     // already persisted states have to be added to the index only
     stateNodes
       .filter((stateNode) => stateNode.visState.isPersisted())
@@ -195,11 +195,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     const nonPersistedStates = stateNodes.filter((stateNode) => !stateNode.visState.isPersisted());
 
-    if(nonPersistedStates.length > 0) {
-      if(captureAndIndex) {
+    if (nonPersistedStates.length > 0) {
+      if (captureAndIndex) {
         this.jumpToAndIndexStates(nonPersistedStates);
 
-      } else if(nonPersistedStates.length > 1) { // message only if more than 1 state
+      } else if (nonPersistedStates.length > 1) { // message only if more than 1 state
         console.warn(`${nonPersistedStates.length} provenance states were not indexed for the provenance state search. You will get incomplete search results.`);
       }
     }
@@ -210,7 +210,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param stateNodes
    * @returns {Promise<any>} Will be resolved, once all states are processed.
    */
-  private async jumpToAndIndexStates(stateNodes:StateNode[]):Promise<any> {
+  private async jumpToAndIndexStates(stateNodes: StateNode[]): Promise<any> {
     const currentState = this.data.act;
 
     for (const stateNode of stateNodes) {
@@ -227,11 +227,11 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param stateNode
    * @returns {Promise<boolean>} Returns `true` if successfully added to index. Otherwise returns `false`.
    */
-  private async captureAndIndexState(stateNode:StateNode):Promise<boolean> {
-    if(stateNode.visState.isPersisted()) {
+  private async captureAndIndexState(stateNode: StateNode): Promise<boolean> {
+    if (stateNode.visState.isPersisted()) {
       return Promise.resolve(true);
     }
-    const visState:IVisState = await stateNode.visState.captureAndPersist();
+    const visState: IVisState = await stateNode.visState.captureAndPersist();
     this.propertyModifier.properties = await this.options.app.getVisStateProps();
     this.propertyModifier.addState(visState);
     this.$select2Instance.updateData(this.propertyModifier.properties);
@@ -242,8 +242,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const asideName = 'provenance-retrieval-panel';
 
     const $p = $parent.append('aside')
-      //.classed('provenance-layout-vis', true)
-      //.classed('hidden', true)
+    //.classed('provenance-layout-vis', true)
+    //.classed('hidden', true)
       .classed(asideName, true)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
@@ -348,7 +348,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         this.fire(ClueSidePanelEvents.CLOSE);
       });
 
-    const filterSelect2SuggestionsListener = (showActiveStateOnly:boolean) => {
+    const filterSelect2SuggestionsListener = (showActiveStateOnly: boolean) => {
       (<Event>d3.event).preventDefault();
       $p.selectAll('.dropdown-menu li').classed('active', false);
       d3.select((<Event>d3.event).srcElement.parentElement).classed('active', true);
@@ -391,8 +391,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.$searchResults = $p.select('.search-results');
 
-    if(this.options.app && this.options.app.getVisStateProps) {
-      this.options.app.getVisStateProps().then((properties:IProperty[]) => {
+    if (this.options.app && this.options.app.getVisStateProps) {
+      this.options.app.getVisStateProps().then((properties: IProperty[]) => {
         $p.select('.body > form .btn-group').classed('hidden', false);
 
         this.propertyModifier.properties = properties;
@@ -400,7 +400,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         const $select2 = this.$select2Instance.init('#prov-retrieval-select', this.propertyModifier.properties);
         $select2
           .on('select2:select', (evt) => {
-            const propValue:IPropertyValue = evt.params.data.propValue;
+            const propValue: IPropertyValue = evt.params.data.propValue;
             propValue.isSelected = true;
             //console.log('select2:select', evt.params.data);
 
@@ -412,7 +412,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             $select2.val(null).trigger('change');
           })
           .on('select2:unselect', (evt) => {
-            const propValue:IPropertyValue = evt.params.data.propValue;
+            const propValue: IPropertyValue = evt.params.data.propValue;
             propValue.isSelected = false;
             //console.log('select2:unselect ', evt.params.data);
 
@@ -436,10 +436,10 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     return $p;
   }
 
-  private updateWeightingEditor(query:IQuery) {
+  private updateWeightingEditor(query: IQuery) {
     const $ul = d3.select('#prov-retrieval-weighting-editor ul.terms');
     const $terms = $ul.selectAll('li.term')
-      .data(query.propValues, (d) => String(d.id) );
+      .data(query.propValues, (d) => String(d.id));
 
     $terms.enter().insert('li', 'li.remove-all').classed('term', true);
     $terms
@@ -449,7 +449,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         <span class="remove" role="presentation" title="Remove">×</span>
         <span>${d.text}</span>
       `)//;
-    //$terms.select('.remove')
+      //$terms.select('.remove')
       .on('click', (propValue) => {
         propValue.isSelected = false;
         this.query = this.query.removePropValue(propValue);
@@ -475,7 +475,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $editorLi
       .style('width', (d, i) => `${widthScale(query.weights[i])}px`)
       .style('background-color', (d, i) => query.colors[i])
-      .attr('title', (d, i) => `${d.text}: ${d3.round(query.weights[i]*100, 2)}%`)
+      .attr('title', (d, i) => `${d.text}: ${d3.round(query.weights[i] * 100, 2)}%`)
       .html((d, i) => `<span class="draggable"></span>`);
 
     const drag = d3.behavior.drag()
@@ -484,16 +484,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         const diffWeight = (query.weights[i] - newWeight) / (query.weights.length - 1 - i);
 
         query.weights = query.weights.map((d, j) => {
-          if(i === j) {
+          if (i === j) {
             return newWeight; // apply new weight to current element
-          } else if(j > i) {
+          } else if (j > i) {
             return d + diffWeight; // shift all upcoming elements
           }
           return d; // keep previous elements the same
         });
 
         $editorLi
-          .attr('title', (d, j) => `${d.text}: ${d3.round(query.weights[j]*100, 2)}%`)
+          .attr('title', (d, j) => `${d.text}: ${d3.round(query.weights[j] * 100, 2)}%`)
           .style('width', (d, j) => `${widthScale(query.weights[j])}px`);
       })
       .on('dragend', () => {
@@ -510,8 +510,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $editorLi.exit().remove();
   }
 
-  private performSearch(query:IQuery) {
-    if(!query) {
+  private performSearch(query: IQuery) {
+    if (!query) {
       return;
     }
 
@@ -519,7 +519,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       .compareAll(query)
       .filter((state) => state.similarity > 0); // filter results that does not match at all
 
-    if(results.length > 0) {
+    if (results.length > 0) {
       this.$node.select('.number-of-results').html(`<b>${results.length}</b> Provenance States found`);
       this.data.fire('search_complete', results);
 
@@ -587,28 +587,28 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @returns {ISearchResultSequence[]}
    */
 
-  private groupIntoSequences(results:ISearchResult[]):ISearchResultSequence[] {
-    const lookup:Map<StateNode, string> = new Map();
+  private groupIntoSequences(results: ISearchResult[]): ISearchResultSequence[] {
+    const lookup: Map<StateNode, string> = new Map();
     // create lookup for faster access of matching terms per state node
     results.forEach((r) => {
       lookup.set(<StateNode>r.state.node, r.matchingIndicesStr());
     });
 
     return d3.nest()
-      .key((d:ISearchResult) => d.numMatchingTerms + ' matching terms')
-      .key((d:ISearchResult) => d.matchingIndicesStr())
-      .key((d:ISearchResult) => {
-        let firstStateNode:StateNode = <StateNode>d.state.node;
-        let bakStateNode:StateNode = firstStateNode;
+      .key((d: ISearchResult) => d.numMatchingTerms + ' matching terms')
+      .key((d: ISearchResult) => d.matchingIndicesStr())
+      .key((d: ISearchResult) => {
+        let firstStateNode: StateNode = <StateNode>d.state.node;
+        let bakStateNode: StateNode = firstStateNode;
         // continue as long as previous state is still available in the search results and
         // the number of matching terms are still equal. Otherwise create a new sequence.
-        while(lookup.has(firstStateNode) && lookup.get(firstStateNode) === d.matchingIndicesStr()) {
+        while (lookup.has(firstStateNode) && lookup.get(firstStateNode) === d.matchingIndicesStr()) {
           bakStateNode = firstStateNode;
           firstStateNode = firstStateNode.previousState;
         }
         return String(bakStateNode.id);
       })
-      .sortValues((a:ISearchResult, b:ISearchResult) => a.state.node.id - b.state.node.id)
+      .sortValues((a: ISearchResult, b: ISearchResult) => a.state.node.id - b.state.node.id)
       .entries(results)
       // </end> of d3.nest -> continue with nested array
       //.map((d) => { // debug
@@ -623,20 +623,20 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
   }
 
 
-  private updateResults(sequences:ISearchResultSequence[], clearContent:boolean = false) {
+  private updateResults(sequences: ISearchResultSequence[], clearContent: boolean = false) {
 
-    if(clearContent) {
+    if (clearContent) {
       this.$searchResults.selectAll('*').remove(); // clear DOM list
     }
 
-    if(sequences.length === 0) {
+    if (sequences.length === 0) {
       return;
     }
 
     const widthScale = d3.scale.linear().domain([0, 1]).range([0, 100]);
 
     const $seqLi = this.createSequenceDOM(this.$searchResults, sequences, widthScale);
-     this.createStateListDOM($seqLi.select('.states'), widthScale);
+    this.createStateListDOM($seqLi.select('.states'), widthScale);
   }
 
   /**
@@ -646,7 +646,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param widthScale
    * @returns {selection.Update<ISearchResultSequence>}
    */
-  private createSequenceDOM($parent, sequences:ISearchResultSequence[], widthScale):d3.Selection<ISearchResultSequence> {
+  private createSequenceDOM($parent, sequences: ISearchResultSequence[], widthScale): d3.Selection<ISearchResultSequence> {
     const that = this;
     const hasThumbnails = (areThumbnailsAvailable(this.data)) ? '1' : '0';
 
@@ -654,17 +654,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     const $seqLi = $parent
       .selectAll('li.sequence')
-      .data(sequences, (d:ISearchResultSequence) => d.id)
+      .data(sequences, (d: ISearchResultSequence) => d.id)
       .order();
 
     $seqLi.enter().append('li')
       .classed('sequence', true)
       // set child elements here to avoid reloading when manipulating the weights
-      .html(function(d:ISearchResultSequence) {
+      .html(function (d: ISearchResultSequence) {
 
         const groups = d3.nest()
-          .key((d:IPropertyValue) => d.group)
-          .key((prop:IPropertyValue) => d.topResult.query.propValues.find((p) => p.id === prop.id) ? 'match' : 'no_match').sortKeys(d3.ascending)
+          .key((d: IPropertyValue) => d.group)
+          .key((prop: IPropertyValue) => d.topResult.query.propValues.find((p) => p.id === prop.id) ? 'match' : 'no_match').sortKeys(d3.ascending)
           .entries(d.topResult.state.propValues);
 
         const terms = groups
@@ -683,7 +683,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
         let seqIconId = '';
         let seqLength = '';
-        switch(d.searchResults.length) {
+        switch (d.searchResults.length) {
           case 1:
             seqIconId = 'one-state';
             seqLength = '';
@@ -711,7 +711,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           (<any>img).onload();
         }
 
-        const topResultActive = (d.topResult.isActiveInMainView || that.data.act === d.topResult.state.node) ? 'active' : '' ;
+        const topResultActive = (d.topResult.isActiveInMainView || that.data.act === d.topResult.state.node) ? 'active' : '';
 
         return `
           <div class="top-result ${topResultActive}" data-has-thumbs="${hasThumbnails}" data-score="${d.topResult.weightedSimilarity.toFixed(2)}">
@@ -734,16 +734,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
           <ol class="states hidden"></ol>
         `;
       })
-      .each(function() {
+      .each(function () {
         const $terms = d3.select(this).select('.result-terms');
         $terms.classed('expandable',
           (<Element>$terms.select('small').node()).getBoundingClientRect().height >
-           (<Element>$terms.node()).getBoundingClientRect().height
+          (<Element>$terms.node()).getBoundingClientRect().height
         );
       });
 
-    $seqLi.each(function(d:ISearchResultSequence) {
-      const containsActive = (searchResults:ISearchResult[]) => {
+    $seqLi.each(function (d: ISearchResultSequence) {
+      const containsActive = (searchResults: ISearchResult[]) => {
         return searchResults.some((e) => e.isActiveInMainView || that.data.act === e.state.node);
       };
 
@@ -759,49 +759,49 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     $seqLi.exit().remove();
 
-    const hoverMultipleStateNodes = (seq:ISearchResultSequence, operation: SelectOperation) => {
-      const stateNodeIds:number[] = seq.searchResults.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
+    const hoverMultipleStateNodes = (seq: ISearchResultSequence, operation: SelectOperation) => {
+      const stateNodeIds: number[] = seq.searchResults.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
       // hover multiple stateNodeIds
       this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
     };
 
     $seqLi.select('.seq-length')
-      .on('mouseenter', (d:ISearchResultSequence) => {
+      .on('mouseenter', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
       })
-      .on('mouseleave', (d:ISearchResultSequence) => {
+      .on('mouseleave', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
       })
-      .on('click', (d:ISearchResultSequence) => {
+      .on('click', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
         // expand/collapse only for sequence length > 1
         //if(d.searchResults.length > 1) {
-          const li = (<any>d3.event).target.parentNode.parentNode;
-          li.classList.toggle('active');
-          li.querySelector('.states').classList.toggle('hidden');
+        const li = (<any>d3.event).target.parentNode.parentNode;
+        li.classList.toggle('active');
+        li.querySelector('.states').classList.toggle('hidden');
         //}
         return false;
       });
 
     const addMouseListener = ($elem) => {
       $elem
-        .on('mouseenter', (d:ISearchResultSequence) => {
+        .on('mouseenter', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
           hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('hover');
         })
-        .on('mouseleave', (d:ISearchResultSequence) => {
+        .on('mouseleave', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
           hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('hover');
         })
-        .on('click', (d:ISearchResultSequence) => {
+        .on('click', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           this.setLastStateBeforeSearch();
           this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
@@ -815,7 +815,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     addMouseListener($seqLi.select('.prov-ret-thumbnail'));
 
     const $seqSimBar = $seqLi.select('.similarity-bar')
-      .attr('data-tooltip', (d:ISearchResultSequence) => {
+      .attr('data-tooltip', (d: ISearchResultSequence) => {
         const textSim = d.topResult.query.propValues.map((p, i) => {
           return {text: p.text, similarity: d.topResult.weightedSimilarities[i]};
         });
@@ -823,7 +823,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
       })
       .selectAll('li.bar')
-      .data((d:ISearchResultSequence) => {
+      .data((d: ISearchResultSequence) => {
         return d.topResult.weightedSimilarities.map((sim, i) => {
           const propValue = (<any>d).topResult.query.propValues[i];
           return {
@@ -839,9 +839,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $seqSimBar.enter().append('li').classed('bar', true);
 
     $seqSimBar
-      .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
-      .style('background-color', (d:any) => d.color)
-      .style('width', (d:any) => `${d3.round(d.width, 2)}%`);
+      .attr('data-weight', (d: any) => `${d3.round(d.weight, 2)}%`)
+      .style('background-color', (d: any) => d.color)
+      .style('width', (d: any) => `${d3.round(d.width, 2)}%`);
 
     $seqSimBar.exit().remove();
 
@@ -853,17 +853,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    * @param $parent
    * @param widthScale
    */
-  private createStateListDOM($parent:d3.Selection<ISearchResultSequence>, widthScale) {
+  private createStateListDOM($parent: d3.Selection<ISearchResultSequence>, widthScale) {
 
     const $stateLi = $parent
       .selectAll('li.state')
-      .data((seq:ISearchResultSequence) => seq.searchResults, (d) => d.id)
+      .data((seq: ISearchResultSequence) => seq.searchResults, (d) => d.id)
       .order();
 
     $stateLi.enter().append('li')
       .classed('state', true)
       .classed('active', (d) => d.isActiveInMainView || this.data.act === d.state.node)
-      .html((d:ISearchResult) => {
+      .html((d: ISearchResult) => {
         return `
           <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}" data-is-top="${d.isTopResult ? 1 : 0}">
             <div class="circle"><i class="fa fa-circle glyph"></i></div>
@@ -879,15 +879,15 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $stateLi.exit().remove();
 
     $stateLi.select('.seq-state-result')
-      .on('mouseenter', (d:ISearchResult) => {
+      .on('mouseenter', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
       })
-      .on('mouseleave', (d:ISearchResult) => {
+      .on('mouseleave', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       })
-      .on('click', (d:ISearchResult) => {
+      .on('click', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.setLastStateBeforeSearch();
         this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
@@ -896,7 +896,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       });
 
     const $simBar = $stateLi.select('.similarity-bar')
-      .attr('data-tooltip', (d:ISearchResult) => {
+      .attr('data-tooltip', (d: ISearchResult) => {
         const textSim = d.query.propValues.map((p, i) => {
           return {text: p.text, similarity: d.weightedSimilarities[i]};
         });
@@ -904,7 +904,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         return textSim.map((t) => `${t.text}:\t${d3.round(widthScale(t.similarity), 2)}%`).join('\n');
       })
       .selectAll('li.bar')
-      .data((d:ISearchResult) => {
+      .data((d: ISearchResult) => {
         return d.weightedSimilarities.map((sim, i) => {
           const propValue = d.query.propValues[i];
           return {
@@ -920,15 +920,15 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $simBar.enter().append('li').classed('bar', true);
 
     $simBar
-      .attr('data-weight', (d:any) => `${d3.round(d.weight, 2)}%`)
-      .style('background-color', (d:any) => d.color)
-      .style('width', (d:any) => `${d3.round(d.width, 2)}%`);
+      .attr('data-weight', (d: any) => `${d3.round(d.weight, 2)}%`)
+      .style('background-color', (d: any) => d.color)
+      .style('width', (d: any) => `${d3.round(d.width, 2)}%`);
 
     $simBar.exit().remove();
   }
 
 }
 
-export function create(data: ProvenanceGraph, parent: Element, options:IProvRetrievalPanelOptions = {}) {
+export function create(data: ProvenanceGraph, parent: Element, options: IProvRetrievalPanelOptions = {}) {
   return new ProvRetrievalPanel(data, parent, options);
 }
