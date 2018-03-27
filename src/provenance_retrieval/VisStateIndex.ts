@@ -2,7 +2,7 @@
  * Created by Holger Stitz on 07.06.2017.
  */
 import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
-import {IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IPropertyValue, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {COMPARATORS, selectComparator} from './VisStatePropertyComparator';
 import * as d3 from 'd3';
 
@@ -225,12 +225,17 @@ export class VisStateIndex {
     return true;
   }
 
-  compareAll(query:IQuery):ISearchResult[] {
-    return this.states.map((s) => VisStateIndex.compare(query, s));
+  compareAll(query:IQuery, similarityScale?: (type: PropertyType, similarity: number) => number):ISearchResult[] {
+    return this.states.map((s) => VisStateIndex.compare(query, s, similarityScale));
   }
 
-  static compare(query:IQuery, state: IVisState):ISearchResult {
-    const similarities = state.compare(selectComparator, query.propValues);
+  static compare(query:IQuery, state: IVisState, similarityScale?: (type: PropertyType, similarity: number) => number):ISearchResult {
+    let similarities = state.compare(selectComparator, query.propValues);
+
+    if(similarityScale) {
+      similarities = query.propValues.map((propVal, i) => similarityScale(propVal.type, similarities[i]));
+    }
+
     return new SearchResult(query, state, similarities);
   }
 

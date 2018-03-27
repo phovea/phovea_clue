@@ -13,7 +13,7 @@ import {
   VisStateIndex,
 } from './VisStateIndex';
 import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IProperty, IPropertyValue, setProperty} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue, setProperty, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
 import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
 import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
@@ -516,8 +516,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
       return;
     }
 
+    // create a similarity scale for all categorical property values
+    const categoricalScale: d3.scale.Linear<number, number> = this.createCategoricalSimilarityScale(query);
+    const similarityScale = (type: PropertyType, value: number): number => {
+      if(type === PropertyType.CATEGORICAL) {
+        return categoricalScale(value);
+      }
+      return value; // all other property types without scaling
+    };
+
     const results = this.stateIndex
-      .compareAll(query)
+      .compareAll(query, similarityScale)
       .filter((state) => state.similarity > 0); // filter results that does not match at all
 
     if (results.length > 0) {
@@ -535,6 +544,34 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     this.currentSequences = this.groupIntoSequences(results);
     this.updateResults(this.currentSequences, true);
+  }
+
+  /**
+   * Filter the query for all categorical properties.
+   * Run a comparison and create a D3 scale with the domain
+   * between 0 and the maximum TF-IDF value.
+   *
+   * Background: The TF-IDF value can go beyond 1. A high TF-IDF value
+   * can be reached by a high term frequency (in the given visualization state)
+   * and a low document frequency of the term in the whole collection
+   * of visualization states.
+   * We must ensure TF-IDF values in the range [0, 1] in order to work
+   * that the weighted scaling is still working.
+   *
+   * @param {IQuery} query
+   * @returns {d3.scale.Linear<number, number>}
+   */
+  private createCategoricalSimilarityScale(query: IQuery): d3.scale.Linear<number, number> {
+    const categoricalQuery: IQuery = new Query()
+      .replacePropValues(query.propValues.filter((d) => d.type === PropertyType.CATEGORICAL));
+
+    const similarities: number[] = this.stateIndex
+      .compareAll(categoricalQuery) // no second parameter = without scaling
+      .filter((state) => state.similarity > 0)
+      .map((result) => result.similarities)
+      .reduce((prev, curr) => prev.concat(curr), []); // flatten the array
+
+    return d3.scale.linear().domain([0, Math.max(1, ...similarities)]).range([0, 1]);
   }
 
   /**
