@@ -10,6 +10,6 @@ services:
   db_memcached:
     image: memcached:1.4-alpine
   util_chrome:
-    image: 'alpeware/chrome-headless-trunk'
+    image: 'alpeware/chrome-headless-stable'
     environment:
       - CHROME_OPTS=--window-size=1920,1080
