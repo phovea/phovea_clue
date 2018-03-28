@@ -10,7 +10,7 @@ import {ProvenanceGraph, StateNode, SlideNode} from 'phovea_core/src/provenance'
 import * as not_available from './assets/not_available.png';
 
 
-export function thumbnail_url(graph: ProvenanceGraph, state: StateNode, options= {}) {
+export function thumbnail_url(graph: ProvenanceGraph, state: StateNode, options = {}) {
   const o = {
     width: 128,
     format: 'jpg'
@@ -22,14 +22,14 @@ export function thumbnail_url(graph: ProvenanceGraph, state: StateNode, options=
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`/clue/thumbnail${d.attrs.of.startsWith('/') ? d.attrs.of : '/' + d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
   return not_available;
 }
 
-export function preview_thumbnail_url(graph: ProvenanceGraph, state: SlideNode, options= {}) {
+export function preview_thumbnail_url(graph: ProvenanceGraph, state: SlideNode, options = {}) {
   const o = {
     width: 128,
     format: 'jpg'
@@ -40,14 +40,14 @@ export function preview_thumbnail_url(graph: ProvenanceGraph, state: SlideNode, 
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`/clue/preview_thumbnail${d.attrs.of.startsWith('/') ? d.attrs.of : '/' + d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
   return not_available;
 }
 
-export function screenshot_url(graph: ProvenanceGraph, state: StateNode, options= {}) {
+export function screenshot_url(graph: ProvenanceGraph, state: StateNode, options = {}) {
   const o = {
     width: 128,
     format: 'jpg'
@@ -58,7 +58,7 @@ export function screenshot_url(graph: ProvenanceGraph, state: StateNode, options
 
   const d = (<any>graph.desc);
   if (d.attrs && d.attrs.of && !(d.local)) {
-    return api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+    return api2absURL(`screnshot${d.attrs.of.startsWith('/') ? d.attrs.of : '/' + d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
       width: o.width
     });
   }
