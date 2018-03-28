@@ -1,3 +1,5 @@
+selenium==3.4.3
+chromedriver_installer==0.0.6
 python-memcached==1.58
 -e git+https://github.com/phovea/phovea_server.git@develop#egg=phovea_server
 -e git+https://github.com/phovea/phovea_security_flask.git@develop#egg=phovea_security_flask
