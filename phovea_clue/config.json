@@ -1,5 +1,6 @@
 {
   "server": "http://web",
+  "server__local": "http://api/vega_clue", // and use npm run watch:<app>... to launch the application and access it via http://localhost:9000/<app>
   "chromeAddress": "chrome:9222",
   "memcached": [
     "memcached:11211"
