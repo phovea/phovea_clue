@@ -739,7 +739,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             seqLength = String(d.searchResults.length - 2); // -2 because start and end state are explicitly displayed
         }
 
-        const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node));
+        const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node), {width: 128, format: 'png'});
         const img = new Image();
         img.onload = () => {
           d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
