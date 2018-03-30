@@ -360,7 +360,8 @@
     }
 
     .match {
-      background-color: lighten($select-color, 40%);
+      color: $select-color;
+      background-color: lighten($select-color, 90%);
     }
   }
 
