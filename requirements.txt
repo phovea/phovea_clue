@@ -1,5 +1,4 @@
 selenium==3.11.0
-chromedriver_installer==0.0.6 --install-option="--chromedriver-version=2.34"
 python-memcached==1.58
 -e git+https://github.com/phovea/phovea_server.git@develop#egg=phovea_server
 -e git+https://github.com/phovea/phovea_security_flask.git@develop#egg=phovea_security_flask
