@@ -241,7 +241,7 @@ export class PropertyModifier {
         return propVals;
       })
       .reduce((prev, curr) => prev.concat(curr), []) // flatten the  array
-      .filter((p) => !queryPropVals.find((qp) => qp.baseId === p.baseId))
+      .filter((p) => !queryPropVals.find((qp) => qp.id === p.id)) // qp.baseId === p.baseId
       .forEach((p) => {
         const id = PropertyModifier.getPropId(p);
         // filter None values
