@@ -8,6 +8,7 @@
 import * as header from 'phovea_ui/src/header';
 import * as prov from 'phovea_core/src/provenance';
 import * as d3 from 'd3';
+import {resolveImmediately} from 'phovea_core/src';
 
 /**
  * factory method creating a CLUEWrapper instance
@@ -25,7 +26,7 @@ export function create(body:HTMLElement, options:any = {}) {
   return {
     on: (...args : any[]) => 0,
     $main,
-    graph: Promise.resolve(graph),
+    graph: resolveImmediately(graph),
     jumpToStored: () => 0
   };
 }

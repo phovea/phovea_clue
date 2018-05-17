@@ -7,17 +7,19 @@ import * as events from 'phovea_core/src/event';
 import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
+import {lastOnly} from './compress';
+import {resolveImmediately} from 'phovea_core/src';
 
 const disabler = new events.EventHandler();
 
 
-function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
+export function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
   const idtype = idtypes.resolve(parameter.idtype),
     range = ranges.parse(parameter.range),
     type = parameter.type;
   const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
 
-  if (C.hash.is('debug')) {
+  if (C.hash.has('debug')) {
     console.log('select', range.toString());
   }
   disabler.fire('disable-'+idtype.id);
@@ -37,7 +39,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
   let p;
   if (l === 0) {
     title += 'no '+idtype.names;
-    p = Promise.resolve(title);
+    p = resolveImmediately(title);
   } else if (l === 1) {
     title += idtype.name+' ';
 
@@ -53,7 +55,7 @@ function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
     });
   } else {
     title += `${range.dim(0).length} ${idtype.names}`;
-    p = Promise.resolve(title);
+    p = resolveImmediately(title);
   }
   return p.then((title) => provenance.meta(title, provenance.cat.selection));
 }
@@ -84,21 +86,7 @@ export function createSelection(idtype:idtypes.IDType, type:string, range:ranges
 }
 
 export function compressSelection(path: provenance.ActionNode[]) {
-  const lastByIDType : any = {};
-  path.forEach((p) => {
-    if (p.f_id === 'select') {
-      const para = p.parameter;
-      lastByIDType[para.idtype+'@'+para.type] = p;
-    }
-  });
-  return path.filter((p) => {
-    if (p.f_id !== 'select') {
-      return true;
-    }
-    const para = p.parameter;
-    //last one remains
-    return lastByIDType[para.idtype+'@'+para.type] === p;
-  });
+  return lastOnly(path, 'select', (p) => p.parameter.idtype + '@' + p.parameter.type);
 }
 
 /**
@@ -188,12 +176,4 @@ export class SelectionRecorder {
 
 export function create(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
   return new SelectionRecorder(graph, type, options);
-}
-
-export function createCmd(id:string) {
-  switch (id) {
-    case 'select':
-      return select;
-  }
-  return null;
 }

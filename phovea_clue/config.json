@@ -1,7 +1,7 @@
 {
-  "server": "http://localhost/",
-  "phantomjs2": "phantomjs",
+  "server": "http://web",
+  "chromeAddress": "chrome:9222",
   "memcached": [
-    "127.0.0.1:11211"
+    "memcached:11211"
   ]
 }

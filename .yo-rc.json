@@ -6,8 +6,6 @@
     "githubAccount": "phovea",
     "modules": [
       "phovea_core",
-      "phovea_d3",
-      "phovea_vis",
       "phovea_ui",
       "phovea_security_flask",
       "phovea_server"

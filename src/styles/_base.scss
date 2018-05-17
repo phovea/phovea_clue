@@ -122,8 +122,10 @@ aside {
 
 header.clue-modeselector {
   position: absolute;
-  left: 30vw;
-  width: 45vw;
+  left: 50%;
+  width: 40em;
+  margin-left: -20em;
+  transition: top 1s;
   top: 2px;
   text-align: center;
 
@@ -131,6 +133,10 @@ header.clue-modeselector {
     //padding: 1em 5px;
     width: 10em;
   }
+}
+
+[data-clue=E] header.clue-modeselector.collapsed {
+  top: -40px;
 }
 
 // #player_duration{
