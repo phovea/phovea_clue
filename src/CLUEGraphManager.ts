@@ -28,12 +28,12 @@ export default class CLUEGraphManager extends EventHandler {
 
   private onHashChanged = () => this.onHashChangedImpl();
 
-  constructor(private manager: MixedStorageProvenanceGraphManager) {
+  constructor(private manager: MixedStorageProvenanceGraphManager, private readonly isReadonly = false) {
     super();
     //selected by url
   }
 
-  static setGraphInUrl(value: string) {
+  private static setGraphInUrl(value: string) {
     hash.removeProp('clue_slide', false);
     hash.removeProp('clue_state', false);
     hash.setProp('clue_graph', value);
@@ -62,7 +62,7 @@ export default class CLUEGraphManager extends EventHandler {
   newGraph() {
     hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     CLUEGraphManager.setGraphInUrl('new');
-      CLUEGraphManager.reloadPage();
+    CLUEGraphManager.reloadPage();
   }
 
   loadGraph(desc: any) {
@@ -77,6 +77,9 @@ export default class CLUEGraphManager extends EventHandler {
   }
 
   set storedSlide(value: number) {
+    if (this.isReadonly) {
+      return;
+    }
     hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
       hash.setInt('clue_slide', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
@@ -91,6 +94,9 @@ export default class CLUEGraphManager extends EventHandler {
   }
 
   set storedState(value: number) {
+    if (this.isReadonly) {
+      return;
+    }
     hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
       hash.setInt('clue_state', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
@@ -137,7 +143,9 @@ export default class CLUEGraphManager extends EventHandler {
     const old = graph.desc;
     return this.manager.migrateRemote(graph, extras).then((newGraph) => {
       return (old.local ? this.manager.delete(old) : resolveImmediately(true)).then(() => {
-        hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
+        if (!this.isReadonly) {
+          hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
+        }
         return newGraph;
       });
     });
@@ -148,6 +156,9 @@ export default class CLUEGraphManager extends EventHandler {
   }
 
   setGraph(graph: ProvenanceGraph) {
+    if (this.isReadonly) {
+      return graph;
+    }
     hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     hash.setProp('clue_graph', graph.desc.id);
     hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
@@ -237,7 +248,9 @@ export default class CLUEGraphManager extends EventHandler {
 
   cloneLocal(graph: IProvenanceGraphDataDescription) {
     if (useInMemoryGraph()) {
-      CLUEGraphManager.setGraphInUrl('memory');
+      if (!this.isReadonly) {
+        CLUEGraphManager.setGraphInUrl('memory');
+      }
       return this.manager.cloneInMemory(graph);
     }
     this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
