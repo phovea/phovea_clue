@@ -67,7 +67,7 @@
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
   "homepage": "http://vistories.org",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
