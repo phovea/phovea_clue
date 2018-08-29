@@ -88,8 +88,6 @@ export class CLUEWrapper extends ACLUEWrapper {
     mixin(this.options, options);
     this.build(body, options);
     this.on('jumped_to,loaded_graph', () => this.header.ready());
-
-    this.$main = select(body).select('main');
   }
 
   protected buildImpl(body: HTMLElement) {
@@ -122,6 +120,8 @@ export class CLUEWrapper extends ACLUEWrapper {
     cmode.createButton(modeSelector, {
       size: 'sm'
     });
+
+    this.$main = select(body).select('main');
 
     const graph = clueManager.list().then((graphs) => {
       provenanceMenu.build(graphs);
