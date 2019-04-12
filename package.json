@@ -40,7 +40,7 @@
     "test:python": "test ! $(find tests -name \"*.py\") || python setup.py test",
     "predist:web": "npm run build:web && npm run docs:web",
     "dist:web": "mkdirp dist && cd build && tar cvzf ../dist/phovea_clue.tar.gz *",
-    "dist:python": "python setup.py bdist_egg",
+    "dist:python": "python setup.py sdist bdist_wheel",
     "docs:web": "typedoc --options typedoc.json src/**.ts",
     "docs:python": "sphinx-apidoc -o docs -f ./phovea_clue && sphinx-build ./docs build/docs",
     "build:python": "rm -rf build/source && find . -name '*.pyc' -delete && node buildPython.js && cp -r ./phovea_clue build/source/",
