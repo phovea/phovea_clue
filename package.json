@@ -60,14 +60,14 @@
     "@types/marked": "0.3.0",
     "d3": "3.5.17",
     "marked": "0.3.9",
-    "phovea_ui": "~2.1.1",
-    "phovea_core": "~2.1.2",
-    "phovea_security_flask": "~2.1.2"
+    "phovea_ui": "github:phovea/phovea_ui#develop",
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#develop"
   },
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
   "homepage": "http://vistories.org",
-  "version": "2.1.1",
+  "version": "2.1.2-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
