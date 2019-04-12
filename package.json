@@ -47,7 +47,8 @@
     "build:web": "webpack --env prod",
     "predist:python": "npm run build:python && npm run docs:python",
     "prebuild:python": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:python",
-    "prebuild:web": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:web"
+    "prebuild:web": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:web",
+    "publish:python": "twine upload --repository-url https://upload.pypi.org/legacy/ dist/*"
   },
   "main": "build/phovea_clue.js",
   "engines": {
