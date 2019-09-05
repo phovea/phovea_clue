@@ -1,5 +1,7 @@
 /**
- * Provide the loaded provenance graph
+ * Provides the loaded provenance graph
+ *
+ * @factoryParam {ProvenanceGraph} provenanceGraph The loaded provenance graph
  */
-export const PHOVEA_PROVENANCE_GRAPH = 'phoveaProvenanceGraph';
+export const EP_PHOVEA_CLUE_PROVENANCE_GRAPH = 'epPhoveaClueProvenanceGraph';
 

@@ -13,7 +13,7 @@ import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list, IPluginDesc} from 'phovea_core/src/plugin';
-import {PHOVEA_PROVENANCE_GRAPH} from './extensions';
+import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
 
 const TEMPLATE = `<div class="box">
   <header>
@@ -75,7 +75,7 @@ export abstract class ACLUEWrapper extends EventHandler {
 
     this.graph.then((graph) => {
       // load registered extensions and pass the ready graph to extension
-      list(PHOVEA_PROVENANCE_GRAPH).map((desc: IPluginDesc) => {
+      list(EP_PHOVEA_CLUE_PROVENANCE_GRAPH).map((desc: IPluginDesc) => {
         desc.load().then((plugin) => plugin.factory(graph));
       });
 
