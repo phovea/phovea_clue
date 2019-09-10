@@ -116,7 +116,7 @@ def create_via_selenium(url, width, height):
     if found:
       _log.info('found jumped flag: {}'.format(found.get_attribute('class')))
     else:
-      _log.warn('cannnot find jumped flag after 3 x 30 seconds, give up and take a screenshot')
+      _log.warn('cannot find jumped flag after 3 x 30 seconds, give up and take a screenshot')
 
   return screenshotter.take(url, eval_clue)
 
