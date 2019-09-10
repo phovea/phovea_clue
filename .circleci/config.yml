@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/phovea
     docker:
-      - image: caleydo/phovea_circleci_python:v1.0
+      - image: circleci/python:3.7-node-browsers
     tags:
       - /v\d+.\d+.\d+.*/
     steps:
