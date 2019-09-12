@@ -74,7 +74,7 @@ screenshotter = Screenshotter()
 def randomword(length):
   import random
   import string
-  return ''.join(random.choice(string.lowercase) for i in range(length))
+  return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
 
 def generate_url(app, prov_id, state):
