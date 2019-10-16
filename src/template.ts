@@ -115,7 +115,7 @@ export class CLUEWrapper extends ACLUEWrapper {
 
     this.header.wait();
 
-    new LoginMenu(this.header, {
+    const _ = new LoginMenu(this.header, {
       loginForm: this.options.loginForm,
       insertIntoHeader: true
     });

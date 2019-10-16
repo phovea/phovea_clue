@@ -507,6 +507,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         placeholder: 'Markdown supported...',
         multiline: true
       }).then((text) => {
+        if(text === null) {
+          return; // dialog was closed without submitting the form
+        }
         d.name = text;
         this.update();
         this.updateInfo(d);
