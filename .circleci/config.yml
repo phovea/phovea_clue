@@ -54,4 +54,4 @@ jobs:
             npm run dist
       - store_artifacts:
           path: dist
-          prefix: dist
+          destination: dist
