@@ -1,0 +1,10 @@
+{
+  "phovea": {
+    "common": {
+      "group": "Group from CLUE",
+      "test": {
+        "foo": "baz from CLUE"
+      }
+    }
+  }
+}

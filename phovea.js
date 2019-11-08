@@ -30,5 +30,17 @@ module.exports = function(registry) {
     'factory': 'select'
   });
   /// #endif
+
+  registry.push('epPhoveaCoreLocale', 'phoveaClueLocaleEN', function() {
+    return System.import('./src/assets/locales/en/phovea.json').then(function(json) {
+      return {
+        create: function() {
+          return json;
+        }
+      };
+    });
+  }, {
+    lng: 'en'
+  });
   // generator-phovea:end
 };

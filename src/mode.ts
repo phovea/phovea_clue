@@ -2,6 +2,10 @@
  * Created by Samuel Gratzl on 01.09.2015.
  */
 
+import i18next from 'phovea_core/src/i18n';
+console.log(i18next.t('phovea:common.group'));
+console.log(i18next.t('phovea:common.query'));
+console.log(i18next.t('phovea:common.test.foo'));
 
 import {hash, mixin, onDOMNodeRemoved} from 'phovea_core/src';
 import {EventHandler, fire, IEvent} from 'phovea_core/src/event';
