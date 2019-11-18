@@ -20,10 +20,11 @@ import * as player from './player';
 import * as $ from 'jquery';
 import * as textPNG from './assets/text.png';
 import {resolveImmediately} from 'phovea_core/src';
+import i18next from 'i18next';
 
 
 interface ISlideNodeRepr {
-  id: number|string;
+  id: number | string;
   i?: number;
   isPlaceholder?: boolean;
   isLastPlaceholder?: boolean;
@@ -235,25 +236,25 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $node.html(`
       <div>
         <h2><i class="fa fa-video-camera"></i> Story <span id="player_controls">
-            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="Step Backward"></i>
-            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="Play"></i>
-            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="Step Forward"></i>
+            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${i18next.t('phovea:clue.storyvis.stepBackward')}"></i>
+            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${i18next.t('phovea:clue.storyvis.play')}"></i>
+            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${i18next.t('phovea:clue.storyvis.stepForward')}"></i>
           </span>
           <i class="fa fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
-            Select<span class="caret"></span>
+                  ${i18next.t('phovea:clue.storyvis.select')}<span class="caret"></span>
           </button>
           <ul class="dropdown-menu" id="story_list">
             <!--<li><a href="#">A</a></li>-->
           </ul>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
-          <button class="btn btn-default btn-xs" data-create="plus" title="create a new story"><i class="fa fa-plus"></i> New Story</button>
-          <button class="btn btn-default btn-xs" data-create="clone" title="create a new story by extracting the current path"><i class="fa fa-files-o"></i> Extract</button>
-          <button class="btn btn-default btn-xs" data-create="bookmark" title="create a new story by extracting all bookmarked ones"><i class="fa fa-bookmark"></i> Bookmarked</button>
+          <button class="btn btn-default btn-xs" data-create="plus" title="${i18next.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${i18next.t('phovea:clue.storyvis.newStory')}</button>
+          <button class="btn btn-default btn-xs" data-create="clone" title="${i18next.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${i18next.t('phovea:clue.storyvis.extract')}</button>
+          <button class="btn btn-default btn-xs" data-create="bookmark" title="${i18next.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${i18next.t('phovea:clue.storyvis.bookmarked')}</button>
         </div>
         </form>
       </div>
@@ -355,64 +356,64 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           return false;
         }
       }).on('dragover', (d) => {
-      if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
-        (<Event>d3.event).preventDefault();
-        C.updateDropEffect(<DragEvent>d3.event);
-        return false;
-      }
-    }).on('dragleave', function (d) {
-      d3.select(this).classed('hover', false);
-    }).on('drop', function (d) {
-      d3.select(this).classed('hover', false);
-      const e = <DragEvent>(<any>d3.event);
-      e.preventDefault();
-      const fullStory = provenance.toSlidePath(that.story);
-      const dStory = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
-      const insertIntoStory = (newSlide: provenance.SlideNode) => {
-        if (dStory == null) { //at the beginning
-          const bak = that.story;
-          that.story = newSlide;
-          if (bak) {
-            that.data.insertIntoSlide(newSlide, bak, true);
-          }
-        } else {
-          that.data.insertIntoSlide(newSlide, dStory, false);
+        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
+          (<Event>d3.event).preventDefault();
+          C.updateDropEffect(<DragEvent>d3.event);
+          return false;
         }
-        that.update();
-      };
-      if (C.hasDnDType(e, 'application/phovea-prov-state')) {
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'), 10));
-        insertIntoStory(that.data.wrapAsSlide(state));
-
-      } else if (C.hasDnDType(e, 'application/application/phovea-prov-story-text')) {
-        insertIntoStory(that.data.makeTextSlide());
-      } else if (C.hasDnDType(e, 'application/phovea-prov-story')) {
-        const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/phovea-prov-story'), 10));
-        if (fullStory.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
-          if (dStory == null) { //no self move
-            if (story !== that.story) {
-              const bak = that.story;
-              that.story = story;
-              that.data.moveSlide(story, bak, true);
-              that.update();
+      }).on('dragleave', function (d) {
+        d3.select(this).classed('hover', false);
+      }).on('drop', function (d) {
+        d3.select(this).classed('hover', false);
+        const e = <DragEvent>(<any>d3.event);
+        e.preventDefault();
+        const fullStory = provenance.toSlidePath(that.story);
+        const dStory = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
+        const insertIntoStory = (newSlide: provenance.SlideNode) => {
+          if (dStory == null) { //at the beginning
+            const bak = that.story;
+            that.story = newSlide;
+            if (bak) {
+              that.data.insertIntoSlide(newSlide, bak, true);
             }
           } else {
-            const ref = dStory;
-            if (ref !== story) {
-              //we might moved the first one
-              if (story === that.story) {
-                that.story = story.next;
-              }
-              that.data.moveSlide(story, ref, false);
-              that.update();
-            }
+            that.data.insertIntoSlide(newSlide, dStory, false);
           }
-        } else { //multi story move
-          insertIntoStory(that.data.cloneSingleSlideNode(story));
+          that.update();
+        };
+        if (C.hasDnDType(e, 'application/phovea-prov-state')) {
+          const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'), 10));
+          insertIntoStory(that.data.wrapAsSlide(state));
+
+        } else if (C.hasDnDType(e, 'application/application/phovea-prov-story-text')) {
+          insertIntoStory(that.data.makeTextSlide());
+        } else if (C.hasDnDType(e, 'application/phovea-prov-story')) {
+          const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/phovea-prov-story'), 10));
+          if (fullStory.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
+            if (dStory == null) { //no self move
+              if (story !== that.story) {
+                const bak = that.story;
+                that.story = story;
+                that.data.moveSlide(story, bak, true);
+                that.update();
+              }
+            } else {
+              const ref = dStory;
+              if (ref !== story) {
+                //we might moved the first one
+                if (story === that.story) {
+                  that.story = story.next;
+                }
+                that.data.moveSlide(story, ref, false);
+                that.update();
+              }
+            }
+          } else { //multi story move
+            insertIntoStory(that.data.cloneSingleSlideNode(story));
+          }
         }
-      }
-      return false;
-    });
+        return false;
+      });
   }
 
   private changeDuration($elem: d3.Selection<provenance.SlideNode>) {
@@ -507,7 +508,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         placeholder: 'Markdown supported...',
         multiline: true
       }).then((text) => {
-        if(text === null) {
+        if (text === null) {
           return; // dialog was closed without submitting the form
         }
         d.name = text;
@@ -602,9 +603,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $stories = this.$node.select('.dropdown-menu').selectAll('li').data(stories);
     $stories.enter().insert('li').append('a')
       .attr('href', '#').on('click', (d) => {
-      this.switchTo(d);
-      (<Event>d3.event).preventDefault();
-    });
+        this.switchTo(d);
+        (<Event>d3.event).preventDefault();
+      });
     $stories.select('a').text((d) => d.name);
 
     $stories.exit().remove();

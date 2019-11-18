@@ -14,6 +14,7 @@ import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list, IPluginDesc} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
+import i18next, {initializeI18next} from '../../phovea_core/src/i18n/index';
 
 const TEMPLATE = `<div class="box">
   <header>
@@ -55,11 +56,13 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
-  private storyVis: ()=>Promise<VerticalStoryVis>;
-  private provVis: ()=>Promise<LayoutedProvVis>;
+  private storyVis: () => Promise<VerticalStoryVis>;
+  private provVis: () => Promise<LayoutedProvVis>;
   private urlTracking = EUrlTracking.ENABLE;
 
-  protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
+  protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
+    await initializeI18next(); // wait for i18next to load locale files so you can use i18next.t() function
+
     if (options.replaceBody !== false) {
       body.innerHTML = TEMPLATE;
     } else {
@@ -124,7 +127,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     });
   }
 
-  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: ()=>Promise<VerticalStoryVis>, provVis: ()=>Promise<LayoutedProvVis>, manager: CLUEGraphManager};
+  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: () => Promise<VerticalStoryVis>, provVis: () => Promise<LayoutedProvVis>, manager: CLUEGraphManager};
 
   private handleModeChange() {
     const $right = <HTMLElement>document.querySelector('aside.provenance-layout-vis');
@@ -181,7 +184,7 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async nextSlide() {
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18next.t('phovea:clue.aClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.forward();
@@ -189,22 +192,22 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async previousSlide() {
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18next.t('phovea:clue.aClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.backward();
   }
 
   async jumpToStory(story: number, autoPlay = this.clueManager.isAutoPlay) {
-    console.log('jump to stored story', story);
+    console.log(i18next.t('phovea:clue.aClueWrapper.jumpToStoredStory'), story);
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18next.t('phovea:clue.aClueWrapper.noPlayerAvailable'));
     }
     const graph = await this.graph;
     const storyVis = await this.storyVis();
     const s = graph.getSlideById(story);
     if (s) {
-      console.log('jump to stored story', s.id);
+      console.log(i18next.t('phovea:clue.aClueWrapper.jumpToStoredStory'), s.id);
       this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       storyVis.switchTo(s);
       if (autoPlay) {
@@ -219,25 +222,25 @@ export abstract class ACLUEWrapper extends EventHandler {
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject('story not found');
+    return Promise.reject(i18next.t('phovea:clue.aClueWrapper.storyNotFound'));
   }
 
   async jumpToState(state: number) {
-    console.log('jump to stored state', state);
+    console.log(i18next.t('phovea:clue.aClueWrapper.jumpToStoredState'), state);
     const graph = await this.graph;
     const s = graph.getStateById(state);
     if (s) {
-      console.log('jump to stored', s.id);
+      console.log(i18next.t('phovea:clue.aClueWrapper.jumpToStored'), s.id);
       this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       await graph.jumpTo(s);
       this.urlTracking = EUrlTracking.ENABLE;
       this.clueManager.storedState = graph.act.id;
-      console.log('jumped to stored', s.id);
+      console.log(i18next.t('phovea:clue.aClueWrapper.jumpedToStored'), s.id);
       this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject('state not found');
+    return Promise.reject(i18next.t('phovea:clue.aClueWrapper.stateNotFound'));
   }
 
   jumpToStored() {

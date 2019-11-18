@@ -2,20 +2,17 @@
  * Created by Samuel Gratzl on 01.09.2015.
  */
 
-import i18next from 'phovea_core/src/i18n';
-console.log(i18next.t('phovea:common.group'));
-console.log(i18next.t('phovea:common.query'));
-console.log(i18next.t('phovea:common.test.foo'));
 
 import {hash, mixin, onDOMNodeRemoved} from 'phovea_core/src';
 import {EventHandler, fire, IEvent} from 'phovea_core/src/event';
+import i18next from 'phovea_core/src/i18n';
 
 /**
  * normalizes the given coordinates to sum up to one
  * @param arr
  * @returns {any}
  */
-function normalize(arr:[number, number, number]):[number, number, number] {
+function normalize(arr: [number, number, number]): [number, number, number] {
   const sum = arr.reduce((a, b) => a + b, 0);
   return <[number, number, number]>arr.map((i) => i / sum);
 }
@@ -24,9 +21,9 @@ function normalize(arr:[number, number, number]):[number, number, number] {
  * generic version of the CLUE mode, a combination of exploration, authoring, and normalization
  */
 export class CLUEMode {
-  private coord:[number, number, number];
+  private coord: [number, number, number];
 
-  constructor(exploration:number, authoring:number, presentation:number) {
+  constructor(exploration: number, authoring: number, presentation: number) {
     this.coord = normalize([exploration, authoring, presentation]);
   }
 
@@ -42,7 +39,7 @@ export class CLUEMode {
     return this.coord[2];
   }
 
-  value(index:number|string):number {
+  value(index: number | string): number {
     if (typeof index === 'number') {
       return this.coord[index];
     } else if (typeof index === 'string') {
@@ -70,7 +67,7 @@ export class CLUEMode {
     if (this.presentation === 1) {
       return 'P';
     }
-    return '(' + this.coord.map((s) => (Math.round(s* 1000)/1000).toString()).join('-') + ')';
+    return '(' + this.coord.map((s) => (Math.round(s * 1000) / 1000).toString()).join('-') + ')';
   }
 }
 
@@ -81,7 +78,7 @@ export class CLUEMode {
  * @param presentation
  * @returns {CLUEMode}
  */
-function mode(exploration:number, authoring:number, presentation:number) {
+function mode(exploration: number, authoring: number, presentation: number) {
   return new CLUEMode(exploration, authoring, presentation);
 }
 
@@ -95,7 +92,7 @@ export const modes = {
   Presentation: mode(0, 0, 1)
 };
 
-function fromString(s:string) {
+function fromString(s: string) {
   if (s === 'P') {
     return modes.Presentation;
   } else if (s === 'A') {
@@ -110,7 +107,7 @@ function fromString(s:string) {
 /**
  * returns the default mode either stored in the hash or by default exploration
  */
-function defaultMode():CLUEMode {
+function defaultMode(): CLUEMode {
   return fromString(hash.getProp('clue', 'E'));
 }
 
@@ -125,7 +122,7 @@ class ModeWrapper extends EventHandler {
     fire('clue.modeChanged', this._mode, this._mode);
   }
 
-  set mode(value:CLUEMode) {
+  set mode(value: CLUEMode) {
     if (this._mode === value) {
       return;
     }
@@ -161,7 +158,7 @@ export function getMode() {
  * set the mode
  * @param value
  */
-export function setMode(value:CLUEMode) {
+export function setMode(value: CLUEMode) {
   _instance.mode = value;
 }
 
@@ -177,11 +174,11 @@ export class ButtonModeSelector {
   };
   private readonly node: HTMLElement;
 
-  constructor(parent:Element, options:any = {}) {
+  constructor(parent: Element, options: any = {}) {
     mixin(this.options, options);
     this.node = this.build(parent);
 
-    const listener = (event:IEvent, newMode:CLUEMode) => {
+    const listener = (event: IEvent, newMode: CLUEMode) => {
       this.node.dataset.mode = newMode.toString();
       Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {
         const input = (<HTMLInputElement>label.firstElementChild!);
@@ -198,14 +195,14 @@ export class ButtonModeSelector {
 
   private build(parent: Element) {
     parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${getMode().toString()}">
-        <label class="btn btn-${this.options.size} clue-${modes.Exploration.toString()}${modes.Exploration === getMode()? ' active':''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Exploration.toString()}" ${modes.Exploration === getMode() ? 'checked="checked"' : ''}> Exploration
+        <label class="btn btn-${this.options.size} clue-${modes.Exploration.toString()}${modes.Exploration === getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Exploration.toString()}" ${modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.exploration')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${modes.Authoring.toString()}${modes.Authoring === getMode()? ' active':''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Authoring.toString()}" ${modes.Authoring === getMode() ? 'checked="checked"' : ''}> Authoring
+        <label class="btn btn-${this.options.size} clue-${modes.Authoring.toString()}${modes.Authoring === getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Authoring.toString()}" ${modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.authoring')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${modes.Presentation.toString()}${modes.Presentation === getMode()? ' active':''}">
-            <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Presentation.toString()}" ${modes.Presentation === getMode() ? 'checked="checked"' : ''}> Presentation
+        <label class="btn btn-${this.options.size} clue-${modes.Presentation.toString()}${modes.Presentation === getMode() ? ' active' : ''}">
+            <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Presentation.toString()}" ${modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.presentation')}
         </label>
     </div>`);
     Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {
@@ -374,7 +371,7 @@ export class ButtonModeSelector {
 // export function createTriangle(parent:Element, options:any = {}) {
 //   return new TriangleModeSelector(parent, options);
 // }
-export function createButton(parent:Element, options:any = {}) {
+export function createButton(parent: Element, options: any = {}) {
   return new ButtonModeSelector(parent, options);
 }
 //export function createSlider(parent:Element, options:any = {}) {

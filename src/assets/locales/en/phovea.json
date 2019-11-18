@@ -1,10 +1,81 @@
 {
-  "phovea": {
-    "common": {
-      "group": "Group from CLUE",
-      "test": {
-        "foo": "baz from CLUE"
-      }
+  "clue": {
+    "provenanceMenu": {
+      "import": "Import...",
+      "importRemote": "Import Remote ...",
+      "export": "Export ...",
+      "new": "New ...",
+      "newRemote": "New Remote...",
+      "selectFile": "Select File",
+      "upload": "Upload",
+      "selectFileToUpload": "Select File to Upload",
+      "created": "created",
+      "description": "description",
+      "nodes": "nodes",
+      "edges": "edges",
+      "clone": "Clone",
+      "delete": "Delete",
+      "areYouSureToDelete": "'Are you sure to delete"
+    },
+
+    "aClueWrapper": {
+      "noPlayerAvailable": "no player available",
+      "jumpToStoreStory": "jump to stored story",
+      "storyNotFound": "story not found",
+      "jumpToStoredState": "jump to stored state",
+      "jumpToStored": "jump to stored",
+      "jumpedToStored": "jumped to stored",
+      "stateNotFound": "state not found"
+    },
+    "annotation": {
+      "annotationPlaceholder": "Enter Text by Clicking (MarkDown supported)"
+    },
+    "clueGraphManager": {
+      "errorMessage": "Provenance Graph with id {{graphID}} not found"
+    },
+    "mode": {
+      "exploration": "Exploration",
+      "authoring": "Authoring",
+      "presentation": "Presentation"
+    },
+    "provvis": {
+      "showProvenanceGraph": "Show Provenance Graph",
+      "hideProvenanceGraph": "Hide Provenance Graph",
+      "provenance": "Provenance",
+      "bookmarkThisState": "bookmark this state for latter use",
+      "name": "name",
+      "nameCapitalized": "Name",
+      "notesCapitalized": "Notes",
+      "notesPlaceholder": "place for notes... (#tags will be automatically extracted)",
+      "extractedTags": "Extracted Tags",
+      "dataActions": "data actions",
+      "visualActions": "visual actions",
+      "selectionActions": "selection actions",
+      "layoutActions": "layout actions",
+      "createActions": "create actions",
+      "updateActions": "update actions",
+      "removeActions": "remove actions",
+      "taggedStates": "tagged states",
+      "tags": "tags",
+      "data": "Data",
+      "visual": "Visual",
+      "selections": "Selections",
+      "layout": "Layout",
+      "analysis": "Analysis",
+      "logicActions": "logic actions"
+    },
+    "storyvis": {
+      "story": "Story",
+      "stepBackward": "Step Backward",
+      "play": "Play",
+      "stepForward": "Step Forward",
+      "select": "Select",
+      "newStory": "New Story",
+      "newStoryLabel": "Create New Story",
+      "extract": "Extract",
+      "extractLabel": "Create New Story by extracting the current path",
+      "bookmarked":"Bookmarked",
+      "bookmarkedLabel":"Create New Story by extracting all bookmarked ones"
     }
   }
 }
