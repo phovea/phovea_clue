@@ -16,13 +16,14 @@
       "selectFile": "Select File",
       "upload": "Upload",
       "selectFileToUpload": "Select File to Upload",
-      "created": "created",
-      "description": "description",
-      "nodes": "nodes",
-      "edges": "edges",
+      "creator": "creator:",
+      "created": "created:",
+      "description": "description:",
+      "nodes": "nodes/edges:",
       "clone": "Clone",
       "delete": "Delete",
-      "areYouSureToDelete": "'Are you sure to delete"
+      "select": "Select",
+      "areYouSureToDelete": "Are you sure to delete"
     },
 
     "ClueWrapper": {

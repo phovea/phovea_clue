@@ -168,15 +168,15 @@ export default class ProvenanceGraphMenu {
                 <div class="col-sm-9">${creator}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.created')}:</div>
+                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.created')}</div>
                 <div class="col-sm-9">${ts}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.description')}:</div>
+                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.description')}</div>
                 <div class="col-sm-9">${description}</div>
             </div>
             <div class="row">
-                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.nodes')}/${i18next.t('phovea:clue.provenanceMenu.edges')}:</div>
+                <div class="col-sm-3">${i18next.t('phovea:clue.provenanceMenu.nodes')}</div>
                 <div class="col-sm-9">${nnodes}/${nedges}</div>
             </div>
             <div class="row">
@@ -188,7 +188,7 @@ export default class ProvenanceGraphMenu {
             </div>
         </div>`);
         $elem.find('button.btn-danger').on('click', () => {
-          areyousure(`${i18next.t('phovea:clue.provenanceMenu.edges')}: "` + graph.name + '"').then((deleteIt) => {
+          areyousure(`${i18next.t('phovea:clue.provenanceMenu.areYouSureToDelete')}: "` + graph.name + '"').then((deleteIt) => {
             if (deleteIt) {
               manager.delete(graph);
             }
