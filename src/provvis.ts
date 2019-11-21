@@ -359,15 +359,12 @@ class StateRepr {
       $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
     $(dia.footer).find('button.btn-primary').on('click', function () {
-      dia.hide();
-    });
-
-    dia.onHide(() => {
       const name = $body.select('input').property('value');
       d.s.name = name;
       const val =  $body.select('textarea').property('value');
       d.s.setAttr('tags', extractTags(val));
       d.s.setAttr('note', val);
+      dia.hide();
     });
     dia.show();
   }
