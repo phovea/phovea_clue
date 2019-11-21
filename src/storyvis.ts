@@ -234,7 +234,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
       <div>
-        <h2><i class="fa fa-video-camera"></i> Story <span id="player_controls">
+        <h2><i class="fa fa-video-camera"></i> ${i18next.t('phovea:clue.storyvis.story')} <span id="player_controls">
             <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${i18next.t('phovea:clue.storyvis.stepBackward')}"></i>
             <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${i18next.t('phovea:clue.storyvis.play')}"></i>
             <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${i18next.t('phovea:clue.storyvis.stepForward')}"></i>
@@ -556,7 +556,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $p.html(`<div>
-       <button class="btn btn-default btn-xs" data-add="text" title="${i18next.t('phovea:clue.storyvis.addTextStyle')}"><i class="fa fa-file-text-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="text" title="${i18next.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract" title="${i18next.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
        <button class="btn btn-default btn-xs" data-add="extract_all" title="${i18next.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
        </div>
