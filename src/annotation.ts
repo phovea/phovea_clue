@@ -245,7 +245,7 @@ export class Renderer {
   private rendererImpl(d: string): string {
     if (modeFeatures.isEditable() && d.length === 0) {
       //return placeholder
-      return `<i class="placeholder">${i18next.t('phovea:clue.annotation:annotationPlaceholder')}</i>`;
+      return `<i class="placeholder">${i18next.t('phovea:clue.annotationPlaceholder')}</i>`;
     }
     //replace variables within the text
     if (this.act) {

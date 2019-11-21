@@ -19,8 +19,7 @@ import * as marked from 'marked';
 import * as player from './player';
 import * as $ from 'jquery';
 import * as textPNG from './assets/text.png';
-import {resolveImmediately} from 'phovea_core/src';
-import i18next from 'i18next';
+import i18next from 'phovea_core/src/i18n';
 
 
 interface ISlideNodeRepr {
@@ -259,9 +258,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         </form>
       </div>
       <div class="current">
-        <input type="text" class="form-control" placeholder="slide name" disabled="disabled">
+        <input type="text" class="form-control" placeholder="${i18next.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
         <div class="name"></div>
-        <textarea class="form-control" placeholder="slide description" disabled="disabled"></textarea>
+        <textarea class="form-control" placeholder="${i18next.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>
         <div class="description"></div>
       </div>
       <div class="stories ${this.options.class}">
@@ -277,15 +276,15 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       let story;
       switch (create) {
         case 'plus':
-          story = that.data.startNewSlide('Welcome');
+          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.welcome'));
           break;
         case 'clone':
           const state = that.data.selectedStates()[0] || that.data.act;
-          story = that.data.startNewSlide('My story to ' + (state ? state.name : 'heaven'), state ? state.path : []);
+          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.myStoryTo') + (state ? state.name : i18next.t('phovea:clue.storyvis.heaven')), state ? state.path : []);
           break;
         case 'bookmark':
           const states = that.data.states.filter((d) => d.getAttr('starred', false));
-          story = that.data.startNewSlide('My favorite findings', states);
+          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.myFavoriteFindings'), states);
           break;
       }
       that.switchTo(story);
@@ -504,8 +503,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       e.stopPropagation();
       e.preventDefault();
       dialogs.prompt(d.name, {
-        title: 'Edit name',
-        placeholder: 'Markdown supported...',
+        title: i18next.t('phovea:clue.storyvis.editName'),
+        placeholder: i18next.t('phovea:clue.storyvis.markdownSupported'),
         multiline: true
       }).then((text) => {
         if (text === null) {
@@ -518,7 +517,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
 
-    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', 'clone slide').on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', i18next.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -537,7 +536,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
      return false;
      });
      */
-    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', 'remove slide').on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', i18next.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -557,9 +556,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $p.html(`<div>
-       <button class="btn btn-default btn-xs" data-add="text" title="add text slide"><i class="fa fa-file-text-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract" title="add current state"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract_all" title="add path to current state"><i class="fa fa-files-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="text" title="${i18next.t('phovea:clue.storyvis.addTextStyle')}"><i class="fa fa-file-text-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract" title="${i18next.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract_all" title="${i18next.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
        </div>
        <div class="duration"><span>00:00</span><i class="fa fa-circle"></i></div>
       `);
@@ -570,9 +569,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       switch (create) {
         case 'text':
           if (last) {
-            that.data.moveSlide(that.data.makeTextSlide('Unnamed'), last, false);
+            that.data.moveSlide(that.data.makeTextSlide(i18next.t('phovea:clue.storyvis.unnamed')), last, false);
           } else {
-            that.story = that.data.startNewSlide('Welcome');
+            that.story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.welcome'));
           }
           break;
         case 'extract':

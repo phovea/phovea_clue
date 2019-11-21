@@ -195,7 +195,7 @@ export default class CLUEGraphManager extends EventHandler {
     }
     // not found
     if (rejectOnNotFound) {
-      return Promise.reject({graph, msg: i18next.t('phovea:clue.clueGraphManager.errorMessage', {graphID: graph})});
+      return Promise.reject({graph, msg: i18next.t('phovea:clue.errorMessage', {graphID: graph})});
     }
     if (useInMemoryGraph()) {
       return resolveImmediately(this.manager.createInMemory());

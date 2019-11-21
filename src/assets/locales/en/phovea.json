@@ -1,5 +1,12 @@
 {
   "clue": {
+
+    "annotationPlaceholder": "Enter Text by Clicking (MarkDown supported)",
+    "errorMessage": "Provenance Graph with id {{graphID}} not found",
+    "exploration": "Exploration",
+    "authoring": "Authoring",
+    "presentation": "Presentation",
+
     "provenanceMenu": {
       "import": "Import...",
       "importRemote": "Import Remote ...",
@@ -18,7 +25,7 @@
       "areYouSureToDelete": "'Are you sure to delete"
     },
 
-    "aClueWrapper": {
+    "ClueWrapper": {
       "noPlayerAvailable": "no player available",
       "jumpToStoreStory": "jump to stored story",
       "storyNotFound": "story not found",
@@ -27,17 +34,7 @@
       "jumpedToStored": "jumped to stored",
       "stateNotFound": "state not found"
     },
-    "annotation": {
-      "annotationPlaceholder": "Enter Text by Clicking (MarkDown supported)"
-    },
-    "clueGraphManager": {
-      "errorMessage": "Provenance Graph with id {{graphID}} not found"
-    },
-    "mode": {
-      "exploration": "Exploration",
-      "authoring": "Authoring",
-      "presentation": "Presentation"
-    },
+
     "provvis": {
       "showProvenanceGraph": "Show Provenance Graph",
       "hideProvenanceGraph": "Hide Provenance Graph",
@@ -64,6 +61,7 @@
       "analysis": "Analysis",
       "logicActions": "logic actions"
     },
+
     "storyvis": {
       "story": "Story",
       "stepBackward": "Step Backward",
@@ -74,8 +72,22 @@
       "newStoryLabel": "Create New Story",
       "extract": "Extract",
       "extractLabel": "Create New Story by extracting the current path",
-      "bookmarked":"Bookmarked",
-      "bookmarkedLabel":"Create New Story by extracting all bookmarked ones"
+      "bookmarked": "Bookmarked",
+      "bookmarkedLabel": "Create New Story by extracting all bookmarked ones",
+      "slideName": "slide name",
+      "slideDescription": "slide description",
+      "welcome": "Welcome",
+      "myStoryTo": "My story to ",
+      "heaven": "heaven",
+      "myFavoriteFindings": "My favorite findings",
+      "editName": "Edit name",
+      "markdownSupported": "Markdown supported...",
+      "cloneSlide": "clone slide",
+      "removeSlide": "remove slide",
+      "addTextSlide": "add text slide",
+      "addCurrentState": "add current state",
+      "addPathToCurrentState": "add path to current state",
+      "unnamed": "Unnamed"
     }
   }
 }

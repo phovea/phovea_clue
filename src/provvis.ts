@@ -15,7 +15,7 @@ import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 
 import * as utils from './utils';
-import i18next from 'i18next';
+import i18next from 'phovea_core/src/i18n';
 
 
 function extractTags(text: string) {

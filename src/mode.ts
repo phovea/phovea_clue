@@ -196,13 +196,13 @@ export class ButtonModeSelector {
   private build(parent: Element) {
     parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${getMode().toString()}">
         <label class="btn btn-${this.options.size} clue-${modes.Exploration.toString()}${modes.Exploration === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Exploration.toString()}" ${modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.exploration')}
+           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Exploration.toString()}" ${modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.exploration')}
         </label>
         <label class="btn btn-${this.options.size} clue-${modes.Authoring.toString()}${modes.Authoring === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Authoring.toString()}" ${modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.authoring')}
+           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Authoring.toString()}" ${modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.authoring')}
         </label>
         <label class="btn btn-${this.options.size} clue-${modes.Presentation.toString()}${modes.Presentation === getMode() ? ' active' : ''}">
-            <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Presentation.toString()}" ${modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.mode.presentation')}
+            <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Presentation.toString()}" ${modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18next.t('phovea:clue.presentation')}
         </label>
     </div>`);
     Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {
