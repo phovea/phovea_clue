@@ -9,9 +9,9 @@
 
     "provenanceMenu": {
       "import": "Import...",
-      "importRemote": "Import Remote ...",
-      "export": "Export ...",
-      "new": "New ...",
+      "importRemote": "Import Remote...",
+      "export": "Export...",
+      "new": "New...",
       "newRemote": "New Remote...",
       "selectFile": "Select File",
       "upload": "Upload",
