@@ -541,7 +541,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
 
     $p
-      .classed('collapsed', this.options.provVisCollapsed)
+      .classed('hidden', this.options.provVisCollapsed)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     if (this.options.hideCLUEButtonsOnCollapse && this.options.provVisCollapsed) {
@@ -551,7 +551,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     $p.html(`
       <div class="header">
         <h2>
-          <i class="fa fa-code-fork fa-rotate-180"></i> Current Session History 
+          <i class="fa fa-code-fork fa-rotate-180"></i> Current Session History
           <button type="button" class="close" aria-label="Close" title="Close history panel"><span aria-hidden="true">×</span></button>
           <a href="#" class="btn-filter" title="Filter current session history"><i class="fa fa-filter"></i></a>
         </h2>
