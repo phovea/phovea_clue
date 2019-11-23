@@ -27,6 +27,7 @@ interface IProvRetrievalPanelOptions {
   captureNonPersistedStates?: boolean;
   rotate?: number;
   app?: IVisStateApp;
+  startCollapsed?: boolean;
 }
 
 /**
@@ -58,6 +59,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     captureNonPersistedStates: ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES,
     rotate: 0,
     app: null,
+    startCollapsed: false
   };
 
   private executedFirstListener = ((evt: any, action: ActionNode, state: StateNode) => {
@@ -244,13 +246,13 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
     const $p = $parent.append('aside')
     //.classed('provenance-layout-vis', true)
-    //.classed('hidden', true)
+      .classed('hidden', this.options.startCollapsed)
       .classed(asideName, true)
       .style('transform', 'rotate(' + this.options.rotate + 'deg)');
 
     $p.html(`
       <div class="header">
-        <h2><i class="fa fa-search"></i> Search in Current Session 
+        <h2><i class="fa fa-search"></i> Search in Current Session
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
         <a href="#" class="hidden btn-return-to-last-state" title="Return to the state you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
       </div>
@@ -261,19 +263,19 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <select multiple style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
             <div class="btn-group hidden">
               <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-cog" aria-hidden="true"></i> 
+                <i class="fa fa-cog" aria-hidden="true"></i>
               </a>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li><span>Search term suggestions based on &hellip;</span></li> 
+                <li><span>Search term suggestions based on &hellip;</span></li>
                 <li class="active"><a href="#" class="suggestion-filter-all">Whole history</a></li>
-                <li class=""><a href="#" class="suggestion-filter-active"><span>Active session state only</span></a></li> 
+                <li class=""><a href="#" class="suggestion-filter-active"><span>Active session state only</span></a></li>
               </ul>
             </div>
           </div>
         </form>
         <div id="prov-retrieval-weighting-editor">
           <ul class="terms">
-            <li class="remove-all" data-tooltip="Remove all">×</li>    
+            <li class="remove-all" data-tooltip="Remove all">×</li>
           </ul>
           <ul class="weighting-editor"></ul>
           <div class="number-of-results"></div>
@@ -324,7 +326,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             <p><a class="yes btn btn-default" href="#"><i class="fa fa-step-backward" aria-hidden="true"></i>
  Yes, please bring me back!</a></p>
             <p><a class="no" href="#">No, thanks. Hide this message.</a></p>
-          </div>  
+          </div>
           <p class="start-searching">Enter a search term to find similar views.</p>
         </div>
       </div>
