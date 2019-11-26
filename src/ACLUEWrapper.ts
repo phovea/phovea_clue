@@ -16,7 +16,7 @@ import {list, IPluginDesc} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
 import i18n, {initializeI18next} from 'phovea_core/src/i18n/index';
 
-const TEMPLATE = `<div class="box">
+const getTemplate = () => `<div class="box">
   <header>
 
   </header>
@@ -25,7 +25,7 @@ const TEMPLATE = `<div class="box">
     <!--annotation toolbar-->
     <aside class="annotations" style="display:none">
       <div>
-        <h2>Annotations</h2>
+        <h2>${i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
       </div>
       <div class="btn-group" role="group" aria-label="annotations">
         <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
@@ -53,7 +53,6 @@ enum EUrlTracking {
 export abstract class ACLUEWrapper extends EventHandler {
   static readonly EVENT_MODE_CHANGED = 'modeChanged';
   static readonly EVENT_JUMPED_TO = 'jumped_to';
-
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
   private storyVis: () => Promise<VerticalStoryVis>;
@@ -62,11 +61,11 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
     await initializeI18next(); // wait for i18next to load locale files so you can use i18n.t() function
-
+    console.log(getTemplate())
     if (options.replaceBody !== false) {
-      body.innerHTML = TEMPLATE;
+      body.innerHTML = getTemplate();
     } else {
-      body.insertAdjacentHTML('afterbegin', TEMPLATE);
+      body.insertAdjacentHTML('afterbegin', getTemplate());
     }
     handleMagicHashElements(body, this);
     const {graph, storyVis, manager, provVis} = this.buildImpl(body);

@@ -23,12 +23,13 @@
       "clone": "Clone",
       "delete": "Delete",
       "select": "Select",
-      "areYouSureToDelete": "Are you sure to delete"
+      "areYouSureToDelete": "Are you sure to delete: \""
     },
 
     "ClueWrapper": {
+      "annotations": "Annotations",
       "noPlayerAvailable": "no player available",
-      "jumpToStoreStory": "jump to stored story",
+      "jumpToStoredStory": "jump to stored story",
       "storyNotFound": "story not found",
       "jumpToStoredState": "jump to stored state",
       "jumpToStored": "jump to stored",
@@ -40,7 +41,7 @@
       "showProvenanceGraph": "Show Provenance Graph",
       "hideProvenanceGraph": "Hide Provenance Graph",
       "provenance": "Provenance",
-      "bookmarkThisState": "bookmark this state for latter use",
+      "bookmarkThisState": "bookmark this state for later use",
       "name": "name",
       "nameCapitalized": "Name",
       "notesCapitalized": "Notes",
