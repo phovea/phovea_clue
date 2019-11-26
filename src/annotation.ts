@@ -10,7 +10,7 @@ import * as marked from 'marked';
 import {defaultSelectionType} from 'phovea_core/src/idtype';
 import * as player from './player';
 import {resolveImmediately} from 'phovea_core/src';
-import i18next from 'phovea_core/src/i18n';
+import i18n from 'phovea_core/src/i18n';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -245,7 +245,7 @@ export class Renderer {
   private rendererImpl(d: string): string {
     if (modeFeatures.isEditable() && d.length === 0) {
       //return placeholder
-      return `<i class="placeholder">${i18next.t('phovea:clue.annotationPlaceholder')}</i>`;
+      return `<i class="placeholder">${i18n.t('phovea:clue.annotationPlaceholder')}</i>`;
     }
     //replace variables within the text
     if (this.act) {

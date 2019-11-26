@@ -19,7 +19,7 @@ import * as marked from 'marked';
 import * as player from './player';
 import * as $ from 'jquery';
 import * as textPNG from './assets/text.png';
-import i18next from 'phovea_core/src/i18n';
+import i18n from 'phovea_core/src/i18n';
 
 
 interface ISlideNodeRepr {
@@ -234,33 +234,33 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
       <div>
-        <h2><i class="fa fa-video-camera"></i> ${i18next.t('phovea:clue.storyvis.story')} <span id="player_controls">
-            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${i18next.t('phovea:clue.storyvis.stepBackward')}"></i>
-            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${i18next.t('phovea:clue.storyvis.play')}"></i>
-            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${i18next.t('phovea:clue.storyvis.stepForward')}"></i>
+        <h2><i class="fa fa-video-camera"></i> ${i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
+            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
+            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${i18n.t('phovea:clue.storyvis.play')}"></i>
+            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${i18n.t('phovea:clue.storyvis.stepForward')}"></i>
           </span>
           <i class="fa fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
-                  ${i18next.t('phovea:clue.storyvis.select')}<span class="caret"></span>
+                  ${i18n.t('phovea:clue.storyvis.select')}<span class="caret"></span>
           </button>
           <ul class="dropdown-menu" id="story_list">
             <!--<li><a href="#">A</a></li>-->
           </ul>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
-          <button class="btn btn-default btn-xs" data-create="plus" title="${i18next.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${i18next.t('phovea:clue.storyvis.newStory')}</button>
-          <button class="btn btn-default btn-xs" data-create="clone" title="${i18next.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${i18next.t('phovea:clue.storyvis.extract')}</button>
-          <button class="btn btn-default btn-xs" data-create="bookmark" title="${i18next.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${i18next.t('phovea:clue.storyvis.bookmarked')}</button>
+          <button class="btn btn-default btn-xs" data-create="plus" title="${i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${i18n.t('phovea:clue.storyvis.newStory')}</button>
+          <button class="btn btn-default btn-xs" data-create="clone" title="${i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${i18n.t('phovea:clue.storyvis.extract')}</button>
+          <button class="btn btn-default btn-xs" data-create="bookmark" title="${i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${i18n.t('phovea:clue.storyvis.bookmarked')}</button>
         </div>
         </form>
       </div>
       <div class="current">
-        <input type="text" class="form-control" placeholder="${i18next.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
+        <input type="text" class="form-control" placeholder="${i18n.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
         <div class="name"></div>
-        <textarea class="form-control" placeholder="${i18next.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>
+        <textarea class="form-control" placeholder="${i18n.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>
         <div class="description"></div>
       </div>
       <div class="stories ${this.options.class}">
@@ -276,15 +276,15 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       let story;
       switch (create) {
         case 'plus':
-          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.welcome'));
+          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.welcome'));
           break;
         case 'clone':
           const state = that.data.selectedStates()[0] || that.data.act;
-          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.myStoryTo') + (state ? state.name : i18next.t('phovea:clue.storyvis.heaven')), state ? state.path : []);
+          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.myStoryTo') + (state ? state.name : i18n.t('phovea:clue.storyvis.heaven')), state ? state.path : []);
           break;
         case 'bookmark':
           const states = that.data.states.filter((d) => d.getAttr('starred', false));
-          story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.myFavoriteFindings'), states);
+          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.myFavoriteFindings'), states);
           break;
       }
       that.switchTo(story);
@@ -503,8 +503,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       e.stopPropagation();
       e.preventDefault();
       dialogs.prompt(d.name, {
-        title: i18next.t('phovea:clue.storyvis.editName'),
-        placeholder: i18next.t('phovea:clue.storyvis.markdownSupported'),
+        title: i18n.t('phovea:clue.storyvis.editName'),
+        placeholder: i18n.t('phovea:clue.storyvis.markdownSupported'),
         multiline: true
       }).then((text) => {
         if (text === null) {
@@ -517,7 +517,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
 
-    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', i18next.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', i18n.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -536,7 +536,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
      return false;
      });
      */
-    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', i18next.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', i18n.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -556,9 +556,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $p.html(`<div>
-       <button class="btn btn-default btn-xs" data-add="text" title="${i18next.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract" title="${i18next.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract_all" title="${i18next.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="text" title="${i18n.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract" title="${i18n.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract_all" title="${i18n.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
        </div>
        <div class="duration"><span>00:00</span><i class="fa fa-circle"></i></div>
       `);
@@ -569,9 +569,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       switch (create) {
         case 'text':
           if (last) {
-            that.data.moveSlide(that.data.makeTextSlide(i18next.t('phovea:clue.storyvis.unnamed')), last, false);
+            that.data.moveSlide(that.data.makeTextSlide(i18n.t('phovea:clue.storyvis.unnamed')), last, false);
           } else {
-            that.story = that.data.startNewSlide(i18next.t('phovea:clue.storyvis.welcome'));
+            that.story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.welcome'));
           }
           break;
         case 'extract':

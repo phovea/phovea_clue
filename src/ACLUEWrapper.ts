@@ -14,7 +14,7 @@ import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list, IPluginDesc} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
-import i18next, {initializeI18next} from 'phovea_core/src/i18n/index';
+import i18n, {initializeI18next} from 'phovea_core/src/i18n/index';
 
 const TEMPLATE = `<div class="box">
   <header>
@@ -61,7 +61,7 @@ export abstract class ACLUEWrapper extends EventHandler {
   private urlTracking = EUrlTracking.ENABLE;
 
   protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
-    await initializeI18next(); // wait for i18next to load locale files so you can use i18next.t() function
+    await initializeI18next(); // wait for i18next to load locale files so you can use i18n.t() function
 
     if (options.replaceBody !== false) {
       body.innerHTML = TEMPLATE;
@@ -184,7 +184,7 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async nextSlide() {
     if (!this.storyVis) {
-      return Promise.reject(i18next.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.forward();
@@ -192,16 +192,16 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async previousSlide() {
     if (!this.storyVis) {
-      return Promise.reject(i18next.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.backward();
   }
 
   async jumpToStory(story: number, autoPlay = this.clueManager.isAutoPlay) {
-    console.log(i18next.t('phovea:clue.ClueWrapper.jumpToStoredStory'), story);
+    console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStoredStory'), story);
     if (!this.storyVis) {
-      return Promise.reject(i18next.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const graph = await this.graph;
     const storyVis = await this.storyVis();
@@ -221,25 +221,25 @@ export abstract class ACLUEWrapper extends EventHandler {
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject(i18next.t('phovea:clue.ClueWrapper.storyNotFound'));
+    return Promise.reject(i18n.t('phovea:clue.ClueWrapper.storyNotFound'));
   }
 
   async jumpToState(state: number) {
-    console.log(i18next.t('phovea:clue.ClueWrapper.jumpToStoredState'), state);
+    console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStoredState'), state);
     const graph = await this.graph;
     const s = graph.getStateById(state);
     if (s) {
-      console.log(i18next.t('phovea:clue.ClueWrapper.jumpToStored'), s.id);
+      console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStored'), s.id);
       this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       await graph.jumpTo(s);
       this.urlTracking = EUrlTracking.ENABLE;
       this.clueManager.storedState = graph.act.id;
-      console.log(i18next.t('phovea:clue.ClueWrapper.jumpedToStored'), s.id);
+      console.log(i18n.t('phovea:clue.ClueWrapper.jumpedToStored'), s.id);
       this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject(i18next.t('phovea:clue.ClueWrapper.stateNotFound'));
+    return Promise.reject(i18n.t('phovea:clue.ClueWrapper.stateNotFound'));
   }
 
   jumpToStored() {
