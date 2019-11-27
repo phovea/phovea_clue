@@ -14,7 +14,7 @@ import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list, IPluginDesc} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
-import i18n, {initializeI18next} from 'phovea_core/src/i18n/index';
+import i18n, {initializeI18n} from 'phovea_core/src/i18n/index';
 
 const getTemplate = () => `<div class="box">
   <header>
@@ -28,11 +28,11 @@ const getTemplate = () => `<div class="box">
         <h2>${i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
       </div>
       <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addTextAnnotations')}" data-ann="text"><i class="fa fa-font"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fa fa-arrow-right"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="fa fa-square-o"></i>
         </button>
       </div>
     </aside>
@@ -60,8 +60,8 @@ export abstract class ACLUEWrapper extends EventHandler {
   private urlTracking = EUrlTracking.ENABLE;
 
   protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
-    await initializeI18next(); // wait for i18next to load locale files so you can use i18n.t() function
-    console.log(getTemplate())
+    await initializeI18n(); // wait for i18n to load locale files so you can use i18n.t() function
+
     if (options.replaceBody !== false) {
       body.innerHTML = getTemplate();
     } else {

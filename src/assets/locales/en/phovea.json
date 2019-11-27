@@ -28,6 +28,9 @@
 
     "ClueWrapper": {
       "annotations": "Annotations",
+      "addTextAnnotation": "add text annotation",
+      "addArrow": "add arrow",
+      "addFrame": "add frame",
       "noPlayerAvailable": "no player available",
       "jumpToStoredStory": "jump to stored story",
       "storyNotFound": "story not found",
