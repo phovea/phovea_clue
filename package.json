@@ -1,7 +1,6 @@
 {
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
-  "homepage": "http://vistories.org",
   "version": "2.3.1-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
@@ -9,6 +8,7 @@
     "url": "https://caleydo.org"
   },
   "license": "BSD-3-Clause",
+  "homepage": "http://vistories.org",
   "bugs": {
     "url": "https://github.com/phovea/phovea_clue/issues"
   },
