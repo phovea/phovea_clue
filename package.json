@@ -1,4 +1,21 @@
 {
+  "name": "phovea_clue",
+  "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
+  "homepage": "http://vistories.org",
+  "version": "2.3.1-SNAPSHOT",
+  "author": {
+    "name": "The Caleydo Team",
+    "email": "contact@caleydo.org",
+    "url": "https://caleydo.org"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/phovea/phovea_clue/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phovea/phovea_clue.git"
+  },
   "files": [
     "src",
     "index.js",
@@ -64,23 +81,6 @@
     "phovea_ui": "github:phovea/phovea_ui#develop",
     "phovea_core": "github:phovea/phovea_core#develop",
     "phovea_security_flask": "github:phovea/phovea_security_flask#develop"
-  },
-  "name": "phovea_clue",
-  "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
-  "homepage": "http://vistories.org",
-  "version": "2.3.1-SNAPSHOT",
-  "author": {
-    "name": "The Caleydo Team",
-    "email": "contact@caleydo.org",
-    "url": "https://caleydo.org"
-  },
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/phovea/phovea_clue/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/phovea/phovea_clue.git"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
