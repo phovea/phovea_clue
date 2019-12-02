@@ -14,7 +14,7 @@ import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list, IPluginDesc} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
-import i18n, {initializeI18n} from 'phovea_core/src/i18n/index';
+import i18n, {initI18n} from 'phovea_core/src/i18n/index';
 
 const getTemplate = () => `<div class="box">
   <header>
@@ -60,7 +60,7 @@ export abstract class ACLUEWrapper extends EventHandler {
   private urlTracking = EUrlTracking.ENABLE;
 
   protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
-    await initializeI18n(); // wait for i18n to load locale files so you can use i18n.t() function
+    await initI18n(); // wait for i18n to load locale files so you can use i18n.t() function
 
     if (options.replaceBody !== false) {
       body.innerHTML = getTemplate();
