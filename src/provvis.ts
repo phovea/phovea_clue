@@ -358,7 +358,7 @@ class StateRepr {
     $body.select('textarea').on('input', function() {
       $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
-    $(dia.footer).find('button.btn-primary').on('click', function () {
+    dia.footer.querySelector('button.btn-primary').addEventListener('click', function () {
       const name = $body.select('input').property('value');
       d.s.name = name;
       const val =  $body.select('textarea').property('value');
