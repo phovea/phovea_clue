@@ -188,7 +188,7 @@ export default class ProvenanceGraphMenu {
             </div>
         </div>`);
         $elem.find('button.btn-danger').on('click', () => {
-          areyousure(i18n.t('phovea:clue.provenanceMenu.areYouSureToDelete') + graph.name + '"').then((deleteIt) => {
+          areyousure(i18n.t('phovea:clue.provenanceMenu.areYouSureToDelete', {name: graph.name})).then((deleteIt) => {
             if (deleteIt) {
               manager.delete(graph);
             }

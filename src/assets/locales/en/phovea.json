@@ -23,7 +23,7 @@
       "clone": "Clone",
       "delete": "Delete",
       "select": "Select",
-      "areYouSureToDelete": "Are you sure to delete: \""
+      "areYouSureToDelete": "Are you sure to delete: \"{{name}}\""
     },
 
     "ClueWrapper": {
