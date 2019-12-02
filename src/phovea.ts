@@ -1,4 +1,5 @@
 import {IRegistry, asResource} from 'phovea_core/src/plugin';
+import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from 'phovea_core/src/extensions';
 
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return System.import('./extension_impl'); }, {});
@@ -26,10 +27,10 @@ export default function (registry: IRegistry) {
   });
   /// #endif
 
-  registry.push('epPhoveaCoreLocale', 'phoveaClueLocaleEN', function () {
+  registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaClueLocaleEN', function () {
     return System.import('./assets/locales/en/phovea.json').then(asResource);
-  }, {
-      ns: 'phovea',
-    });
+  }, <ILocaleEPDesc>{
+    ns: 'phovea',
+  });
   // generator-phovea:end
 }
