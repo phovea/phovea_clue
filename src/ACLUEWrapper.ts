@@ -60,8 +60,6 @@ export abstract class ACLUEWrapper extends EventHandler {
   private urlTracking = EUrlTracking.ENABLE;
 
   protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
-    await initI18n(); // wait for i18n to load locale files so you can use i18n.t() function
-
     if (options.replaceBody !== false) {
       body.innerHTML = getTemplate();
     } else {
