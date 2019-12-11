@@ -327,7 +327,7 @@ class StateRepr {
     const d = this;
     const icon = StateRepr.toIcon(d);
     const title = d.s.name;
-      const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
+    const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
 
     const thumbnail = utils.thumbnail_url(d.graph, d.s, { width: 512, format: 'png' });
     const notes = d.s.getAttr('note', '');
@@ -358,13 +358,13 @@ class StateRepr {
     $body.select('textarea').on('input', function() {
       $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
-
-    dia.onHide(() => {
+    dia.footer.querySelector('button.btn-primary').addEventListener('click', function () {
       const name = $body.select('input').property('value');
       d.s.name = name;
       const val =  $body.select('textarea').property('value');
       d.s.setAttr('tags', extractTags(val));
       d.s.setAttr('note', val);
+      dia.hide();
     });
     dia.show();
   }
