@@ -12,9 +12,9 @@ import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
-import {list, IPluginDesc} from 'phovea_core/src/plugin';
+import {list} from 'phovea_core/src/plugin';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from './extensions';
-import i18n, {initI18n} from 'phovea_core/src/i18n/index';
+import i18n from 'phovea_core/src/i18n/index';
 
 const getTemplate = () => `<div class="box">
   <header>
