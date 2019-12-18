@@ -78,9 +78,9 @@
     "@types/marked": "0.3.0",
     "d3": "~3.5.17",
     "marked": "0.3.9",
-    "phovea_ui": "github:phovea/phovea_ui#develop",
+    "phovea_ui": "github:phovea/phovea_ui#thinkh/provenance_retrieval",
     "phovea_core": "github:phovea/phovea_core#thinkh/provenance_retrieval",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#develop"
+    "phovea_security_flask": "github:phovea/phovea_security_flask#thinkh/provenance_retrieval"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
