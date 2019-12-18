@@ -8,10 +8,10 @@ import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
  */
 export const EP_PHOVEA_CLUE_PROVENANCE_GRAPH = 'epPhoveaClueProvenanceGraph';
 
-export interface IProvenanceGraphExtensionPoint {
+export interface IProvenanceGraphEP {
   factory(graph: ProvenanceGraph): void;
 }
 
-export interface IProvenanceGraphExtensionPointDesc extends IPluginDesc {
-  load(): Promise<IPlugin & IProvenanceGraphExtensionPoint>;
+export interface IProvenanceGraphEPDesc extends IPluginDesc {
+  load(): Promise<IPlugin & IProvenanceGraphEP>;
 }
