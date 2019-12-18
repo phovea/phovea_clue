@@ -17,6 +17,7 @@ import * as utils from './utils';
 import {ISearchResult} from './provenance_retrieval/VisStateIndex';
 import {GraphNode} from 'phovea_core/src/graph/graph';
 import {ClueSidePanelEvents} from './template';
+import i18n from 'phovea_core/src/i18n';
 
 
 function extractTags(text: string) {
@@ -56,13 +57,13 @@ function getLevelOfDetail(): LevelOfDetail {
 
 class StateRepr {
   doi: number;
-  xy: [number, number] = [0,0];
+  xy: [number, number] = [0, 0];
 
   selected = false;
   parent: StateRepr = null;
   children: StateRepr[] = [];
 
-  a : provenance.ActionNode = null;
+  a: provenance.ActionNode = null;
 
   constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
     this.doi = 0.1;
@@ -73,7 +74,7 @@ class StateRepr {
     return `url(${utils.thumbnail_url(this.graph, this.s)})`;
   }
 
-  build(lookup: { [id:number] :StateRepr }, line: StateRepr[]) {
+  build(lookup: {[id: number]: StateRepr}, line: StateRepr[]) {
     const p = this.s.previousState;
     if (p) {
       this.parent = lookup[p.id];
@@ -116,7 +117,7 @@ class StateRepr {
   get lod() {
     const global = getLevelOfDetail();
     const local = this.lod_local;
-    return global < local ? global: local;
+    return global < local ? global : local;
   }
 
   get size() {
@@ -137,9 +138,9 @@ class StateRepr {
   }
 
 
-  static toRepr(graph : provenance.ProvenanceGraph, highlight: any, searchResults:ISearchResult[], options : any = {}) {
+  static toRepr(graph: provenance.ProvenanceGraph, highlight: any, searchResults: ISearchResult[], options: any = {}) {
     //assign doi
-    const lookup : any = {};
+    const lookup: any = {};
 
     //mark selected
     const selected = graph.act;
@@ -153,21 +154,21 @@ class StateRepr {
     const toState = (s:provenance.StateNode) => {
       const r = new StateRepr(s, graph);
       const a = s.creator;
-      const meta = a ? a.meta : provenance.meta('No','none','none');
+      const meta = a ? a.meta : provenance.meta('No', 'none', 'none');
 
       const category = highlight.category[meta.category] ? 1 : 0;
       const operation = highlight.operation[meta.operation] ? 1 : 0;
-      const bookmark = (s.getAttr('starred', false) ? 1: 0);
-      const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1: 0) : 0);
-      const isSelected = s === selected ? 3: 0;
+      const bookmark = (s.getAttr('starred', false) ? 1 : 0);
+      const tags = (highlight.tags.length > 0 ? (s.getAttr('tags', []).some((d) => highlight.tags.indexOf(d) >= 0) ? 1 : 0) : 0);
+      const isSelected = s === selected ? 3 : 0;
       const isSearchForState = s === options.searchForState ? 3: 0;
       const isSearchResult = (searchResultStates.indexOf(s) >= 0) ? 1: 0;
 
       // number of states that should be expanded previously to the selected one (if there are no search results)
       const numShowPrevStates = (searchResultStates.length > 0) ? -1 : 6;
-      const inpath = (selectedPath.indexOf(s) >= 0) ? Math.max(-2.5, numShowPrevStates-selectedPath.indexOf(s)) : -2.5;
+      const inpath = selectedPath.indexOf(s) >= 0 ? Math.max(-2.5, 6 - selectedPath.indexOf(s)) : -2.5;
 
-      const sizePenality = Math.max(-1, -size/10);
+      const sizePenality = Math.max(-1, -size / 10);
       //combine to a doi value
       const sum = 6 + isSelected + isSearchForState + inpath + sizePenality;
       r.doi = d3.round(Math.max(0, Math.min(10, sum))/10,1);
@@ -178,7 +179,7 @@ class StateRepr {
       }
 
       if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
-        r.doi = Math.min(r.doi, DOI_LARGE-0.01); //border for switching to thumbnails
+        r.doi = Math.min(r.doi, DOI_LARGE - 0.01); //border for switching to thumbnails
       }
       r.selected = s === selected;
 
@@ -202,41 +203,41 @@ class StateRepr {
 
   private static layout(states: StateRepr[], line: StateRepr[]) {
     //horizontally align the line
-    let byLevel : StateRepr[][] = [];
+    let byLevel: StateRepr[][] = [];
     const root = states.filter((s) => s.parent === null)[0];
     byLevel.push([root]);
     byLevel.push(root.children.slice());
 
-    while(byLevel[byLevel.length-1].length > 0) {
-      byLevel.push([].concat.apply([],byLevel[byLevel.length - 1].map((c) => c.children.slice())));
+    while (byLevel[byLevel.length - 1].length > 0) {
+      byLevel.push([].concat.apply([], byLevel[byLevel.length - 1].map((c) => c.children.slice())));
     }
 
-    byLevel.forEach((level,i) => {
+    byLevel.forEach((level, i) => {
       if (i < line.length) {
         //resort such that the element will be at the first place
-        level.splice(level.indexOf(line[i]),1);
+        level.splice(level.indexOf(line[i]), 1);
         level.unshift(line[i]);
       }
     });
 
     let changed = false, loop = 0;
-   do {
+    do {
       changed = false;
-     loop++;
+      loop++;
 
       byLevel.forEach((level, i) => {
         //ensure that my children have at least a >= index than me
         for (let j = 0; j < level.length; ++j) {
           const s = level[j];
           if (s) {
-            s.xy = [j,i];
+            s.xy = [j, i];
             if (s.children.length > 0) {
-              const start = byLevel[i+1].indexOf(s.children[0]);
+              const start = byLevel[i + 1].indexOf(s.children[0]);
               changed = changed || start !== j;
-              if(start < j) {
-                byLevel[i+1].splice.apply(byLevel[i+1],[start,0].concat(d3.range(j-start).map((d) => null)));
+              if (start < j) {
+                byLevel[i + 1].splice.apply(byLevel[i + 1], [start, 0].concat(d3.range(j - start).map((d) => null)));
               } else if (j < start && j > 0) {
-                level.splice.apply(level,[j,0].concat(d3.range(start-j).map((d) => null)));
+                level.splice.apply(level, [j, 0].concat(d3.range(start - j).map((d) => null)));
                 s.xy[0] = start;
                 j = start;
               }
@@ -245,7 +246,7 @@ class StateRepr {
         }
       });
 
-    } while (changed && loop < 5 );
+    } while (changed && loop < 5);
 
     byLevel = byLevel.filter((d) => d.length > 0);
     //boost all states that are on the left side to medium if they are small
@@ -269,20 +270,20 @@ class StateRepr {
 
     //convert indices to real positions
     const acccolwidths = colwidths.reduce((arr, b, i) => {
-        arr[i+1] = arr[arr.length - 1] + b;
-        return arr;
-      }, [0]),
+      arr[i + 1] = arr[arr.length - 1] + b;
+      return arr;
+    }, [0]),
       accrowheights = rowheights.reduce((arr, b, i) => {
-        arr[i+1] = arr[arr.length - 1] + b;
+        arr[i + 1] = arr[arr.length - 1] + b;
         return arr;
       }, [0]);
     acccolwidths.shift();
 
     states.forEach((s) => {
       const xy = s.xy;
-      const x = acccolwidths[acccolwidths.length-1] -acccolwidths[xy[0]] + 5; // + (colwidths[xy[0]]);
+      const x = acccolwidths[acccolwidths.length - 1] - acccolwidths[xy[0]] + 5; // + (colwidths[xy[0]]);
       const y = accrowheights[xy[1]];
-      s.xy = [x,y];
+      s.xy = [x, y];
     });
   }
 
@@ -313,21 +314,21 @@ class StateRepr {
       .classed('doi', (d) => d.lod === LevelOfDetail.Medium)
       .classed('doi-lg', (d) => d.lod === LevelOfDetail.Large)
       .classed('phovea-select-selected', (d) => d.selected)
-      .classed('bookmarked', (d) => d.s.getAttr('starred',false))
-      .attr('data-doi',(d) => d.doi)
+      .classed('bookmarked', (d) => d.s.getAttr('starred', false))
+      .attr('data-doi', (d) => d.doi)
       .attr('title', (d) => d.name);
 
     $elem.select('span.icon').html(StateRepr.toIcon);
     $elem.select('span.slabel').text((d) => d.name);
     $elem.select('i.bookmark')
-      .classed('fa-bookmark-o',(d) => !d.s.getAttr('starred', false))
-      .classed('fa-bookmark',(d) => d.s.getAttr('starred', false));
+      .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred', false))
+      .classed('fa-bookmark', (d) => d.s.getAttr('starred', false));
 
     $elem.select('div.sthumbnail')
       .style('background-image', (d) => d.lod === LevelOfDetail.Large ? d.thumbnail : null);
     $elem.transition().style({
-      'padding-left': (d) => (d.xy[0]+4)+'px',
-      top: (d) => d.xy[1]+'px'
+      'padding-left': (d) => (d.xy[0] + 4) + 'px',
+      top: (d) => d.xy[1] + 'px'
     });
   }
 
@@ -335,44 +336,44 @@ class StateRepr {
     const d = this;
     const icon = StateRepr.toIcon(d);
     const title = d.s.name;
-      const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
+    const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
 
-    const thumbnail = utils.thumbnail_url(d.graph, d.s, { width: 512, format: 'png' });
+    const thumbnail = utils.thumbnail_url(d.graph, d.s, {width: 512, format: 'png'});
     const notes = d.s.getAttr('note', '');
     const starred = d.s.getAttr('starred', false);
     const $body = d3.select(dia.body);
     $body.html(`
     <form class="state_info" onsubmit="return false">
-      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="bookmark this state for latter use"></span>
+      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="${i18n.t('phovea:clue.provvis.bookmarkThisState')}"></span>
       <div class="img"><img src="${thumbnail}"></div>
       <div class="form-group">
-        <label>Name</label>
-        <input type="text" class="form-control" placeholder="name" value="${title}">
+        <label>${i18n.t('phovea:clue.provvis.nameCapitalized')}</label>
+        <input type="text" class="form-control" placeholder="${i18n.t('phovea:clue.provvis.name')}" value="${title}">
       </div>
       <div class="form-group">
-        <label>Notes</label>
-        <textarea class="form-control" placeholder="place for notes... (#tags will be automatically extracted)">${notes}</textarea>
+        <label>${i18n.t('phovea:clue.provvis.notesCapitalized')}</label>
+        <textarea class="form-control" placeholder="${i18n.t('phovea:clue.provvis.notesPlaceholder')}">${notes}</textarea>
       </div>
       <div class="form-group">
-        <label>Extracted Tags</label>
+        <label>${i18n.t('phovea:clue.provvis.extractedTags')}</label>
         <input type="text" class="form-control readonly" readonly="readonly" value="${extractTags(notes).join(' ')}">
       </div>
     </form>`);
-    $body.select('span.star').on('click', function() {
-      d.s.setAttr('starred',!d.s.getAttr('starred',false));
+    $body.select('span.star').on('click', function () {
+      d.s.setAttr('starred', !d.s.getAttr('starred', false));
       $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
       return false;
     });
-    $body.select('textarea').on('input', function() {
+    $body.select('textarea').on('input', function () {
       $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
-
-    dia.onHide(() => {
+    dia.footer.querySelector('button.btn-primary').addEventListener('click', function () {
       const name = $body.select('input').property('value');
       d.s.name = name;
-      const val =  $body.select('textarea').property('value');
+      const val = $body.select('textarea').property('value');
       d.s.setAttr('tags', extractTags(val));
       d.s.setAttr('note', val);
+      dia.hide();
     });
     dia.show();
   }
@@ -383,13 +384,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   private trigger = this.update.bind(this);
   private triggerStoryHighlight = this.updateStoryHighlight.bind(this);
 
-  private onStateAdded = (event:any, state:provenance.StateNode) => {
+  private onStateAdded = (event: any, state: provenance.StateNode) => {
     state.on('setAttr', this.trigger);
   }
 
   private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
     const selectedStates = this.data.selectedStates(type);
-    this.$node.selectAll('div.state').classed('phovea-select-'+type, function (d: StateRepr) {
+    this.$node.selectAll('div.state').classed('phovea-select-' + type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
       if (isSelected && type === idtypes.defaultSelectionType) {
         this.scrollIntoView();
@@ -425,9 +426,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
   }
 
-  private line = d3.svg.line<{ cx: number; cy : number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
+  private line = d3.svg.line<{cx: number; cy: number}>().interpolate('step-after').x((d) => d.cx).y((d) => d.cy);
 
-  private dim : [number, number] = [200, 100];
+  private dim: [number, number] = [200, 100];
 
   private highlight = {
     category: {
@@ -451,7 +452,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private searchForState: provenance.StateNode = null;
 
-  constructor(public data:provenance.ProvenanceGraph, public parent:Element, private options:any) {
+  constructor(public data: provenance.ProvenanceGraph, public parent: Element, private options: any) {
     super();
     this.options = C.mixin({
       thumbnails: true,
@@ -511,7 +512,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.unbind();
   }
 
-  get rawSize():[number, number] {
+  get rawSize(): [number, number] {
     return this.dim;
   }
 
@@ -519,7 +520,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     return <Element>this.$node.node();
   }
 
-  option(name:string, val?:any) {
+  option(name: string, val?: any) {
     if (arguments.length === 1) {
       return this.options[name];
     } else {
@@ -529,11 +530,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
   }
 
-  locateImpl(range:ranges.Range) {
+  locateImpl(range: ranges.Range) {
     return Promise.resolve(null);
   }
 
-  private build($parent:d3.Selection<any>) {
+  private build($parent: d3.Selection<any>) {
     //  scale = this.options.scale;
     let $p = $parent.select('aside.provenance-layout-vis');
     if ($p.empty()) {
@@ -557,31 +558,31 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="data actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.dataActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fa fa-database"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="visual actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.visualActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="selection actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.selectionActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="selection"> <i class="fa fa-pencil-square"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="layout actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.layoutActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="logic actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.logicActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i>
           </label>
         </div>
 
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="create actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.createActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="create"> <i class="fa fa-plus"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="update actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.updateActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="update"> <i class="fa fa-refresh"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="remove actions">
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.removeActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="remove"> <i class="fa fa-remove"></i>
           </label>
         </div>
@@ -595,8 +596,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
               </button>
               <div class="dropdown-menu dropdown-menu-right">
                 <div class="input-group input-group-sm">
-                  <span class="input-group-addon" title="tagged states"><i class="fa fa-tags"></i></span>
-                  <input name="tags" type="text" class="form-control input-sm" placeholder="tags">
+                  <span class="input-group-addon" title="${i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fa fa-tags"></i></span>
+                  <input name="tags" type="text" class="form-control input-sm" placeholder="${i18n.t('phovea:clue.provvis.tags')}">
                 </div>
               </div>
             </div>
@@ -615,20 +616,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       </div>
       <div class="legend">
         <div class="btn-group-vertical" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="data actions">
-            <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> Data
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.dataActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> ${i18n.t('phovea:clue.provvis.data')}
           </label>
-          <label class="btn btn-default btn-xs" title="visual actions">
-            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> Visual
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.visualActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> ${i18n.t('phovea:clue.provvis.visual')}
           </label>
-          <label class="btn btn-default btn-xs" title="selection actions">
-            <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> Selections
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.selectionActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> ${i18n.t('phovea:clue.provvis.selections')}
           </label>
-          <label class="btn btn-default btn-xs" title="layout actions">
-            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> Layout
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.layoutActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> ${i18n.t('phovea:clue.provvis.layout')}
           </label>
-          <label class="btn btn-default btn-xs" title="logic actions">
-            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> Analysis
+          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.logicActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> ${i18n.t('phovea:clue.provvis.analysis')}
           </label>
         </div>
       </div>
@@ -639,11 +640,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const that = this;
     //must use bootstrap since they are manually triggered
     jp.find('form.toolbar input, .legend input').on('change', function() {
-      if (this.type==='text') {
-        that.highlight.tags = this.value.split(' ');
+      const inputElement = <HTMLInputElement>this;
+      if (inputElement.type === 'text') {
+        that.highlight.tags = inputElement.value.split(' ');
         jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
       } else {
-        that.highlight[this.name][this.value] = this.checked;
+        that.highlight[inputElement.name][inputElement.value] = inputElement.checked;
       }
       that.update();
     });
@@ -698,13 +700,13 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const graph = this.data;
 
     const lod = getLevelOfDetail();
-    this.$node.classed('large', lod  === LevelOfDetail.Large);
-    this.$node.classed('medium', lod  === LevelOfDetail.Medium);
-    this.$node.classed('small', lod  === LevelOfDetail.Small);
-    this.$node.classed('xsmall', lod  === LevelOfDetail.ExtraSmall);
+    this.$node.classed('large', lod === LevelOfDetail.Large);
+    this.$node.classed('medium', lod === LevelOfDetail.Medium);
+    this.$node.classed('small', lod === LevelOfDetail.Small);
+    this.$node.classed('xsmall', lod === LevelOfDetail.ExtraSmall);
 
     const states = StateRepr.toRepr(graph, this.highlight, this.searchResults, { thumbnails: this.options.thumbnails, searchForState: this.searchForState });
-    const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => ''+d.s.id);
+    const $states = this.$node.select('div.states').selectAll('div.state').data(states, (d) => '' + d.s.id);
     const $statesEnter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
@@ -716,12 +718,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .on('mouseleave', (d) => {
         graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
       })
-      .attr('draggable',true)
+      .attr('draggable', true)
       .on('dragstart', (d) => {
         const e = <DragEvent>(<any>d3.event);
         e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', d.s.name);
-        e.dataTransfer.setData('application/phovea-prov-state',String(d.s.id));
+        e.dataTransfer.setData('application/phovea-prov-state', String(d.s.id));
       })
       .on('dragenter', function () {
         if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
@@ -740,10 +742,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         d3.select(this).classed('hover', false);
         const e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'),10));
+        const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'), 10));
         that.data.fork(state.creator, d.s);
         return false;
-    });
+      });
 
 
     const $inner = $statesEnter;
@@ -762,11 +764,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       d3.event.stopPropagation();
       d3.event.preventDefault();
     });*/
-    $inner.append('span').classed('slabel',true);
+    $inner.append('span').classed('slabel', true);
     $inner.append('div').classed('sthumbnail', true);
     const $toolbarEnter = $statesEnter.append('div').classed('toolbar', true);
     $toolbarEnter.append('i').attr('title', 'Bookmark state').attr('class', 'fa bookmark fa-bookmark-o').on('click', function(d) {
-      const v = !d.s.getAttr('starred',false);
+      const v = !d.s.getAttr('starred', false);
       const e = <Event>d3.event;
       d.s.setAttr('starred', v);
       d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
@@ -821,19 +823,19 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
     const edges = [];
     states.forEach((s) => {
-      edges.push.apply(edges, s.children.map((c) => ({s, t : c})));
+      edges.push.apply(edges, s.children.map((c) => ({s, t: c})));
     });
 
     this.dim = [
-      d3.max(states, (s) => s.xy[0]+s.size[0]) + (lod >= LevelOfDetail.Medium ? 200 : 0), //for label
-      d3.max(states, (s) => s.xy[1]+s.size[1])
+      d3.max(states, (s) => s.xy[0] + s.size[0]) + (lod >= LevelOfDetail.Medium ? 200 : 0), //for label
+      d3.max(states, (s) => s.xy[1] + s.size[1])
     ];
 
     this.$node.select('svg')
       .attr('width', this.dim[0])
       .attr('height', this.dim[1]);
 
-    const $edges = this.$node.select('svg g.edges').selectAll('path').data(edges, (d) => d.s.s.id+'-'+d.t.s.id);
+    const $edges = this.$node.select('svg g.edges').selectAll('path').data(edges, (d) => d.s.s.id + '-' + d.t.s.id);
     $edges.enter().append('path');
     $edges.transition().attr('d', (d) => this.line([d.s, d.t]));
     $edges.exit().remove();
@@ -846,12 +848,12 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const $g = this.$node.select('svg g.storyhighlights');
     const $states = this.$node.select('div.states').selectAll<StateRepr>('div.state');
     const states = $states.data();
-    const lookup : any = {};
+    const lookup: any = {};
     states.forEach((s) => lookup[s.s.id] = s);
     let firstSlide = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
     if (firstSlide) {
       $g.style('display', null);
-      while(firstSlide.previous) {
+      while (firstSlide.previous) {
         firstSlide = firstSlide.previous;
       }
       const line = provenance.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
@@ -864,6 +866,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 }
 
-export function create(data:provenance.ProvenanceGraph, parent:Element, options = {}) {
+export function create(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
   return new LayoutedProvVis(data, parent, options);
 }
