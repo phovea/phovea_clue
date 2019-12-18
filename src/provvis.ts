@@ -359,13 +359,13 @@ class StateRepr {
     $body.select('textarea').on('input', function () {
       $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
     });
-
-    dia.onHide(() => {
+    dia.footer.querySelector('button.btn-primary').addEventListener('click', function () {
       const name = $body.select('input').property('value');
       d.s.name = name;
       const val = $body.select('textarea').property('value');
       d.s.setAttr('tags', extractTags(val));
       d.s.setAttr('note', val);
+      dia.hide();
     });
     dia.show();
   }
