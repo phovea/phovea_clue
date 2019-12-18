@@ -10,6 +10,7 @@ import {canWrite, isLoggedIn} from 'phovea_core/src/security';
 import {useInMemoryGraph} from './internal';
 import {EventHandler} from 'phovea_core/src/event';
 import {resolveImmediately} from 'phovea_core/src';
+import i18n from 'phovea_core/src/i18n';
 
 export interface IClueState {
   graph: string;
@@ -194,7 +195,7 @@ export default class CLUEGraphManager extends EventHandler {
     }
     // not found
     if (rejectOnNotFound) {
-      return Promise.reject({ graph, msg: `Provenance Graph with id ${graph} not found`});
+      return Promise.reject({graph, msg: i18n.t('phovea:clue.errorMessage', {graphID: graph})});
     }
     if (useInMemoryGraph()) {
       return resolveImmediately(this.manager.createInMemory());
