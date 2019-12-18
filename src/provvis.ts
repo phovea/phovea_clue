@@ -595,7 +595,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     //must use bootstrap since they are manually triggered
     jp.find('form.toolbar input, .legend input').on('change', function() {
       const inputElement = <HTMLInputElement>this;
-      if (inputElement.type==='text') {
+      if (inputElement.type === 'text') {
         that.highlight.tags = inputElement.value.split(' ');
         jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
       } else {
