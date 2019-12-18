@@ -45,14 +45,14 @@ export class Select2 {
     if(!this.$instance) {
       return;
     }
-    this.$instance.select2('open');
+    (<any>this.$instance).select2('open');
   }
 
   close() {
     if(!this.$instance) {
       return;
     }
-    this.$instance.select2('close');
+    (<any>this.$instance).select2('close');
   }
 
   private prepareData(data : IProperty[]):ISelect2Category[] {
@@ -86,7 +86,7 @@ export class Select2 {
     this.updateData(data);
 
     this.$instance = $(selector);
-    return this.$instance.select2(<any>{
+    return (<any>this.$instance).select2(<any>{
       theme: 'bootstrap',
       placeholder: 'Search for attribute, selection, …',
       data: this.prepData,
@@ -273,9 +273,9 @@ export class Select2 {
         $result.html(text);
 
       } else {
-        $result.html(` 
-          <span>${text.substring(0, match).replace(' ', '&nbsp;')}</span> 
-          <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length).replace(' ', '&nbsp;')}</span> 
+        $result.html(`
+          <span>${text.substring(0, match).replace(' ', '&nbsp;')}</span>
+          <span class="select2-rendered__match">${text.substring(match, match + searchTerm.length).replace(' ', '&nbsp;')}</span>
           <span>${text.substring(match + searchTerm.length).replace(' ', '&nbsp;')}</span>
         `);
       }
