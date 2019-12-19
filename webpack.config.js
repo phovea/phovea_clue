@@ -72,7 +72,6 @@ const webpackloaders = [
       options: Object.assign({include: includeFeature}, preCompilerFlags)
     }]
   },
-  {test: /\.json$/, use: 'json-loader'},
   {
     test: /\.(png|jpg)$/,
     loader: 'url-loader',
