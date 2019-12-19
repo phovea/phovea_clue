@@ -194,7 +194,7 @@ export default class ProvenanceGraphMenu {
           });
         });
         $elem.find('button.btn-primary').on('click', function () {
-          const isSelect = this.dataset.action === 'select';
+          const isSelect = (<any>this).dataset.action === 'select';
           manager.loadOrClone(graph, isSelect);
           return false;
         });
