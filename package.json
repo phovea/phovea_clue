@@ -43,7 +43,7 @@
     "posttest": "echo hybrid",
     "test:watch": "karma start --autoWatch=true --singleRun=false",
     "build:dev": "webpack --mode=development",
-    "build": "webpack --mode=production --verbose --display=verbose",
+    "build": "webpack --mode=production",
     "start": "webpack-dev-server --mode=development --inline",
     "start:hot": "webpack-dev-server --mode=development --inline --hot",
     "watch": "webpack --mode=development --watch",
