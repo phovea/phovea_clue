@@ -76,7 +76,7 @@
     "@types/d3": "~3.5.36",
     "@types/marked": "0.3.0",
     "d3": "~3.5.17",
-    "marked": "0.3.9",
+    "marked": "0.3.18",
     "phovea_ui": "^3.0.0",
     "phovea_core": "^3.0.0",
     "phovea_security_flask": "^3.0.0"
