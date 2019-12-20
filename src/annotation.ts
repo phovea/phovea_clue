@@ -10,6 +10,7 @@ import * as marked from 'marked';
 import {defaultSelectionType} from 'phovea_core/src/idtype';
 import * as player from './player';
 import {resolveImmediately} from 'phovea_core/src';
+import i18n from 'phovea_core/src/i18n';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -57,9 +58,9 @@ class Anchor {
    * @type {null}
    * @private
    */
-  private _pos:[number, number] = null;
+  private _pos: [number, number] = null;
 
-  constructor(private elem:Element, private anchor:EAnchorDirection, lazy = false) {
+  constructor(private elem: Element, private anchor: EAnchorDirection, lazy = false) {
     if (!lazy) {
       this._pos = this.compute();
     }
@@ -70,7 +71,7 @@ class Anchor {
    * @param pos the current point
    * @returns {number} the square distance
    */
-  distance(pos:[number, number]) {
+  distance(pos: [number, number]) {
     const p = this.pos;
     const dx = pos[0] - p[0];
     const dy = pos[1] - p[1];
@@ -91,7 +92,7 @@ class Anchor {
     return Math.abs(old[0] - newValue[0]) > 1 || Math.abs(old[1] - newValue[1]) > 1;
   }
 
-  compute():[number, number] {
+  compute(): [number, number] {
     //start with the bounds
     const o = C.bounds(this.elem);
     //add offset
@@ -134,7 +135,7 @@ class Anchor {
    * @param s
    * @returns {Anchor}
    */
-  static fromString(s:string, lazy = true) {
+  static fromString(s: string, lazy = true) {
     const parts = s.split('@');
     const elem = <Element>document.querySelector('*[data-anchor="' + parts[0] + '"]');
     const anchor = string2anchor[parts[1]];
@@ -145,11 +146,11 @@ class Anchor {
 class AnchorWatcher {
   private static UPDATE_INTERVALL = 100;
 
-  private anchors : { anchor: Anchor, callback: () => void }[] = [];
+  private anchors: {anchor: Anchor, callback: () => void}[] = [];
   private intervall = -1;
 
   add(anchor: string, callback: () => void) {
-    this.anchors.push({ anchor: Anchor.fromString(anchor, false), callback});
+    this.anchors.push({anchor: Anchor.fromString(anchor, false), callback});
     if (this.intervall < 0) {
       this.watch();
     }
@@ -207,12 +208,12 @@ export class Renderer {
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
   private rerender = () => this.render(this.act, true, true);
 
-  private act:prov.SlideNode = null;
+  private act: prov.SlideNode = null;
 
   private renderer = this.rendererImpl.bind(this);
   private anchorWatcher = new AnchorWatcher();
 
-  constructor(private $main:d3.Selection<any>, private graph:prov.ProvenanceGraph, options = {}) {
+  constructor(private $main: d3.Selection<any>, private graph: prov.ProvenanceGraph, options = {}) {
     C.mixin(this.options, options);
     //update during slide change
     this.graph.on('select_slide_' + defaultSelectionType, this.l);
@@ -241,15 +242,15 @@ export class Renderer {
    * @param d the text to render
    * @returns {String}
    */
-  private rendererImpl(d:string):string {
+  private rendererImpl(d: string): string {
     if (modeFeatures.isEditable() && d.length === 0) {
       //return placeholder
-      return `<i class="placeholder">Enter Text by Clicking (MarkDown supported)</i>`;
+      return `<i class="placeholder">${i18n.t('phovea:clue.annotationPlaceholder')}</i>`;
     }
     //replace variables within the text
     if (this.act) {
       //vars contains all possible variables
-      const vars:any = {
+      const vars: any = {
         name: this.act.name,
         description: this.act.description,
         duration: this.act.duration,
@@ -274,7 +275,7 @@ export class Renderer {
     return (this.options.markdown ? marked(d) : d);
   }
 
-  private replaceVariables(d:string, vars:{ [key: string] : string }) {
+  private replaceVariables(d: string, vars: {[key: string]: string}) {
     return d.replace(/\$\{([^}]+)\}/gi, function (match, variable) {
       const r = vars[variable];
       if (r) {
@@ -290,7 +291,7 @@ export class Renderer {
     cmode.off('modeChanged', this.rerender);
   }
 
-  render(state:prov.SlideNode, withTransition = true, waitBetweenTakeDown = false) {
+  render(state: prov.SlideNode, withTransition = true, waitBetweenTakeDown = false) {
     if (this.act) {
       //disable annotation update listener
       this.act.off('push-annotations,attr-name,attr-duration', this.updateAnnotations);
@@ -336,14 +337,14 @@ export class Renderer {
    * renders anchor hits
    * @param bounds the parent bounds where the anchors are rendered into
    */
-  private renderAnchors(bounds:{ x: number, y: number, w: number, h: number}) {
+  private renderAnchors(bounds: {x: number, y: number, w: number, h: number}) {
     const mainNode = <Element>this.$main.node();
-    const anchorElements:Element[] = [].slice.apply(mainNode.querySelectorAll('*[data-anchor]'));
+    const anchorElements: Element[] = [].slice.apply(mainNode.querySelectorAll('*[data-anchor]'));
     if (mainNode.getAttribute('data-anchor') != null) {
       anchorElements.push(mainNode);
     }
 
-    const anchors:Anchor[] = [];
+    const anchors: Anchor[] = [];
     //create anchors
     anchorElements.forEach((a) => {
       const b = C.bounds(a);
@@ -370,14 +371,14 @@ export class Renderer {
    * @param bounds bounds of the parent element containing the anchors
    * @returns {any}
    */
-  private updateAnchor(pos:[number, number], bounds:{ x: number, y: number, w: number, h: number}):any {
+  private updateAnchor(pos: [number, number], bounds: {x: number, y: number, w: number, h: number}): any {
     const $anchors = this.$main.selectAll<Anchor>('div.annotation-anchor');
     if ($anchors.empty()) { //no anchors
       return null;
     }
-    const abspos:[number, number] = [pos[0] + bounds.x, pos[1] + bounds.y];
+    const abspos: [number, number] = [pos[0] + bounds.x, pos[1] + bounds.y];
     let minV = Number.POSITIVE_INFINITY,
-      minAnchor:Anchor = null;
+      minAnchor: Anchor = null;
     $anchors.each((d) => {
       const distance = d.distance(abspos);
       if (distance < minV) {
@@ -400,19 +401,19 @@ export class Renderer {
     this.$main.selectAll('div.annotation-anchor').style('display', 'none').remove();
   }
 
-  private renderAnnotationsImpl(state:prov.SlideNode) {
+  private renderAnnotationsImpl(state: prov.SlideNode) {
     const that = this;
     const editable = modeFeatures.isEditable() && state != null;
 
-    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d, i) => state.id+'@'+d.type + i);
+    const $anns = this.$main.selectAll('div.annotation').data(state ? state.annotations : [], (d, i) => state.id + '@' + d.type + i);
     const $annsEnter = $anns.enter().append('div')
       .attr('class', (d) => d.type + '-annotation annotation');
 
     const bounds = C.bounds(<Element>this.$main.node());
 
-    function updatePos(d:prov.IStateAnnotation) {
+    function updatePos(d: prov.IStateAnnotation) {
       const elem = <HTMLElement>this;
-      const p:any = d.pos;
+      const p: any = d.pos;
       if (Array.isArray(p)) { //relative
         elem.style.left = p[0] + '%';
         elem.style.top = p[1] + '%';
@@ -433,9 +434,9 @@ export class Renderer {
       }
     }
 
-    function updateSize(d:prov.IFrameStateAnnotation) {
+    function updateSize(d: prov.IFrameStateAnnotation) {
       const elem = <HTMLElement>this;
-      const p:any = d.pos2;
+      const p: any = d.pos2;
       if (p) { //anchor based
         const base = Anchor.fromString(p.anchor).pos;
         const pos = Anchor.fromString((<any>d.pos).anchor).pos;
@@ -448,7 +449,7 @@ export class Renderer {
       }
     }
     function watchSizeAnchor(d: prov.IFrameStateAnnotation) {
-      const p:any = d.pos2;
+      const p: any = d.pos2;
       if (p) {
         that.anchorWatcher.add(p.anchor, () => updateSize.call(this, d));
       }
@@ -457,11 +458,11 @@ export class Renderer {
     //move
     $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
       //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
-      .on('dragstart', function (d:prov.IStateAnnotation, i) {
+      .on('dragstart', function (d: prov.IStateAnnotation, i) {
         that.renderAnchors(bounds);
       })
       .on('dragend', that.removeAnchors.bind(that))
-      .on('drag', function (d:prov.IStateAnnotation, i) {
+      .on('drag', function (d: prov.IStateAnnotation, i) {
         const mouse = d3.mouse(this.parentNode.parentNode);
         d.pos = that.updateAnchor(mouse, bounds);
         state.updateAnnotation(d);
@@ -470,7 +471,7 @@ export class Renderer {
 
     //remove
     $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
-      .on('click', function (d:prov.IStateAnnotation, i) {
+      .on('click', function (d: prov.IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotationElem(d);
         (<Event>d3.event).preventDefault();
@@ -478,9 +479,9 @@ export class Renderer {
 
 
     //Text
-    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts:d3.selection.Update<prov.ITextStateAnnotation>, $textsEnter:d3.selection.Update<prov.ITextStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<prov.ITextStateAnnotation>, $textsEnter: d3.selection.Update<prov.ITextStateAnnotation>) => {
 
-      const onEdit = function (d:prov.ITextStateAnnotation, i) {
+      const onEdit = function (d: prov.ITextStateAnnotation, i) {
         const $elem = d3.select(this);
         if (!d3.select(this.parentNode).classed('editable')) {
           return;
@@ -496,8 +497,8 @@ export class Renderer {
       $textsEnter.append('div').classed('text', true).on('click', onEdit);
 
       $texts.select('div.text').html((d) => this.renderer(d.text)).style({
-        width: (d:prov.ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
-        height: (d:prov.ITextStateAnnotation) => d.size ? d.size[1] + 'px' : null,
+        width: (d: prov.ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
+        height: (d: prov.ITextStateAnnotation) => d.size ? d.size[1] + 'px' : null,
       }).each(function (d) {
         if (d.styles) {
           d3.select(this).style(d.styles);
@@ -507,7 +508,7 @@ export class Renderer {
 
 
     //Arrow
-    $anns.filter((d) => d.type === 'arrow').call(($arrows:d3.selection.Update<prov.IArrowStateAnnotation>, $arrowsEnter:d3.selection.Update<prov.IArrowStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<prov.IArrowStateAnnotation>, $arrowsEnter: d3.selection.Update<prov.IArrowStateAnnotation>) => {
       const $svgEnter = $arrowsEnter.insert('svg', ':first-child').attr({
         width: (d) => 30 + Math.abs(d.at[0]),
         height: (d) => 30 + Math.abs(d.at[1])
@@ -547,8 +548,8 @@ export class Renderer {
         cx: (d) => d.at[0],
         cy: (d) => d.at[1]
       }).call(d3.behavior.drag()
-        .on('drag', function (d:prov.IArrowStateAnnotation, i) {
-          const e:any = d3.event;
+        .on('drag', function (d: prov.IArrowStateAnnotation, i) {
+          const e: any = d3.event;
           d.at = [e.x, e.y];
           state.updateAnnotation(d);
           d3.select(this).style({
@@ -574,7 +575,7 @@ export class Renderer {
     }, $annsEnter.filter((d) => d.type === 'arrow'));
 
     //FRAME
-    $anns.filter((d) => d.type === 'frame').call(($frames:d3.selection.Update<prov.IFrameStateAnnotation>, $framesEnter:d3.selection.Update<prov.IFrameStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<prov.IFrameStateAnnotation>, $framesEnter: d3.selection.Update<prov.IFrameStateAnnotation>) => {
       $frames.each(function (d) {
         updateSize.call(this, d);
         watchSizeAnchor.call(this, d);
@@ -586,11 +587,11 @@ export class Renderer {
       //resize
       $framesEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
-          .on('dragstart', function (d:prov.IStateAnnotation, i) {
+          .on('dragstart', function (d: prov.IStateAnnotation, i) {
             that.renderAnchors(bounds);
           })
           .on('dragend', that.removeAnchors.bind(that))
-          .on('drag', function (d:prov.IFrameStateAnnotation, i) {
+          .on('drag', function (d: prov.IFrameStateAnnotation, i) {
             const mouse = d3.mouse(this.parentNode.parentNode);
             d.pos2 = that.updateAnchor(mouse, bounds);
             state.updateAnnotation(d);
@@ -606,12 +607,12 @@ export class Renderer {
     return $anns;
   }
 
-  renderAnnotations(state:prov.SlideNode) {
+  renderAnnotations(state: prov.SlideNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
       if (this.options.animation && !$anns.empty() && this.options.duration > 0) {
         $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1);
-        C.resolveIn(this.options.duration+10).then(() => resolve($anns.node()));
+        C.resolveIn(this.options.duration + 10).then(() => resolve($anns.node()));
       } else {
         $anns.style('opacity', 1);
         resolve($anns.node());
@@ -626,7 +627,7 @@ export class Renderer {
       const $div = this.$main.classed('hide-all-non-annotations', false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
       if (this.options.animation && !$div.empty() && this.options.duration > 0) {
         $div.transition().duration(this.options.duration).style('opacity', 0).remove();
-        C.resolveIn(this.options.duration+10).then(() => resolve());
+        C.resolveIn(this.options.duration + 10).then(() => resolve());
       } else {
         $div.remove();
         resolve();
@@ -634,14 +635,14 @@ export class Renderer {
     });
   }
 
-  renderSubtitle(overlay:prov.SlideNode) {
+  renderSubtitle(overlay: prov.SlideNode) {
     return new Promise((resolve) => {
       this.$main.append('div').attr('class', 'subtitle-annotation').html(this.renderer(this.options.subtitlePattern));
       resolve(this.$main.node());
     });
   }
 
-  renderText(overlay:prov.SlideNode) {
+  renderText(overlay: prov.SlideNode) {
     const t = overlay.transition * player.FACTOR;
     return C.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
@@ -650,7 +651,7 @@ export class Renderer {
   }
 }
 
-export function create(main:HTMLElement, graph:prov.ProvenanceGraph) {
+export function create(main: HTMLElement, graph: prov.ProvenanceGraph) {
   const instance = new Renderer(d3.select(main), graph);
   return {
     render: instance.render.bind(instance)

@@ -12,10 +12,11 @@ import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
-import {list, IPluginDesc} from 'phovea_core/src/plugin';
-import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
+import {list} from 'phovea_core/src/plugin';
+import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from './extensions';
+import i18n from 'phovea_core/src/i18n/index';
 
-const TEMPLATE = `<div class="box">
+const getTemplate = () => `<div class="box">
   <header>
 
   </header>
@@ -24,14 +25,14 @@ const TEMPLATE = `<div class="box">
     <!--annotation toolbar-->
     <aside class="annotations" style="display:none">
       <div>
-        <h2>Annotations</h2>
+        <h2>${i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
       </div>
       <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-default btn-xs" title="add text annotation" data-ann="text"><i class="fa fa-font"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fa fa-font"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="add arrow" data-ann="arrow"><i class="fa fa-arrow-right"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fa fa-arrow-right"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="add frame" data-ann="frame"><i class="fa fa-square-o"></i>
+        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="fa fa-square-o"></i>
         </button>
       </div>
     </aside>
@@ -52,18 +53,17 @@ enum EUrlTracking {
 export abstract class ACLUEWrapper extends EventHandler {
   static readonly EVENT_MODE_CHANGED = 'modeChanged';
   static readonly EVENT_JUMPED_TO = 'jumped_to';
-
   clueManager: CLUEGraphManager;
   graph: Promise<ProvenanceGraph>;
-  private storyVis: ()=>Promise<VerticalStoryVis>;
-  private provVis: ()=>Promise<LayoutedProvVis>;
+  private storyVis: () => Promise<VerticalStoryVis>;
+  private provVis: () => Promise<LayoutedProvVis>;
   private urlTracking = EUrlTracking.ENABLE;
 
-  protected build(body: HTMLElement, options: IACLUEWrapperOptions) {
+  protected async build(body: HTMLElement, options: IACLUEWrapperOptions) {
     if (options.replaceBody !== false) {
-      body.innerHTML = TEMPLATE;
+      body.innerHTML = getTemplate();
     } else {
-      body.insertAdjacentHTML('afterbegin', TEMPLATE);
+      body.insertAdjacentHTML('afterbegin', getTemplate());
     }
     handleMagicHashElements(body, this);
     const {graph, storyVis, manager, provVis} = this.buildImpl(body);
@@ -75,8 +75,8 @@ export abstract class ACLUEWrapper extends EventHandler {
 
     this.graph.then((graph) => {
       // load registered extensions and pass the ready graph to extension
-      list(EP_PHOVEA_CLUE_PROVENANCE_GRAPH).map((desc: IPluginDesc) => {
-        desc.load().then((plugin) => plugin.factory(graph));
+      list(EP_PHOVEA_CLUE_PROVENANCE_GRAPH).map((desc: IProvenanceGraphEPDesc) => {
+        desc.load().then((plugin: IProvenanceGraphEP) => plugin.factory(graph));
       });
 
       graph.on('run_chain', () => {
@@ -124,7 +124,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     });
   }
 
-  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: ()=>Promise<VerticalStoryVis>, provVis: ()=>Promise<LayoutedProvVis>, manager: CLUEGraphManager};
+  protected abstract buildImpl(body: HTMLElement): {graph: Promise<ProvenanceGraph>, storyVis: () => Promise<VerticalStoryVis>, provVis: () => Promise<LayoutedProvVis>, manager: CLUEGraphManager};
 
   private handleModeChange() {
     const $right = <HTMLElement>document.querySelector('aside.provenance-layout-vis');
@@ -181,7 +181,7 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async nextSlide() {
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.forward();
@@ -189,22 +189,21 @@ export abstract class ACLUEWrapper extends EventHandler {
 
   async previousSlide() {
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const story = await this.storyVis();
     return story.player.backward();
   }
 
   async jumpToStory(story: number, autoPlay = this.clueManager.isAutoPlay) {
-    console.log('jump to stored story', story);
+    console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStoredStory'), story);
     if (!this.storyVis) {
-      return Promise.reject('no player available');
+      return Promise.reject(i18n.t('phovea:clue.ClueWrapper.noPlayerAvailable'));
     }
     const graph = await this.graph;
     const storyVis = await this.storyVis();
     const s = graph.getSlideById(story);
     if (s) {
-      console.log('jump to stored story', s.id);
       this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       storyVis.switchTo(s);
       if (autoPlay) {
@@ -219,25 +218,25 @@ export abstract class ACLUEWrapper extends EventHandler {
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject('story not found');
+    return Promise.reject(i18n.t('phovea:clue.ClueWrapper.storyNotFound'));
   }
 
   async jumpToState(state: number) {
-    console.log('jump to stored state', state);
+    console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStoredState'), state);
     const graph = await this.graph;
     const s = graph.getStateById(state);
     if (s) {
-      console.log('jump to stored', s.id);
+      console.log(i18n.t('phovea:clue.ClueWrapper.jumpToStored'), s.id);
       this.urlTracking = EUrlTracking.DISABLE_RESTORING;
       await graph.jumpTo(s);
       this.urlTracking = EUrlTracking.ENABLE;
       this.clueManager.storedState = graph.act.id;
-      console.log('jumped to stored', s.id);
+      console.log(i18n.t('phovea:clue.ClueWrapper.jumpedToStored'), s.id);
       this.fire(ACLUEWrapper.EVENT_JUMPED_TO, s);
       return this;
     }
     this.fire(ACLUEWrapper.EVENT_JUMPED_TO, null);
-    return Promise.reject('state not found');
+    return Promise.reject(i18n.t('phovea:clue.ClueWrapper.stateNotFound'));
   }
 
   jumpToStored() {

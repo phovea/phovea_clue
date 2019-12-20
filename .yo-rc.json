@@ -73,6 +73,12 @@
     ],
     "entries": "./index.js",
     "ignores": [],
-    "today": "Sun, 06 Nov 2016 12:25:08 GMT"
+    "today": "Sun, 06 Nov 2016 12:25:08 GMT",
+    "promptValues": {
+      "authorName": "The Caleydo Team",
+      "authorEmail": "contact@caleydo.org",
+      "authorUrl": "https://caleydo.org",
+      "githubAccount": "phovea"
+    }
   }
 }
