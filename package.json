@@ -78,9 +78,9 @@
     "@types/marked": "0.3.0",
     "d3": "~3.5.17",
     "marked": "0.3.9",
-    "phovea_ui": "github:phovea/phovea_ui#stoiber/webpack4",
     "phovea_core": "github:phovea/phovea_core#stoiber/webpack4",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#stoiber/webpack4"
+    "phovea_security_flask": "github:phovea/phovea_security_flask#stoiber/webpack4",
+    "phovea_ui": "github:phovea/phovea_ui#stoiber/webpack4"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
