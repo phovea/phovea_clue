@@ -1,7 +1,7 @@
 {
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
-  "version": "2.3.1-SNAPSHOT",
+  "version": "3.0.1-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
@@ -70,8 +70,7 @@
   "main": "build/phovea_clue.js",
   "engines": {
     "npm": ">= 6.12",
-    "node": ">= 12.13",
-    "iojs": ">= 3"
+    "node": ">= 12.13"
   },
   "dependencies": {
     "@types/d3": "~3.5.36",
