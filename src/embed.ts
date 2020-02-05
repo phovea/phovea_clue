@@ -19,7 +19,7 @@ export class EmbeddedCLUE {
 
   ready = false;
 
-  constructor(parent:HTMLElement, url:string, private readyCallback : (c : EmbeddedCLUE) => void) {
+  constructor(parent:HTMLElement, url:string, private readyCallback: (c: EmbeddedCLUE) => void) {
     this.iframe = document.createElement('iframe');
     this.iframe.src = url;
 
