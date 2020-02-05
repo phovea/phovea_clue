@@ -16,7 +16,6 @@
     "baseUrl": "../",
     "noImplicitAny": false,
     "skipLibCheck": true,
-
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true
   },
