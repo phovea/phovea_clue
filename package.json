@@ -90,6 +90,7 @@
     "css-loader": "0.28.0",
     "extract-text-webpack-plugin": "2.1.0",
     "extract-loader": "0.1.0",
+    "identity-obj-proxy": "^3.0.0",
     "ifdef-loader": "2.0.0",
     "file-loader": "0.11.1",
     "fork-ts-checker-webpack-plugin": "0.4.1",
