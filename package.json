@@ -63,7 +63,7 @@
     "docs:web": "typedoc --options typedoc.json src/**.ts",
     "docs:python": "sphinx-apidoc -o docs -f ./phovea_clue && sphinx-build ./docs build/docs",
     "build:python": "rm -rf build/source && find . -name '*.pyc' -delete && node buildPython.js && cp -r ./phovea_clue build/source/",
-    "build:web": "webpack --env prod",
+    "build:web": "webpack --mode=production",
     "predist:python": "npm run build:python && npm run docs:python",
     "prebuild:python": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:python",
     "prebuild:web": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:web",
