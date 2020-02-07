@@ -102,7 +102,7 @@ class SelectionTypeRecorder {
 
   private typeRecorders = [];
 
-  constructor(private idtype:idtypes.IDType, private graph:provenance.ProvenanceGraph, private type?:string, private options : any = {}) {
+  constructor(private idtype:idtypes.IDType, private graph:provenance.ProvenanceGraph, private type?:string, private options: any = {}) {
 
     if (this.type) {
       this.typeRecorders = this.type.split(',').map((ttype) => {
@@ -155,7 +155,7 @@ export class SelectionRecorder {
     }
   }
 
-  constructor(private graph:provenance.ProvenanceGraph, private type?:string, private options : any = {}) {
+  constructor(private graph:provenance.ProvenanceGraph, private type?:string, private options: any = {}) {
     this.options = C.mixin({
       filter: C.constantTrue,
       animated: false
