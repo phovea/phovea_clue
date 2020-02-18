@@ -95,7 +95,7 @@ function triggeredByInputField(evt: KeyboardEvent) {
   const elem = <HTMLElement>evt.target;
   const inputTypes = ['input', 'select', 'textarea'];
 
-  return (src && inputTypes.includes(src.nodeName.toLowerCase())) || (elem.nodeName && inputTypes.includes(elem.nodeName.toLowerCase()));
+  return (src && inputTypes.includes((<HTMLElement>src).nodeName.toLowerCase())) || (elem.nodeName && inputTypes.includes(elem.nodeName.toLowerCase()));
 }
 
 /**
