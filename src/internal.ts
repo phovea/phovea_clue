@@ -49,23 +49,23 @@ function injectParentWindowSupport(wrapper: ICLUEWrapper) {
     }
     if (d.clue === 'jump_to') {
       wrapper.jumpToState(d.state).then(() => {
-        s.postMessage({type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
       }).catch(() => {
-        s.postMessage({type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
       });
     } else if (d.clue === 'show_slide') {
       wrapper.jumpToStory(d.slide).then(() => {
-        s.postMessage({type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
       }).catch(() => {
-        s.postMessage({type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
       });
     } else if (d.clue === 'next_slide') {
       wrapper.nextSlide().then(() => {
-        s.postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
       });
     } else if (d.clue === 'previous_slide') {
       wrapper.previousSlide().then(() => {
-        s.postMessage({type: 'caleydo', clue: 'previous_slide', ref: d.ref}, '*');
+        (<Window>s!).postMessage({type: 'caleydo', clue: 'previous_slide', ref: d.ref}, '*');
       });
     }
   });
