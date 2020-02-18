@@ -165,7 +165,7 @@ class AnchorWatcher {
   }
 
   private watch() {
-    this.intervall = setInterval(this.check.bind(this), AnchorWatcher.UPDATE_INTERVALL);
+    this.intervall = self.setInterval(this.check.bind(this), AnchorWatcher.UPDATE_INTERVALL);
   }
 
   clear() {
