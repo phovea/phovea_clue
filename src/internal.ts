@@ -42,30 +42,30 @@ function injectParentWindowSupport(wrapper: ICLUEWrapper) {
   };
   wrapper.on('jumped_to', jumpListener);
   window.addEventListener('message', (event: MessageEvent) => {
-    const s = event.source,
-      d = event.data;
+    const s = <WindowProxy>event.source;
+    const d = event.data;
     if (d.type !== 'caleydo' || !d.clue) {
       return;
     }
     if (d.clue === 'jump_to') {
       wrapper.jumpToState(d.state).then(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'jumped_to', state: d.state, ref: d.ref}, '*');
       }).catch(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'jump_to_error', state: d.state, ref: d.ref}, '*');
       });
     } else if (d.clue === 'show_slide') {
       wrapper.jumpToStory(d.slide).then(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'show_slide', slide: d.slide, ref: d.ref}, '*');
       }).catch(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'show_slide_error', slide: d.slide, ref: d.ref}, '*');
       });
     } else if (d.clue === 'next_slide') {
       wrapper.nextSlide().then(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'next_slide', ref: d.ref}, '*');
       });
     } else if (d.clue === 'previous_slide') {
       wrapper.previousSlide().then(() => {
-        (<Window>s!).postMessage({type: 'caleydo', clue: 'previous_slide', ref: d.ref}, '*');
+        s.postMessage({type: 'caleydo', clue: 'previous_slide', ref: d.ref}, '*');
       });
     }
   });
