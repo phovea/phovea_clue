@@ -91,11 +91,11 @@ export function useInMemoryGraph() {
 }
 
 function triggeredByInputField(evt: KeyboardEvent) {
-  const src = evt.srcElement;
+  const src = <HTMLElement>evt.srcElement;
   const elem = <HTMLElement>evt.target;
   const inputTypes = ['input', 'select', 'textarea'];
 
-  return (src && inputTypes.includes((<HTMLElement>src).nodeName.toLowerCase())) || (elem.nodeName && inputTypes.includes(elem.nodeName.toLowerCase()));
+  return (src && inputTypes.includes(src.nodeName.toLowerCase())) || (elem.nodeName && inputTypes.includes(elem.nodeName.toLowerCase()));
 }
 
 /**
