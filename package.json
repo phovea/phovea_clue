@@ -76,7 +76,7 @@
     "@types/d3": "~3.5.36",
     "@types/marked": "0.7.2",
     "d3": "~3.5.17",
-    "marked": "0.8.0",
+    "marked": "0.7.0",
     "phovea_core": "github:phovea/phovea_core#update_dependencies_38",
     "phovea_security_flask": "github:phovea/phovea_security_flask#update_dependencies_38",
     "phovea_ui": "github:phovea/phovea_ui#update_dependencies_38"
