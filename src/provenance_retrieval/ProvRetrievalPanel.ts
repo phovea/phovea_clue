@@ -354,7 +354,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const filterSelect2SuggestionsListener = (showActiveStateOnly: boolean) => {
       (<Event>d3.event).preventDefault();
       $p.selectAll('.dropdown-menu li').classed('active', false);
-      d3.select((<Event>d3.event).srcElement.parentElement).classed('active', true);
+      d3.select((<HTMLElement>(<Event>d3.event).srcElement).parentElement).classed('active', true);
       this.propertyModifier.showActiveStateOnly = showActiveStateOnly;
       this.$select2Instance.updateData(this.propertyModifier.properties);
       this.$select2Instance.open();
