@@ -24,21 +24,24 @@ const getTemplate = () => `<div class="box">
   <div class="content">
     <main data-anchor="main"></main>
     <!--annotation toolbar-->
-    <aside class="annotations" style="display:none">
-      <div>
-        <h2>${i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
+    <div class="asides">
+      <div class="panel-selector"></div>
+        <aside class="annotations" style="display:none">
+          <div>
+            <h2>${i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
+          </div>
+          <div class="btn-group" role="group" aria-label="annotations">
+            <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fa fa-font"></i>
+            </button>
+            <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fa fa-arrow-right"></i>
+            </button>
+            <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="fa fa-square-o"></i>
+            </button>
+          </div>
+        </aside>
       </div>
-      <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fa fa-font"></i>
-        </button>
-        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fa fa-arrow-right"></i>
-        </button>
-        <button class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="fa fa-square-o"></i>
-        </button>
-      </div>
-    </aside>
-  </div>
-</div>`;
+    </div>
+  </div>`;
 
 export interface IACLUEWrapperOptions {
   replaceBody?: boolean;
