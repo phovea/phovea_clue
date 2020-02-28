@@ -13,9 +13,9 @@ import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {IVisStateApp} from './provenance_retrieval/IVisState';
 import {resolveImmediately} from 'phovea_core/src';
-import {list, IPluginDesc} from 'phovea_core/src/plugin';
-import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH} from './extensions';
-import i18n, {initI18n} from 'phovea_core/src/i18n/index';
+import {list} from 'phovea_core/src/plugin';
+import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from './extensions';
+import i18n from 'phovea_core/src/i18n/index';
 
 const getTemplate = () => `<div class="box">
   <header>
@@ -82,8 +82,8 @@ export abstract class ACLUEWrapper extends EventHandler {
 
     this.graph.then((graph) => {
       // load registered extensions and pass the ready graph to extension
-      list(EP_PHOVEA_CLUE_PROVENANCE_GRAPH).map((desc: IPluginDesc) => {
-        desc.load().then((plugin) => plugin.factory(graph));
+      list(EP_PHOVEA_CLUE_PROVENANCE_GRAPH).map((desc: IProvenanceGraphEPDesc) => {
+        desc.load().then((plugin: IProvenanceGraphEP) => plugin.factory(graph));
       });
 
       graph.on('run_chain', () => {

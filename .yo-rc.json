@@ -55,8 +55,8 @@
     ],
     "unknown": {
       "requirements": [
-        "selenium==2.48.0",
-        "python-memcached==1.58"
+        "selenium==3.11.0",
+        "python-memcached==1.59"
       ],
       "debianPackages": [
         "memcached"
