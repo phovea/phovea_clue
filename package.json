@@ -75,8 +75,8 @@
   "dependencies": {
     "@types/d3": "~3.5.36",
     "d3": "~3.5.17",
-    "@types/jquery": "~3.3.6",
-    "jquery": "~3.3.1",
+    "@types/jquery": "~3.3.33",
+    "jquery": "~3.4.1",
     "@types/marked": "0.7.2",
     "marked": "0.7.0",
     "phovea_ui": "github:phovea/phovea_ui#stoiber/provenance_retrieval+typescript_3.8+update_dependencies_38",
