@@ -77,9 +77,9 @@
     "@types/marked": "0.3.0",
     "d3": "~3.5.17",
     "marked": "0.3.9",
-    "phovea_core": "github:phovea/phovea_core#typescript_3.8",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#typescript_3.8",
-    "phovea_ui": "github:phovea/phovea_ui#typescript_3.8"
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#develop",
+    "phovea_ui": "github:phovea/phovea_ui#develop"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
