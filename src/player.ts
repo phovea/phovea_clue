@@ -83,7 +83,7 @@ export class Player {
     const act = this.graph.selectedSlides()[0] || l[l.length - 1];
     if (act) {
       this.render(act).then(() => {
-        this.anim = setTimeout(this.next.bind(this), act.duration * FACTOR);
+        this.anim = self.setTimeout(this.next.bind(this), act.duration * FACTOR);
       });
       return true;
     } else {
@@ -123,7 +123,7 @@ export class Player {
     const r = this.forward();
     if (r) {
       r.then((act) => {
-        this.anim = setTimeout(this.next.bind(this), act.duration * FACTOR);
+        this.anim = self.setTimeout(this.next.bind(this), act.duration * FACTOR);
       });
     }
   }
