@@ -77,9 +77,9 @@
     "@types/marked": "0.7.2",
     "d3": "~3.5.17",
     "marked": "0.7.0",
-    "phovea_core": "^4.0.0",
-    "phovea_security_flask": "^5.0.0",
-    "phovea_ui": "^4.0.0"
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#develop",
+    "phovea_ui": "github:phovea/phovea_ui#develop"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
