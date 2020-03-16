@@ -42,8 +42,8 @@ function injectParentWindowSupport(wrapper: ICLUEWrapper) {
   };
   wrapper.on('jumped_to', jumpListener);
   window.addEventListener('message', (event: MessageEvent) => {
-    const s = event.source,
-      d = event.data;
+    const s = <WindowProxy>event.source;
+    const d = event.data;
     if (d.type !== 'caleydo' || !d.clue) {
       return;
     }
@@ -91,7 +91,7 @@ export function useInMemoryGraph() {
 }
 
 function triggeredByInputField(evt: KeyboardEvent) {
-  const src = evt.srcElement;
+  const src = <HTMLElement>evt.srcElement;
   const elem = <HTMLElement>evt.target;
   const inputTypes = ['input', 'select', 'textarea'];
 
