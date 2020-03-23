@@ -55,7 +55,7 @@ export class Select2 {
     (<any>this.$instance).select2('close');
   }
 
-  private prepareData(data : IProperty[]):ISelect2Category[] {
+  private prepareData(data: IProperty[]):ISelect2Category[] {
     return data.map((prop) => {
       return {
         text: prop.text,
