@@ -24,7 +24,7 @@ export function create(body:HTMLElement, options:any = {}) {
   const $main = d3.select(body).append('main').style('height', '92vh');
   const graph = prov.createDummy();
   return {
-    on: (...args : any[]) => 0,
+    on: (...args: any[]) => 0,
     $main,
     graph: resolveImmediately(graph),
     jumpToStored: () => 0
