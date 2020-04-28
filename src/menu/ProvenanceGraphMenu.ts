@@ -187,14 +187,14 @@ export default class ProvenanceGraphMenu {
                 </div>
             </div>
         </div>`);
-        $elem.find('button.btn-danger').on('click', () => {
+        $elem.find<HTMLElement>('button.btn-danger').on('click', () => {
           areyousure(i18n.t('phovea:clue.provenanceMenu.areYouSureToDelete', {name: graph.name})).then((deleteIt) => {
             if (deleteIt) {
               manager.delete(graph);
             }
           });
         });
-        $elem.find('button.btn-primary').on('click', function () {
+        $elem.find<HTMLElement>('button.btn-primary').on('click', function () {
           const isSelect = this.dataset.action === 'select';
           manager.loadOrClone(graph, isSelect);
           return false;
@@ -203,10 +203,10 @@ export default class ProvenanceGraphMenu {
       }
     }).parent().on({
       mouseenter() {
-        (<any>$(this).find('a')).popover('show');
+        (<any>$(this).find<HTMLElement>('a')).popover('show');
       },
       mouseleave() {
-        (<any>$(this).find('a')).popover('hide');
+        (<any>$(this).find<HTMLElement>('a')).popover('hide');
       }
     });
   }

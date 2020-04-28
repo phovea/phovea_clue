@@ -291,9 +291,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
     const jp = $($node.node());
-    (<any>jp.find('.dropdown-toggle')).dropdown();
-    jp.find('h2 i.fa-plus-circle').on('click', () => {
-      jp.find('form.toolbar').toggle('fast');
+    (<any>jp.find<HTMLElement>('.dropdown-toggle')).dropdown();
+    jp.find<HTMLElement>('h2 i.fa-plus-circle').on('click', () => {
+      jp.find<HTMLElement>('form.toolbar').toggle('fast');
     });
 
     {
@@ -318,7 +318,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
 
     if (this.data.getSlideChains().length === 0) {
-      jp.find('form.toolbar').toggle('fast');
+      jp.find<HTMLElement>('form.toolbar').toggle('fast');
     }
 
     return $node;
