@@ -594,11 +594,11 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const jp = $($p.node());
     const that = this;
     //must use bootstrap since they are manually triggered
-    jp.find('form.toolbar input, .legend input').on('change', function() {
+    jp.find<HTMLElement>('form.toolbar input, .legend input').on('change', function() {
       const inputElement = <HTMLInputElement>this;
       if (inputElement.type === 'text') {
         that.highlight.tags = inputElement.value.split(' ');
-        jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
+        jp.find<HTMLElement>('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
       } else {
         that.highlight[inputElement.name][inputElement.value] = inputElement.checked;
       }
@@ -606,15 +606,15 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     });
     //initialize bootstrap
     lazyBootstrap().then(($$) => {
-      $$($p.node()).find('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
+      $$($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
     });
 
-    jp.find('.btn-filter').on('click', () => {
-      jp.find('form.toolbar').toggle('fast');
+    jp.find<HTMLElement>('.btn-filter').on('click', () => {
+      jp.find<HTMLElement>('form.toolbar').toggle('fast');
       return false;
     });
 
-    jp.find('.btn-collapse').on('click', (evt) => {
+    jp.find<HTMLElement>('.btn-collapse').on('click', (evt) => {
       evt.preventDefault();
       const collapsed = !$p.classed('collapsed');
       this.toggleBinding(!collapsed);
@@ -729,23 +729,23 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
 
     //just for the entered ones
-    //(<any>$($states_enter[0][0]).find('> span.icon')).popover(StateRepr.popover)
+    //(<any>$($states_enter[0][0]).find<HTMLElement>('> span.icon')).popover(StateRepr.popover)
     //  .parent().on({
     //    mouseenter: function () {
-    //      var $icon = $(this).find('> span.icon');
+    //      var $icon = $(this).find<HTMLElement>('> span.icon');
     //      $icon.addClass('popping');
     //      $icon.data('popup', setTimeout(function () {
     //        (<any>$icon).popover('show');
     //      }, 200));
     //    },
     //    mouseleave: function () {
-    //      var $icon = $(this).find('> span.icon');
+    //      var $icon = $(this).find<HTMLElement>('> span.icon');
     //      const id = +$icon.data('popoup');
     //      clearTimeout(id);
     //      $icon.removeData('popup');
     //      const d:StateRepr = d3.select(this).datum();
     //      if (d && $icon.has('textarea')) {
-    //        const val = $(this).find('textarea').val();
+    //        const val = $(this).find<HTMLElement>('textarea').val();
     //        d.s.setAttr('tags', extractTags(val));
     //        d.s.setAttr('note', val);
     //      }
