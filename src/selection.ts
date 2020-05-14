@@ -174,6 +174,6 @@ export class SelectionRecorder {
 }
 
 
-export function create(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
+export function createSelectionRecorder(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
   return new SelectionRecorder(graph, type, options);
 }
