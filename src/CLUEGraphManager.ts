@@ -7,7 +7,7 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
-import {useInMemoryGraph} from './internal';
+import {useInMemoryGraph} from './wrapper/wrapperUtils';
 import {EventHandler} from 'phovea_core/src/event';
 import {resolveImmediately} from 'phovea_core/src';
 import i18n from 'phovea_core/src/i18n';
