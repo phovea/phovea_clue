@@ -16,7 +16,7 @@ import {resolveImmediately} from 'phovea_core/src';
  * @param options
  * @returns {CLUEWrapper}
  */
-export function create(body:HTMLElement, options:any = {}) {
+export function createWrapperFactory(body:HTMLElement, options:any = {}) {
   header.create(body, {
       appLink: new header.AppHeaderLink(options.app || 'Caleydo'),
       inverse: true

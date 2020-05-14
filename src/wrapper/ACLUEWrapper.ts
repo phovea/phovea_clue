@@ -2,18 +2,18 @@
  * Created by sam on 03.03.2017.
  */
 
-import * as cmode from './mode';
-import {LayoutedProvVis} from './provvis';
-import {VerticalStoryVis} from './storyvis';
+import * as cmode from '../mode';
+import {LayoutedProvVis} from '../vis/provvis';
+import {VerticalStoryVis} from '../vis/storyvis';
 import {EventHandler} from 'phovea_core/src/event';
-import CLUEGraphManager, {IClueState} from './CLUEGraphManager';
-import {handleMagicHashElements, enableKeyboardShortcuts} from './internal';
+import CLUEGraphManager, {IClueState} from '../CLUEGraphManager';
+import {handleMagicHashElements, enableKeyboardShortcuts} from './wrapperUtils';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
 import {resolveImmediately} from 'phovea_core/src';
 import {list} from 'phovea_core/src/plugin';
-import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from './extensions';
+import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from '../extensions';
 import i18n from 'phovea_core/src/i18n/index';
 
 const getTemplate = () => `<div class="box">

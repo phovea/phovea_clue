@@ -11,14 +11,14 @@ import {
   IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
-import {create as createSelection} from './selection';
-import * as cmode from './mode';
-import {loadProvenanceGraphVis, loadStoryVis} from './vis_loader';
+import {createSelectionRecorder} from '../selection';
+import * as cmode from '../mode';
+import {loadProvenanceGraphVis, loadStoryVis} from '../vis/vis_loader';
 import {IEvent} from 'phovea_core/src/event';
-import CLUEGraphManager from './CLUEGraphManager';
-import ProvenanceGraphMenu from './menu/ProvenanceGraphMenu';
-import LoginMenu from './menu/LoginMenu';
-export {default as CLUEGraphManager} from './CLUEGraphManager';
+import CLUEGraphManager from '../CLUEGraphManager';
+import ProvenanceGraphMenu from '../menu/ProvenanceGraphMenu';
+import LoginMenu from '../menu/LoginMenu';
+export {default as CLUEGraphManager} from '../CLUEGraphManager';
 import ACLUEWrapper, {IACLUEWrapperOptions} from './ACLUEWrapper';
 
 
@@ -138,7 +138,7 @@ export class CLUEWrapper extends ACLUEWrapper {
 
       if (this.options.recordSelectionTypes) {
         //record selections of the given type
-        createSelection(graph, this.options.recordSelectionTypes, {
+        createSelectionRecorder(graph, this.options.recordSelectionTypes, {
           filter(idtype) {
             return idtype && idtype.name[0] !== '_';
           },
@@ -176,6 +176,6 @@ export default CLUEWrapper;
  * @param options
  * @returns {CLUEWrapper}
  */
-export function create(body: HTMLElement, options: any = {}) {
+export function createCLUEWrapper(body: HTMLElement, options: any = {}) {
   return new CLUEWrapper(body, options);
 }

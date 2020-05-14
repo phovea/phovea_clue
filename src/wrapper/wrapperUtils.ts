@@ -4,7 +4,7 @@
 
 import {hash} from 'phovea_core/src';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import * as cmode from './mode';
+import * as cmode from '../mode';
 import {IEventHandler} from 'phovea_core/src/event';
 
 export interface ICLUEWrapper extends IEventHandler {
