@@ -5,7 +5,6 @@
 import * as multiform from 'phovea_core/src/multiform';
 import * as provenance from 'phovea_core/src/provenance';
 import * as vis from 'phovea_core/src/vis';
-import * as C from 'phovea_core/src/index';
 
 const disabled = {};
 
