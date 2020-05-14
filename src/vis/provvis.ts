@@ -9,12 +9,12 @@ import lazyBootstrap from 'phovea_ui/src/_lazyBootstrap';
 import * as ranges from 'phovea_core/src/range';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
-import * as cmode from './mode';
+import * as cmode from '../mode';
 import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 
-import * as utils from './utils';
+import * as utils from '../utils';
 import i18n from 'phovea_core/src/i18n';
 
 
@@ -798,6 +798,6 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
   }
 }
 
-export function create(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+export function createLayoutedProvVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
   return new LayoutedProvVis(data, parent, options);
 }

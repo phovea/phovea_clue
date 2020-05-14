@@ -9,16 +9,16 @@ import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {create as createAnnotation} from './annotation';
-import * as cmode from './mode';
+import {createAnnotation} from '../annotation';
+import * as cmode from '../mode';
 import * as dialogs from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
-import * as utils from './utils';
+import * as utils from '../utils';
 import * as marked from 'marked';
-import * as player from './player';
+import * as player from '../player';
 import * as $ from 'jquery';
-import * as textPNG from './assets/text.png';
+import * as textPNG from '../assets/text.png';
 import i18n from 'phovea_core/src/i18n';
 
 
@@ -717,7 +717,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 }
 
 
-export function create(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+export function createVerticalStoryVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
   return new VerticalStoryVis(data, parent, options);
 }
 
@@ -726,7 +726,7 @@ export function create(data: provenance.ProvenanceGraph, parent: Element, option
 export function createStoryVis(graph: ProvenanceGraph, parent: HTMLElement, main: HTMLElement, options: {thumbnails: boolean}) {
   const r = createAnnotation(main, graph);
 
-  const storyvis = create(graph, parent, {
+  const storyvis = createVerticalStoryVis(graph, parent, {
     render: r.render,
     thumbnails: options.thumbnails
   });
