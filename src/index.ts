@@ -4,6 +4,7 @@ export * from './wrapper';
 
 export * from './annotation';
 export * from './CLUEGraphManager';
+export {default as CLUEGraphManager} from './CLUEGraphManager';
 export * from './compress';
 export * from './EmbeddedCLUE';
 export * from './extensions';
