@@ -5,53 +5,23 @@
 
 import * as C from 'phovea_core/src/index';
 import * as $ from 'jquery';
-import lazyBootstrap from 'phovea_ui/src/_lazyBootstrap';
+import {loadBootstrap} from 'phovea_ui/src/_lazyBootstrap';
 import * as ranges from 'phovea_core/src/range';
 import * as idtypes from 'phovea_core/src/idtype';
 import * as provenance from 'phovea_core/src/provenance';
 import * as cmode from '../mode';
-import * as dialogs from 'phovea_ui/src/dialogs';
+import {Dialog} from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
+import {extractTags, LevelOfDetail, getLevelOfDetail} from './utils';
 
 import * as utils from '../utils';
 import i18n from 'phovea_core/src/i18n';
 
 
-function extractTags(text: string) {
-  const regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
-  let match;
-  const matches = [];
-  while (match = regex.exec(text)) {
-    matches.push(match[1]);
-  }
-  return matches;
-}
-
-enum LevelOfDetail {
-  ExtraSmall = 0,
-  Small = 1,
-  Medium = 2,
-  Large = 3
-}
-
 const DOI_LARGE = 0.9;
 const DOI_MEDIUM = 0.7;
 const DOI_SMALL = 0.4;
-
-function getLevelOfDetail(): LevelOfDetail {
-  const mode = cmode.getMode();
-  //if (mode.exploration >= 0.8) {
-  //  return LevelOfDetail.Small;
-  //}
-  if (mode.presentation > 0.3) {
-    return LevelOfDetail.ExtraSmall;
-  }
-  if (mode.authoring >= 0.8) {
-    return LevelOfDetail.Large;
-  }
-  return LevelOfDetail.Medium;
-}
 
 class StateRepr {
   doi: number;
@@ -328,7 +298,7 @@ class StateRepr {
     const d = this;
     const icon = StateRepr.toIcon(d);
     const title = d.s.name;
-    const dia = dialogs.generateDialog(`<span class="icon">${icon}</span>${title}`);
+    const dia = Dialog.generateDialog(`<span class="icon">${icon}</span>${title}`);
 
     const thumbnail = utils.thumbnail_url(d.graph, d.s, {width: 512, format: 'png'});
     const notes = d.s.getAttr('note', '');
@@ -605,7 +575,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       that.update();
     });
     //initialize bootstrap
-    lazyBootstrap().then(($$) => {
+    loadBootstrap().then(($$) => {
       $$($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
     });
 
@@ -796,8 +766,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       $g.style('display', 'none');
     }
   }
-}
-
-export function createLayoutedProvVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
-  return new LayoutedProvVis(data, parent, options);
+  static createLayoutedProvVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+    return new LayoutedProvVis(data, parent, options);
+  }
 }

@@ -3,7 +3,8 @@
  *
  * Created by Samuel Gratzl on 27.08.2015.
  */
-
+/// <amd-dependency path='font-awesome' />
+/// <amd-dependency path='bootstrap' />
 import {mixin} from 'phovea_core/src/index';
 import {IHeaderLink, create as createHeader, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
 import {
@@ -11,7 +12,8 @@ import {
   IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
-import {createSelectionRecorder} from '../selection';
+import {SelectionRecorder} from '../selection';
+import {ButtonModeSelector} from '../mode';
 import * as cmode from '../mode';
 import {loadProvenanceGraphVis, loadStoryVis} from '../vis/vis_loader';
 import {IEvent} from 'phovea_core/src/event';
@@ -19,6 +21,10 @@ import {CLUEGraphManager} from '../CLUEGraphManager';
 import {ProvenanceGraphMenu} from '../menu/ProvenanceGraphMenu';
 import {LoginMenu} from '../menu/LoginMenu';
 import {ACLUEWrapper, IACLUEWrapperOptions} from './ACLUEWrapper';
+import * as header from 'phovea_ui/src/header';
+import * as prov from 'phovea_core/src/provenance';
+import * as d3 from 'd3';
+import {resolveImmediately} from 'phovea_core/src';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
@@ -116,7 +122,7 @@ export class CLUEWrapper extends ACLUEWrapper {
 
     const modeSelector = body.querySelector('header');
     modeSelector.className += 'clue-modeselector';
-    cmode.createButton(modeSelector, {
+    cmode.ButtonModeSelector.createButton(modeSelector, {
       size: 'sm'
     });
 
@@ -137,7 +143,7 @@ export class CLUEWrapper extends ACLUEWrapper {
 
       if (this.options.recordSelectionTypes) {
         //record selections of the given type
-        createSelectionRecorder(graph, this.options.recordSelectionTypes, {
+        SelectionRecorder.createSelectionRecorder(graph, this.options.recordSelectionTypes, {
           filter(idtype) {
             return idtype && idtype.name[0] !== '_';
           },
@@ -166,14 +172,36 @@ export class CLUEWrapper extends ACLUEWrapper {
       });
     });
   }
+
+  /**
+   * factory method creating a CLUEWrapper instance
+   * @param body
+   * @param options
+   * @returns {CLUEWrapper}
+   */
+  static createCLUEWrapper(body: HTMLElement, options: any = {}) {
+    return new CLUEWrapper(body, options);
+  }
+
+  /**
+   * factory method creating a CLUEWrapper instance
+   * @param body
+   * @param options
+   * @returns {CLUEWrapper}
+   */
+  static createWrapperFactory(body:HTMLElement, options:any = {}) {
+    header.create(body, {
+        appLink: new header.AppHeaderLink(options.app || 'Caleydo'),
+        inverse: true
+      });
+    const $main = d3.select(body).append('main').style('height', '92vh');
+    const graph = prov.createDummy();
+    return {
+      on: (...args: any[]) => 0,
+      $main,
+      graph: resolveImmediately(graph),
+      jumpToStored: () => 0
+    };
+  }
 }
 
-/**
- * factory method creating a CLUEWrapper instance
- * @param body
- * @param options
- * @returns {CLUEWrapper}
- */
-export function createCLUEWrapper(body: HTMLElement, options: any = {}) {
-  return new CLUEWrapper(body, options);
-}

@@ -649,11 +649,11 @@ export class Renderer {
       return this.$main.node();
     });
   }
-}
 
-export function createAnnotation(main: HTMLElement, graph: prov.ProvenanceGraph) {
-  const instance = new Renderer(d3.select(main), graph);
-  return {
-    render: instance.render.bind(instance)
-  };
+  static createAnnotation(main: HTMLElement, graph: prov.ProvenanceGraph) {
+    const instance = new Renderer(d3.select(main), graph);
+    return {
+      render: instance.render.bind(instance)
+    };
+  }
 }

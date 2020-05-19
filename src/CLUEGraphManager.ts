@@ -256,13 +256,13 @@ export class CLUEGraphManager extends EventHandler {
     }
     this.manager.cloneLocal(graph).then((graph) => this.loadGraph(graph.desc));
   }
-}
 
-/**
- * create the provenance graph selection dropdown and handles the graph selection
- * @param manager
- * @returns {Promise<U>}
- */
-function choose(manager: CLUEGraphManager): Promise<ProvenanceGraph> {
-  return manager.list().then((list) => manager.choose(list));
+  /**
+   * create the provenance graph selection dropdown and handles the graph selection
+   * @param manager
+   * @returns {Promise<U>}
+   */
+  static choose(manager: CLUEGraphManager): Promise<ProvenanceGraph> {
+    return manager.list().then((list) => manager.choose(list));
+  }
 }

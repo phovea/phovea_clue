@@ -9,12 +9,13 @@ import * as ranges from 'phovea_core/src/range';
 import * as provenance from 'phovea_core/src/provenance';
 import * as idtypes from 'phovea_core/src/idtype';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {createAnnotation} from '../annotation';
+import {Renderer} from '../annotation';
 import * as cmode from '../mode';
-import * as dialogs from 'phovea_ui/src/dialogs';
+import {Dialog} from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
 import * as utils from '../utils';
+import {isEditAble, LevelOfDetail, getLevelOfDetail} from './utils';
 import * as marked from 'marked';
 import * as player from '../player';
 import * as $ from 'jquery';
@@ -30,44 +31,6 @@ interface ISlideNodeRepr {
   name?: string;
   state?: provenance.StateNode;
   to?: provenance.SlideNode;
-}
-
-function to_duration(d: number) {
-  const minutesSeconds = d3.time.format('%M:%S');
-  return minutesSeconds(new Date(d));
-}
-
-function to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
-  if (!d) {
-    return d3.sum(story, (d) => d.duration + d.transition);
-  }
-  const i = story.indexOf(d);
-  return story.slice(0, i).reduce((a, b) => a + b.duration + b.transition, d.transition);
-}
-
-enum LevelOfDetail {
-  None = 0,
-  Small = 1,
-  Medium = 2,
-  Large = 3
-}
-
-function getLevelOfDetail(): LevelOfDetail {
-  const mode = cmode.getMode();
-  if (mode.presentation >= 0.8) {
-    return LevelOfDetail.Large;
-  }
-  if (mode.exploration > 0.3) {
-    return LevelOfDetail.None;
-  }
-  if (mode.authoring >= 0.8) {
-    return LevelOfDetail.Large;
-  }
-  return LevelOfDetail.Medium;
-}
-
-function isEditAble() {
-  return getLevelOfDetail() >= LevelOfDetail.Large;
 }
 
 export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
@@ -430,9 +393,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const stories = provenance.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           const index = stories.indexOf(k);
-          return to_duration(to_starting_time(k, stories) + (index > i ? change : 0));
+          return VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(k, stories) + (index > i ? change : 0));
         });
-        that.$node.select('div.story.placeholder div.duration span').text(to_duration(to_starting_time(null, stories) + change));
+        that.$node.select('div.story.placeholder div.duration span').text(VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(null, stories) + change));
       }).on('dragend', function (d: provenance.SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style(that.options.wh), 10);
@@ -455,9 +418,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         const stories = provenance.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           const index = stories.indexOf(k);
-          return to_duration(to_starting_time(k, stories) + (index >= i ? change : 0));
+          return VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(k, stories) + (index >= i ? change : 0));
         });
-        that.$node.select('div.story.placeholder div.duration span').text(to_duration(to_starting_time(null, stories) + change));
+        that.$node.select('div.story.placeholder div.duration span').text(VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(null, stories) + change));
       }).on('dragend', function (d: provenance.SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style('margin-' + that.options.topleft), 10);
@@ -502,7 +465,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       //remove me
       e.stopPropagation();
       e.preventDefault();
-      dialogs.prompt(d.name, {
+      Dialog.prompt(d.name, {
         title: i18n.t('phovea:clue.storyvis.editName'),
         placeholder: i18n.t('phovea:clue.storyvis.markdownSupported'),
         multiline: true
@@ -679,17 +642,17 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const $stories = $states.filter((d) => !d.isPlaceholder);
     $stories.classed('text', (d) => d.isTextOnly);
     $stories.attr('data-id', (d) => d.id);
-    $stories.attr('title', (d) => d.name + '\n' + (d.transition > 0 ? '(' + to_duration(d.transition) + ')' : '') + '(' + to_duration(d.duration) + ')');
+    $stories.attr('title', (d) => d.name + '\n' + (d.transition > 0 ? '(' + VerticalStoryVis.to_duration(d.transition) + ')' : '') + '(' + VerticalStoryVis.to_duration(d.duration) + ')');
     //$stories.attr('data-toggle', 'tooltip');
     $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? `url(${textPNG})` : `url(${utils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
-    $stories.select('div.duration span').text((d, i) => `${to_duration(to_starting_time(d, storyRaw))}`);
+    $stories.select('div.duration span').text((d, i) => `${VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(d, storyRaw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration) + 'px');
     $stories.style('margin-' + this.options.topleft, (d) => this.duration2pixel(d.transition) - VerticalStoryVis.MIN_HEIGHT + 'px');
 
     //const $placeholders = $states.filter((d) => d.isPlaceholder);
 
-    $states.filter((d) => d.isLastPlaceholder).select('div.duration span').text(to_duration(to_starting_time(null, storyRaw)));
+    $states.filter((d) => d.isLastPlaceholder).select('div.duration span').text(VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(null, storyRaw)));
 
     $states.exit().remove();
   }
@@ -714,65 +677,75 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
 
   }
-}
 
+  static createVerticalStoryVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+    return new VerticalStoryVis(data, parent, options);
+  }
 
-export function createVerticalStoryVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
-  return new VerticalStoryVis(data, parent, options);
-}
+  static createStoryVis(graph: ProvenanceGraph, parent: HTMLElement, main: HTMLElement, options: {thumbnails: boolean}) {
+    const r = Renderer.createAnnotation(main, graph);
 
-
-
-export function createStoryVis(graph: ProvenanceGraph, parent: HTMLElement, main: HTMLElement, options: {thumbnails: boolean}) {
-  const r = createAnnotation(main, graph);
-
-  const storyvis = createVerticalStoryVis(graph, parent, {
-    render: r.render,
-    thumbnails: options.thumbnails
-  });
-
-  graph.on('select_slide_selected', (event, state) => {
-    select('aside.annotations').style('display', state ? null : 'none');
-  });
-  select('aside.annotations > div:first-of-type').call(behavior.drag().on('drag', function () {
-    const mouse = d3mouse(this.parentElement.parentElement);
-    select(this.parentElement).style({
-      left: mouse[0] + 'px',
-      top: mouse[1] + 'px'
+    const storyvis = VerticalStoryVis.createVerticalStoryVis(graph, parent, {
+      render: r.render,
+      thumbnails: options.thumbnails
     });
-  }));
 
-  selectAll('aside.annotations button[data-ann]').on('click', function () {
-    const create = this.dataset.ann;
-    let ann;
-    switch (create) {
-      case 'text':
-        ann = {
-          type: 'text',
-          pos: [10, 10],
-          text: ''
-        };
-        break;
-      case 'arrow':
-        ann = {
-          type: 'arrow',
-          pos: [10, 10],
-          at: [200, 200]
-        };
-        //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
-        //this.actStory.addText();
-        break;
-      case 'frame':
-        ann = {
-          type: 'frame',
-          pos: [10, 10],
-          size: [20, 20]
-        };
-        break;
+    graph.on('select_slide_selected', (event, state) => {
+      select('aside.annotations').style('display', state ? null : 'none');
+    });
+    select('aside.annotations > div:first-of-type').call(behavior.drag().on('drag', function () {
+      const mouse = d3mouse(this.parentElement.parentElement);
+      select(this.parentElement).style({
+        left: mouse[0] + 'px',
+        top: mouse[1] + 'px'
+      });
+    }));
+
+    selectAll('aside.annotations button[data-ann]').on('click', function () {
+      const create = this.dataset.ann;
+      let ann;
+      switch (create) {
+        case 'text':
+          ann = {
+            type: 'text',
+            pos: [10, 10],
+            text: ''
+          };
+          break;
+        case 'arrow':
+          ann = {
+            type: 'arrow',
+            pos: [10, 10],
+            at: [200, 200]
+          };
+          //that.data.appendToStory(that.story.story, that.data.makeTextStory('Unnamed');
+          //this.actStory.addText();
+          break;
+        case 'frame':
+          ann = {
+            type: 'frame',
+            pos: [10, 10],
+            size: [20, 20]
+          };
+          break;
+      }
+      if (storyvis && ann) {
+        storyvis.pushAnnotation(ann);
+      }
+    });
+    return storyvis;
+  }
+
+  static to_duration(d: number) {
+    const minutesSeconds = d3.time.format('%M:%S');
+    return minutesSeconds(new Date(d));
+  }
+
+  static to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
+    if (!d) {
+      return d3.sum(story, (d) => d.duration + d.transition);
     }
-    if (storyvis && ann) {
-      storyvis.pushAnnotation(ann);
-    }
-  });
-  return storyvis;
+    const i = story.indexOf(d);
+    return story.slice(0, i).reduce((a, b) => a + b.duration + b.transition, d.transition);
+  }
 }

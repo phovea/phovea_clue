@@ -2,13 +2,6 @@
  * Created by Samuel Gratzl on 25.02.2016.
  */
 
-function clue_random_id(length = 8) {
-  let id = '';
-  while (id.length < length) {
-    id += Math.random().toString(36).slice(-8);
-  }
-  return id.substr(0, length);
-}
 
 export class EmbeddedCLUE {
   private iframe:HTMLIFrameElement;
@@ -37,7 +30,7 @@ export class EmbeddedCLUE {
   send(type:string, msg:any) {
     msg.type = 'caleydo';
     msg.clue = type;
-    msg.ref = clue_random_id();
+    msg.ref = this.clue_random_id();
     return new Promise((resolve, reject) => {
       this.callbacks[msg.ref] = {
         resolve,
@@ -79,11 +72,19 @@ export class EmbeddedCLUE {
       d.resolve(data);
     }
   }
-}
 
-export function embedCLUE(parent:HTMLElement, server:string, app:string, provenanceGraph:string) {
-  const url = `${server}/${app}/#clue_graph=${provenanceGraph}&clue_contained=T&clue=P`;
-  return new Promise((resolve) => {
-    return new EmbeddedCLUE(parent, url, resolve);
-  });
+  clue_random_id(length = 8) {
+    let id = '';
+    while (id.length < length) {
+      id += Math.random().toString(36).slice(-8);
+    }
+    return id.substr(0, length);
+  }
+
+  static embedCLUE(parent:HTMLElement, server:string, app:string, provenanceGraph:string) {
+    const url = `${server}/${app}/#clue_graph=${provenanceGraph}&clue_contained=T&clue=P`;
+    return new Promise((resolve) => {
+      return new EmbeddedCLUE(parent, url, resolve);
+    });
+  }
 }

@@ -6,7 +6,7 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {event as d3event, select, time} from 'd3';
 import * as $ from 'jquery';
-import {generateDialog, areyousure} from 'phovea_ui/src/dialogs';
+import {Dialog, FormDialog} from 'phovea_ui/src/dialogs';
 import {CLUEGraphManager} from '../CLUEGraphManager';
 import {isLoggedIn} from 'phovea_core/src/security';
 import i18n from 'phovea_core/src/i18n';
@@ -115,7 +115,7 @@ export class ProvenanceGraphMenu {
       e.stopPropagation();
       const remote = this.id === 'provenancegraph_import_remote';
       //import dialog
-      const d = generateDialog(i18n.t('phovea:clue.provenanceMenu.selectFile'), i18n.t('phovea:clue.provenanceMenu.upload'));
+      const d = Dialog.generateDialog(i18n.t('phovea:clue.provenanceMenu.selectFile'), i18n.t('phovea:clue.provenanceMenu.upload'));
       d.body.innerHTML = `<input type="file" placeholder=${i18n.t('phovea:clue.provenanceMenu.selectFileToUpload')}>`;
       select(d.body).select('input').on('change', function () {
         const file = (<any>d3event).target.files[0];
@@ -188,7 +188,7 @@ export class ProvenanceGraphMenu {
             </div>
         </div>`);
         $elem.find<HTMLElement>('button.btn-danger').on('click', () => {
-          areyousure(i18n.t('phovea:clue.provenanceMenu.areYouSureToDelete', {name: graph.name})).then((deleteIt) => {
+          FormDialog.areyousure(i18n.t('phovea:clue.provenanceMenu.areYouSureToDelete', {name: graph.name})).then((deleteIt) => {
             if (deleteIt) {
               manager.delete(graph);
             }

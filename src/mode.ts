@@ -210,6 +210,10 @@ export class ButtonModeSelector {
     });
     return <HTMLElement>parent.lastElementChild!;
   }
+
+  static createButton(parent: Element, options: any = {}) {
+    return new ButtonModeSelector(parent, options);
+  }
 }
 
 // /**
@@ -371,9 +375,6 @@ export class ButtonModeSelector {
 // export function createTriangle(parent:Element, options:any = {}) {
 //   return new TriangleModeSelector(parent, options);
 // }
-export function createButton(parent: Element, options: any = {}) {
-  return new ButtonModeSelector(parent, options);
-}
 //export function createSlider(parent:Element, options:any = {}) {
 //  return new SliderModeSelector(parent, options);
 //}

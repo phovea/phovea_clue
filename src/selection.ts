@@ -171,9 +171,8 @@ export class SelectionRecorder {
     this.handler.forEach((h) => h.destroy());
     this.handler.length = 0;
   }
-}
 
-
-export function createSelectionRecorder(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
-  return new SelectionRecorder(graph, type, options);
+  static createSelectionRecorder(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
+    return new SelectionRecorder(graph, type, options);
+  }
 }
