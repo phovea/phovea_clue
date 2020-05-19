@@ -5,7 +5,7 @@
 
 import {mixin} from 'phovea_core/src/index';
 import {AppHeader} from 'phovea_ui/src/header';
-import BaseLoginMenu, {
+import { LoginMenu as BaseLoginMenu,
   ILoginMenuOptions as IBaseLoginMenuOptions
 } from 'phovea_security_flask/src/LoginMenu';
 
