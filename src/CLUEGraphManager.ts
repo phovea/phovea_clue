@@ -18,7 +18,7 @@ export interface IClueState {
   state: number;
 }
 
-export default class CLUEGraphManager extends EventHandler {
+export class CLUEGraphManager extends EventHandler {
   static readonly EVENT_EXTERNAL_STATE_CHANGE = 'externalStateChanged';
 
   /**

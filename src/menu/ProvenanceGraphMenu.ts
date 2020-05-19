@@ -7,11 +7,11 @@ import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {event as d3event, select, time} from 'd3';
 import * as $ from 'jquery';
 import {generateDialog, areyousure} from 'phovea_ui/src/dialogs';
-import CLUEGraphManager from '../CLUEGraphManager';
+import {CLUEGraphManager} from '../CLUEGraphManager';
 import {isLoggedIn} from 'phovea_core/src/security';
 import i18n from 'phovea_core/src/i18n';
 
-export default class ProvenanceGraphMenu {
+export class ProvenanceGraphMenu {
   private readonly $node: d3.Selection<any>;
   private graph: ProvenanceGraph;
 

@@ -15,11 +15,10 @@ import {createSelectionRecorder} from '../selection';
 import * as cmode from '../mode';
 import {loadProvenanceGraphVis, loadStoryVis} from '../vis/vis_loader';
 import {IEvent} from 'phovea_core/src/event';
-import CLUEGraphManager from '../CLUEGraphManager';
-import ProvenanceGraphMenu from '../menu/ProvenanceGraphMenu';
-import LoginMenu from '../menu/LoginMenu';
-export {default as CLUEGraphManager} from '../CLUEGraphManager';
-import ACLUEWrapper, {IACLUEWrapperOptions} from './ACLUEWrapper';
+import {CLUEGraphManager} from '../CLUEGraphManager';
+import {ProvenanceGraphMenu} from '../menu/ProvenanceGraphMenu';
+import {LoginMenu} from '../menu/LoginMenu';
+import {ACLUEWrapper, IACLUEWrapperOptions} from './ACLUEWrapper';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
@@ -168,7 +167,6 @@ export class CLUEWrapper extends ACLUEWrapper {
     });
   }
 }
-export default CLUEWrapper;
 
 /**
  * factory method creating a CLUEWrapper instance

@@ -6,7 +6,7 @@ import * as cmode from '../mode';
 import {LayoutedProvVis} from '../vis/provvis';
 import {VerticalStoryVis} from '../vis/storyvis';
 import {EventHandler} from 'phovea_core/src/event';
-import CLUEGraphManager, {IClueState} from '../CLUEGraphManager';
+import {CLUEGraphManager, IClueState} from '../CLUEGraphManager';
 import {handleMagicHashElements, enableKeyboardShortcuts} from './wrapperUtils';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
@@ -271,6 +271,3 @@ export abstract class ACLUEWrapper extends EventHandler {
     });
   }
 }
-
-export default ACLUEWrapper;
-

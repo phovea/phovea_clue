@@ -14,7 +14,7 @@ export interface ILoginMenuOptions extends IBaseLoginMenuOptions {
   insertIntoHeader?: boolean;
 }
 
-export default class LoginMenu extends BaseLoginMenu {
+export class LoginMenu extends BaseLoginMenu {
   constructor(private readonly header: AppHeader, options: ILoginMenuOptions = {}) {
     super(header, mixin({
       document: header.rightMenu.ownerDocument
