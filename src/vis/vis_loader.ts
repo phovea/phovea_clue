@@ -8,7 +8,7 @@ export function loadProvenanceGraphVis(data:Promise<ProvenanceGraph>, parent:Ele
   let c: Promise<LayoutedProvVis>;
   return () => {
     if (!c) {
-      c = Promise.all([<any>data, System.import('./provvis')]).then((args) => args[1].create(args[0], parent, options));
+      c = Promise.all([<any>data, System.import('./provvis')]).then((args) => args[1].createLayoutedProvVis(args[0], parent, options));
     }
     return c;
   };
