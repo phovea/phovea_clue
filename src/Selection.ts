@@ -7,86 +7,88 @@ import * as events from 'phovea_core/src/event';
 import * as provenance from 'phovea_core/src/provenance';
 import * as C from 'phovea_core/src/index';
 import * as ranges from 'phovea_core/src/range';
-import {lastOnly} from './compress';
+import {Compression} from './Compression';
 import {resolveImmediately} from 'phovea_core/src';
 
 const disabler = new events.EventHandler();
 
+export class Selection {
 
-export function select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
-  const idtype = idtypes.resolve(parameter.idtype),
-    range = ranges.parse(parameter.range),
-    type = parameter.type;
-  const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
+  static select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
+    const idtype = idtypes.resolve(parameter.idtype),
+      range = ranges.parse(parameter.range),
+      type = parameter.type;
+    const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
 
-  if (C.hash.has('debug')) {
-    console.log('select', range.toString());
+    if (C.hash.has('debug')) {
+      console.log('select', range.toString());
+    }
+    disabler.fire('disable-'+idtype.id);
+    idtype.select(type, range);
+    disabler.fire('enable-'+idtype.id);
+
+    return Selection.createSelection(idtype, type, bak, range, parameter.animated).then((cmd) => ({ inverse: cmd, consumed : parameter.animated ? within : 0 }));
   }
-  disabler.fire('disable-'+idtype.id);
-  idtype.select(type, range);
-  disabler.fire('enable-'+idtype.id);
 
-  return createSelection(idtype, type, bak, range, parameter.animated).then((cmd) => ({ inverse: cmd, consumed : parameter.animated ? within : 0 }));
-}
-
-function capitalize(s: string) {
-  return s.split(' ').map((d) => d[0].toUpperCase()+d.slice(1)).join(' ');
-}
-
-function meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
-  const l = range.dim(0).length;
-  let title = type === idtypes.defaultSelectionType ? '' : (capitalize(type)+' ');
-  let p;
-  if (l === 0) {
-    title += 'no '+idtype.names;
-    p = resolveImmediately(title);
-  } else if (l === 1) {
-    title += idtype.name+' ';
-
-    p = idtype.unmap(range).then((r) => {
-      title += r[0];
-      return title;
-    });
-  } else if (l < 3) {
-    title += idtype.names+' (';
-    p = idtype.unmap(range).then((r) => {
-      title += r.join(', ') + ')';
-      return title;
-    });
-  } else {
-    title += `${range.dim(0).length} ${idtype.names}`;
-    p = resolveImmediately(title);
+  static capitalize(s: string) {
+    return s.split(' ').map((d) => d[0].toUpperCase()+d.slice(1)).join(' ');
   }
-  return p.then((title) => provenance.meta(title, provenance.cat.selection));
-}
 
-/**
- * create a selection command
- * @param idtype
- * @param type
- * @param range
- * @param old optional the old selection for inversion
- * @returns {Cmd}
- */
-export function createSelection(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range = null, animated = false) {
-  return meta(idtype, type, range).then((meta) => {
-    return {
-      meta,
-      id: 'select',
-      f: select,
-      parameter: {
-        idtype: idtype.id,
-        range: range.toString(),
-        type,
-        old: old.toString(),
-        animated
-      }
-    };
-  });
-}
+  static meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
+    const l = range.dim(0).length;
+    let title = type === idtypes.defaultSelectionType ? '' : (Selection.capitalize(type)+' ');
+    let p;
+    if (l === 0) {
+      title += 'no '+idtype.names;
+      p = resolveImmediately(title);
+    } else if (l === 1) {
+      title += idtype.name+' ';
 
-export function compressSelection(path: provenance.ActionNode[]) {
-  return lastOnly(path, 'select', (p) => p.parameter.idtype + '@' + p.parameter.type);
+      p = idtype.unmap(range).then((r) => {
+        title += r[0];
+        return title;
+      });
+    } else if (l < 3) {
+      title += idtype.names+' (';
+      p = idtype.unmap(range).then((r) => {
+        title += r.join(', ') + ')';
+        return title;
+      });
+    } else {
+      title += `${range.dim(0).length} ${idtype.names}`;
+      p = resolveImmediately(title);
+    }
+    return p.then((title) => provenance.meta(title, provenance.cat.selection));
+  }
+
+  /**
+   * create a selection command
+   * @param idtype
+   * @param type
+   * @param range
+   * @param old optional the old selection for inversion
+   * @returns {Cmd}
+   */
+  static createSelection(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range = null, animated = false) {
+    return Selection.meta(idtype, type, range).then((meta) => {
+      return {
+        meta,
+        id: 'select',
+        f: Selection.select,
+        parameter: {
+          idtype: idtype.id,
+          range: range.toString(),
+          type,
+          old: old.toString(),
+          animated
+        }
+      };
+    });
+  }
+
+  static compressSelection(path: provenance.ActionNode[]) {
+    return Compression.lastOnly(path, 'select', (p) => p.parameter.idtype + '@' + p.parameter.type);
+  }
 }
 
 /**
@@ -94,7 +96,7 @@ export function compressSelection(path: provenance.ActionNode[]) {
  */
 class SelectionTypeRecorder {
   private l = (event, type, sel, added, removed, old) => {
-    createSelection(this.idtype, type, sel, old, this.options.animated).then((cmd) => this.graph.push(cmd));
+    Selection.createSelection(this.idtype, type, sel, old, this.options.animated).then((cmd) => this.graph.push(cmd));
   }
 
   private _enable = this.enable.bind(this);

@@ -7,7 +7,7 @@ import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
 import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import {canWrite, isLoggedIn} from 'phovea_core/src/security';
-import {useInMemoryGraph} from './wrapper/wrapperUtils';
+import {WrapperUtils} from './wrapper/WrapperUtils';
 import {EventHandler} from 'phovea_core/src/event';
 import {resolveImmediately} from 'phovea_core/src';
 import i18n from 'phovea_core/src/i18n';
@@ -175,7 +175,7 @@ export class CLUEGraphManager extends EventHandler {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
-      if (useInMemoryGraph()) {
+      if (WrapperUtils.useInMemoryGraph()) {
         return resolveImmediately(this.manager.createInMemory());
       }
       return this.manager.createLocal();
@@ -185,7 +185,7 @@ export class CLUEGraphManager extends EventHandler {
 
   private loadChosen(graph: string, desc?: IProvenanceGraphDataDescription, rejectOnNotFound: boolean = false) {
     if (desc) {
-      if (useInMemoryGraph()) {
+      if (WrapperUtils.useInMemoryGraph()) {
         return this.manager.cloneInMemory(desc);
       }
       if ((<any>desc).local || (isLoggedIn() && canWrite(desc))) {
@@ -197,7 +197,7 @@ export class CLUEGraphManager extends EventHandler {
     if (rejectOnNotFound) {
       return Promise.reject({graph, msg: i18n.t('phovea:clue.errorMessage', {graphID: graph})});
     }
-    if (useInMemoryGraph()) {
+    if (WrapperUtils.useInMemoryGraph()) {
       return resolveImmediately(this.manager.createInMemory());
     }
     return this.manager.create();
@@ -248,7 +248,7 @@ export class CLUEGraphManager extends EventHandler {
   }
 
   cloneLocal(graph: IProvenanceGraphDataDescription) {
-    if (useInMemoryGraph()) {
+    if (WrapperUtils.useInMemoryGraph()) {
       if (!this.isReadonly) {
         CLUEGraphManager.setGraphInUrl('memory');
       }

@@ -7,7 +7,7 @@ import {LayoutedProvVis} from '../vis/provvis';
 import {VerticalStoryVis} from '../vis/storyvis';
 import {EventHandler} from 'phovea_core/src/event';
 import {CLUEGraphManager, IClueState} from '../CLUEGraphManager';
-import {handleMagicHashElements, enableKeyboardShortcuts} from './wrapperUtils';
+import {WrapperUtils} from './WrapperUtils';
 import StateNode from 'phovea_core/src/provenance/StateNode';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
 import SlideNode from 'phovea_core/src/provenance/SlideNode';
@@ -65,7 +65,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     } else {
       body.insertAdjacentHTML('afterbegin', getTemplate());
     }
-    handleMagicHashElements(body, this);
+    WrapperUtils.handleMagicHashElements(body, this);
     const {graph, storyVis, manager, provVis} = this.buildImpl(body);
 
     this.graph = graph;
@@ -117,7 +117,7 @@ export abstract class ACLUEWrapper extends EventHandler {
         }
       });
 
-      enableKeyboardShortcuts(graph);
+      WrapperUtils.enableKeyboardShortcuts(graph);
       this.handleModeChange();
 
       this.fire('loaded_graph', graph);

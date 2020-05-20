@@ -8,7 +8,7 @@ import * as cmode from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
 import {defaultSelectionType} from 'phovea_core/src/idtype';
-import * as player from './player';
+import * as player from './Player';
 import {resolveImmediately} from 'phovea_core/src';
 import i18n from 'phovea_core/src/i18n';
 

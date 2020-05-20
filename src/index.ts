@@ -4,12 +4,12 @@ export * from './wrapper';
 
 export * from './annotation';
 export * from './CLUEGraphManager';
-export * from './compress';
+export * from './Compression';
 export * from './EmbeddedCLUE';
 export * from './extensions';
 export * from './mode';
-export * from './multiform';
+export * from './Multiform';
 export {default} from './phovea';
-export * from './player';
-export * from './selection';
-export * from './utils';
+export * from './Player';
+export * from './Selection';
+export * from './ThumbnailUtils';

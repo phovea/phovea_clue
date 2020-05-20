@@ -13,9 +13,9 @@ import * as cmode from '../mode';
 import {Dialog} from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
-import {extractTags, LevelOfDetail, getLevelOfDetail} from './utils';
+import {DetailUtils, LevelOfDetail} from './DetailUtils';
 
-import * as utils from '../utils';
+import {ThumbnailUtils} from '../ThumbnailUtils';
 import i18n from 'phovea_core/src/i18n';
 
 
@@ -39,7 +39,7 @@ class StateRepr {
   }
 
   get thumbnail() {
-    return `url(${utils.thumbnail_url(this.graph, this.s)})`;
+    return `url(${ThumbnailUtils.thumbnail_url(this.graph, this.s)})`;
   }
 
   build(lookup: {[id: number]: StateRepr}, line: StateRepr[]) {
@@ -83,7 +83,7 @@ class StateRepr {
   }
 
   get lod() {
-    const global = getLevelOfDetail();
+    const global = DetailUtils.getLevelOfDetail();
     const local = this.lod_local;
     return global < local ? global : local;
   }
@@ -114,7 +114,7 @@ class StateRepr {
     const selected = graph.act;
     const selectedPath = selected.path.reverse();
 
-    const lod = getLevelOfDetail();
+    const lod = DetailUtils.getLevelOfDetail();
 
     const size = graph.states.length;
 
@@ -140,7 +140,7 @@ class StateRepr {
         r.doi = Math.max(r.doi, DOI_SMALL);
       }
 
-      if (!utils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
+      if (!ThumbnailUtils.areThumbnailsAvailable(graph) || options.thumbnails === false) {
         r.doi = Math.min(r.doi, DOI_LARGE - 0.01); //border for switching to thumbnails
       }
       r.selected = s === selected;
@@ -300,7 +300,7 @@ class StateRepr {
     const title = d.s.name;
     const dia = Dialog.generateDialog(`<span class="icon">${icon}</span>${title}`);
 
-    const thumbnail = utils.thumbnail_url(d.graph, d.s, {width: 512, format: 'png'});
+    const thumbnail = ThumbnailUtils.thumbnail_url(d.graph, d.s, {width: 512, format: 'png'});
     const notes = d.s.getAttr('note', '');
     const starred = d.s.getAttr('starred', false);
     const $body = d3.select(dia.body);
@@ -318,7 +318,7 @@ class StateRepr {
       </div>
       <div class="form-group">
         <label>${i18n.t('phovea:clue.provvis.extractedTags')}</label>
-        <input type="text" class="form-control readonly" readonly="readonly" value="${extractTags(notes).join(' ')}">
+        <input type="text" class="form-control readonly" readonly="readonly" value="${DetailUtils.extractTags(notes).join(' ')}">
       </div>
     </form>`);
     $body.select('span.star').on('click', function () {
@@ -327,13 +327,13 @@ class StateRepr {
       return false;
     });
     $body.select('textarea').on('input', function () {
-      $body.select('input.readonly').property('value', extractTags(this.value).join(' '));
+      $body.select('input.readonly').property('value', DetailUtils.extractTags(this.value).join(' '));
     });
     dia.footer.querySelector('button.btn-primary').addEventListener('click', function () {
       const name = $body.select('input').property('value');
       d.s.name = name;
       const val = $body.select('textarea').property('value');
-      d.s.setAttr('tags', extractTags(val));
+      d.s.setAttr('tags', DetailUtils.extractTags(val));
       d.s.setAttr('note', val);
       dia.hide();
     });
@@ -610,7 +610,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     const that = this;
     const graph = this.data;
 
-    const lod = getLevelOfDetail();
+    const lod = DetailUtils.getLevelOfDetail();
     this.$node.classed('large', lod === LevelOfDetail.Large);
     this.$node.classed('medium', lod === LevelOfDetail.Medium);
     this.$node.classed('small', lod === LevelOfDetail.Small);

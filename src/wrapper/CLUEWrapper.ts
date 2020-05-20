@@ -12,10 +12,10 @@ import {
   IObjectRef
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
-import {SelectionRecorder} from '../selection';
+import {SelectionRecorder} from '../Selection';
 import {ButtonModeSelector} from '../mode';
 import * as cmode from '../mode';
-import {loadProvenanceGraphVis, loadStoryVis} from '../vis/vis_loader';
+import {VisLoader} from '../vis/VisLoader';
 import {IEvent} from 'phovea_core/src/event';
 import {CLUEGraphManager} from '../CLUEGraphManager';
 import {ProvenanceGraphMenu} from '../menu/ProvenanceGraphMenu';
@@ -152,11 +152,11 @@ export class CLUEWrapper extends ACLUEWrapper {
       }
     });
 
-    const provVis = loadProvenanceGraphVis(graph, body.querySelector('div.content'), {
+    const provVis = VisLoader.loadProvenanceGraphVis(graph, body.querySelector('div.content'), {
       thumbnails: this.options.thumbnails,
       provVisCollapsed: this.options.provVisCollapsed
     });
-    const storyVis = loadStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
+    const storyVis = VisLoader.loadStoryVis(graph, <HTMLElement>body.querySelector('div.content'), <HTMLElement>this.$main.node(), {
       thumbnails: this.options.thumbnails
     });
 

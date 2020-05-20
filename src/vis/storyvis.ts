@@ -14,10 +14,10 @@ import * as cmode from '../mode';
 import {Dialog} from 'phovea_ui/src/dialogs';
 import * as d3 from 'd3';
 import * as vis from 'phovea_core/src/vis';
-import * as utils from '../utils';
-import {isEditAble, LevelOfDetail, getLevelOfDetail} from './utils';
+import {ThumbnailUtils} from '../ThumbnailUtils';
+import {DetailUtils, LevelOfDetail} from './DetailUtils';
 import * as marked from 'marked';
-import * as player from '../player';
+import * as player from '../Player';
 import * as $ from 'jquery';
 import * as textPNG from '../assets/text.png';
 import i18n from 'phovea_core/src/i18n';
@@ -433,7 +433,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     elem.attr('draggable', true)
       .on('dragstart', (d) => {
-        if (!isEditAble()) {
+        if (!DetailUtils.isEditAble()) {
           (<Event>d3.event).preventDefault();
           return;
         }
@@ -598,7 +598,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
     const toId = (d) => String(d.id);
 
-    const lod = getLevelOfDetail();
+    const lod = DetailUtils.getLevelOfDetail();
 
     this.$node
       .classed('large', lod === LevelOfDetail.Large)
@@ -644,7 +644,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $stories.attr('data-id', (d) => d.id);
     $stories.attr('title', (d) => d.name + '\n' + (d.transition > 0 ? '(' + VerticalStoryVis.to_duration(d.transition) + ')' : '') + '(' + VerticalStoryVis.to_duration(d.duration) + ')');
     //$stories.attr('data-toggle', 'tooltip');
-    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? `url(${textPNG})` : `url(${utils.thumbnail_url(this.data, d.state)})`));
+    $stories.select('div.preview').style('background-image', lod < LevelOfDetail.Medium || !this.options.thumbnails ? null : ((d) => d.isTextOnly ? `url(${textPNG})` : `url(${ThumbnailUtils.thumbnail_url(this.data, d.state)})`));
     $stories.select('div.slabel').html((d) => d.name ? marked(d.name) : '');
     $stories.select('div.duration span').text((d, i) => `${VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(d, storyRaw))}`);
     $stories.style(this.options.wh, (d) => this.duration2pixel(d.duration) + 'px');
