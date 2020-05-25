@@ -6,7 +6,7 @@
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
 import {mixin} from 'phovea_core/src/index';
-import {IHeaderLink, create as createHeader, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
+import {IHeaderLink, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
 import {
   MixedStorageProvenanceGraphManager,
   IObjectRef
@@ -100,7 +100,7 @@ export class CLUEWrapper extends ACLUEWrapper {
       showOptionsLink: true, // always activate options
       appLink: this.options.appLink
     });
-    this.header = createHeader(<HTMLElement>body.querySelector('div.box'), headerOptions);
+    this.header = AppHeader.create(<HTMLElement>body.querySelector('div.box'), headerOptions);
 
     //load all available provenance graphs
     const manager = new MixedStorageProvenanceGraphManager({
@@ -189,7 +189,7 @@ export class CLUEWrapper extends ACLUEWrapper {
    * @returns {CLUEWrapper}
    */
   static createWrapperFactory(body:HTMLElement, options:any = {}) {
-    header.create(body, {
+    header.AppHeader.create(body, {
         appLink: new header.AppHeaderLink(options.app || 'Caleydo'),
         inverse: true
       });
