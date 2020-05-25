@@ -4,7 +4,7 @@
 
 import {hash} from 'phovea_core/src';
 import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import * as cmode from '../mode';
+import {CLUEMode, setMode} from '../mode';
 import {IEventHandler} from 'phovea_core/src/event';
 
 export interface ICLUEWrapper extends IEventHandler {
@@ -116,14 +116,14 @@ export class WrapperUtils {
         graph.undo();
       } else if (k.keyCode === 37 && k.ctrlKey) {
         //left arrow 	37
-        cmode.setMode(cmode.modes.Exploration);
+        setMode(CLUEMode.modes.Exploration);
       } else if ((k.keyCode === 38 || k.keyCode === 40) && k.ctrlKey) {
         //up arrow 	38
         //down arrow 	40
-        cmode.setMode(cmode.modes.Authoring);
+        setMode(CLUEMode.modes.Authoring);
       } else if (k.keyCode === 39 && k.ctrlKey) {
         //right arrow 	39
-        cmode.setMode(cmode.modes.Presentation);
+        setMode(CLUEMode.modes.Presentation);
       }
     });
   }

@@ -69,53 +69,54 @@ export class CLUEMode {
     }
     return '(' + this.coord.map((s) => (Math.round(s * 1000) / 1000).toString()).join('-') + ')';
   }
-}
 
-/**
- * mode factory by the given components
- * @param exploration
- * @param authoring
- * @param presentation
- * @returns {CLUEMode}
- */
-function mode(exploration: number, authoring: number, presentation: number) {
-  return new CLUEMode(exploration, authoring, presentation);
-}
-
-/**
- * shortcuts for the atomic modes
- * @type {{Exploration: CLUEMode, Authoring: CLUEMode, Presentation: CLUEMode}}
- */
-export const modes = {
-  Exploration: mode(1, 0, 0),
-  Authoring: mode(0, 1, 0),
-  Presentation: mode(0, 0, 1)
-};
-
-function fromString(s: string) {
-  if (s === 'P') {
-    return modes.Presentation;
-  } else if (s === 'A') {
-    return modes.Authoring;
-  } else if (s === 'E') {
-    return modes.Exploration;
+  /**
+   * mode factory by the given components
+   * @param exploration
+   * @param authoring
+   * @param presentation
+   * @returns {CLUEMode}
+   */
+  static mode(exploration: number, authoring: number, presentation: number) {
+    return new CLUEMode(exploration, authoring, presentation);
   }
-  const coords = s.slice(1, s.length - 1).split('-').map(parseFloat);
-  return new CLUEMode(coords[0], coords[1], coords[2]);
+
+  /**
+   * shortcuts for the atomic modes
+   * @type {{Exploration: CLUEMode, Authoring: CLUEMode, Presentation: CLUEMode}}
+   */
+  static modes = {
+    Exploration: CLUEMode.mode(1, 0, 0),
+    Authoring: CLUEMode.mode(0, 1, 0),
+    Presentation: CLUEMode.mode(0, 0, 1)
+  };
+
+  static fromString(s: string) {
+    if (s === 'P') {
+      return CLUEMode.modes.Presentation;
+    } else if (s === 'A') {
+      return CLUEMode.modes.Authoring;
+    } else if (s === 'E') {
+      return CLUEMode.modes.Exploration;
+    }
+    const coords = s.slice(1, s.length - 1).split('-').map(parseFloat);
+    return new CLUEMode(coords[0], coords[1], coords[2]);
+  }
+
+  /**
+   * returns the default mode either stored in the hash or by default exploration
+   */
+  static defaultMode(): CLUEMode {
+    return CLUEMode.fromString(hash.getProp('clue', 'E'));
+  }
 }
 
-/**
- * returns the default mode either stored in the hash or by default exploration
- */
-function defaultMode(): CLUEMode {
-  return fromString(hash.getProp('clue', 'E'));
-}
 
 /**
  * wrapper containing the current mode
  */
 class ModeWrapper extends EventHandler {
-  private _mode = defaultMode();
+  private _mode = CLUEMode.defaultMode();
 
   constructor() {
     super();
@@ -128,7 +129,7 @@ class ModeWrapper extends EventHandler {
     }
     if (value.isAtomic) {
       //use the real atomic one for a shared instance
-      value = fromString(value.toString());
+      value = CLUEMode.fromString(value.toString());
     }
     const bak = this._mode;
     this._mode = value;
@@ -182,7 +183,7 @@ export class ButtonModeSelector {
       this.node.dataset.mode = newMode.toString();
       Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {
         const input = (<HTMLInputElement>label.firstElementChild!);
-        const d = fromString(input.value);
+        const d = CLUEMode.fromString(input.value);
         label.classList.toggle('active', d === newMode);
         input.checked = d === newMode;
       });
@@ -195,18 +196,18 @@ export class ButtonModeSelector {
 
   private build(parent: Element) {
     parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${getMode().toString()}">
-        <label class="btn btn-${this.options.size} clue-${modes.Exploration.toString()}${modes.Exploration === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Exploration.toString()}" ${modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.exploration')}
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.exploration')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${modes.Authoring.toString()}${modes.Authoring === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Authoring.toString()}" ${modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.authoring')}
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Authoring.toString()}${CLUEMode.modes.Authoring === getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Authoring.toString()}" ${CLUEMode.modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.authoring')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${modes.Presentation.toString()}${modes.Presentation === getMode() ? ' active' : ''}">
-            <input type="radio" name="clue_mode" autocomplete="off" value="${modes.Presentation.toString()}" ${modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.presentation')}
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Presentation.toString()}${CLUEMode.modes.Presentation === getMode() ? ' active' : ''}">
+            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Presentation.toString()}" ${CLUEMode.modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.presentation')}
         </label>
     </div>`);
     Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {
-      label.onclick = () => setMode(fromString((<HTMLInputElement>label.firstElementChild!).value));
+      label.onclick = () => setMode(CLUEMode.fromString((<HTMLInputElement>label.firstElementChild!).value));
     });
     return <HTMLElement>parent.lastElementChild!;
   }

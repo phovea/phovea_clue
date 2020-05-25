@@ -13,8 +13,7 @@ import {
 } from 'phovea_core/src/provenance';
 import {select} from 'd3';
 import {SelectionRecorder} from '../Selection';
-import {ButtonModeSelector} from '../mode';
-import * as cmode from '../mode';
+import {CLUEMode, ButtonModeSelector, setMode} from '../mode';
 import {VisLoader} from '../vis/VisLoader';
 import {IEvent} from 'phovea_core/src/event';
 import {CLUEGraphManager} from '../CLUEGraphManager';
@@ -122,7 +121,7 @@ export class CLUEWrapper extends ACLUEWrapper {
 
     const modeSelector = body.querySelector('header');
     modeSelector.className += 'clue-modeselector';
-    cmode.ButtonModeSelector.createButton(modeSelector, {
+    ButtonModeSelector.createButton(modeSelector, {
       size: 'sm'
     });
 
@@ -168,7 +167,7 @@ export class CLUEWrapper extends ACLUEWrapper {
       graph.jumpTo(graph.states[0]).then(() => {
         graph.clear();
         this.$mainRef = graph.findOrAddObject(this.$main, 'Application', 'visual');
-        cmode.setMode(cmode.modes.Exploration);
+        setMode(CLUEMode.modes.Exploration);
       });
     });
   }
