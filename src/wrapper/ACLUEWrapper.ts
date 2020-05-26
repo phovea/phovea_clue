@@ -128,7 +128,7 @@ export abstract class ACLUEWrapper extends EventHandler {
     const update = (newMode: cmode.CLUEMode) => {
       document.body.dataset.clue = newMode.toString();
       // lazy jquery
-      System.import('jquery').then(($: JQueryStatic) => {
+      import('jquery').then((jquery) => {
         //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
         if (newMode.presentation > 0.8) {
           $($right).animate({width: 'hide'}, 'fast');
