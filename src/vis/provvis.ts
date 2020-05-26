@@ -4,7 +4,8 @@
 
 
 import * as $ from 'jquery';
-import {loadBootstrap} from 'phovea_ui';
+import 'bootstrap-sass/assets/stylesheets/_bootstrap.scss';
+import 'imports-loader?jQuery=jquery!bootstrap-sass/assets/javascripts/bootstrap.js';
 import * as cmode from '../base/mode';
 import {Dialog} from 'phovea_ui';
 import * as d3 from 'd3';
@@ -570,8 +571,8 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
       that.update();
     });
     //initialize bootstrap
-    loadBootstrap().then(($$) => {
-      $$($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
+    import('jquery').then((jquery) => {
+      $($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
     });
 
     jp.find<HTMLElement>('.btn-filter').on('click', () => {
