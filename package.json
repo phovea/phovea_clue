@@ -77,9 +77,9 @@
     "@types/marked": "0.7.2",
     "d3": "~3.5.17",
     "marked": "0.7.0",
+    "phovea_core": "github:phovea/phovea_core#asteiner/refactoring",
     "phovea_security_flask": "github:phovea/phovea_security_flask#vstoiber/refactoring",
-    "phovea_ui": "github:phovea/phovea_ui#vstoiber/refactoring",
-    "phovea_core": "github:phovea/phovea_core#asteiner/refactoring"
+    "phovea_ui": "github:phovea/phovea_ui#vstoiber/refactoring"
   },
   "devDependencies": {
     "@types/jest": "25.1.4",
