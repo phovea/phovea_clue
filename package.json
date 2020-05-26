@@ -66,7 +66,7 @@
     "prebuild:web": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test:web",
     "predist:python": "npm run build:python && npm run docs:python",
     "publish:python": "twine upload --repository-url https://upload.pypi.org/legacy/ dist/*",
-    "dist:web": "mkdir dist && cd build && tar cvzf ../dist/phovea_clue.tar.gz *"
+    "dist:web": "mkdir lib && cd dist && tar cvzf ../lib/phovea_clue.tar.gz *"
   },
   "engines": {
     "npm": ">= 6.12",
