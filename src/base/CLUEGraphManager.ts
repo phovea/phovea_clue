@@ -2,15 +2,10 @@
  * Created by Samuel Gratzl on 28.02.2017.
  */
 
-import {hash, HashProperties} from 'phovea_core/src/index';
-import {IProvenanceGraphDataDescription} from 'phovea_core/src/provenance';
-import MixedStorageProvenanceGraphManager from 'phovea_core/src/provenance/MixedStorageProvenanceGraphManager';
-import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {canWrite, isLoggedIn} from 'phovea_core/src/security';
-import {WrapperUtils} from './wrapper/WrapperUtils';
-import {EventHandler} from 'phovea_core/src/event';
-import {resolveImmediately} from 'phovea_core/src';
-import i18n from 'phovea_core/src/i18n';
+import {IProvenanceGraphDataDescription, EventHandler, MixedStorageProvenanceGraphManager, AppContext, UserSession, ProvenanceGraph, I18nextManager} from 'phovea_core';
+import {WrapperUtils} from './WrapperUtils';
+import {HashProperties} from 'phovea_core';
+import {ResolveNow} from 'phovea_core';
 
 export interface IClueState {
   graph: string;
@@ -35,9 +30,9 @@ export class CLUEGraphManager extends EventHandler {
   }
 
   private static setGraphInUrl(value: string) {
-    hash.removeProp('clue_slide', false);
-    hash.removeProp('clue_state', false);
-    hash.setProp('clue_graph', value);
+    AppContext.getInstance().hash.removeProp('clue_slide', false);
+    AppContext.getInstance().hash.removeProp('clue_state', false);
+    AppContext.getInstance().hash.setProp('clue_graph', value);
   }
 
   static reloadPage() {
@@ -45,70 +40,70 @@ export class CLUEGraphManager extends EventHandler {
   }
 
   private onHashChangedImpl() {
-    const graph = hash.getProp('clue_graph');
-    const slide = hash.getInt('clue_slide', null);
-    const state = hash.getInt('clue_state', null);
+    const graph = AppContext.getInstance().hash.getProp('clue_graph');
+    const slide = AppContext.getInstance().hash.getInt('clue_slide', null);
+    const state = AppContext.getInstance().hash.getInt('clue_state', null);
 
     this.fire(CLUEGraphManager.EVENT_EXTERNAL_STATE_CHANGE, <IClueState>{graph, slide, state});
   }
 
   newRemoteGraph() {
-    if (isLoggedIn()) {
-      hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    if (UserSession.getInstance().isLoggedIn()) {
+      AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
       CLUEGraphManager.setGraphInUrl('new_remote');
       CLUEGraphManager.reloadPage();
     }
   }
 
   newGraph() {
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     CLUEGraphManager.setGraphInUrl('new');
     CLUEGraphManager.reloadPage();
   }
 
   loadGraph(desc: any) {
     // reset
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     CLUEGraphManager.setGraphInUrl(desc.id);
     CLUEGraphManager.reloadPage();
   }
 
   get storedSlide() {
-    return hash.getInt('clue_slide', null);
+    return AppContext.getInstance().hash.getInt('clue_slide', null);
   }
 
   set storedSlide(value: number) {
     if (this.isReadonly) {
       return;
     }
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
-      hash.setInt('clue_slide', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
+      AppContext.getInstance().hash.setInt('clue_slide', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
     } else {
-      hash.removeProp('clue_slide');
+      AppContext.getInstance().hash.removeProp('clue_slide');
     }
-    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
   }
 
   get storedState() {
-    return hash.getInt('clue_state', null);
+    return AppContext.getInstance().hash.getInt('clue_state', null);
   }
 
   set storedState(value: number) {
     if (this.isReadonly) {
       return;
     }
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     if (value !== null) {
-      hash.setInt('clue_state', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
+      AppContext.getInstance().hash.setInt('clue_state', value, CLUEGraphManager.DEBOUNCE_UPDATE_DELAY);
     } else {
-      hash.removeProp('clue_state');
+      AppContext.getInstance().hash.removeProp('clue_state');
     }
-    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
   }
 
   get isAutoPlay() {
-    return hash.has('clue_autoplay');
+    return AppContext.getInstance().hash.has('clue_autoplay');
   }
 
   list() {
@@ -120,10 +115,10 @@ export class CLUEGraphManager extends EventHandler {
   }
 
   startFromScratch() {
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
-    hash.removeProp('clue_slide', false);
-    hash.removeProp('clue_state', false);
-    hash.removeProp('clue_graph');
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.removeProp('clue_slide', false);
+    AppContext.getInstance().hash.removeProp('clue_state', false);
+    AppContext.getInstance().hash.removeProp('clue_graph');
     window.location.reload();
   }
 
@@ -135,7 +130,7 @@ export class CLUEGraphManager extends EventHandler {
 
   importExistingGraph(graph: IProvenanceGraphDataDescription, extras: any = {}, cleanUpLocal = false) {
     return this.manager.cloneRemote(graph, extras).then((newGraph) => {
-      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : resolveImmediately(null);
+      const p = (graph.local && cleanUpLocal) ? this.manager.delete(graph) : ResolveNow.resolveImmediately(null);
       return p.then(() => this.loadGraph(newGraph.desc));
     });
   }
@@ -143,9 +138,9 @@ export class CLUEGraphManager extends EventHandler {
   migrateGraph(graph: ProvenanceGraph, extras: any = {}): PromiseLike<ProvenanceGraph> {
     const old = graph.desc;
     return this.manager.migrateRemote(graph, extras).then((newGraph) => {
-      return (old.local ? this.manager.delete(old) : resolveImmediately(true)).then(() => {
+      return (old.local ? this.manager.delete(old) : ResolveNow.resolveImmediately(true)).then(() => {
         if (!this.isReadonly) {
-          hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
+          AppContext.getInstance().hash.setProp('clue_graph', newGraph.desc.id); //just update the reference
         }
         return newGraph;
       });
@@ -160,23 +155,23 @@ export class CLUEGraphManager extends EventHandler {
     if (this.isReadonly) {
       return graph;
     }
-    hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
-    hash.setProp('clue_graph', graph.desc.id);
-    hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.off(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
+    AppContext.getInstance().hash.setProp('clue_graph', graph.desc.id);
+    AppContext.getInstance().hash.on(HashProperties.EVENT_HASH_CHANGED, this.onHashChanged);
     return graph;
   }
 
   private chooseNew() {
-    const graph = hash.getProp('clue_graph', null);
+    const graph = AppContext.getInstance().hash.getProp('clue_graph', null);
     if (graph === 'memory') {
-      return resolveImmediately(this.manager.createInMemory());
+      return ResolveNow.resolveImmediately(this.manager.createInMemory());
     }
-    if (graph === 'new_remote' && isLoggedIn()) {
+    if (graph === 'new_remote' && UserSession.getInstance().isLoggedIn()) {
       return this.manager.createRemote();
     }
     if (graph === null || graph === 'new') {
       if (WrapperUtils.useInMemoryGraph()) {
-        return resolveImmediately(this.manager.createInMemory());
+        return ResolveNow.resolveImmediately(this.manager.createInMemory());
       }
       return this.manager.createLocal();
     }
@@ -188,17 +183,17 @@ export class CLUEGraphManager extends EventHandler {
       if (WrapperUtils.useInMemoryGraph()) {
         return this.manager.cloneInMemory(desc);
       }
-      if ((<any>desc).local || (isLoggedIn() && canWrite(desc))) {
+      if ((<any>desc).local || (UserSession.getInstance().isLoggedIn() && UserSession.getInstance().canWrite(desc))) {
         return this.manager.get(desc);
       }
       return this.manager.cloneLocal(desc);
     }
     // not found
     if (rejectOnNotFound) {
-      return Promise.reject({graph, msg: i18n.t('phovea:clue.errorMessage', {graphID: graph})});
+      return Promise.reject({graph, msg: I18nextManager.getInstance().i18n.t('phovea:clue.errorMessage', {graphID: graph})});
     }
     if (WrapperUtils.useInMemoryGraph()) {
-      return resolveImmediately(this.manager.createInMemory());
+      return ResolveNow.resolveImmediately(this.manager.createInMemory());
     }
     return this.manager.create();
   }
@@ -208,7 +203,7 @@ export class CLUEGraphManager extends EventHandler {
     if (r) {
       return r;
     }
-    const graph = hash.getProp('clue_graph', null);
+    const graph = AppContext.getInstance().hash.getProp('clue_graph', null);
     const desc = <IProvenanceGraphDataDescription>list.find((d) => d.id === graph);
     return this.loadChosen(graph, desc, rejectOnNotFound);
   }
@@ -218,7 +213,7 @@ export class CLUEGraphManager extends EventHandler {
     if (r) {
       return r;
     }
-    const graph = hash.getProp('clue_graph', null);
+    const graph = AppContext.getInstance().hash.getProp('clue_graph', null);
     const locals = this.manager.listLocalSync();
     const desc = locals.find((d) => d.id === graph);
     if (desc) {

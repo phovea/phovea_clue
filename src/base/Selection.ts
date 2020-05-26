@@ -2,25 +2,21 @@
  * Created by sam on 10.02.2015.
  */
 
-import * as idtypes from 'phovea_core/src/idtype';
-import * as events from 'phovea_core/src/event';
-import * as provenance from 'phovea_core/src/provenance';
-import * as C from 'phovea_core/src/index';
-import * as ranges from 'phovea_core/src/range';
 import {Compression} from './Compression';
-import {resolveImmediately} from 'phovea_core/src';
+import {ProvenanceGraph, ResolveNow, EventHandler, ICmdResult, IDTypeManager, IObjectRef, Range, ParseRangeUtils, IDType, SelectionUtils, ActionMetaData, ObjectRefUtils, ActionNode, BaseUtils, AppContext} from 'phovea_core';
 
-const disabler = new events.EventHandler();
+
+const disabler = new EventHandler();
 
 export class Selection {
 
-  static select(inputs:provenance.IObjectRef<any>[], parameter:any, graph, within):provenance.ICmdResult {
-    const idtype = idtypes.resolve(parameter.idtype),
-      range = ranges.parse(parameter.range),
+  static select(inputs: IObjectRef<any>[], parameter:any, graph, within): ICmdResult {
+    const idtype = IDTypeManager.getInstance().resolveIdType(parameter.idtype),
+      range = ParseRangeUtils.parseRangeLike(parameter.range),
       type = parameter.type;
-    const bak = parameter.old ? ranges.parse(parameter.old) : idtype.selections(type);
+    const bak = parameter.old ? ParseRangeUtils.parseRangeLike(parameter.old) : idtype.selections(type);
 
-    if (C.hash.has('debug')) {
+    if (AppContext.getInstance().hash.has('debug')) {
       console.log('select', range.toString());
     }
     disabler.fire('disable-'+idtype.id);
@@ -34,13 +30,13 @@ export class Selection {
     return s.split(' ').map((d) => d[0].toUpperCase()+d.slice(1)).join(' ');
   }
 
-  static meta(idtype:idtypes.IDType, type:string, range:ranges.Range) {
+  static meta(idtype: IDType, type:string, range: Range) {
     const l = range.dim(0).length;
-    let title = type === idtypes.defaultSelectionType ? '' : (Selection.capitalize(type)+' ');
+    let title = type === SelectionUtils.defaultSelectionType ? '' : (Selection.capitalize(type)+' ');
     let p;
     if (l === 0) {
       title += 'no '+idtype.names;
-      p = resolveImmediately(title);
+      p = ResolveNow.resolveImmediately(title);
     } else if (l === 1) {
       title += idtype.name+' ';
 
@@ -56,9 +52,9 @@ export class Selection {
       });
     } else {
       title += `${range.dim(0).length} ${idtype.names}`;
-      p = resolveImmediately(title);
+      p = ResolveNow.resolveImmediately(title);
     }
-    return p.then((title) => provenance.meta(title, provenance.cat.selection));
+    return p.then((title) => ActionMetaData.actionMeta(title, ObjectRefUtils.category.selection));
   }
 
   /**
@@ -69,7 +65,7 @@ export class Selection {
    * @param old optional the old selection for inversion
    * @returns {Cmd}
    */
-  static createSelection(idtype:idtypes.IDType, type:string, range:ranges.Range, old:ranges.Range = null, animated = false) {
+  static createSelection(idtype: IDType, type:string, range: Range, old: Range = null, animated = false) {
     return Selection.meta(idtype, type, range).then((meta) => {
       return {
         meta,
@@ -86,7 +82,7 @@ export class Selection {
     });
   }
 
-  static compressSelection(path: provenance.ActionNode[]) {
+  static compressSelection(path: ActionNode[]) {
     return Compression.lastOnly(path, 'select', (p) => p.parameter.idtype + '@' + p.parameter.type);
   }
 }
@@ -104,7 +100,7 @@ class SelectionTypeRecorder {
 
   private typeRecorders = [];
 
-  constructor(private idtype:idtypes.IDType, private graph:provenance.ProvenanceGraph, private type?:string, private options: any = {}) {
+  constructor(private idtype: IDType, private graph: ProvenanceGraph, private type?:string, private options: any = {}) {
 
     if (this.type) {
       this.typeRecorders = this.type.split(',').map((ttype) => {
@@ -157,24 +153,24 @@ export class SelectionRecorder {
     }
   }
 
-  constructor(private graph:provenance.ProvenanceGraph, private type?:string, private options: any = {}) {
-    this.options = C.mixin({
-      filter: C.constantTrue,
+  constructor(private graph: ProvenanceGraph, private type?:string, private options: any = {}) {
+    this.options = BaseUtils.mixin({
+      filter: BaseUtils.constantTrue,
       animated: false
     }, this.options);
-    events.on('register.idtype', this.adder);
-    idtypes.list().forEach((d) => {
+    EventHandler.getInstance().on('register.idtype', this.adder);
+    IDTypeManager.getInstance().listIdTypes().forEach((d) => {
       this.adder(null, d);
     });
   }
 
   destroy() {
-    events.off('register.idtype', this.adder);
+    EventHandler.getInstance().off('register.idtype', this.adder);
     this.handler.forEach((h) => h.destroy());
     this.handler.length = 0;
   }
 
-  static createSelectionRecorder(graph:provenance.ProvenanceGraph, type?:string, options: any = {}) {
+  static createSelectionRecorder(graph:ProvenanceGraph, type?:string, options: any = {}) {
     return new SelectionRecorder(graph, type, options);
   }
 }

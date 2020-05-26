@@ -2,10 +2,8 @@
  * Created by Samuel Gratzl on 28.02.2017.
  */
 
-import {hash} from 'phovea_core/src';
-import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {CLUEMode, setMode} from '../mode';
-import {IEventHandler} from 'phovea_core/src/event';
+import {AppContext, ProvenanceGraph, IEventHandler} from 'phovea_core';
+import {CLUEMode, setMode} from './mode';
 
 export interface ICLUEWrapper extends IEventHandler {
   jumpToState(state: number): Promise<any>;
@@ -75,13 +73,13 @@ export class WrapperUtils {
 
   static handleMagicHashElements(body: HTMLElement, manager: ICLUEWrapper) {
     //special flag for rendering server side screenshots
-    if (hash.has('clue_headless')) {
+    if (AppContext.getInstance().hash.has('clue_headless')) {
       console.log('init headless mode');
       WrapperUtils.injectHeadlessSupport(manager);
       body.classList.add('headless');
     }
 
-    if (hash.has('clue_contained')) {
+    if (AppContext.getInstance().hash.has('clue_contained')) {
       console.log('init contained mode');
       WrapperUtils.injectParentWindowSupport(manager);
       body.classList.add('headless');
@@ -89,7 +87,7 @@ export class WrapperUtils {
   }
 
   static useInMemoryGraph() {
-    return hash.has('clue_headless') || hash.getProp('clue_graph', '') === 'memory';
+    return AppContext.getInstance().hash.has('clue_headless') || AppContext.getInstance().hash.getProp('clue_graph', '') === 'memory';
   }
 
   static triggeredByInputField(evt: KeyboardEvent) {

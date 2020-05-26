@@ -3,9 +3,7 @@
  */
 
 
-import {mixin} from 'phovea_core/src/index';
-import {api2absURL} from 'phovea_core/src/ajax';
-import {ProvenanceGraph, StateNode, SlideNode} from 'phovea_core/src/provenance';
+import {BaseUtils, AppContext, ProvenanceGraph, StateNode, SlideNode} from 'phovea_core';
 
 import * as not_available from './assets/not_available.png';
 
@@ -16,14 +14,14 @@ export class ThumbnailUtils {
       width: 128,
       format: 'jpg'
     };
-    mixin(o, options);
+    BaseUtils.mixin(o, options);
     if (state.hasAttr('thumbnail')) {
       return state.getAttr('thumbnail');
     }
 
     const d = (<any>graph.desc);
     if (d.attrs && d.attrs.of && !(d.local)) {
-      return api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+      return AppContext.getInstance().api2absURL(`/clue/thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
         width: o.width
       });
     }
@@ -41,7 +39,7 @@ export class ThumbnailUtils {
 
     const d = (<any>graph.desc);
     if (d.attrs && d.attrs.of && !(d.local)) {
-      return api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+      return AppContext.getInstance().api2absURL(`/clue/preview_thumbnail${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
         width: o.width
       });
     }
@@ -59,7 +57,7 @@ export class ThumbnailUtils {
 
     const d = (<any>graph.desc);
     if (d.attrs && d.attrs.of && !(d.local)) {
-      return api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
+      return AppContext.getInstance().api2absURL(`screnshot${d.attrs.of}/${graph.desc.id}/${state.id}.${o.format}`, {
         width: o.width
       });
     }

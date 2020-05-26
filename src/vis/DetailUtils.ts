@@ -1,4 +1,4 @@
-import * as cmode from '../mode';
+import * as cmode from '../base/mode';
 
 export enum LevelOfDetail {
   ExtraSmall = 0,

@@ -3,20 +3,15 @@
  */
 
 
-import * as C from 'phovea_core/src/index';
 import * as $ from 'jquery';
-import {loadBootstrap} from 'phovea_ui/src/_lazyBootstrap';
-import * as ranges from 'phovea_core/src/range';
-import * as idtypes from 'phovea_core/src/idtype';
-import * as provenance from 'phovea_core/src/provenance';
-import * as cmode from '../mode';
-import {Dialog} from 'phovea_ui/src/dialogs';
+import {loadBootstrap} from 'phovea_ui';
+import * as cmode from '../base/mode';
+import {Dialog} from 'phovea_ui';
 import * as d3 from 'd3';
-import * as vis from 'phovea_core/src/vis';
 import {DetailUtils, LevelOfDetail} from './DetailUtils';
-
-import {ThumbnailUtils} from '../ThumbnailUtils';
-import i18n from 'phovea_core/src/i18n';
+import {ThumbnailUtils} from '../base/ThumbnailUtils';
+import {ActionNode, StateNode, ProvenanceGraph, I18nextManager, AVisInstance, IVisInstance, Range, SelectionUtils, SelectOperation, SlideNode, ActionMetaData} from 'phovea_core';
+import {DnDUtils, AppContext, BaseUtils} from 'phovea_core';
 
 
 const DOI_LARGE = 0.9;
@@ -31,9 +26,9 @@ class StateRepr {
   parent: StateRepr = null;
   children: StateRepr[] = [];
 
-  a: provenance.ActionNode = null;
+  a: ActionNode = null;
 
-  constructor(public s: provenance.StateNode, public graph: provenance.ProvenanceGraph) {
+  constructor(public s: StateNode, public graph: ProvenanceGraph) {
     this.doi = 0.1;
     this.a = s.creator;
   }
@@ -106,7 +101,7 @@ class StateRepr {
   }
 
 
-  static toRepr(graph: provenance.ProvenanceGraph, highlight: any, options: any = {}) {
+  static toRepr(graph: ProvenanceGraph, highlight: any, options: any = {}) {
     //assign doi
     const lookup: any = {};
 
@@ -121,7 +116,7 @@ class StateRepr {
     const toState = (s) => {
       const r = new StateRepr(s, graph);
       const a = s.creator;
-      const meta = a ? a.meta : provenance.meta('No', 'none', 'none');
+      const meta = a ? a.meta : ActionMetaData.actionMeta('No', 'none', 'none');
 
       const category = highlight.category[meta.category] ? 1 : 0;
       const operation = highlight.operation[meta.operation] ? 1 : 0;
@@ -306,18 +301,18 @@ class StateRepr {
     const $body = d3.select(dia.body);
     $body.html(`
     <form class="state_info" onsubmit="return false">
-      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="${i18n.t('phovea:clue.provvis.bookmarkThisState')}"></span>
+      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.bookmarkThisState')}"></span>
       <div class="img"><img src="${thumbnail}"></div>
       <div class="form-group">
-        <label>${i18n.t('phovea:clue.provvis.nameCapitalized')}</label>
-        <input type="text" class="form-control" placeholder="${i18n.t('phovea:clue.provvis.name')}" value="${title}">
+        <label>${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.nameCapitalized')}</label>
+        <input type="text" class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.name')}" value="${title}">
       </div>
       <div class="form-group">
-        <label>${i18n.t('phovea:clue.provvis.notesCapitalized')}</label>
-        <textarea class="form-control" placeholder="${i18n.t('phovea:clue.provvis.notesPlaceholder')}">${notes}</textarea>
+        <label>${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.notesCapitalized')}</label>
+        <textarea class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.notesPlaceholder')}">${notes}</textarea>
       </div>
       <div class="form-group">
-        <label>${i18n.t('phovea:clue.provvis.extractedTags')}</label>
+        <label>${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.extractedTags')}</label>
         <input type="text" class="form-control readonly" readonly="readonly" value="${DetailUtils.extractTags(notes).join(' ')}">
       </div>
     </form>`);
@@ -341,18 +336,18 @@ class StateRepr {
   }
 }
 
-export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstance {
+export class LayoutedProvVis extends AVisInstance implements IVisInstance {
   private $node: d3.Selection<any>;
-  private trigger = C.bind(this.update, this);
-  private triggerStoryHighlight = C.bind(this.updateStoryHighlight, this);
-  private onStateAdded = (event: any, state: provenance.StateNode) => {
+  private trigger = BaseUtils.bind(this.update, this);
+  private triggerStoryHighlight = BaseUtils.bind(this.updateStoryHighlight, this);
+  private onStateAdded = (event: any, state: StateNode) => {
     state.on('setAttr', this.trigger);
   }
-  private onSelectionChanged = (event: any, type: string, act: ranges.Range) => {
+  private onSelectionChanged = (event: any, type: string, act: Range) => {
     const selectedStates = this.data.selectedStates(type);
     this.$node.selectAll('div.state').classed('phovea-select-' + type, function (d: StateRepr) {
       const isSelected = selectedStates.indexOf(d.s) >= 0;
-      if (isSelected && type === idtypes.defaultSelectionType) {
+      if (isSelected && type === SelectionUtils.defaultSelectionType) {
         this.scrollIntoView();
       }
       return isSelected;
@@ -381,9 +376,9 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     tags: []
   };
 
-  constructor(public data: provenance.ProvenanceGraph, public parent: Element, private options: any) {
+  constructor(public data: ProvenanceGraph, public parent: Element, private options: any) {
     super();
-    this.options = C.mixin({
+    this.options = BaseUtils.mixin({
       thumbnails: true,
       provVisCollapsed: false,
       hideCLUEButtonsOnCollapse: false
@@ -391,7 +386,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     this.options.scale = [1, 1];
     this.options.rotate = 0;
     this.$node = this.build(d3.select(parent));
-    C.onDOMNodeRemoved(this.node, this.destroy, this);
+    AppContext.getInstance().onDOMNodeRemoved(this.node, this.destroy, this);
 
     if (!this.options.provVisCollapsed) {
       this.bind();
@@ -453,7 +448,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
   }
 
-  locateImpl(range: ranges.Range) {
+  locateImpl(range: Range) {
     return Promise.resolve(null);
   }
 
@@ -475,39 +470,39 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
     }
 
     $p.html(`
-      <a href="#" class="btn-collapse" title="${(this.options.provVisCollapsed) ? i18n.t('phovea:clue.provvis.showProvenanceGraph') : i18n.t('phovea:clue.provvis.hideProvenanceGraph')}"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
+      <a href="#" class="btn-collapse" title="${(this.options.provVisCollapsed) ? I18nextManager.getInstance().i18n.t('phovea:clue.provvis.showProvenanceGraph') : I18nextManager.getInstance().i18n.t('phovea:clue.provvis.hideProvenanceGraph')}"><i class="fa ${(this.options.provVisCollapsed) ? 'fa-arrow-circle-o-left' : 'fa-arrow-circle-o-right'}"></i></a>
       <div>
         <h2>
-          <i class="fa fa-code-fork fa-rotate-180"></i> ${i18n.t('phovea:clue.provvis.provenance')}
+          <i class="fa fa-code-fork fa-rotate-180"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.provenance')}
           <a href="#" class="btn-filter"><i class="fa fa-filter"></i></a>
         </h2>
         <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.dataActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fa fa-database"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.visualActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.selectionActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="selection"> <i class="fa fa-pencil-square"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.layoutActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.logicActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i>
           </label>
         </div>
 
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.createActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.createActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="create"> <i class="fa fa-plus"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.updateActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.updateActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="update"> <i class="fa fa-refresh"></i>
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.removeActions')}">
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.removeActions')}">
             <input type="checkbox" autocomplete="off" name="operation" value="remove"> <i class="fa fa-remove"></i>
           </label>
         </div>
@@ -521,8 +516,8 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
               </button>
               <div class="dropdown-menu dropdown-menu-right">
                 <div class="input-group input-group-sm">
-                  <span class="input-group-addon" title="${i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fa fa-tags"></i></span>
-                  <input name="tags" type="text" class="form-control input-sm" placeholder="${i18n.t('phovea:clue.provvis.tags')}">
+                  <span class="input-group-addon" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fa fa-tags"></i></span>
+                  <input name="tags" type="text" class="form-control input-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}">
                 </div>
               </div>
             </div>
@@ -541,20 +536,20 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       </div>
       <div class="legend">
         <div class="btn-group-vertical" data-toggle="buttons">
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.dataActions')}">
-            <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> ${i18n.t('phovea:clue.provvis.data')}
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.data')}
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.visualActions')}">
-            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> ${i18n.t('phovea:clue.provvis.visual')}
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visual')}
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.selectionActions')}">
-            <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> ${i18n.t('phovea:clue.provvis.selections')}
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selections')}
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.layoutActions')}">
-            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> ${i18n.t('phovea:clue.provvis.layout')}
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layout')}
           </label>
-          <label class="btn btn-default btn-xs" title="${i18n.t('phovea:clue.provvis.logicActions')}">
-            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> ${i18n.t('phovea:clue.provvis.analysis')}
+          <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
+            <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.analysis')}
           </label>
         </div>
       </div>
@@ -588,7 +583,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       evt.preventDefault();
       const collapsed = !$p.classed('collapsed');
       this.toggleBinding(!collapsed);
-      $p.select('.btn-collapse').attr('title', collapsed ? i18n.t('phovea:clue.provvis.showProvenanceGraph') as string : i18n.t('phovea:clue.provvis.hideProvenanceGraph') as string);
+      $p.select('.btn-collapse').attr('title', collapsed ? I18nextManager.getInstance().i18n.t('phovea:clue.provvis.showProvenanceGraph') as string : I18nextManager.getInstance().i18n.t('phovea:clue.provvis.hideProvenanceGraph') as string);
       $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', !collapsed).classed('fa-arrow-circle-o-left', collapsed);
       $p.classed('collapsed', collapsed);
 
@@ -602,7 +597,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
 
   private onStateClick(d: StateRepr) {
     (<Event>d3.event).stopPropagation();
-    this.data.selectState(d.s, idtypes.toSelectOperation(<MouseEvent>d3.event));
+    this.data.selectState(d.s, SelectionUtils.toSelectOperation(<MouseEvent>d3.event));
     this.data.jumpTo(d.s);
   }
 
@@ -624,10 +619,10 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       .append('div')
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) => {
-        graph.selectState(d.s, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        graph.selectState(d.s, SelectOperation.SET, SelectionUtils.hoverSelectionType);
       })
       .on('mouseleave', (d) => {
-        graph.selectState(d.s, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        graph.selectState(d.s, SelectOperation.REMOVE, SelectionUtils.hoverSelectionType);
       })
       .attr('draggable', true)
       .on('dragstart', (d) => {
@@ -637,14 +632,14 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
         e.dataTransfer.setData('application/phovea-prov-state', String(d.s.id));
       })
       .on('dragenter', function () {
-        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
+        if (DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', () => {
-        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
+        if (DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state')) {
           (<Event>d3.event).preventDefault();
-          C.updateDropEffect(<DragEvent>d3.event);
+          DnDUtils.getInstance().updateDropEffect(<DragEvent>d3.event);
           return false;
         }
       }).on('dragleave', function () {
@@ -758,7 +753,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       while (firstSlide.previous) {
         firstSlide = firstSlide.previous;
       }
-      const line = provenance.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
+      const line = SlideNode.toSlidePath(firstSlide).map((s) => s.state ? lookup[s.state.id] : null).filter((d) => !!d);
       $states.classed('story_member', (d) => line.indexOf(d) >= 0);
       $g.select('path').attr('d', this.line.interpolate('linear')(line));
       this.line.interpolate('step-after');
@@ -766,7 +761,7 @@ export class LayoutedProvVis extends vis.AVisInstance implements vis.IVisInstanc
       $g.style('display', 'none');
     }
   }
-  static createLayoutedProvVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+  static createLayoutedProvVis(data: ProvenanceGraph, parent: Element, options = {}) {
     return new LayoutedProvVis(data, parent, options);
   }
 }

@@ -4,23 +4,18 @@
 
 
 import {behavior, mouse as d3mouse, select, selectAll} from 'd3';
-import * as C from 'phovea_core/src/index';
-import * as ranges from 'phovea_core/src/range';
-import * as provenance from 'phovea_core/src/provenance';
-import * as idtypes from 'phovea_core/src/idtype';
-import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {Renderer} from '../annotation';
-import * as cmode from '../mode';
-import {Dialog} from 'phovea_ui/src/dialogs';
+import {Renderer} from '../base/annotation';
+import * as cmode from '../base/mode';
+import {Dialog} from 'phovea_ui';
 import * as d3 from 'd3';
-import * as vis from 'phovea_core/src/vis';
-import {ThumbnailUtils} from '../ThumbnailUtils';
+import {ThumbnailUtils} from '../base/ThumbnailUtils';
 import {DetailUtils, LevelOfDetail} from './DetailUtils';
 import * as marked from 'marked';
-import * as player from '../Player';
+import * as player from '../base/Player';
 import * as $ from 'jquery';
 import * as textPNG from '../assets/text.png';
-import i18n from 'phovea_core/src/i18n';
+import {DnDUtils, StateNode, SlideNode, AVisInstance, IVisInstance, Range, SelectionUtils, SelectOperation, ProvenanceGraph, I18nextManager, IStateAnnotation, BaseUtils, AppContext} from 'phovea_core';
+import {ArrayUtils} from 'phovea_core';
 
 
 interface ISlideNodeRepr {
@@ -29,29 +24,29 @@ interface ISlideNodeRepr {
   isPlaceholder?: boolean;
   isLastPlaceholder?: boolean;
   name?: string;
-  state?: provenance.StateNode;
-  to?: provenance.SlideNode;
+  state?: StateNode;
+  to?: SlideNode;
 }
 
-export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstance {
+export class VerticalStoryVis extends AVisInstance implements IVisInstance {
   private $node: d3.Selection<any>;
   private trigger = this.update.bind(this);
 
-  private onSelectionChanged = (event: any, slide: provenance.SlideNode, type: string, op: any, extras) => {
-    this.$node.selectAll('div.story:not(.placeholder)').classed('phovea-select-' + type, function (d: provenance.SlideNode) {
+  private onSelectionChanged = (event: any, slide: SlideNode, type: string, op: any, extras) => {
+    this.$node.selectAll('div.story:not(.placeholder)').classed('phovea-select-' + type, function (d: SlideNode) {
       const isSelected = d === slide;
-      if (isSelected && type === idtypes.defaultSelectionType) {
+      if (isSelected && type === SelectionUtils.defaultSelectionType) {
         this.scrollIntoView();
       }
       return isSelected;
     });
 
-    if (type === idtypes.defaultSelectionType) {
+    if (type === SelectionUtils.defaultSelectionType) {
       this.updateInfo(slide);
       this.updateTimeIndicator(slide, extras.withTransition !== false);
     }
   }
-  private onStateSelectionChanged = (event: any, state: provenance.StateNode, type: string, op, extras) => {
+  private onStateSelectionChanged = (event: any, state: StateNode, type: string, op, extras) => {
     if (!state || extras.slideSelected === true) {
       return;
     }
@@ -60,10 +55,10 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
       return;
     }
-    if (type === idtypes.defaultSelectionType) {
-      this.data.selectSlide(slide, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, {withTransition: false});
+    if (type === SelectionUtils.defaultSelectionType) {
+      this.data.selectSlide(slide, SelectOperation.SET, SelectionUtils.defaultSelectionType, {withTransition: false});
     } else {
-      this.data.selectSlide(slide, idtypes.SelectOperation.SET, type);
+      this.data.selectSlide(slide, SelectOperation.SET, type);
     }
   }
 
@@ -82,20 +77,20 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   static MIN_HEIGHT = 20;
   private duration2pixel = d3.scale.linear().domain([0, 10000]).range([VerticalStoryVis.MIN_HEIGHT, 200]);
 
-  story: provenance.SlideNode = null;
+  story: SlideNode = null;
 
   player: player.Player = null;
 
-  constructor(public data: provenance.ProvenanceGraph, public parent: Element, options: any = {}) {
+  constructor(public data: ProvenanceGraph, public parent: Element, options: any = {}) {
     super();
-    this.options = C.mixin(this.options, options);
+    this.options = BaseUtils.mixin(this.options, options);
     if (this.options.class === 'horizontal') {
       this.options.xy = 'x';
       this.options.wh = 'width';
       this.options.topleft = 'left';
     }
     this.$node = this.build(d3.select(parent));
-    C.onDOMNodeRemoved(this.node, this.destroy, this);
+    AppContext.getInstance().onDOMNodeRemoved(this.node, this.destroy, this);
 
     this.player = new player.Player(data, this.node.querySelector('#player_controls'));
 
@@ -106,11 +101,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.update();
   }
 
-  private findSlideForState(state: provenance.StateNode) {
+  private findSlideForState(state: StateNode) {
     if (!this.story) {
       return null;
     }
-    return C.search(provenance.toSlidePath(this.story), (s) => s.state === state);
+    return ArrayUtils.search(SlideNode.toSlidePath(this.story), (s) => s.state === state);
   }
 
   private bind() {
@@ -146,7 +141,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }
   }
 
-  locateImpl(range: ranges.Range) {
+  locateImpl(range: Range) {
     return Promise.resolve(null);
   }
 
@@ -172,7 +167,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return act;
   }
 
-  switchTo(story: provenance.SlideNode) {
+  switchTo(story: SlideNode) {
     if (story) {
       let storyStart = story;
       while (storyStart.previous) {
@@ -197,33 +192,33 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
       <div>
-        <h2><i class="fa fa-video-camera"></i> ${i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
-            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
-            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${i18n.t('phovea:clue.storyvis.play')}"></i>
-            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${i18n.t('phovea:clue.storyvis.stepForward')}"></i>
+        <h2><i class="fa fa-video-camera"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
+            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
+            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.play')}"></i>
+            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepForward')}"></i>
           </span>
           <i class="fa fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
-                  ${i18n.t('phovea:clue.storyvis.select')}<span class="caret"></span>
+                  ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.select')}<span class="caret"></span>
           </button>
           <ul class="dropdown-menu" id="story_list">
             <!--<li><a href="#">A</a></li>-->
           </ul>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
-          <button class="btn btn-default btn-xs" data-create="plus" title="${i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${i18n.t('phovea:clue.storyvis.newStory')}</button>
-          <button class="btn btn-default btn-xs" data-create="clone" title="${i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${i18n.t('phovea:clue.storyvis.extract')}</button>
-          <button class="btn btn-default btn-xs" data-create="bookmark" title="${i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${i18n.t('phovea:clue.storyvis.bookmarked')}</button>
+          <button class="btn btn-default btn-xs" data-create="plus" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStory')}</button>
+          <button class="btn btn-default btn-xs" data-create="clone" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extract')}</button>
+          <button class="btn btn-default btn-xs" data-create="bookmark" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarked')}</button>
         </div>
         </form>
       </div>
       <div class="current">
-        <input type="text" class="form-control" placeholder="${i18n.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
+        <input type="text" class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
         <div class="name"></div>
-        <textarea class="form-control" placeholder="${i18n.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>
+        <textarea class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>
         <div class="description"></div>
       </div>
       <div class="stories ${this.options.class}">
@@ -239,15 +234,15 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       let story;
       switch (create) {
         case 'plus':
-          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.welcome'));
+          story = that.data.startNewSlide(I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.welcome'));
           break;
         case 'clone':
           const state = that.data.selectedStates()[0] || that.data.act;
-          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.myStoryTo') + (state ? state.name : i18n.t('phovea:clue.storyvis.heaven')), state ? state.path : []);
+          story = that.data.startNewSlide(I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.myStoryTo') + (state ? state.name : I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.heaven')), state ? state.path : []);
           break;
         case 'bookmark':
           const states = that.data.states.filter((d) => d.getAttr('starred', false));
-          story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.myFavoriteFindings'), states);
+          story = that.data.startNewSlide(I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.myFavoriteFindings'), states);
           break;
       }
       that.switchTo(story);
@@ -287,7 +282,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return $node;
   }
 
-  private updateInfo(slide: provenance.SlideNode) {
+  private updateInfo(slide: SlideNode) {
     const $base = this.$node.select('div.current').datum(slide);
     $base.select('input').property('value', slide ? slide.name : '').attr('disabled', slide ? null : 'disabled');
     $base.select('div.name').html(slide ? marked(slide.name) : '');
@@ -295,17 +290,17 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $base.select('div.description').html(slide ? marked(slide.description) : '');
   }
 
-  pushAnnotation(ann: provenance.IStateAnnotation) {
+  pushAnnotation(ann: IStateAnnotation) {
     const selected = this.data.selectedSlides()[0];
     if (selected) {
       selected.pushAnnotation(ann);
     }
   }
 
-  onSlideClick(d: provenance.SlideNode) {
-    this.data.selectSlide(d, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, {withTransition: false});
+  onSlideClick(d: SlideNode) {
+    this.data.selectSlide(d, SelectOperation.SET, SelectionUtils.defaultSelectionType, {withTransition: false});
     if (d && d.state) {
-      this.data.selectState(d.state, idtypes.SelectOperation.SET, idtypes.defaultSelectionType, {slideSelected: true});
+      this.data.selectState(d.state, SelectOperation.SET, SelectionUtils.defaultSelectionType, {slideSelected: true});
     }
   }
 
@@ -313,14 +308,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     const that = this;
     elem
       .on('dragenter', function (d) {
-        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
+        if (DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
           d3.select(this).classed('hover', true);
           return false;
         }
       }).on('dragover', (d) => {
-        if (C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || C.hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
+        if (DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-state') || DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story') || DnDUtils.getInstance().hasDnDType(<DragEvent>d3.event, 'application/phovea-prov-story-text')) {
           (<Event>d3.event).preventDefault();
-          C.updateDropEffect(<DragEvent>d3.event);
+          DnDUtils.getInstance().updateDropEffect(<DragEvent>d3.event);
           return false;
         }
       }).on('dragleave', function (d) {
@@ -329,9 +324,9 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         d3.select(this).classed('hover', false);
         const e = <DragEvent>(<any>d3.event);
         e.preventDefault();
-        const fullStory = provenance.toSlidePath(that.story);
-        const dStory = d.isPlaceholder ? d.to : <provenance.SlideNode>(<any>d);
-        const insertIntoStory = (newSlide: provenance.SlideNode) => {
+        const fullStory = SlideNode.toSlidePath(that.story);
+        const dStory = d.isPlaceholder ? d.to : <SlideNode>(<any>d);
+        const insertIntoStory = (newSlide: SlideNode) => {
           if (dStory == null) { //at the beginning
             const bak = that.story;
             that.story = newSlide;
@@ -343,13 +338,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
           }
           that.update();
         };
-        if (C.hasDnDType(e, 'application/phovea-prov-state')) {
+        if (DnDUtils.getInstance().hasDnDType(e, 'application/phovea-prov-state')) {
           const state = that.data.getStateById(parseInt(e.dataTransfer.getData('application/phovea-prov-state'), 10));
           insertIntoStory(that.data.wrapAsSlide(state));
 
-        } else if (C.hasDnDType(e, 'application/application/phovea-prov-story-text')) {
+        } else if (DnDUtils.getInstance().hasDnDType(e, 'application/application/phovea-prov-story-text')) {
           insertIntoStory(that.data.makeTextSlide());
-        } else if (C.hasDnDType(e, 'application/phovea-prov-story')) {
+        } else if (DnDUtils.getInstance().hasDnDType(e, 'application/phovea-prov-story')) {
           const story = that.data.getSlideById(parseInt(e.dataTransfer.getData('application/phovea-prov-story'), 10));
           if (fullStory.indexOf(story) >= 0 && e.dataTransfer.dropEffect !== 'copy') { //internal move
             if (dStory == null) { //no self move
@@ -378,11 +373,11 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       });
   }
 
-  private changeDuration($elem: d3.Selection<provenance.SlideNode>) {
+  private changeDuration($elem: d3.Selection<SlideNode>) {
     const that = this;
     $elem.call(d3.behavior.drag()
       .origin(() => ({x: 0, y: 0}))
-      .on('drag', function (d: provenance.SlideNode, i) {
+      .on('drag', function (d: SlideNode, i) {
         //update the height of the slide node
         const e: any = d3.event;
         const $elem = d3.select((<Element>this).parentElement);
@@ -390,24 +385,24 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.style(that.options.wh, height + 'px');
         const change = that.duration2pixel.invert(height) - d.duration;
         const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
-        const stories = provenance.toSlidePath(that.story);
+        const stories = SlideNode.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           const index = stories.indexOf(k);
           return VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(k, stories) + (index > i ? change : 0));
         });
         that.$node.select('div.story.placeholder div.duration span').text(VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(null, stories) + change));
-      }).on('dragend', function (d: provenance.SlideNode) {
+      }).on('dragend', function (d: SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style(that.options.wh), 10);
         d.duration = that.duration2pixel.invert(h);
       }));
   }
 
-  private changeTransition($elem: d3.Selection<provenance.SlideNode>) {
+  private changeTransition($elem: d3.Selection<SlideNode>) {
     const that = this;
     $elem.call(d3.behavior.drag()
       .origin(() => ({x: 0, y: 0}))
-      .on('drag', function (d: provenance.SlideNode, i) {
+      .on('drag', function (d: SlideNode, i) {
         //update the height of the slide node
         const e: any = d3.event;
         const $elem = d3.select((<Element>this).parentElement);
@@ -415,13 +410,13 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
         $elem.style('margin-' + that.options.topleft, offset + 'px');
         const change = that.duration2pixel.invert(offset + VerticalStoryVis.MIN_HEIGHT) - d.transition;
         const durations = that.$node.selectAll('div.story').filter((d) => !d.isPlaceholder);
-        const stories = provenance.toSlidePath(that.story);
+        const stories = SlideNode.toSlidePath(that.story);
         durations.select('div.duration span').text((k) => {
           const index = stories.indexOf(k);
           return VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(k, stories) + (index >= i ? change : 0));
         });
         that.$node.select('div.story.placeholder div.duration span').text(VerticalStoryVis.to_duration(VerticalStoryVis.to_starting_time(null, stories) + change));
-      }).on('dragend', function (d: provenance.SlideNode) {
+      }).on('dragend', function (d: SlideNode) {
         //update the stored duration just once
         const h = parseInt(d3.select((<Element>this).parentElement).style('margin-' + that.options.topleft), 10);
         d.transition = that.duration2pixel.invert(h + VerticalStoryVis.MIN_HEIGHT);
@@ -445,19 +440,19 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       .on('click', this.onSlideClick.bind(this))
       .on('mouseenter', function (d) {
         if (d.state != null) {
-          graph.selectState(d.state, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+          graph.selectState(d.state, SelectOperation.SET, SelectionUtils.hoverSelectionType);
         }
-        graph.selectSlide(<provenance.SlideNode><any>d, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        graph.selectSlide(<SlideNode><any>d, SelectOperation.SET, SelectionUtils.hoverSelectionType);
       })
       .on('mouseleave', function (d) {
         if (d.state != null) {
-          graph.selectState(d.state, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+          graph.selectState(d.state, SelectOperation.REMOVE, SelectionUtils.hoverSelectionType);
         }
-        graph.selectSlide(<provenance.SlideNode><any>d, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        graph.selectSlide(<SlideNode><any>d, SelectOperation.REMOVE, SelectionUtils.hoverSelectionType);
       });
   }
 
-  private createToolbar($elem: d3.Selection<provenance.SlideNode>) {
+  private createToolbar($elem: d3.Selection<SlideNode>) {
 
     const $toolbarEnter = $elem.append('div').classed('toolbar', true);
     $toolbarEnter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
@@ -466,8 +461,8 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       e.stopPropagation();
       e.preventDefault();
       Dialog.prompt(d.name, {
-        title: i18n.t('phovea:clue.storyvis.editName'),
-        placeholder: i18n.t('phovea:clue.storyvis.markdownSupported'),
+        title: I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.editName'),
+        placeholder: I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.markdownSupported'),
         multiline: true
       }).then((text) => {
         if (text === null) {
@@ -480,7 +475,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
       return false;
     });
 
-    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', i18n.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -499,7 +494,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
      return false;
      });
      */
-    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', i18n.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -519,22 +514,22 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
   private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $p.html(`<div>
-       <button class="btn btn-default btn-xs" data-add="text" title="${i18n.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract" title="${i18n.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract_all" title="${i18n.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="text" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract_all" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
        </div>
        <div class="duration"><span>00:00</span><i class="fa fa-circle"></i></div>
       `);
     $p.selectAll('button[data-add]').on('click', function () {
       const create = this.dataset.add;
-      const path = provenance.toSlidePath(that.story);
+      const path = SlideNode.toSlidePath(that.story);
       const last = path[path.length - 1];
       switch (create) {
         case 'text':
           if (last) {
-            that.data.moveSlide(that.data.makeTextSlide(i18n.t('phovea:clue.storyvis.unnamed')), last, false);
+            that.data.moveSlide(that.data.makeTextSlide(I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.unnamed')), last, false);
           } else {
-            that.story = that.data.startNewSlide(i18n.t('phovea:clue.storyvis.welcome'));
+            that.story = that.data.startNewSlide(I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.welcome'));
           }
           break;
         case 'extract':
@@ -578,7 +573,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     this.updateSelection();
 
 
-    const storyRaw = provenance.toSlidePath(this.story);
+    const storyRaw = SlideNode.toSlidePath(this.story);
 
 
     const story: ISlideNodeRepr[] = storyRaw.length > 0 ? [{id: 'f-1', i: -1, isPlaceholder: true, to: null}] : [];
@@ -657,14 +652,14 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     $states.exit().remove();
   }
 
-  private updateTimeIndicator(slide: provenance.SlideNode, withTransition: boolean) {
+  private updateTimeIndicator(slide: SlideNode, withTransition: boolean) {
     const $marker = this.$node.select('div.time_marker');
     if (!slide) {
       $marker.style('display', 'none');
       return;
     }
-    const bounds = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.story[data-id="' + slide.id + '"]'));
-    const base = C.bounds(<any>(<Element>this.$node.node()).querySelector('div.stories'));
+    const bounds = BaseUtils.bounds(<any>(<Element>this.$node.node()).querySelector('div.story[data-id="' + slide.id + '"]'));
+    const base = BaseUtils.bounds(<any>(<Element>this.$node.node()).querySelector('div.stories'));
     //console.log(bounds, base, bounds.y - base.y);
     const t: any = $marker
       .transition().ease('linear')
@@ -678,7 +673,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
 
   }
 
-  static createVerticalStoryVis(data: provenance.ProvenanceGraph, parent: Element, options = {}) {
+  static createVerticalStoryVis(data: ProvenanceGraph, parent: Element, options = {}) {
     return new VerticalStoryVis(data, parent, options);
   }
 
@@ -741,7 +736,7 @@ export class VerticalStoryVis extends vis.AVisInstance implements vis.IVisInstan
     return minutesSeconds(new Date(d));
   }
 
-  static to_starting_time(d: provenance.SlideNode, story: provenance.SlideNode[]) {
+  static to_starting_time(d: SlideNode, story: SlideNode[]) {
     if (!d) {
       return d3.sum(story, (d) => d.duration + d.transition);
     }

@@ -5,25 +5,24 @@
  */
 /// <amd-dependency path='font-awesome' />
 /// <amd-dependency path='bootstrap' />
-import {mixin} from 'phovea_core/src/index';
-import {IHeaderLink, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui/src/header';
+import {IHeaderLink, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui';
 import {
   MixedStorageProvenanceGraphManager,
-  IObjectRef
-} from 'phovea_core/src/provenance';
+  IObjectRef,
+  BaseUtils,
+  IEvent,
+  ProvenanceGraph
+} from 'phovea_core';
 import {select} from 'd3';
-import {SelectionRecorder} from '../Selection';
-import {CLUEMode, ButtonModeSelector, setMode} from '../mode';
+import {SelectionRecorder} from '../base/Selection';
+import {CLUEMode, ButtonModeSelector, setMode} from '../base/mode';
 import {VisLoader} from '../vis/VisLoader';
-import {IEvent} from 'phovea_core/src/event';
-import {CLUEGraphManager} from '../CLUEGraphManager';
+import {CLUEGraphManager} from '../base/CLUEGraphManager';
 import {ProvenanceGraphMenu} from '../menu/ProvenanceGraphMenu';
 import {LoginMenu} from '../menu/LoginMenu';
 import {ACLUEWrapper, IACLUEWrapperOptions} from './ACLUEWrapper';
-import * as header from 'phovea_ui/src/header';
-import * as prov from 'phovea_core/src/provenance';
 import * as d3 from 'd3';
-import {resolveImmediately} from 'phovea_core/src';
+import {ResolveNow} from 'phovea_core';
 
 
 export interface ICLUEWrapperOptions extends IACLUEWrapperOptions {
@@ -89,14 +88,14 @@ export class CLUEWrapper extends ACLUEWrapper {
 
   constructor(body: HTMLElement, options: ICLUEWrapperOptions = {}) {
     super();
-    mixin(this.options, options);
+    BaseUtils.mixin(this.options, options);
     this.build(body, options);
     this.on('jumped_to,loaded_graph', () => this.header.ready());
   }
 
   protected buildImpl(body: HTMLElement) {
     //create the common header
-    const headerOptions = mixin(this.options.headerOptions, {
+    const headerOptions = BaseUtils.mixin(this.options.headerOptions, {
       showOptionsLink: true, // always activate options
       appLink: this.options.appLink
     });
@@ -189,16 +188,16 @@ export class CLUEWrapper extends ACLUEWrapper {
    * @returns {CLUEWrapper}
    */
   static createWrapperFactory(body:HTMLElement, options:any = {}) {
-    header.AppHeader.create(body, {
-        appLink: new header.AppHeaderLink(options.app || 'Caleydo'),
+    AppHeader.create(body, {
+        appLink: new AppHeaderLink(options.app || 'Caleydo'),
         inverse: true
       });
     const $main = d3.select(body).append('main').style('height', '92vh');
-    const graph = prov.createDummy();
+    const graph = ProvenanceGraph.createDummy();
     return {
       on: (...args: any[]) => 0,
       $main,
-      graph: resolveImmediately(graph),
+      graph: ResolveNow.resolveImmediately(graph),
       jumpToStored: () => 0
     };
   }

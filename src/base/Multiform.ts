@@ -2,16 +2,15 @@
  * Created by sam on 10.02.2015.
  */
 
-import * as multiform from 'phovea_core/src/multiform';
-import * as provenance from 'phovea_core/src/provenance';
-import * as vis from 'phovea_core/src/vis';
+import {IObjectRef, ICmdResult, IVisInstance, ITransform, ActionMetaData, ObjectRefUtils, IMultiForm, ProvenanceGraph} from 'phovea_core';
+
 
 const disabled = {};
 
 export class Multiform {
 
-  static transform(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
-    const v: vis.IVisInstance = inputs[0].value,
+  static transform(inputs: IObjectRef<any>[], parameter: any): ICmdResult {
+    const v: IVisInstance = inputs[0].value,
       transform = parameter.transform,
       bak = parameter.old || v.transform();
 
@@ -22,9 +21,9 @@ export class Multiform {
       inverse: Multiform.createTransform(inputs[0], bak, transform)
     };
   }
-  static createTransform(v: provenance.IObjectRef<vis.IVisInstance>, t: vis.ITransform, old: vis.ITransform = null) {
+  static createTransform(v: IObjectRef<IVisInstance>, t: ITransform, old: ITransform = null) {
     return {
-      meta: provenance.meta('transform ' + v.toString(), provenance.cat.visual),
+      meta: ActionMetaData.actionMeta('transform ' + v.toString(), ObjectRefUtils.category.visual),
       id: 'transform',
       f: Multiform.transform,
       inputs: [v],
@@ -35,8 +34,8 @@ export class Multiform {
     };
   }
 
-  static changeVis(inputs: provenance.IObjectRef<any>[], parameter: any): Promise<provenance.ICmdResult> {
-    const v: multiform.IMultiForm = inputs[0].value,
+  static changeVis(inputs: IObjectRef<any>[], parameter: any): Promise<ICmdResult> {
+    const v: IMultiForm = inputs[0].value,
       to: string = parameter.to,
       from = parameter.from || v.act.id;
     disabled['switch-' + v.id] = true;
@@ -47,9 +46,9 @@ export class Multiform {
       };
     });
   }
-  static createChangeVis(v: provenance.IObjectRef<multiform.IMultiForm>, to: string, from: string = null) {
+  static createChangeVis(v: IObjectRef<IMultiForm>, to: string, from: string = null) {
     return {
-      meta: provenance.meta('switch vis ' + v.toString(), provenance.cat.visual),
+      meta: ActionMetaData.actionMeta('switch vis ' + v.toString(), ObjectRefUtils.category.visual),
       id: 'changeVis',
       f: Multiform.changeVis,
       inputs: [v],
@@ -60,8 +59,8 @@ export class Multiform {
     };
   }
 
-  static setOption(inputs: provenance.IObjectRef<any>[], parameter: any): provenance.ICmdResult {
-    const v: vis.IVisInstance = inputs[0].value,
+  static setOption(inputs: IObjectRef<any>[], parameter: any): ICmdResult {
+    const v: IVisInstance = inputs[0].value,
       name = parameter.name,
       value = parameter.value,
       bak = parameter.old || v.option(name);
@@ -73,9 +72,9 @@ export class Multiform {
     };
   }
 
-  static createSetOption(v: provenance.IObjectRef<vis.IVisInstance>, name: string, value: any, old: any = null) {
+  static createSetOption(v: IObjectRef<IVisInstance>, name: string, value: any, old: any = null) {
     return {
-      meta: provenance.meta('set option "' + name + +'" of "' + v.toString() + ' to "' + value + '"', provenance.cat.visual),
+      meta: ActionMetaData.actionMeta('set option "' + name + +'" of "' + v.toString() + ' to "' + value + '"', ObjectRefUtils.category.visual),
       id: 'setOption',
       f: Multiform.setOption,
       inputs: [v],
@@ -87,13 +86,13 @@ export class Multiform {
     };
   }
 
-  static attach(graph: provenance.ProvenanceGraph, v: provenance.IObjectRef<vis.IVisInstance>) {
+  static attach(graph: ProvenanceGraph, v: IObjectRef<IVisInstance>) {
     const m = v.value, id = m.id;
     if (typeof ((<any>m).switchTo) === 'function') {
       m.on('changed', (event, newValue, old) => {
         if (disabled['switch-' + id] !== true) {
           console.log('push switch');
-          graph.push(Multiform.createChangeVis(<provenance.IObjectRef<multiform.IMultiForm>>v, newValue.id, old ? old.id : null));
+          graph.push(Multiform.createChangeVis(<IObjectRef<IMultiForm>>v, newValue.id, old ? old.id : null));
         }
       });
     }

@@ -1,6 +1,6 @@
 
 
-import ActionNode from 'phovea_core/src/provenance/ActionNode';
+import {ActionNode} from 'phovea_core';
 
 
 export class Compression {

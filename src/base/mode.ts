@@ -3,9 +3,7 @@
  */
 
 
-import {hash, mixin, onDOMNodeRemoved} from 'phovea_core/src';
-import {EventHandler, fire, IEvent} from 'phovea_core/src/event';
-import i18n from 'phovea_core/src/i18n';
+import {EventHandler, IEvent, AppContext, BaseUtils, I18nextManager} from 'phovea_core';
 
 /**
  * normalizes the given coordinates to sum up to one
@@ -107,7 +105,7 @@ export class CLUEMode {
    * returns the default mode either stored in the hash or by default exploration
    */
   static defaultMode(): CLUEMode {
-    return CLUEMode.fromString(hash.getProp('clue', 'E'));
+    return CLUEMode.fromString(AppContext.getInstance().hash.getProp('clue', 'E'));
   }
 }
 
@@ -120,7 +118,7 @@ class ModeWrapper extends EventHandler {
 
   constructor() {
     super();
-    fire('clue.modeChanged', this._mode, this._mode);
+    EventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
   }
 
   set mode(value: CLUEMode) {
@@ -134,9 +132,9 @@ class ModeWrapper extends EventHandler {
     const bak = this._mode;
     this._mode = value;
     //store in hash
-    hash.setProp('clue', value.toString());
+    AppContext.getInstance().hash.setProp('clue', value.toString());
     this.fire('modeChanged', value, bak);
-    fire('clue.modeChanged', value, bak);
+    EventHandler.getInstance().fire('clue.modeChanged', value, bak);
   }
 
   get mode() {
@@ -176,7 +174,7 @@ export class ButtonModeSelector {
   private readonly node: HTMLElement;
 
   constructor(parent: Element, options: any = {}) {
-    mixin(this.options, options);
+    BaseUtils.mixin(this.options, options);
     this.node = this.build(parent);
 
     const listener = (event: IEvent, newMode: CLUEMode) => {
@@ -189,7 +187,7 @@ export class ButtonModeSelector {
       });
     };
     _instance.on('modeChanged', listener);
-    onDOMNodeRemoved(this.node, () => {
+    AppContext.getInstance().onDOMNodeRemoved(this.node, () => {
       _instance.off('modeChanged', listener);
     });
   }
@@ -197,13 +195,13 @@ export class ButtonModeSelector {
   private build(parent: Element) {
     parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${getMode().toString()}">
         <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.exploration')}
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.exploration')}
         </label>
         <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Authoring.toString()}${CLUEMode.modes.Authoring === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Authoring.toString()}" ${CLUEMode.modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.authoring')}
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Authoring.toString()}" ${CLUEMode.modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.authoring')}
         </label>
         <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Presentation.toString()}${CLUEMode.modes.Presentation === getMode() ? ' active' : ''}">
-            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Presentation.toString()}" ${CLUEMode.modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${i18n.t('phovea:clue.presentation')}
+            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Presentation.toString()}" ${CLUEMode.modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.presentation')}
         </label>
     </div>`);
     Array.from(parent.lastElementChild!.querySelectorAll('label')).forEach((label: HTMLElement) => {

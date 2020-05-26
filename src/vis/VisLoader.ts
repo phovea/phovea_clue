@@ -1,4 +1,4 @@
-import {ProvenanceGraph} from 'phovea_core/src/provenance';
+import {ProvenanceGraph} from 'phovea_core';
 import {LayoutedProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
 

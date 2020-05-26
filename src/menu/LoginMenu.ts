@@ -3,11 +3,11 @@
  */
 
 
-import {mixin} from 'phovea_core/src/index';
-import {AppHeader} from 'phovea_ui/src/header';
+import {BaseUtils} from 'phovea_core';
+import {AppHeader} from 'phovea_ui';
 import { LoginMenu as BaseLoginMenu,
   ILoginMenuOptions as IBaseLoginMenuOptions
-} from 'phovea_security_flask/src/LoginMenu';
+} from 'phovea_security_flask';
 
 
 export interface ILoginMenuOptions extends IBaseLoginMenuOptions {
@@ -16,7 +16,7 @@ export interface ILoginMenuOptions extends IBaseLoginMenuOptions {
 
 export class LoginMenu extends BaseLoginMenu {
   constructor(private readonly header: AppHeader, options: ILoginMenuOptions = {}) {
-    super(header, mixin({
+    super(header, BaseUtils.mixin({
       document: header.rightMenu.ownerDocument
     }, options));
     if (options.insertIntoHeader) {

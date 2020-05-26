@@ -1,5 +1,5 @@
-import {IPlugin, IPluginDesc} from 'phovea_core/src/plugin';
-import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
+import {IPlugin, IPluginDesc} from 'phovea_core';
+import {ProvenanceGraph} from 'phovea_core';
 
 /**
  * Provides the loaded provenance graph

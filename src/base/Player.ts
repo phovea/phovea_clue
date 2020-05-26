@@ -2,10 +2,9 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 
-import * as provenance from 'phovea_core/src/provenance';
-import * as C from 'phovea_core/src/index';
 import * as d3 from 'd3';
-import {resolveImmediately} from 'phovea_core/src';
+import {ProvenanceGraph, BaseUtils, SlideNode, ResolveNow} from 'phovea_core';
+
 
 export const FACTOR = 1;
 export const MIN_DURATION = -1;
@@ -24,8 +23,8 @@ export class Player {
 
   private $play:d3.Selection<any>;
 
-  constructor(private graph:provenance.ProvenanceGraph, controls:Element, options:any = {}) {
-    C.mixin(this.options, options);
+  constructor(private graph: ProvenanceGraph, controls:Element, options:any = {}) {
+    BaseUtils.mixin(this.options, options);
 
     const $controls = d3.select(controls);
     const that = this;
@@ -91,11 +90,11 @@ export class Player {
     }
   }
 
-  render(story:provenance.SlideNode) {
+  render(story: SlideNode) {
     //render by selecting the slide
     this.graph.selectSlide(story);
     //TODO transition time
-    return resolveImmediately(story);
+    return ResolveNow.resolveImmediately(story);
   }
 
   private stopAnim() {

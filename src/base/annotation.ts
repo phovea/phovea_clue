@@ -2,15 +2,12 @@
  * Created by Samuel Gratzl on 15.10.2015.
  */
 
-import * as C from 'phovea_core/src/index';
-import * as prov from 'phovea_core/src/provenance';
 import * as cmode from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
-import {defaultSelectionType} from 'phovea_core/src/idtype';
 import * as player from './Player';
-import {resolveImmediately} from 'phovea_core/src';
-import i18n from 'phovea_core/src/i18n';
+import {SlideNode, ProvenanceGraph, SelectionUtils, I18nextManager, IStateAnnotation, IFrameStateAnnotation, ITextStateAnnotation, IArrowStateAnnotation, ResolveNow} from 'phovea_core';
+import {BaseUtils, AppContext} from 'phovea_core';
 
 const modeFeatures = {
   isEditable: () => cmode.getMode().authoring > 0.8
@@ -94,7 +91,7 @@ class Anchor {
 
   compute(): [number, number] {
     //start with the bounds
-    const o = C.bounds(this.elem);
+    const o = BaseUtils.bounds(this.elem);
     //add offset
     o.x += window.pageXOffset;
     o.y += window.pageYOffset;
@@ -202,25 +199,25 @@ export class Renderer {
     subtitlePattern: '${description}'
   };
 
-  private prev = resolveImmediately(null);
+  private prev = ResolveNow.resolveImmediately(null);
 
   private l = (event, state, type, op, extras) => this.render(state, extras.withTransition !== false);
   private updateAnnotations = () => this.renderAnnotationsImpl(this.act);
   private rerender = () => this.render(this.act, true, true);
 
-  private act: prov.SlideNode = null;
+  private act: SlideNode = null;
 
   private renderer = this.rendererImpl.bind(this);
   private anchorWatcher = new AnchorWatcher();
 
-  constructor(private $main: d3.Selection<any>, private graph: prov.ProvenanceGraph, options = {}) {
-    C.mixin(this.options, options);
+  constructor(private $main: d3.Selection<any>, private graph: ProvenanceGraph, options = {}) {
+    BaseUtils.mixin(this.options, options);
     //update during slide change
-    this.graph.on('select_slide_' + defaultSelectionType, this.l);
+    this.graph.on('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
     //and mode change
     cmode.on('modeChanged', this.rerender);
 
-    C.onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
+    AppContext.getInstance().onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
   }
 
   /**
@@ -245,7 +242,7 @@ export class Renderer {
   private rendererImpl(d: string): string {
     if (modeFeatures.isEditable() && d.length === 0) {
       //return placeholder
-      return `<i class="placeholder">${i18n.t('phovea:clue.annotationPlaceholder')}</i>`;
+      return `<i class="placeholder">${I18nextManager.getInstance().i18n.t('phovea:clue.annotationPlaceholder')}</i>`;
     }
     //replace variables within the text
     if (this.act) {
@@ -286,12 +283,12 @@ export class Renderer {
   }
 
   private destroy() {
-    this.graph.off('select_slide_' + defaultSelectionType, this.l);
+    this.graph.off('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
 
     cmode.off('modeChanged', this.rerender);
   }
 
-  render(state: prov.SlideNode, withTransition = true, waitBetweenTakeDown = false) {
+  render(state: SlideNode, withTransition = true, waitBetweenTakeDown = false) {
     if (this.act) {
       //disable annotation update listener
       this.act.off('push-annotations,attr-name,attr-duration', this.updateAnnotations);
@@ -312,8 +309,8 @@ export class Renderer {
         return takedown;
       }
       //wait 1sec till the previous annotations are removed
-      return takedown.then(() => C.resolveIn(waitBetweenTakeDown ? 1000 : 0)).then(() => {
-        let next = resolveImmediately(null);
+      return takedown.then(() => BaseUtils.resolveIn(waitBetweenTakeDown ? 1000 : 0)).then(() => {
+        let next = ResolveNow.resolveImmediately(null);
         if (state.isTextOnly) { //no state jump
           next = this.renderText(state);
         } else {
@@ -347,7 +344,7 @@ export class Renderer {
     const anchors: Anchor[] = [];
     //create anchors
     anchorElements.forEach((a) => {
-      const b = C.bounds(a);
+      const b = BaseUtils.bounds(a);
       if (b.w * b.h < 50 * 50) { //area to small for higher details
         anchors.push(new Anchor(a, EAnchorDirection.CENTER));
       } else {
@@ -401,7 +398,7 @@ export class Renderer {
     this.$main.selectAll('div.annotation-anchor').style('display', 'none').remove();
   }
 
-  private renderAnnotationsImpl(state: prov.SlideNode) {
+  private renderAnnotationsImpl(state: SlideNode) {
     const that = this;
     const editable = modeFeatures.isEditable() && state != null;
 
@@ -409,9 +406,9 @@ export class Renderer {
     const $annsEnter = $anns.enter().append('div')
       .attr('class', (d) => d.type + '-annotation annotation');
 
-    const bounds = C.bounds(<Element>this.$main.node());
+    const bounds = BaseUtils.bounds(<Element>this.$main.node());
 
-    function updatePos(d: prov.IStateAnnotation) {
+    function updatePos(d: IStateAnnotation) {
       const elem = <HTMLElement>this;
       const p: any = d.pos;
       if (Array.isArray(p)) { //relative
@@ -427,14 +424,14 @@ export class Renderer {
 
     this.anchorWatcher.clear();
 
-    function watchAnchor(d: prov.IStateAnnotation) {
+    function watchAnchor(d: IStateAnnotation) {
       const p: any = d.pos;
       if (!Array.isArray(p)) {
         that.anchorWatcher.add(p.anchor, () => updatePos.call(this, d));
       }
     }
 
-    function updateSize(d: prov.IFrameStateAnnotation) {
+    function updateSize(d: IFrameStateAnnotation) {
       const elem = <HTMLElement>this;
       const p: any = d.pos2;
       if (p) { //anchor based
@@ -448,7 +445,7 @@ export class Renderer {
         elem.style.height = size[1] + '%';
       }
     }
-    function watchSizeAnchor(d: prov.IFrameStateAnnotation) {
+    function watchSizeAnchor(d: IFrameStateAnnotation) {
       const p: any = d.pos2;
       if (p) {
         that.anchorWatcher.add(p.anchor, () => updateSize.call(this, d));
@@ -458,11 +455,11 @@ export class Renderer {
     //move
     $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-arrows').call(d3.behavior.drag()
       //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
-      .on('dragstart', function (d: prov.IStateAnnotation, i) {
+      .on('dragstart', function (d: IStateAnnotation, i) {
         that.renderAnchors(bounds);
       })
       .on('dragend', that.removeAnchors.bind(that))
-      .on('drag', function (d: prov.IStateAnnotation, i) {
+      .on('drag', function (d: IStateAnnotation, i) {
         const mouse = d3.mouse(this.parentNode.parentNode);
         d.pos = that.updateAnchor(mouse, bounds);
         state.updateAnnotation(d);
@@ -471,7 +468,7 @@ export class Renderer {
 
     //remove
     $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-times')
-      .on('click', function (d: prov.IStateAnnotation, i) {
+      .on('click', function (d: IStateAnnotation, i) {
         d3.select(this.parentNode).remove();
         state.removeAnnotationElem(d);
         (<Event>d3.event).preventDefault();
@@ -479,9 +476,9 @@ export class Renderer {
 
 
     //Text
-    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<prov.ITextStateAnnotation>, $textsEnter: d3.selection.Update<prov.ITextStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'text' || !d.hasOwnProperty('type')).call(($texts: d3.selection.Update<ITextStateAnnotation>, $textsEnter: d3.selection.Update<ITextStateAnnotation>) => {
 
-      const onEdit = function (d: prov.ITextStateAnnotation, i) {
+      const onEdit = function (d: ITextStateAnnotation, i) {
         const $elem = d3.select(this);
         if (!d3.select(this.parentNode).classed('editable')) {
           return;
@@ -497,8 +494,8 @@ export class Renderer {
       $textsEnter.append('div').classed('text', true).on('click', onEdit);
 
       $texts.select('div.text').html((d) => this.renderer(d.text)).style({
-        width: (d: prov.ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
-        height: (d: prov.ITextStateAnnotation) => d.size ? d.size[1] + 'px' : null,
+        width: (d: ITextStateAnnotation) => d.size ? d.size[0] + 'px' : null,
+        height: (d: ITextStateAnnotation) => d.size ? d.size[1] + 'px' : null,
       }).each(function (d) {
         if (d.styles) {
           d3.select(this).style(d.styles);
@@ -508,7 +505,7 @@ export class Renderer {
 
 
     //Arrow
-    $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<prov.IArrowStateAnnotation>, $arrowsEnter: d3.selection.Update<prov.IArrowStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'arrow').call(($arrows: d3.selection.Update<IArrowStateAnnotation>, $arrowsEnter: d3.selection.Update<IArrowStateAnnotation>) => {
       const $svgEnter = $arrowsEnter.insert('svg', ':first-child').attr({
         width: (d) => 30 + Math.abs(d.at[0]),
         height: (d) => 30 + Math.abs(d.at[1])
@@ -548,7 +545,7 @@ export class Renderer {
         cx: (d) => d.at[0],
         cy: (d) => d.at[1]
       }).call(d3.behavior.drag()
-        .on('drag', function (d: prov.IArrowStateAnnotation, i) {
+        .on('drag', function (d: IArrowStateAnnotation, i) {
           const e: any = d3.event;
           d.at = [e.x, e.y];
           state.updateAnnotation(d);
@@ -575,7 +572,7 @@ export class Renderer {
     }, $annsEnter.filter((d) => d.type === 'arrow'));
 
     //FRAME
-    $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<prov.IFrameStateAnnotation>, $framesEnter: d3.selection.Update<prov.IFrameStateAnnotation>) => {
+    $anns.filter((d) => d.type === 'frame').call(($frames: d3.selection.Update<IFrameStateAnnotation>, $framesEnter: d3.selection.Update<IFrameStateAnnotation>) => {
       $frames.each(function (d) {
         updateSize.call(this, d);
         watchSizeAnchor.call(this, d);
@@ -587,11 +584,11 @@ export class Renderer {
       //resize
       $framesEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fa fa-expand fa-flip-horizontal')
         .call(d3.behavior.drag()
-          .on('dragstart', function (d: prov.IStateAnnotation, i) {
+          .on('dragstart', function (d: IStateAnnotation, i) {
             that.renderAnchors(bounds);
           })
           .on('dragend', that.removeAnchors.bind(that))
-          .on('drag', function (d: prov.IFrameStateAnnotation, i) {
+          .on('drag', function (d: IFrameStateAnnotation, i) {
             const mouse = d3.mouse(this.parentNode.parentNode);
             d.pos2 = that.updateAnchor(mouse, bounds);
             state.updateAnnotation(d);
@@ -607,12 +604,12 @@ export class Renderer {
     return $anns;
   }
 
-  renderAnnotations(state: prov.SlideNode) {
+  renderAnnotations(state: SlideNode) {
     return new Promise((resolve) => {
       const $anns = this.renderAnnotationsImpl(state);
       if (this.options.animation && !$anns.empty() && this.options.duration > 0) {
         $anns.style('opacity', 0).transition().duration(this.options.duration).style('opacity', 1);
-        C.resolveIn(this.options.duration + 10).then(() => resolve($anns.node()));
+        BaseUtils.resolveIn(this.options.duration + 10).then(() => resolve($anns.node()));
       } else {
         $anns.style('opacity', 1);
         resolve($anns.node());
@@ -627,7 +624,7 @@ export class Renderer {
       const $div = this.$main.classed('hide-all-non-annotations', false).selectAll('div.annotation, div.text-overlay, div.add-text-annotation, div.subtitle-annotation');
       if (this.options.animation && !$div.empty() && this.options.duration > 0) {
         $div.transition().duration(this.options.duration).style('opacity', 0).remove();
-        C.resolveIn(this.options.duration + 10).then(() => resolve());
+        BaseUtils.resolveIn(this.options.duration + 10).then(() => resolve());
       } else {
         $div.remove();
         resolve();
@@ -635,22 +632,22 @@ export class Renderer {
     });
   }
 
-  renderSubtitle(overlay: prov.SlideNode) {
+  renderSubtitle(overlay: SlideNode) {
     return new Promise((resolve) => {
       this.$main.append('div').attr('class', 'subtitle-annotation').html(this.renderer(this.options.subtitlePattern));
       resolve(this.$main.node());
     });
   }
 
-  renderText(overlay: prov.SlideNode) {
+  renderText(overlay: SlideNode) {
     const t = overlay.transition * player.FACTOR;
-    return C.resolveIn(t).then(() => {
+    return BaseUtils.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
       return this.$main.node();
     });
   }
 
-  static createAnnotation(main: HTMLElement, graph: prov.ProvenanceGraph) {
+  static createAnnotation(main: HTMLElement, graph: ProvenanceGraph) {
     const instance = new Renderer(d3.select(main), graph);
     return {
       render: instance.render.bind(instance)
