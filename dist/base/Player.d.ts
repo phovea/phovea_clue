@@ -2,9 +2,11 @@
  * Created by Samuel Gratzl on 27.08.2015.
  */
 import { ProvenanceGraph, SlideNode } from 'phovea_core';
-export declare const FACTOR = 1;
-export declare const MIN_DURATION = -1;
-export declare const MIN_TRANSITION = -1;
+export declare module StoryTransition {
+    const FACTOR = 1;
+    const MIN_DURATION = -1;
+    const MIN_TRANSITION = -1;
+}
 /**
  * story player interface and logic
  */

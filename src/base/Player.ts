@@ -5,10 +5,11 @@
 import * as d3 from 'd3';
 import {ProvenanceGraph, BaseUtils, SlideNode, ResolveNow} from 'phovea_core';
 
-
-export const FACTOR = 1;
-export const MIN_DURATION = -1;
-export const MIN_TRANSITION = -1;
+export module StoryTransition {
+  export const FACTOR = 1;
+  export const MIN_DURATION = -1;
+  export const MIN_TRANSITION = -1;
+}
 
 /**
  * story player interface and logic
@@ -82,7 +83,7 @@ export class Player {
     const act = this.graph.selectedSlides()[0] || l[l.length - 1];
     if (act) {
       this.render(act).then(() => {
-        this.anim = self.setTimeout(this.next.bind(this), act.duration * FACTOR);
+        this.anim = self.setTimeout(this.next.bind(this), act.duration * StoryTransition.FACTOR);
       });
       return true;
     } else {
@@ -122,7 +123,7 @@ export class Player {
     const r = this.forward();
     if (r) {
       r.then((act) => {
-        this.anim = self.setTimeout(this.next.bind(this), act.duration * FACTOR);
+        this.anim = self.setTimeout(this.next.bind(this), act.duration * StoryTransition.FACTOR);
       });
     }
   }

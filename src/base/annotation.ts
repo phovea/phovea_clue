@@ -315,7 +315,7 @@ export class Renderer {
           next = this.renderText(state);
         } else {
           //jump to next state
-          next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.MIN_TRANSITION : state.transition * player.FACTOR);
+          next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : state.transition * player.StoryTransition.FACTOR);
         }
         //wait till next is done before rendering annotations
         return next.then(() => {
@@ -640,7 +640,7 @@ export class Renderer {
   }
 
   renderText(overlay: SlideNode) {
-    const t = overlay.transition * player.FACTOR;
+    const t = overlay.transition * player.StoryTransition.FACTOR;
     return BaseUtils.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
       return this.$main.node();

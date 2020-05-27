@@ -663,11 +663,11 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     //console.log(bounds, base, bounds.y - base.y);
     const t: any = $marker
       .transition().ease('linear')
-      .duration(slide.transition < 0 || !withTransition ? player.MIN_TRANSITION : slide.transition * player.FACTOR)
+      .duration(slide.transition < 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : slide.transition * player.StoryTransition.FACTOR)
       .style('top', (bounds.y - base.y) + 'px');
 
     t.transition().ease('linear')
-      .duration(slide.duration < 0 || !withTransition ? player.MIN_DURATION : slide.duration * player.FACTOR)
+      .duration(slide.duration < 0 || !withTransition ? player.StoryTransition.MIN_DURATION : slide.duration * player.StoryTransition.FACTOR)
       .style('top', (bounds.y - base.y + bounds.h - 4) + 'px');
 
 

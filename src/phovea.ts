@@ -1,4 +1,4 @@
-import {IRegistry, PluginRegistry, ILocaleEPDesc, LocaleExtensionPointDesc} from 'phovea_core';
+import {IRegistry, PluginRegistry, ILocaleEPDesc, EP_PHOVEA_CORE_LOCALE} from 'phovea_core';
 
 
 export default function (registry: IRegistry) {
@@ -27,7 +27,7 @@ export default function (registry: IRegistry) {
   });
   /// #endif
 
-  registry.push(LocaleExtensionPointDesc.EP_PHOVEA_CORE_LOCALE, 'phoveaClueLocaleEN', function () {
+  registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaClueLocaleEN', function () {
     return import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
   }, <ILocaleEPDesc>{
     ns: 'phovea',
