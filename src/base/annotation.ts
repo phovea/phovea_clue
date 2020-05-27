@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.10.2015.
  */
 
-import * as cmode from './mode';
+import {ModeWrapper} from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
 import * as player from './Player';
@@ -10,7 +10,7 @@ import {SlideNode, ProvenanceGraph, SelectionUtils, I18nextManager, IStateAnnota
 import {BaseUtils, AppContext} from 'phovea_core';
 
 const modeFeatures = {
-  isEditable: () => cmode.getMode().authoring > 0.8
+  isEditable: () => ModeWrapper.getInstance().getMode().authoring > 0.8
 };
 
 /**
@@ -215,7 +215,7 @@ export class Renderer {
     //update during slide change
     this.graph.on('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
     //and mode change
-    cmode.on('modeChanged', this.rerender);
+    ModeWrapper.getInstance().on('modeChanged', this.rerender);
 
     AppContext.getInstance().onDOMNodeRemoved(<Element>$main.node(), this.destroy.bind(this));
   }
@@ -285,7 +285,7 @@ export class Renderer {
   private destroy() {
     this.graph.off('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
 
-    cmode.off('modeChanged', this.rerender);
+    ModeWrapper.getInstance().off('modeChanged', this.rerender);
   }
 
   render(state: SlideNode, withTransition = true, waitBetweenTakeDown = false) {
@@ -305,7 +305,7 @@ export class Renderer {
       this.act.on('push-annotations,attr-name,attr-duration', this.updateAnnotations);
 
       //no annotations should be shown
-      if (cmode.getMode().exploration > 0.8) {
+      if (ModeWrapper.getInstance().getMode().exploration > 0.8) {
         return takedown;
       }
       //wait 1sec till the previous annotations are removed

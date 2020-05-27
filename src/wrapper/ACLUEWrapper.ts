@@ -2,7 +2,7 @@
  * Created by sam on 03.03.2017.
  */
 
-import * as cmode from '../base/mode';
+import {ModeWrapper, CLUEMode} from '../base/mode';
 import {LayoutedProvVis} from '../vis/provvis';
 import {VerticalStoryVis} from '../vis/storyvis';
 import {EventHandler, I18nextManager, ProvenanceGraph, PluginRegistry, StateNode, SlideNode} from 'phovea_core';
@@ -124,8 +124,8 @@ export abstract class ACLUEWrapper extends EventHandler {
   private handleModeChange() {
     const $right = <HTMLElement>document.querySelector('aside.provenance-layout-vis');
     const $rightStory = <HTMLElement>document.querySelector('aside.provenance-story-vis');
-    this.propagate(cmode, 'modeChanged');
-    const update = (newMode: cmode.CLUEMode) => {
+    this.propagate(ModeWrapper.getInstance(), 'modeChanged');
+    const update = (newMode: CLUEMode) => {
       document.body.dataset.clue = newMode.toString();
       // lazy jquery
       import('jquery').then((jquery) => {
@@ -148,10 +148,10 @@ export abstract class ACLUEWrapper extends EventHandler {
         }
       });
     };
-    cmode.on('modeChanged', (event, newMode) => update(newMode));
-    this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
+    ModeWrapper.getInstance().on('modeChanged', (event, newMode) => update(newMode));
+    this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, ModeWrapper.getInstance().getMode());
     { //no animation initially
-      const mode = cmode.getMode();
+      const mode = ModeWrapper.getInstance().getMode();
       document.body.dataset.clue = mode.toString();
       //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
       if (mode.presentation > 0.8) {

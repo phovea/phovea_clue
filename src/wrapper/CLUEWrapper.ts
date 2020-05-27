@@ -15,7 +15,7 @@ import {
 } from 'phovea_core';
 import {select} from 'd3';
 import {SelectionRecorder} from '../base/Selection';
-import {CLUEMode, ButtonModeSelector, setMode} from '../base/mode';
+import {CLUEMode, ButtonModeSelector, ModeWrapper} from '../base/mode';
 import {VisLoader} from '../vis/VisLoader';
 import {CLUEGraphManager} from '../base/CLUEGraphManager';
 import {ProvenanceGraphMenu} from '../menu/ProvenanceGraphMenu';
@@ -166,7 +166,7 @@ export class CLUEWrapper extends ACLUEWrapper {
       graph.jumpTo(graph.states[0]).then(() => {
         graph.clear();
         this.$mainRef = graph.findOrAddObject(this.$main, 'Application', 'visual');
-        setMode(CLUEMode.modes.Exploration);
+        ModeWrapper.getInstance().setMode(CLUEMode.modes.Exploration);
       });
     });
   }

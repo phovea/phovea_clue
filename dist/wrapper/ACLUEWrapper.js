@@ -1,7 +1,7 @@
 /**
  * Created by sam on 03.03.2017.
  */
-import * as cmode from '../base/mode';
+import { ModeWrapper } from '../base/mode';
 import { EventHandler, I18nextManager, PluginRegistry } from 'phovea_core';
 import { CLUEGraphManager } from '../base/CLUEGraphManager';
 import { WrapperUtils } from '../base/WrapperUtils';
@@ -102,7 +102,7 @@ export class ACLUEWrapper extends EventHandler {
     handleModeChange() {
         const $right = document.querySelector('aside.provenance-layout-vis');
         const $rightStory = document.querySelector('aside.provenance-story-vis');
-        this.propagate(cmode, 'modeChanged');
+        this.propagate(ModeWrapper.getInstance(), 'modeChanged');
         const update = (newMode) => {
             document.body.dataset.clue = newMode.toString();
             // lazy jquery
@@ -128,10 +128,10 @@ export class ACLUEWrapper extends EventHandler {
                 }
             });
         };
-        cmode.on('modeChanged', (event, newMode) => update(newMode));
-        this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, cmode.getMode());
+        ModeWrapper.getInstance().on('modeChanged', (event, newMode) => update(newMode));
+        this.fire(ACLUEWrapper.EVENT_MODE_CHANGED, ModeWrapper.getInstance().getMode());
         { //no animation initially
-            const mode = cmode.getMode();
+            const mode = ModeWrapper.getInstance().getMode();
             document.body.dataset.clue = mode.toString();
             //$('nav').css('background-color', d3.rgb(255 * new_.exploration, 255 * new_.authoring, 255 * new_.presentation).darker().darker().toString());
             if (mode.presentation > 0.8) {

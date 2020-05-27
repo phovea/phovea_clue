@@ -1,14 +1,14 @@
 /**
  * Created by Samuel Gratzl on 15.10.2015.
  */
-import * as cmode from './mode';
+import { ModeWrapper } from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
 import * as player from './Player';
 import { SelectionUtils, I18nextManager, ResolveNow } from 'phovea_core';
 import { BaseUtils, AppContext } from 'phovea_core';
 const modeFeatures = {
-    isEditable: () => cmode.getMode().authoring > 0.8
+    isEditable: () => ModeWrapper.getInstance().getMode().authoring > 0.8
 };
 /**
  * place where the annotation is attached to an anchor
@@ -203,7 +203,7 @@ export class Renderer {
         //update during slide change
         this.graph.on('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
         //and mode change
-        cmode.on('modeChanged', this.rerender);
+        ModeWrapper.getInstance().on('modeChanged', this.rerender);
         AppContext.getInstance().onDOMNodeRemoved($main.node(), this.destroy.bind(this));
     }
     /**
@@ -268,7 +268,7 @@ export class Renderer {
     }
     destroy() {
         this.graph.off('select_slide_' + SelectionUtils.defaultSelectionType, this.l);
-        cmode.off('modeChanged', this.rerender);
+        ModeWrapper.getInstance().off('modeChanged', this.rerender);
     }
     render(state, withTransition = true, waitBetweenTakeDown = false) {
         if (this.act) {
@@ -286,7 +286,7 @@ export class Renderer {
             //listen to annotation changes
             this.act.on('push-annotations,attr-name,attr-duration', this.updateAnnotations);
             //no annotations should be shown
-            if (cmode.getMode().exploration > 0.8) {
+            if (ModeWrapper.getInstance().getMode().exploration > 0.8) {
                 return takedown;
             }
             //wait 1sec till the previous annotations are removed

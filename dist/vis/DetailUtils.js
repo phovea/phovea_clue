@@ -1,4 +1,4 @@
-import * as cmode from '../base/mode';
+import { ModeWrapper } from '../base/mode';
 export var LevelOfDetail;
 (function (LevelOfDetail) {
     LevelOfDetail[LevelOfDetail["ExtraSmall"] = 0] = "ExtraSmall";
@@ -17,7 +17,7 @@ export class DetailUtils {
         return matches;
     }
     static getLevelOfDetail() {
-        const mode = cmode.getMode();
+        const mode = ModeWrapper.getInstance().getMode();
         //if (mode.exploration >= 0.8) {
         //  return LevelOfDetail.Small;
         //}

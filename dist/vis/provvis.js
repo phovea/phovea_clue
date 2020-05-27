@@ -4,7 +4,7 @@
 import * as $ from 'jquery';
 import 'bootstrap-sass/assets/stylesheets/_bootstrap.scss';
 import 'imports-loader?jQuery=jquery!bootstrap-sass/assets/javascripts/bootstrap.js';
-import * as cmode from '../base/mode';
+import { ModeWrapper } from '../base/mode';
 import { Dialog } from 'phovea_ui';
 import * as d3 from 'd3';
 import { DetailUtils, LevelOfDetail } from './DetailUtils';
@@ -348,7 +348,7 @@ export class LayoutedProvVis extends AVisInstance {
         this.data.states.forEach((s) => {
             s.on('setAttr', this.trigger);
         });
-        cmode.on('modeChanged', this.trigger);
+        ModeWrapper.getInstance().on('modeChanged', this.trigger);
     }
     unbind() {
         this.data.off('switch_state,clear', this.trigger);
@@ -358,7 +358,7 @@ export class LayoutedProvVis extends AVisInstance {
         this.data.states.forEach((s) => {
             s.off('setAttr', this.trigger);
         });
-        cmode.off('modeChanged', this.trigger);
+        ModeWrapper.getInstance().off('modeChanged', this.trigger);
     }
     toggleBinding(enable) {
         if (enable) {

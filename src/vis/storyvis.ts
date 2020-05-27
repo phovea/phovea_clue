@@ -5,7 +5,7 @@
 
 import {behavior, mouse as d3mouse, select, selectAll} from 'd3';
 import {Renderer} from '../base/annotation';
-import * as cmode from '../base/mode';
+import {ModeWrapper} from '../base/mode';
 import {Dialog} from 'phovea_ui';
 import * as d3 from 'd3';
 import {ThumbnailUtils} from '../base/ThumbnailUtils';
@@ -50,7 +50,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     if (!state || extras.slideSelected === true) {
       return;
     }
-    const slide = cmode.getMode().exploration < 0.8 ? this.findSlideForState(state) : null;
+    const slide = ModeWrapper.getInstance().getMode().exploration < 0.8 ? this.findSlideForState(state) : null;
     const selected = this.data.selectedSlides(type);
     if ((slide && selected.indexOf(slide) >= 0) || (!slide && selected.length === 0)) {
       return;
@@ -112,7 +112,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     this.data.on('select_slide', this.onSelectionChanged);
     this.data.on('select_state', this.onStateSelectionChanged);
     this.data.on('start_slide,destroy_slide', this.trigger);
-    cmode.on('modeChanged', this.trigger);
+    ModeWrapper.getInstance().on('modeChanged', this.trigger);
   }
 
   destroy() {
@@ -120,7 +120,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     this.data.off('select_slide', this.onSelectionChanged);
     this.data.off('select_state', this.onStateSelectionChanged);
     this.data.off('start_slide,destroy_slide', this.trigger);
-    cmode.off('modeChanged', this.trigger);
+    ModeWrapper.getInstance().off('modeChanged', this.trigger);
   }
 
   get rawSize(): [number, number] {

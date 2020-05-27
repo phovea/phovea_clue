@@ -1,6 +1,7 @@
 /**
  * Created by Samuel Gratzl on 01.09.2015.
  */
+import { EventHandler, IEventHandler, IEventListener } from 'phovea_core';
 /**
  * generic version of the CLUE mode, a combination of exploration, authoring, and normalization
  */
@@ -40,18 +41,23 @@ export declare class CLUEMode {
      */
     static defaultMode(): CLUEMode;
 }
-export declare const on: any;
-export declare const off: any;
 /**
- * returns the current mode
- * @returns {CLUEMode}
+ * wrapper containing the current mode
  */
-export declare function getMode(): CLUEMode;
-/**
- * set the mode
- * @param value
- */
-export declare function setMode(value: CLUEMode): void;
+export declare class ModeWrapper implements IEventHandler {
+    private _mode;
+    constructor();
+    on(events: string | {
+        [key: string]: IEventListener;
+    }, handler?: IEventListener): EventHandler;
+    off(events: string | {
+        [key: string]: IEventListener;
+    }, handler?: IEventListener): EventHandler;
+    setMode(value: CLUEMode): void;
+    getMode(): CLUEMode;
+    private static instance;
+    static getInstance(): ModeWrapper;
+}
 /**
  * utility to select the mode using three buttons to the atomic versions using bootstrap buttons
  */

@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 28.02.2017.
  */
 import { AppContext } from 'phovea_core';
-import { CLUEMode, setMode } from './mode';
+import { CLUEMode, ModeWrapper } from './mode';
 export class WrapperUtils {
     /**
      * injection for headless support
@@ -100,16 +100,16 @@ export class WrapperUtils {
             }
             else if (k.keyCode === 37 && k.ctrlKey) {
                 //left arrow 	37
-                setMode(CLUEMode.modes.Exploration);
+                ModeWrapper.getInstance().setMode(CLUEMode.modes.Exploration);
             }
             else if ((k.keyCode === 38 || k.keyCode === 40) && k.ctrlKey) {
                 //up arrow 	38
                 //down arrow 	40
-                setMode(CLUEMode.modes.Authoring);
+                ModeWrapper.getInstance().setMode(CLUEMode.modes.Authoring);
             }
             else if (k.keyCode === 39 && k.ctrlKey) {
                 //right arrow 	39
-                setMode(CLUEMode.modes.Presentation);
+                ModeWrapper.getInstance().setMode(CLUEMode.modes.Presentation);
             }
         });
     }

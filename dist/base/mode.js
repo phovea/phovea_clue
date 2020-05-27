@@ -98,13 +98,18 @@ CLUEMode.modes = {
 /**
  * wrapper containing the current mode
  */
-class ModeWrapper extends EventHandler {
+export class ModeWrapper {
     constructor() {
-        super();
         this._mode = CLUEMode.defaultMode();
         EventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
     }
-    set mode(value) {
+    on(events, handler) {
+        return EventHandler.getInstance().on(events, handler);
+    }
+    off(events, handler) {
+        return EventHandler.getInstance().off(events, handler);
+    }
+    setMode(value) {
         if (this._mode === value) {
             return;
         }
@@ -116,29 +121,18 @@ class ModeWrapper extends EventHandler {
         this._mode = value;
         //store in hash
         AppContext.getInstance().hash.setProp('clue', value.toString());
-        this.fire('modeChanged', value, bak);
+        EventHandler.getInstance().fire('modeChanged', value, bak);
         EventHandler.getInstance().fire('clue.modeChanged', value, bak);
     }
-    get mode() {
+    getMode() {
         return this._mode;
     }
-}
-const _instance = new ModeWrapper();
-export const on = ModeWrapper.prototype.on.bind(_instance);
-export const off = ModeWrapper.prototype.off.bind(_instance);
-/**
- * returns the current mode
- * @returns {CLUEMode}
- */
-export function getMode() {
-    return _instance.mode;
-}
-/**
- * set the mode
- * @param value
- */
-export function setMode(value) {
-    _instance.mode = value;
+    static getInstance() {
+        if (!ModeWrapper.instance) {
+            ModeWrapper.instance = new ModeWrapper();
+        }
+        return ModeWrapper.instance;
+    }
 }
 /**
  * utility to select the mode using three buttons to the atomic versions using bootstrap buttons
@@ -162,25 +156,25 @@ export class ButtonModeSelector {
                 input.checked = d === newMode;
             });
         };
-        _instance.on('modeChanged', listener);
+        EventHandler.getInstance().on('modeChanged', listener);
         AppContext.getInstance().onDOMNodeRemoved(this.node, () => {
-            _instance.off('modeChanged', listener);
+            EventHandler.getInstance().off('modeChanged', listener);
         });
     }
     build(parent) {
-        parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${getMode().toString()}">
-        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.exploration')}
+        parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${ModeWrapper.getInstance().getMode().toString()}">
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.exploration')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Authoring.toString()}${CLUEMode.modes.Authoring === getMode() ? ' active' : ''}">
-           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Authoring.toString()}" ${CLUEMode.modes.Authoring === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.authoring')}
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Authoring.toString()}${CLUEMode.modes.Authoring === ModeWrapper.getInstance().getMode() ? ' active' : ''}">
+           <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Authoring.toString()}" ${CLUEMode.modes.Authoring === ModeWrapper.getInstance().getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.authoring')}
         </label>
-        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Presentation.toString()}${CLUEMode.modes.Presentation === getMode() ? ' active' : ''}">
-            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Presentation.toString()}" ${CLUEMode.modes.Presentation === getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.presentation')}
+        <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Presentation.toString()}${CLUEMode.modes.Presentation === ModeWrapper.getInstance().getMode() ? ' active' : ''}">
+            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Presentation.toString()}" ${CLUEMode.modes.Presentation === ModeWrapper.getInstance().getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.presentation')}
         </label>
     </div>`);
         Array.from(parent.lastElementChild.querySelectorAll('label')).forEach((label) => {
-            label.onclick = () => setMode(CLUEMode.fromString(label.firstElementChild.value));
+            label.onclick = () => ModeWrapper.getInstance().setMode(CLUEMode.fromString(label.firstElementChild.value));
         });
         return parent.lastElementChild;
     }
