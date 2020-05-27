@@ -11,7 +11,7 @@ import * as d3 from 'd3';
 import {ThumbnailUtils} from '../base/ThumbnailUtils';
 import {DetailUtils, LevelOfDetail} from './DetailUtils';
 import * as marked from 'marked';
-import * as player from '../base/Player';
+import {StoryTransition, Player} from '../base/Player';
 import * as $ from 'jquery';
 import * as textPNG from '../assets/text.png';
 import {DnDUtils, StateNode, SlideNode, AVisInstance, IVisInstance, Range, SelectionUtils, SelectOperation, ProvenanceGraph, I18nextManager, IStateAnnotation, BaseUtils, AppContext} from 'phovea_core';
@@ -79,7 +79,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
 
   story: SlideNode = null;
 
-  player: player.Player = null;
+  player: Player = null;
 
   constructor(public data: ProvenanceGraph, public parent: Element, options: any = {}) {
     super();
@@ -92,7 +92,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     this.$node = this.build(d3.select(parent));
     AppContext.getInstance().onDOMNodeRemoved(this.node, this.destroy, this);
 
-    this.player = new player.Player(data, this.node.querySelector('#player_controls'));
+    this.player = new Player(data, this.node.querySelector('#player_controls'));
 
     this.bind();
 
@@ -663,11 +663,11 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     //console.log(bounds, base, bounds.y - base.y);
     const t: any = $marker
       .transition().ease('linear')
-      .duration(slide.transition < 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : slide.transition * player.StoryTransition.FACTOR)
+      .duration(slide.transition < 0 || !withTransition ? StoryTransition.MIN_TRANSITION : slide.transition * StoryTransition.FACTOR)
       .style('top', (bounds.y - base.y) + 'px');
 
     t.transition().ease('linear')
-      .duration(slide.duration < 0 || !withTransition ? player.StoryTransition.MIN_DURATION : slide.duration * player.StoryTransition.FACTOR)
+      .duration(slide.duration < 0 || !withTransition ? StoryTransition.MIN_DURATION : slide.duration * StoryTransition.FACTOR)
       .style('top', (bounds.y - base.y + bounds.h - 4) + 'px');
 
 

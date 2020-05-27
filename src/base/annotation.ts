@@ -5,7 +5,7 @@
 import {ModeWrapper} from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
-import * as player from './Player';
+import {StoryTransition} from './Player';
 import {SlideNode, ProvenanceGraph, SelectionUtils, I18nextManager, IStateAnnotation, IFrameStateAnnotation, ITextStateAnnotation, IArrowStateAnnotation, ResolveNow} from 'phovea_core';
 import {BaseUtils, AppContext} from 'phovea_core';
 
@@ -315,7 +315,7 @@ export class Renderer {
           next = this.renderText(state);
         } else {
           //jump to next state
-          next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : state.transition * player.StoryTransition.FACTOR);
+          next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? StoryTransition.MIN_TRANSITION : state.transition * StoryTransition.FACTOR);
         }
         //wait till next is done before rendering annotations
         return next.then(() => {
@@ -640,7 +640,7 @@ export class Renderer {
   }
 
   renderText(overlay: SlideNode) {
-    const t = overlay.transition * player.StoryTransition.FACTOR;
+    const t = overlay.transition * StoryTransition.FACTOR;
     return BaseUtils.resolveIn(t).then(() => {
       this.$main.classed('hide-all-non-annotations', true);
       return this.$main.node();
