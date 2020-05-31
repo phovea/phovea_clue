@@ -4,7 +4,7 @@
 import { ModeWrapper } from './mode';
 import * as d3 from 'd3';
 import * as marked from 'marked';
-import * as player from './Player';
+import { StoryTransition } from './Player';
 import { SelectionUtils, I18nextManager, ResolveNow } from 'phovea_core';
 import { BaseUtils, AppContext } from 'phovea_core';
 const modeFeatures = {
@@ -297,7 +297,7 @@ export class Renderer {
                 }
                 else {
                     //jump to next state
-                    next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : state.transition * player.StoryTransition.FACTOR);
+                    next = this.graph.jumpTo(state.state, state.transition <= 0 || !withTransition ? StoryTransition.MIN_TRANSITION : state.transition * StoryTransition.FACTOR);
                 }
                 //wait till next is done before rendering annotations
                 return next.then(() => {
@@ -592,7 +592,7 @@ export class Renderer {
         });
     }
     renderText(overlay) {
-        const t = overlay.transition * player.StoryTransition.FACTOR;
+        const t = overlay.transition * StoryTransition.FACTOR;
         return BaseUtils.resolveIn(t).then(() => {
             this.$main.classed('hide-all-non-annotations', true);
             return this.$main.node();

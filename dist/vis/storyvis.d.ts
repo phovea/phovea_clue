@@ -1,7 +1,7 @@
 /**
  * Created by sam on 09.02.2015.
  */
-import * as player from '../base/Player';
+import { Player } from '../base/Player';
 import { SlideNode, AVisInstance, IVisInstance, Range, ProvenanceGraph, IStateAnnotation } from 'phovea_core';
 export declare class VerticalStoryVis extends AVisInstance implements IVisInstance {
     data: ProvenanceGraph;
@@ -14,7 +14,7 @@ export declare class VerticalStoryVis extends AVisInstance implements IVisInstan
     static MIN_HEIGHT: number;
     private duration2pixel;
     story: SlideNode;
-    player: player.Player;
+    player: Player;
     constructor(data: ProvenanceGraph, parent: Element, options?: any);
     private findSlideForState;
     private bind;

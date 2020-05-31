@@ -9,7 +9,7 @@ import * as d3 from 'd3';
 import { ThumbnailUtils } from '../base/ThumbnailUtils';
 import { DetailUtils, LevelOfDetail } from './DetailUtils';
 import * as marked from 'marked';
-import * as player from '../base/Player';
+import { StoryTransition, Player } from '../base/Player';
 import * as $ from 'jquery';
 import * as textPNG from '../assets/text.png';
 import { DnDUtils, SlideNode, AVisInstance, SelectionUtils, SelectOperation, I18nextManager, BaseUtils, AppContext } from 'phovea_core';
@@ -69,7 +69,7 @@ export class VerticalStoryVis extends AVisInstance {
         }
         this.$node = this.build(d3.select(parent));
         AppContext.getInstance().onDOMNodeRemoved(this.node, this.destroy, this);
-        this.player = new player.Player(data, this.node.querySelector('#player_controls'));
+        this.player = new Player(data, this.node.querySelector('#player_controls'));
         this.bind();
         this.story = this.data.selectedSlides()[0] || this.data.getSlideChains()[0];
         this.update();
@@ -592,10 +592,10 @@ export class VerticalStoryVis extends AVisInstance {
         //console.log(bounds, base, bounds.y - base.y);
         const t = $marker
             .transition().ease('linear')
-            .duration(slide.transition < 0 || !withTransition ? player.StoryTransition.MIN_TRANSITION : slide.transition * player.StoryTransition.FACTOR)
+            .duration(slide.transition < 0 || !withTransition ? StoryTransition.MIN_TRANSITION : slide.transition * StoryTransition.FACTOR)
             .style('top', (bounds.y - base.y) + 'px');
         t.transition().ease('linear')
-            .duration(slide.duration < 0 || !withTransition ? player.StoryTransition.MIN_DURATION : slide.duration * player.StoryTransition.FACTOR)
+            .duration(slide.duration < 0 || !withTransition ? StoryTransition.MIN_DURATION : slide.duration * StoryTransition.FACTOR)
             .style('top', (bounds.y - base.y + bounds.h - 4) + 'px');
     }
     static createVerticalStoryVis(data, parent, options = {}) {

@@ -2,7 +2,7 @@
  * Created by sam on 09.02.2015.
  */
 import { BaseUtils, AppContext } from 'phovea_core';
-import * as not_available from './assets/not_available.png';
+import * as not_available from '../assets/not_available.png';
 export class ThumbnailUtils {
     static thumbnail_url(graph, state, options = {}) {
         const o = {

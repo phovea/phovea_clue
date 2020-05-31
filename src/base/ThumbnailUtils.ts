@@ -5,7 +5,7 @@
 
 import {BaseUtils, AppContext, ProvenanceGraph, StateNode, SlideNode} from 'phovea_core';
 
-import * as not_available from './assets/not_available.png';
+import * as not_available from '../assets/not_available.png';
 
 export class ThumbnailUtils {
 
