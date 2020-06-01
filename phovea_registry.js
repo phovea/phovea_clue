@@ -4,7 +4,7 @@
  * Licensed under the new BSD license, available at http://caleydo.org/license
  **************************************************************************** */
 
-import {register} from 'phovea_core';
+import {PluginRegistry} from 'phovea_core';
 import reg from './src/phovea';
 
 /**
@@ -15,4 +15,4 @@ import 'phovea_core/phovea_registry.js';
 import 'phovea_ui/phovea_registry.js';
 import 'phovea_security_flask/phovea_registry.js';
 //self
-register('phovea_clue',reg);
+PluginRegistry.getInstance().register('phovea_clue',reg);
