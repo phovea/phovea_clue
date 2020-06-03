@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 01.09.2015.
  */
-import { EventHandler, AppContext, BaseUtils, I18nextManager } from 'phovea_core';
+import { GlobalEventHandler, AppContext, BaseUtils, I18nextManager, EventHandler } from 'phovea_core';
 /**
  * normalizes the given coordinates to sum up to one
  * @param arr
@@ -98,16 +98,11 @@ CLUEMode.modes = {
 /**
  * wrapper containing the current mode
  */
-export class ModeWrapper {
+export class ModeWrapper extends EventHandler {
     constructor() {
+        super();
         this._mode = CLUEMode.defaultMode();
-        EventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
-    }
-    on(events, handler) {
-        return EventHandler.getInstance().on(events, handler);
-    }
-    off(events, handler) {
-        return EventHandler.getInstance().off(events, handler);
+        GlobalEventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
     }
     setMode(value) {
         if (ModeWrapper.getInstance()._mode === value) {
@@ -121,8 +116,8 @@ export class ModeWrapper {
         ModeWrapper.getInstance()._mode = value;
         //store in hash
         AppContext.getInstance().hash.setProp('clue', value.toString());
-        EventHandler.getInstance().fire('modeChanged', value, bak);
-        EventHandler.getInstance().fire('clue.modeChanged', value, bak);
+        this.fire('modeChanged', value, bak);
+        GlobalEventHandler.getInstance().fire('clue.modeChanged', value, bak);
     }
     getMode() {
         return ModeWrapper.getInstance()._mode;
@@ -156,9 +151,9 @@ export class ButtonModeSelector {
                 input.checked = d === newMode;
             });
         };
-        EventHandler.getInstance().on('modeChanged', listener);
+        ModeWrapper.getInstance().on('modeChanged', listener);
         AppContext.getInstance().onDOMNodeRemoved(this.node, () => {
-            EventHandler.getInstance().off('modeChanged', listener);
+            ModeWrapper.getInstance().off('modeChanged', listener);
         });
     }
     build(parent) {

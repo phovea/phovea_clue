@@ -2,7 +2,7 @@
  * Created by sam on 10.02.2015.
  */
 import { Compression } from './Compression';
-import { ResolveNow, EventHandler, IDTypeManager, ParseRangeUtils, SelectionUtils, ActionMetaData, ObjectRefUtils, BaseUtils, AppContext } from 'phovea_core';
+import { ResolveNow, EventHandler, GlobalEventHandler, IDTypeManager, ParseRangeUtils, SelectionUtils, ActionMetaData, ObjectRefUtils, BaseUtils, AppContext } from 'phovea_core';
 const disabler = new EventHandler();
 export class Selection {
     static select(inputs, parameter, graph, within) {
@@ -146,13 +146,13 @@ export class SelectionRecorder {
             filter: BaseUtils.constantTrue,
             animated: false
         }, this.options);
-        EventHandler.getInstance().on('register.idtype', this.adder);
+        GlobalEventHandler.getInstance().on('register.idtype', this.adder);
         IDTypeManager.getInstance().listIdTypes().forEach((d) => {
             this.adder(null, d);
         });
     }
     destroy() {
-        EventHandler.getInstance().off('register.idtype', this.adder);
+        GlobalEventHandler.getInstance().off('register.idtype', this.adder);
         this.handler.forEach((h) => h.destroy());
         this.handler.length = 0;
     }

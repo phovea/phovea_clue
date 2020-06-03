@@ -3,7 +3,7 @@
  */
 
 
-import {EventHandler, IEvent, AppContext, BaseUtils, I18nextManager, IEventHandler, IEventListener} from 'phovea_core';
+import {GlobalEventHandler, IEvent, AppContext, BaseUtils, I18nextManager, IEventHandler, IEventListener, EventHandler} from 'phovea_core';
 
 /**
  * normalizes the given coordinates to sum up to one
@@ -113,18 +113,12 @@ export class CLUEMode {
 /**
  * wrapper containing the current mode
  */
-export class ModeWrapper implements IEventHandler {
+export class ModeWrapper extends EventHandler {
   private _mode = CLUEMode.defaultMode();
 
   constructor() {
-    EventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
-  }
-
-  on(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
-    return EventHandler.getInstance().on(events, handler);
-  }
-  off(events: string|{[key: string]: IEventListener}, handler?: IEventListener) {
-    return EventHandler.getInstance().off(events, handler);
+    super();
+    GlobalEventHandler.getInstance().fire('clue.modeChanged', this._mode, this._mode);
   }
 
   setMode(value: CLUEMode) {
@@ -139,8 +133,8 @@ export class ModeWrapper implements IEventHandler {
     ModeWrapper.getInstance()._mode = value;
     //store in hash
     AppContext.getInstance().hash.setProp('clue', value.toString());
-    EventHandler.getInstance().fire('modeChanged', value, bak);
-    EventHandler.getInstance().fire('clue.modeChanged', value, bak);
+    this.fire('modeChanged', value, bak);
+    GlobalEventHandler.getInstance().fire('clue.modeChanged', value, bak);
   }
 
   getMode() {
@@ -182,9 +176,9 @@ export class ButtonModeSelector {
         input.checked = d === newMode;
       });
     };
-    EventHandler.getInstance().on('modeChanged', listener);
+    ModeWrapper.getInstance().on('modeChanged', listener);
     AppContext.getInstance().onDOMNodeRemoved(this.node, () => {
-      EventHandler.getInstance().off('modeChanged', listener);
+      ModeWrapper.getInstance().off('modeChanged', listener);
     });
   }
 

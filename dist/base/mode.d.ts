@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 01.09.2015.
  */
-import { EventHandler, IEventHandler, IEventListener } from 'phovea_core';
+import { EventHandler } from 'phovea_core';
 /**
  * generic version of the CLUE mode, a combination of exploration, authoring, and normalization
  */
@@ -44,15 +44,9 @@ export declare class CLUEMode {
 /**
  * wrapper containing the current mode
  */
-export declare class ModeWrapper implements IEventHandler {
+export declare class ModeWrapper extends EventHandler {
     private _mode;
     constructor();
-    on(events: string | {
-        [key: string]: IEventListener;
-    }, handler?: IEventListener): EventHandler;
-    off(events: string | {
-        [key: string]: IEventListener;
-    }, handler?: IEventListener): EventHandler;
     setMode(value: CLUEMode): void;
     getMode(): CLUEMode;
     private static instance;
