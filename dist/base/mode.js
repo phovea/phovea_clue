@@ -110,22 +110,22 @@ export class ModeWrapper {
         return EventHandler.getInstance().off(events, handler);
     }
     setMode(value) {
-        if (this._mode === value) {
+        if (ModeWrapper.getInstance()._mode === value) {
             return;
         }
         if (value.isAtomic) {
             //use the real atomic one for a shared instance
             value = CLUEMode.fromString(value.toString());
         }
-        const bak = this._mode;
-        this._mode = value;
+        const bak = ModeWrapper.getInstance()._mode;
+        ModeWrapper.getInstance()._mode = value;
         //store in hash
         AppContext.getInstance().hash.setProp('clue', value.toString());
         EventHandler.getInstance().fire('modeChanged', value, bak);
         EventHandler.getInstance().fire('clue.modeChanged', value, bak);
     }
     getMode() {
-        return this._mode;
+        return ModeWrapper.getInstance()._mode;
     }
     static getInstance() {
         if (!ModeWrapper.instance) {

@@ -128,15 +128,15 @@ export class ModeWrapper implements IEventHandler {
   }
 
   setMode(value: CLUEMode) {
-    if (this._mode === value) {
+    if (ModeWrapper.getInstance()._mode === value) {
       return;
     }
     if (value.isAtomic) {
       //use the real atomic one for a shared instance
       value = CLUEMode.fromString(value.toString());
     }
-    const bak = this._mode;
-    this._mode = value;
+    const bak = ModeWrapper.getInstance()._mode;
+    ModeWrapper.getInstance()._mode = value;
     //store in hash
     AppContext.getInstance().hash.setProp('clue', value.toString());
     EventHandler.getInstance().fire('modeChanged', value, bak);
@@ -144,7 +144,7 @@ export class ModeWrapper implements IEventHandler {
   }
 
   getMode() {
-    return this._mode;
+    return ModeWrapper.getInstance()._mode;
   }
 
   private static instance: ModeWrapper;
