@@ -1,0 +1,7 @@
+phovea_clue
+===========
+
+.. toctree::
+   :maxdepth: 4
+
+   phovea_clue

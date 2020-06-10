@@ -1,0 +1,22 @@
+phovea\_clue package
+====================
+
+Submodules
+----------
+
+phovea\_clue.remoteplayer module
+--------------------------------
+
+.. automodule:: phovea_clue.remoteplayer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: phovea_clue
+   :members:
+   :undoc-members:
+   :show-inheritance:
