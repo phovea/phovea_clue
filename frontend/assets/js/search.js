@@ -1,3 +1,3 @@
 var typedoc = typedoc || {};
             typedoc.search = typedoc.search || {};
-            typedoc.search.data = {"kinds":{"65536":"Type literal"},"rows":[{"id":0,"kind":65536,"name":"__type","url":"globals.html#disabled.__type","classes":"tsd-kind-type-literal tsd-parent-kind-variable","parent":"disabled"}]};
+            typedoc.search.data = {"kinds":{"65536":"Type literal"},"rows":[{"id":0,"kind":65536,"name":"__type","url":"index.html#disabled.__type","classes":"tsd-kind-type-literal tsd-parent-kind-variable","parent":"disabled"}]};
