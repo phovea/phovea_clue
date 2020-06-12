@@ -39,7 +39,7 @@
     "copy-assets": "if [ -d src/assets ]; then shx --verbose cp -R src/assets/. dist/assets/; fi",
     "copy-styles": "if [ -d src/scss ]; then shx --verbose cp -R src/scss/. dist/scss/; fi",
     "pretest:python": "npm run check",
-    "posttest:web": "npm run clean && npm run compile",
+    "posttest:web": "npm run lint",
     "pretest": "echo hybrid",
     "test:web": "test ! $(find tests -name \"*.ts\") || jest",
     "test:python": "test ! $(find tests -name \"*.py\") || python setup.py test",
