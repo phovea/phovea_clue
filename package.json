@@ -19,7 +19,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "phovea.js",
     "phovea_registry.js",
     "dist",
     "src",
@@ -36,8 +35,9 @@
     "clean:compile": "rimraf src/**/*.map src/**/*.js src/**/*.d.ts tests/**/*.js tests/**/*.map tests/**/*.d.ts demo/**/*.js demo/**/*.map demo/**/*.d.ts",
     "check": "flake8 --exclude=.git,venv,deploy,docs,__pycache__,node_modules",
     "compile": "tsc",
-    "copy-assets": "if [ -d src/assets ]; then shx --verbose cp -R src/assets/ dist/assets/; fi",
-    "copy-styles": "if [ -d src/scss ]; then shx --verbose cp -R src/scss/ dist/scss/; fi",
+    "compile:watch": "tsc -w",
+    "copy-assets": "if [ -d src/assets ]; then shx --verbose cp -R src/assets/. dist/assets/; fi",
+    "copy-styles": "if [ -d src/scss ]; then shx --verbose cp -R src/scss/. dist/scss/; fi",
     "pretest:python": "npm run check",
     "posttest:web": "npm run clean && npm run compile",
     "pretest": "echo hybrid",
@@ -72,8 +72,6 @@
     "node": ">= 12.13"
   },
   "dependencies": {
-    "@types/d3": "~3.5.36",
-    "@types/marked": "0.7.2",
     "d3": "~3.5.17",
     "marked": "0.7.0",
     "phovea_core": "github:phovea/phovea_core#asteiner/refactoring",
@@ -81,25 +79,18 @@
     "phovea_ui": "github:phovea/phovea_ui#vstoiber/refactoring"
   },
   "devDependencies": {
+    "@types/d3": "~3.5.36",
+    "@types/marked": "0.7.2",
     "@types/jest": "25.1.4",
-    "cache-loader": "1.2.0",
-    "file-loader": "0.11.1",
-    "html-loader": "0.4.5",
     "identity-obj-proxy": "^3.0.0",
-    "ifdef-loader": "2.0.0",
-    "imports-loader": "0.7.1",
     "jest": "25.1.0",
     "jest-raw-loader": "1.0.1",
-    "node-sass": "^4.13.1",
-    "null-loader": "0.1.1",
-    "raw-loader": "0.5.1",
     "rimraf": "^3.0.0",
     "shx": "^0.3.2",
     "ts-jest": "25.2.1",
     "tslib": "~1.11.0",
     "tslint": "5.9.1",
     "typedoc": "~0.16.10",
-    "typescript": "~3.8.2",
-    "url-loader": "0.5.8"
+    "typescript": "~3.8.2"
   }
 }
