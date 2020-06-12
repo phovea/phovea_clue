@@ -2,7 +2,7 @@
  * Created by sam on 09.02.2015.
  */
 import 'bootstrap-sass/assets/stylesheets/_bootstrap.scss';
-import 'imports-loader?jQuery=jquery!bootstrap-sass/assets/javascripts/bootstrap.js';
+import 'bootstrap-sass/assets/javascripts/bootstrap.js';
 import { ProvenanceGraph, AVisInstance, IVisInstance, Range } from 'phovea_core';
 export declare class LayoutedProvVis extends AVisInstance implements IVisInstance {
     data: ProvenanceGraph;

@@ -3,7 +3,7 @@
  */
 import * as $ from 'jquery';
 import 'bootstrap-sass/assets/stylesheets/_bootstrap.scss';
-import 'imports-loader?jQuery=jquery!bootstrap-sass/assets/javascripts/bootstrap.js';
+import 'bootstrap-sass/assets/javascripts/bootstrap.js';
 import { ModeWrapper } from '../base/mode';
 import { Dialog } from 'phovea_ui';
 import * as d3 from 'd3';
