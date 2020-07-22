@@ -82,6 +82,7 @@
   "devDependencies": {
     "@types/d3": "~3.5.36",
     "@types/marked": "0.7.2",
+    "@types/jquery": "~3.5.0",
     "@types/jest": "~26.0.5",
     "identity-obj-proxy": "~3.0.0",
     "jest": "~26.1.0",

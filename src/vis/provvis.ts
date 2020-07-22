@@ -570,6 +570,8 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
     });
     //initialize bootstrap
     import('jquery').then((jquery) => {
+      // avoid Property 'button' does not exist on type 'JQuery<HTMLElement>'
+      // @ts-ignore
       $($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
     });
 

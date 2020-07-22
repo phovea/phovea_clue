@@ -503,6 +503,8 @@ export class LayoutedProvVis extends AVisInstance {
         });
         //initialize bootstrap
         import('jquery').then((jquery) => {
+            // avoid Property 'button' does not exist on type 'JQuery<HTMLElement>'
+            // @ts-ignore
             $($p.node()).find('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
         });
         jp.find('.btn-filter').on('click', () => {
