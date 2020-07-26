@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist lib",
+    "delete-dependencies": "rimraf node_modules",
     "check": "flake8 --exclude=.git,venv,deploy,docs,__pycache__,node_modules",
     "compile": "tsc",
     "postcompile": "npm run copy",
@@ -75,9 +76,9 @@
   "dependencies": {
     "d3": "~3.5.17",
     "marked": "0.7.0",
-    "phovea_core": "github:phovea/phovea_core#asteiner/refactoring",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#vstoiber/refactoring",
-    "phovea_ui": "github:phovea/phovea_ui#vstoiber/refactoring"
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#develop",
+    "phovea_ui": "github:phovea/phovea_ui#develop"
   },
   "devDependencies": {
     "@types/d3": "~3.5.36",

@@ -23,7 +23,7 @@ export default function (registry) {
     });
     /// #endif
     registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaClueLocaleEN', function () {
-        return import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
+        return import('./locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
     }, {
         ns: 'phovea',
     });
