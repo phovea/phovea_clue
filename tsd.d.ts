@@ -13,27 +13,18 @@ declare module "*.css" {
   const content:string;
   export default content;
 }
+// allow image dependencies
 declare module "*.png";
 declare module "*.jpg";
+declare module "*.gif";
+declare module "*.webp";
+declare module "*.svg";
 //allow html dependencies
 declare module "*.html" {
   const content:string;
   export default content;
 }
-//allow json dependencies
-declare module "*.json";
-//allow file dependencies
-declare module "file-loader!*";
-//allow file dependencies
-declare module "raw-loader!*";
-//allow url dependencies
-declare module "url-loader!*";
-//allow html dependencies
-declare module "imports-loader!*";
-
-
-//define System.import as understood by webpack2
-interface ISystem {
-  import(module: string): Promise<any>;
+declare module "*.xml" {
+  const content:string;
+  export default content;
 }
-declare const System: ISystem;
