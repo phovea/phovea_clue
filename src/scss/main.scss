@@ -1,10 +1,8 @@
-
 // import variables first
 @import "./abstracts/variables";
-@import "./abstracts/colors";
-$boostrapAssetDir: '~phovea_ui/dist/assets';
 
-@import "~phovea_ui/dist/scss/base";
+$boostrapAssetDir: '~phovea_ui/dist/assets';
+@import "~phovea_ui/dist/scss/main";
 
 // basic CLUE style
 @import "./base/base";
@@ -14,7 +12,8 @@ $boostrapAssetDir: '~phovea_ui/dist/assets';
 @import "./components/provvis";
 @import "./components/storyvis";
 
+
 // import the header navbar with a more specific CSS selector again, to style it with the CLUE colors
 .box {
-  @import "~phovea_ui/dist/scss/header_navbar";
+  @import "~phovea_ui/dist/scss/components/header_navbar";
 }
