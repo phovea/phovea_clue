@@ -2,43 +2,44 @@
  * Created by Samuel Gratzl on 27.08.2014.
  */
 
+
 // header navbar color (the inverse colors will be computed using sass `invert($color)`)
-$header-bg-color: #60AA85;
-$header-border-color: transparent;
-$header-link-color: #F5F3F3;
-$header-dropdown-link-color: #000;
+$header-bg-color: #60AA85 !default;
+$header-border-color: transparent !default;
+$header-link-color: #F5F3F3 !default;
+$header-dropdown-link-color: #000 !default;
 
 
-$select-color: orange;
-$select-color-bright: #ffdca3;
-$hover-color: black;
+$select-color: orange !default;
+$select-color-bright: #ffdca3 !default;
+$hover-color: black !default;
 
-$hover-presentation-color: #f0bb00;
+$hover-presentation-color: #f0bb00 !default;
 
-$core_colour: #60AA85;
-$core_colour_text: #F5F3F3;
-$core_colour_selected:#72C29B;
-$core_border : $core_colour;
+$core_colour: #60AA85 !default;
+$core_colour_text: #F5F3F3 !default;
+$core_colour_selected:#72C29B !default;
+$core_border : $core_colour !default;
 
-$exploration-stage: $core_colour;
-$exploration-stage-hover: $core_colour_selected;
+$exploration-stage: $core_colour !default;
+$exploration-stage-hover: $core_colour_selected !default;
 
-$authoring-stage: $core_colour;
-$authoring-stage-hover: $core_colour_selected;
-$presentation-stage: $core_colour;
-$presentation-stage-hover: $core_colour_selected;
+$authoring-stage: $core_colour !default;
+$authoring-stage-hover: $core_colour_selected !default;
+$presentation-stage: $core_colour !default;
+$presentation-stage-hover: $core_colour_selected !default;
 
-$core_player: $authoring-stage;
-$core_duration:#D8D8D8;
+$core_player: $authoring-stage !default;
+$core_duration:#D8D8D8 !default;
 
 
-$header-menu-bg-color: rgb(190, 218, 194);
-$header-menu-color: #333;
+$header-menu-bg-color: rgb(190, 218, 194) !default;
+$header-menu-color: #333 !default;
 
-$core_color_almost_black: black;
+$core_color_almost_black: black !default;
 
-$annotation_color: #009ACD;
-$annotation_color_hover: #006b90;
+$annotation_color: #009ACD !default;
+$annotation_color_hover: #006b90 !default;
 
-$anchor_color: red;
-$anchor_color_hover: darkred;
+$anchor_color: red !default;
+$anchor_color_hover: darkred !default;
