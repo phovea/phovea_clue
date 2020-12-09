@@ -76,9 +76,9 @@
   "dependencies": {
     "d3": "~3.5.17",
     "marked": "0.7.0",
-    "phovea_core": "github:phovea/phovea_core#develop",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#develop",
-    "phovea_ui": "github:phovea/phovea_ui#develop"
+    "phovea_core": "github:phovea/phovea_core#vstoiber/update_dependencies",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#vstoiber/update_dependencies",
+    "phovea_ui": "github:phovea/phovea_ui#vstoiber/update_dependencies"
   },
   "devDependencies": {
     "@types/d3": "~3.5.36",
