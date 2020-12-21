@@ -1,5 +1,7 @@
-phovea_clue [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+phovea_clue  
 =====================
+[![Phovea][phovea-image-client]][phovea-url] [![Phovea][phovea-image-server]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
+
 
 CLUE (for **C**apture, **L**abel, **U**nderstand, **E**xplain) is a model that tightly integrates data exploration and presentation of discoveries. Based on provenance data captured during the exploration process, users can extract key steps, add annotations, and author 'Vistories', visual stories based on the history of the exploration.
 
@@ -43,11 +45,11 @@ for an simple example how to use it.
 This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform for developing web-based visualization applications. For tutorials, API docs, and more information about the build and deployment process, see the [documentation page](http://phovea.caleydo.org).
 
 
-[phovea-image]: https://img.shields.io/badge/Phovea-Client%20Plugin-F47D20.svg
+[phovea-image-client]: https://img.shields.io/badge/Phovea-Client%20Plugin-F47D20.svg
+[phovea-image-server]: https://img.shields.io/badge/Phovea-Server%20Plugin-10ACDF.svg
 [phovea-url]: https://phovea.caleydo.org
 [npm-image]: https://badge.fury.io/js/phovea_clue.svg
 [npm-url]: https://npmjs.org/package/phovea_clue
-[travis-image]: https://travis-ci.org/phovea/phovea_clue.svg?branch=master
-[travis-url]: https://travis-ci.org/phovea/phovea_clue
-[daviddm-image]: https://david-dm.org/phovea/phovea_clue/status.svg
-[daviddm-url]: https://david-dm.org/phovea/phovea_clue
+[circleci-image]: https://circleci.com/gh/phovea/phovea_clue.svg?style=shield
+[circleci-url]: https://circleci.com/gh/phovea/phovea_clue
+

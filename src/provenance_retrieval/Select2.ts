@@ -6,7 +6,7 @@ import * as $ from 'jquery';
 import {
   IProperty, IPropertyValue, PropertyType,
   TAG_VALUE_SEPARATOR, createPropertyValue
-} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+} from 'phovea_core';
 import * as d3 from 'd3';
 
 interface IQuery {

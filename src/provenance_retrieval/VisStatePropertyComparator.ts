@@ -2,15 +2,15 @@
  * Created by Holger Stitz on 28.06.2017.
  */
 import * as d3 from 'd3';
-import {IPropertyValue, PropertyType, TAG_VALUE_SEPARATOR} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IPropertyValue, PropertyType, TAG_VALUE_SEPARATOR} from 'phovea_core';
 import {
 ICategoricalPropertyComparator, INumericalPropertyComparator,
 IPropertyComparator, ISetPropertyComparator
-} from 'phovea_core/src/provenance/retrieval/PropertyValueComparator';
-import {TermFrequency} from 'phovea_core/src/provenance/retrieval/tf_idf/TermFrequency';
-import {InverseDocumentFrequency} from 'phovea_core/src/provenance/retrieval/tf_idf/InverseDocumentFrequency';
-import {Jaccard} from 'phovea_core/src/provenance/retrieval/jaccard/Jaccard';
-import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
+} from 'phovea_core';
+import {TermFrequency} from 'phovea_core';
+import {InverseDocumentFrequency} from 'phovea_core';
+import {Jaccard} from 'phovea_core';
+import {IVisState} from 'phovea_core';
 
 
 class NumericalPropertyComparator implements INumericalPropertyComparator {

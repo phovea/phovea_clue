@@ -1,13 +1,10 @@
 /**
  * Created by Holger Stitz on 09.08.2017.
  */
-import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
-import {
-  IProperty, IPropertyValue, Property, PropertyType,
-  TAG_VALUE_SEPARATOR
-} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
-import {ISearchResult} from './VisStateIndex';
+import {IVisState, IProperty, IPropertyValue, Property, PropertyType,
+  TAG_VALUE_SEPARATOR} from 'phovea_core';
 import * as d3 from 'd3';
+import {ISearchResult} from './VisStateIndex';
 
 export class PropertyModifier {
 

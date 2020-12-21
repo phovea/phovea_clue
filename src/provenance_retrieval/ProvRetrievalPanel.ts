@@ -2,24 +2,15 @@
  * Created by Holger Stitz on 01.06.2017.
  */
 import * as d3 from 'd3';
-import ProvenanceGraph from 'phovea_core/src/provenance/ProvenanceGraph';
-import {AVisInstance, IVisInstance} from 'phovea_core/src/vis';
-import {onDOMNodeRemoved, mixin} from 'phovea_core/src/index';
-import StateNode from 'phovea_core/src/provenance/StateNode';
-import * as idtypes from 'phovea_core/src/idtype';
+import {AVisInstance, IVisInstance, AppContext, BaseUtils, ProvenanceGraph, StateNode, ActionNode, IVisState, IProperty, IPropertyValue, setProperty, PropertyType, ProvenanceGraphDim, SelectOperation, SelectionUtils} from 'phovea_core';
 import {Select2} from './Select2';
 import {
   IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
   VisStateIndex,
 } from './VisStateIndex';
-import ActionNode from 'phovea_core/src/provenance/ActionNode';
-import {IProperty, IPropertyValue, setProperty, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
-import {ProvenanceGraphDim} from 'phovea_core/src/provenance';
-import {SelectOperation} from 'phovea_core/src/idtype/IIDType';
 import * as utils from './../utils';
 import {PropertyModifier} from './PropertyModifier';
 import {IVisStateApp} from './IVisState';
-import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
 import {areThumbnailsAvailable} from '../utils';
 import {ClueSidePanelEvents} from '../template';
 
@@ -133,9 +124,9 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
 
   constructor(public data: ProvenanceGraph, public parent: Element, private options: IProvRetrievalPanelOptions) {
     super();
-    this.options = mixin({}, this.defaultOptions, options);
+    this.options = BaseUtils.mixin({}, this.defaultOptions, options);
     this.$node = this.build(d3.select(parent));
-    onDOMNodeRemoved(this.node, this.destroy, this);
+    AppContext.getInstance().onDOMNodeRemoved(this.node, this.destroy, this);
 
     this.bind();
     this.initStateIndex(this.data.states, this.options.captureNonPersistedStates);
@@ -373,7 +364,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $p.select('.btn-return-to-last-state')
       .on('click', () => {
         (<Event>d3.event).preventDefault();
-        this.data.selectState(this.lastStateBeforeSearch, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.selectState(this.lastStateBeforeSearch, SelectionUtils.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(this.lastStateBeforeSearch);
         this.resetLastStateBeforeSearch();
       });
@@ -381,7 +372,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $p.select('.return-to-last-state .yes')
       .on('click', () => {
         (<Event>d3.event).preventDefault();
-        this.data.selectState(this.lastStateBeforeSearch, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.selectState(this.lastStateBeforeSearch, SelectionUtils.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(this.lastStateBeforeSearch);
         this.resetLastStateBeforeSearch();
       });
@@ -802,17 +793,17 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     const hoverMultipleStateNodes = (seq: ISearchResultSequence, operation: SelectOperation) => {
       const stateNodeIds: number[] = seq.searchResults.map((d) => this.data.states.indexOf(<StateNode>d.state.node));
       // hover multiple stateNodeIds
-      this.data.select(ProvenanceGraphDim.State, idtypes.hoverSelectionType, stateNodeIds, operation);
+      this.data.select(ProvenanceGraphDim.State, SelectionUtils.hoverSelectionType, stateNodeIds, operation);
     };
 
     $seqLi.select('.seq-length')
       .on('mouseenter', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
-        hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
+        hoverMultipleStateNodes(d, SelectOperation.SET);
       })
       .on('mouseleave', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
-        hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
+        hoverMultipleStateNodes(d, SelectOperation.REMOVE);
       })
       .on('click', (d: ISearchResultSequence) => {
         (<Event>d3.event).stopPropagation();
@@ -830,21 +821,21 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
         .on('mouseenter', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
-          hoverMultipleStateNodes(d, idtypes.SelectOperation.SET);
+          hoverMultipleStateNodes(d, SelectOperation.SET);
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('hover');
         })
         .on('mouseleave', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           //this.data.selectState(<StateNode>d.topResult.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
-          hoverMultipleStateNodes(d, idtypes.SelectOperation.REMOVE);
+          hoverMultipleStateNodes(d, SelectOperation.REMOVE);
           const li = (<any>d3.event).target.parentNode.parentNode;
           li.classList.toggle('hover');
         })
         .on('click', (d: ISearchResultSequence) => {
           (<Event>d3.event).stopPropagation();
           this.setLastStateBeforeSearch();
-          this.data.selectState(<StateNode>d.topResult.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+          this.data.selectState(<StateNode>d.topResult.state.node, SelectionUtils.toSelectOperation(<MouseEvent>d3.event));
           this.data.jumpTo(<StateNode>d.topResult.state.node);
           return false;
         });
@@ -921,16 +912,16 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $stateLi.select('.seq-state-result')
       .on('mouseenter', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
-        this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.SET, idtypes.hoverSelectionType);
+        this.data.selectState(<StateNode>d.state.node, SelectOperation.SET, SelectionUtils.hoverSelectionType);
       })
       .on('mouseleave', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
-        this.data.selectState(<StateNode>d.state.node, idtypes.SelectOperation.REMOVE, idtypes.hoverSelectionType);
+        this.data.selectState(<StateNode>d.state.node, SelectOperation.REMOVE, SelectionUtils.hoverSelectionType);
       })
       .on('click', (d: ISearchResult) => {
         (<Event>d3.event).stopPropagation();
         this.setLastStateBeforeSearch();
-        this.data.selectState(<StateNode>d.state.node, idtypes.toSelectOperation(<MouseEvent>d3.event));
+        this.data.selectState(<StateNode>d.state.node, SelectionUtils.toSelectOperation(<MouseEvent>d3.event));
         this.data.jumpTo(<StateNode>d.state.node);
         return false;
       });

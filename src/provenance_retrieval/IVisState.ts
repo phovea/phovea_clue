@@ -1,7 +1,7 @@
 /**
  * Created by Holger Stitz on 07.06.2017.
  */
-import {IProperty, IPropertyValue} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IProperty, IPropertyValue} from 'phovea_core';
 
 export interface IVisStateApp {
   /**
@@ -22,4 +22,3 @@ export interface IVisStateApp {
    */
   getCurrVisState(): Promise<IPropertyValue[]>;
 }
-

@@ -1,8 +1,8 @@
 /**
  * Created by Holger Stitz on 07.06.2017.
  */
-import {IVisState} from 'phovea_core/src/provenance/retrieval/VisState';
-import {IPropertyValue, PropertyType} from 'phovea_core/src/provenance/retrieval/VisStateProperty';
+import {IVisState} from 'phovea_core';
+import {IPropertyValue, PropertyType} from 'phovea_core';
 import {COMPARATORS, selectComparator} from './VisStatePropertyComparator';
 import * as d3 from 'd3';
 
