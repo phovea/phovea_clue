@@ -3,8 +3,7 @@
  *
  * Created by Samuel Gratzl on 27.08.2015.
  */
-/// <amd-dependency path='font-awesome' />
-/// <amd-dependency path='bootstrap' />
+
 import {IHeaderLink, AppHeaderLink, IAppHeaderOptions, AppHeader} from 'phovea_ui';
 import {
   MixedStorageProvenanceGraphManager,
@@ -24,7 +23,7 @@ import {ACLUEWrapper, IACLUEWrapperOptions} from './ACLUEWrapper';
 import * as d3 from 'd3';
 import {ResolveNow} from 'phovea_core';
 import {IVisStateApp} from '../provenance_retrieval/IVisState';
-import {create as createProvRetrievalPanel} from '../provenance_retrieval/ProvRetrievalPanel';
+import {ProvRetrievalPanel} from '../provenance_retrieval';
 
 export class ClueSidePanelEvents {
   static OPEN = 'open';
@@ -160,7 +159,7 @@ export class CLUEWrapper extends ACLUEWrapper {
     graph.then((graph) => {
       // `set_application` is fired in ACLUEWrapper
       this.on('set_application', (evt, app: IVisStateApp) => {
-        createProvRetrievalPanel(graph, body.querySelector('div.content'), {
+        ProvRetrievalPanel.create(graph, body.querySelector('div.content'), {
           app
         })
         .on(ClueSidePanelEvents.OPEN, () => {

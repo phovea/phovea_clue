@@ -1,4 +1,5 @@
 import {ProvenanceGraph} from 'phovea_core';
+import {ClueSidePanelEvents} from '../wrapper';
 import {LayoutedProvVis} from './provvis';
 import {VerticalStoryVis} from './storyvis';
 

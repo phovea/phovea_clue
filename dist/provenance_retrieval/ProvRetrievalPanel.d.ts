@@ -158,6 +158,6 @@ export declare class ProvRetrievalPanel extends AVisInstance implements IVisInst
      * @param widthScale
      */
     private createStateListDOM;
+    static create(data: ProvenanceGraph, parent: Element, options?: IProvRetrievalPanelOptions): ProvRetrievalPanel;
 }
-export declare function create(data: ProvenanceGraph, parent: Element, options?: IProvRetrievalPanelOptions): ProvRetrievalPanel;
 export {};

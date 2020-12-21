@@ -155,7 +155,7 @@ export class VerticalStoryVis extends AVisInstance {
             'class': 'provenance-story-vis ' + this.options.class
         }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
         $node.html(`
-      <div>
+    <div class="header">
         <h2><i class="fa fa-video-camera"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
             <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
             <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.play')}"></i>
@@ -179,7 +179,7 @@ export class VerticalStoryVis extends AVisInstance {
         </div>
         </form>
       </div>
-      <div class="current">
+      <div class="body current">
         <input type="text" class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.slideName')}" disabled="disabled">
         <div class="name"></div>
         <textarea class="form-control" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.slideDescription')}" disabled="disabled"></textarea>

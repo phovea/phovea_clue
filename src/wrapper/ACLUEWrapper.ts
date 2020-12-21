@@ -11,6 +11,7 @@ import {WrapperUtils} from '../base/WrapperUtils';
 import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGraphEP} from '../base/extensions';
 import {ResolveNow} from 'phovea_core';
 import {IVisStateApp} from '../provenance_retrieval/IVisState';
+import {ClueSidePanelEvents} from './CLUEWrapper';
 
 const getTemplate = () => `<div class="box">
   <header>

@@ -1,0 +1,605 @@
+
+.provenance-retrieval-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 30em;
+  min-width: 30em; // set min-width to avoid shrinking (e.g., in Ordino)
+  overflow: hidden;
+
+  > .header {
+    flex: 0 0 auto;
+
+    .btn-return-to-last-state {
+      color: $core_colour_text;
+      float: right;
+      cursor: pointer;
+      margin-right: 10px;
+
+      &:hover {
+        font-weight: bold;
+      }
+    }
+  }
+  > .body {
+    padding: 5px;
+
+    &.scrollable {
+      height: 80vh;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding-bottom: 30px;
+    }
+  }
+
+  .search-form {
+    display: flex;
+
+    .form-group:first-child {
+      flex: 1;
+      position: relative;
+    }
+
+    .btn-group {
+      position: absolute;
+      right: 10px;
+      top: 25%;
+
+      > a {
+        cursor: pointer;
+        color: #444;
+
+        &:active,
+        &:focus,
+        &:hover {
+          color: #777;
+        }
+
+      }
+    }
+
+    .dropdown-menu {
+      li {
+        position: relative;
+
+        > span {
+          display: block;
+          color: #444;
+          background: #efefef;
+          padding: 5px 20px 5px 7px;
+          font-size: 12px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        a {
+          padding-left: 25px;
+        }
+
+        a:before {
+          font-family: FontAwesome, sans-serif;
+          position: absolute;
+          left: 7px;
+          top: 3px;
+          content: '\f1db';
+        }
+
+        &.active a:before {
+          content: '\f058';
+        }
+
+        a.suggestion-filter-active > span {
+          display: flex;
+          align-items: center;
+          pointer-events: none;
+
+          &:before {
+            content: '';
+            display: block;
+            margin-right: 5px;
+            background-color: $select-color;
+            border-radius: 6px;
+            width: 6px;
+            height: 6px;
+          }
+        }
+
+      }
+    }
+  }
+
+  .search-results {
+    display: block;
+    padding-left: 0;
+    list-style: none;
+
+    + div {
+      display: none;
+    }
+
+    &:empty {
+      display: none;
+
+      + div {
+        display: block;
+        text-align: center;
+
+        .return-to-last-state .state-title {
+          display: block;
+          margin: 5px 0;
+        }
+
+        .return-to-last-state + p {
+          display: none;
+        }
+
+        .return-to-last-state.hidden + p {
+          display: block;
+        }
+
+      }
+    }
+
+    > li {
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      //transition: box-shadow 0.3s cubic-bezier(.25,.8,.25,1);
+
+      /*&:hover {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      }*/
+
+      &:not(:first-child) {
+        margin: 15px 0;
+      }
+    }
+  }
+
+  .top-result[data-has-thumbs="1"] {
+    display: grid;
+    grid-template-columns: [thumbnail-start] 120px [margin] 5px [text-start] auto [seq-start] 50px [margin-right] 5px [seq-end];
+    grid-template-rows: [simbar-start] auto [margin-top] 5px [text-start] auto [terms-start] auto [margin-bottom] 5px [text-end];
+    grid-template-areas:
+      "thumbnail . similarity-bar similarity-bar similarity-bar"
+      "thumbnail . . . ."
+      "thumbnail . title seq-length ."
+      "thumbnail . terms terms ."
+      "thumbnail . . . .";
+  }
+
+  .top-result[data-has-thumbs="0"] {
+    display: grid;
+    grid-template-columns: [margin] 5px [text-start] auto [seq-start] 50px [margin-right] 5px [seq-end];
+    grid-template-rows: [simbar-start] auto [margin-top] 5px [text-start] auto [terms-start] auto [margin-bottom] 5px [text-end];
+    grid-template-areas:
+      "similarity-bar similarity-bar similarity-bar similarity-bar"
+      ". . . ."
+      ". title seq-length ."
+      ". terms terms ."
+      ". . . .";
+  }
+
+  .seq-state-result {
+    display: grid;
+    grid-template-columns: [circle-start] 20px [margin] 5px [text-start] auto [best-match] 20px [margin-right] 5px [seq-end];
+    grid-template-rows: [margin-top] 12px [text-start] auto [margin-bottom] 0px [simbar-start] auto [text-end];
+    grid-template-areas:
+      ". . . . ."
+      "circle . title best-match ."
+      ". . . . ."
+      ". . similarity-bar similarity-bar similarity-bar";
+
+    .title {
+      position: relative;
+    }
+
+    &:hover {
+      .title {
+        font-weight: bold;
+      }
+
+      i.glyph {
+        font-size: 100%;
+        color: #000;
+        transform: translateY(0px);
+      }
+    }
+  }
+
+  .best-match {
+    display: none;
+  }
+
+  [data-is-top="1"] .best-match {
+    display: block;
+    grid-area: best-match;
+    cursor: help;
+    text-align: right;
+  }
+
+  [data-has-thumbs="0"] .prov-ret-thumbnail {
+    display: none;
+  }
+
+  [data-has-thumbs="1"] .prov-ret-thumbnail {
+    position: relative;
+    grid-area: thumbnail;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .loading {
+      position: absolute;
+      z-index: 0;
+      width: 30px;
+      pointer-events: none;
+      fill: #ccc;
+      stroke: #ccc;
+    }
+
+    .img {
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background: no-repeat top center;
+      cursor: pointer;
+    }
+  }
+
+  .title {
+    grid-area: title;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .top-result.active .title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: $select-color;
+
+    &:before {
+      content : '';
+      display: block;
+      background-color: $select-color;
+      border-radius: 6px;
+      width: 6px;
+      height: 6px;
+      margin-right: 5px;
+    }
+  }
+
+  .hover > .top-result > .title, // hover on top-result should only affect the direct title
+  .title:hover {
+    font-weight: bold;
+  }
+
+  .seq-length {
+    grid-area: seq-length;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+
+    > span {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      text-align: center;
+      width: 100%;
+      font-size: 0.9em;
+      color: #888888;
+    }
+
+    .svg-icon {
+      pointer-events: none;
+      width: 50px;
+      height: 10px;
+      fill: #949494;
+      stroke: #ddd;
+      --stroke-color: #ddd;
+    }
+
+    &.first {
+      --active-state-first: $select-color;
+    }
+
+    &.center {
+      --active-state-center: $select-color;
+
+      > span {
+        color: $select-color !important;
+      }
+    }
+
+    &.last {
+      --active-state-last: $select-color;
+    }
+  }
+
+  .sequence.active .seq-length,
+  .seq-length:hover {
+    > span {
+      color: #444444;
+    }
+
+    .svg-icon {
+      fill: #444444;
+      stroke: #444444;
+    }
+  }
+
+  .result-terms {
+    position: relative;
+    grid-area: terms;
+    overflow: hidden;
+    color: #aaa;
+    min-height: 42px;
+    max-height: 42px;
+    cursor: pointer;
+
+    transition: max-height 0.2s cubic-bezier(0,1,0,1) 0.1s;
+
+    &.expandable:after {
+      content: '\2026'; // = &hellip;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      opacity: 1;
+      background: #fff;
+      height: 5px;
+      line-height: 0;
+      transition: opacity 0.2s cubic-bezier(0,1,0,1) 0.1s;
+    }
+
+    small {
+      font-size: 80%;
+    }
+
+    .match {
+      color: $select-color;
+      background-color: lighten($select-color, 90%);
+    }
+  }
+
+  .hover .result-terms,
+  .result-terms:hover {
+    transition: max-height 0.2s cubic-bezier(1,0,1,0) 0.8s;
+    max-height: 200px;
+
+    &:after {
+      opacity: 0;
+      transition: opacity 0.2s cubic-bezier(1,0,1,0) 0.8s;
+    }
+  }
+
+  .similarity-bar {
+    grid-area: similarity-bar;
+    align-self: end;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+
+    > li {
+      transition: width 0.2s cubic-bezier(.25,.8,.25,1);
+      height: 3px;
+    }
+
+    &:after {
+      content: attr(data-tooltip);
+      position: absolute;
+      z-index: 2;
+      color: white;
+      background: rgba(50, 50, 50, 0.9);
+      padding: 3px 5px;
+      border-radius: 4px;
+      white-space: pre-line;
+      font-size: 0.85em;
+      margin-top: 5px;
+      user-select: none;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: visibility 0s ease 0.5s, opacity 0.5s ease 0s;
+      text-align: right;
+    }
+
+    &:hover:after {
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s, 0.5s;
+    }
+  }
+
+  .states {
+    position: relative;
+    display: block;
+    padding: 25px 0 20px 5px;
+    list-style: none;
+    border-top: 1px solid #ccc;
+    font-size: 90%;
+
+    // renders the connection line between different state circles in the background
+    &:before {
+      content: '';
+      border: 1px solid #ddd;
+      position: absolute;
+      left: 14px;
+      top: 48px;
+      bottom: 30px;
+      z-index: 0;
+    }
+
+    &:after {
+      content: 'Sequence of matching states';
+      top: 10px;
+      position: absolute;
+      font-weight: bold;
+    }
+
+    .circle {
+      grid-area: circle;
+      align-self: center;
+      justify-self: center;
+    }
+
+    i.glyph {
+      font-size: 65%;
+      color: #949494;
+      transform: translateY(-2px);
+      transition: all 0.2s cubic-bezier(.25,.8,.25,1);
+    }
+
+    li.active {
+      i.glyph,
+      .title {
+        color: $select-color;
+      }
+    }
+
+    .similarity-bar {
+      > li {
+        height: 2px;
+      }
+    }
+  }
+}
+
+#prov-retrieval-weighting-editor {
+  ul.terms {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+
+    li.term {
+      color: #555;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: 0 6px 5px 0;
+      padding: 3px 6px;
+      cursor: default;
+
+      .remove {
+        color: #949494;
+        cursor: pointer;
+
+        &:hover {
+          color: #000;
+        }
+      }
+    }
+
+    li.remove-all {
+      &:only-child {
+        display: none;
+      }
+
+      color: #aaa;
+      margin: 0 6px 5px 0;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(.25,.8,.25,1);
+      position: relative;
+
+      &:after {
+        position: absolute;
+        content: attr(data-tooltip);
+        left: 0;
+        margin-left: 120%;
+        white-space: nowrap;
+        user-select: none;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: visibility 0s ease 0.5s, opacity 0.5s ease 0s;
+      }
+
+      &:hover {
+        color: #555;
+        background: #fff;
+        border-color: #ccc;
+
+        &:after {
+          opacity: 1;
+          visibility: visible;
+          transition-delay: 0s, 0.5s;
+        }
+      }
+    }
+  }
+
+  .weighting-editor {
+    margin: 0;
+    padding: 10px 0;
+    display: flex;
+    list-style: none;
+
+    li {
+      height: 10px;
+      position: relative;
+    }
+
+    .draggable {
+      //display: none;
+      border-color: black transparent;
+      border-style: solid;
+      border-width: 0 6px 10px 6px;
+      position: absolute;
+      height: 0;
+      width: 0;
+      right: -6px;
+      bottom: -10px;
+      cursor: ew-resize;
+      opacity: 0;
+      visibility: hidden;
+      transition: visibility 0s cubic-bezier(.25,.8,.25,1) 0.2s, opacity 0.2s cubic-bezier(.25,.8,.25,1) 0s;
+
+      &:before {
+        content: '';
+        display: block;
+        height: 10px;
+        width: 2px;
+        position: absolute;
+        background: white;
+        top: -10px;
+        z-index: 2;
+        left: -1px;
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &:hover .draggable {
+      //display: block;
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s, 0.2s;
+    }
+
+    li:last-child .draggable {
+      display: none;
+    }
+  }
+
+  .number-of-results {
+    color: #aaa;
+    font-size: 12px;
+    margin: 3px 0;
+
+    &:empty {
+      display: none;
+    }
+  }
+}

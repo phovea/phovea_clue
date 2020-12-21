@@ -1,5 +1,3 @@
-/// <amd-dependency path="font-awesome" />
-/// <amd-dependency path="bootstrap" />
 /**
  * provides a template wrapper around an application for including CLUE. Includes the common frame for switching modes, provenance, and story visualizations
  *

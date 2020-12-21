@@ -15,6 +15,8 @@ export declare class LayoutedProvVis extends AVisInstance implements IVisInstanc
     private line;
     private dim;
     private highlight;
+    private searchResults;
+    private searchForState;
     constructor(data: ProvenanceGraph, parent: Element, options: any);
     private bind;
     private unbind;

@@ -3,8 +3,6 @@
  *
  * Created by Samuel Gratzl on 27.08.2015.
  */
-/// <amd-dependency path='font-awesome' />
-/// <amd-dependency path='bootstrap' />
 import { AppHeaderLink, AppHeader } from 'phovea_ui';
 import { MixedStorageProvenanceGraphManager, BaseUtils, ProvenanceGraph } from 'phovea_core';
 import { select } from 'd3';
@@ -17,7 +15,7 @@ import { LoginMenu } from '../menu/LoginMenu';
 import { ACLUEWrapper } from './ACLUEWrapper';
 import * as d3 from 'd3';
 import { ResolveNow } from 'phovea_core';
-import { create as createProvRetrievalPanel } from '../provenance_retrieval/ProvRetrievalPanel';
+import { ProvRetrievalPanel } from '../provenance_retrieval';
 export class ClueSidePanelEvents {
 }
 ClueSidePanelEvents.OPEN = 'open';
@@ -91,7 +89,7 @@ export class CLUEWrapper extends ACLUEWrapper {
         graph.then((graph) => {
             // `set_application` is fired in ACLUEWrapper
             this.on('set_application', (evt, app) => {
-                createProvRetrievalPanel(graph, body.querySelector('div.content'), {
+                ProvRetrievalPanel.create(graph, body.querySelector('div.content'), {
                     app
                 })
                     .on(ClueSidePanelEvents.OPEN, () => {

@@ -5,10 +5,9 @@ import * as d3 from 'd3';
 import { AVisInstance, AppContext, BaseUtils, setProperty, PropertyType, ProvenanceGraphDim, SelectOperation, SelectionUtils } from 'phovea_core';
 import { Select2 } from './Select2';
 import { Query, SearchResultSequence, VisStateIndex, } from './VisStateIndex';
-import * as utils from './../utils';
 import { PropertyModifier } from './PropertyModifier';
-import { areThumbnailsAvailable } from '../utils';
-import { ClueSidePanelEvents } from '../template';
+import { ThumbnailUtils } from '../base';
+import { ClueSidePanelEvents } from '../wrapper';
 /**
  * To enable the Provenance Retrieval Panel the application must set to the ACLUEWrapper.
  *
@@ -577,7 +576,7 @@ export class ProvRetrievalPanel extends AVisInstance {
      */
     createSequenceDOM($parent, sequences, widthScale) {
         const that = this;
-        const hasThumbnails = (areThumbnailsAvailable(this.data)) ? '1' : '0';
+        const hasThumbnails = (ThumbnailUtils.areThumbnailsAvailable(this.data)) ? '1' : '0';
         sequences.sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
         const $seqLi = $parent
             .selectAll('li.sequence')
@@ -622,7 +621,7 @@ export class ProvRetrievalPanel extends AVisInstance {
                     seqIconId = 'n-states';
                     seqLength = String(d.searchResults.length - 2); // -2 because start and end state are explicitly displayed
             }
-            const url = utils.thumbnail_url(that.data, d.topResult.state.node, { width: 128, format: 'png' });
+            const url = ThumbnailUtils.thumbnail_url(that.data, d.topResult.state.node, { width: 128, format: 'png' });
             const img = new Image();
             img.onload = () => {
                 d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
@@ -820,6 +819,9 @@ export class ProvRetrievalPanel extends AVisInstance {
             .style('width', (d) => `${d3.round(d.width, 2)}%`);
         $simBar.exit().remove();
     }
+    static create(data, parent, options = {}) {
+        return new ProvRetrievalPanel(data, parent, options);
+    }
 }
 /**
  * Capture the `StateNode.visState` that haven not been persisted yet and index them.
@@ -831,7 +833,4 @@ export class ProvRetrievalPanel extends AVisInstance {
  * @type {boolean}
  */
 ProvRetrievalPanel.CAPTURE_AND_INDEX_NON_PERSISTED_STATES = false;
-export function create(data, parent, options = {}) {
-    return new ProvRetrievalPanel(data, parent, options);
-}
 //# sourceMappingURL=ProvRetrievalPanel.js.map

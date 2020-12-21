@@ -8,11 +8,10 @@ import {
   IQuery, ISearchResult, ISearchResultSequence, Query, SearchResultSequence,
   VisStateIndex,
 } from './VisStateIndex';
-import * as utils from './../utils';
 import {PropertyModifier} from './PropertyModifier';
 import {IVisStateApp} from './IVisState';
-import {areThumbnailsAvailable} from '../utils';
-import {ClueSidePanelEvents} from '../template';
+import {ThumbnailUtils} from '../base';
+import {ClueSidePanelEvents} from '../wrapper';
 
 interface IProvRetrievalPanelOptions {
   captureNonPersistedStates?: boolean;
@@ -679,7 +678,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
    */
   private createSequenceDOM($parent, sequences: ISearchResultSequence[], widthScale): d3.Selection<ISearchResultSequence> {
     const that = this;
-    const hasThumbnails = (areThumbnailsAvailable(this.data)) ? '1' : '0';
+    const hasThumbnails = (ThumbnailUtils.areThumbnailsAvailable(this.data)) ? '1' : '0';
 
     sequences.sort((a, b) => b.topResult.weightedSimilarity - a.topResult.weightedSimilarity);
 
@@ -732,7 +731,7 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
             seqLength = String(d.searchResults.length - 2); // -2 because start and end state are explicitly displayed
         }
 
-        const url = utils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node), {width: 128, format: 'png'});
+        const url = ThumbnailUtils.thumbnail_url(that.data, (<StateNode>d.topResult.state.node), {width: 128, format: 'png'});
         const img = new Image();
         img.onload = () => {
           d3.select(this).select('.prov-ret-thumbnail > .loading').classed('hidden', true);
@@ -958,8 +957,8 @@ export class ProvRetrievalPanel extends AVisInstance implements IVisInstance {
     $simBar.exit().remove();
   }
 
-}
+  static create(data: ProvenanceGraph, parent: Element, options: IProvRetrievalPanelOptions = {}) {
+    return new ProvRetrievalPanel(data, parent, options);
+  }
 
-export function create(data: ProvenanceGraph, parent: Element, options: IProvRetrievalPanelOptions = {}) {
-  return new ProvRetrievalPanel(data, parent, options);
 }
