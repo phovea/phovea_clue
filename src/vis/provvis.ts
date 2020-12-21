@@ -593,7 +593,7 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
       .attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.provvis.showProvenanceGraph') as string)
       .classed('btn-collapse', true)
       .classed('hidden', !this.options.provVisCollapsed)
-      .html(`<i class="fa fa-code-fork fa-rotate-180"></i>`)
+      .html(`<i class="fas fa-code-branch fa-rotate-180"></i>`)
       .on('click', () => {
         const collapsed = !$p.classed('hidden');
         this.toggleBinding(!collapsed);
