@@ -76,16 +76,16 @@
           padding-left: 25px;
         }
 
-        a:before {
-          font-family: FontAwesome, sans-serif;
+        a::before {
           position: absolute;
           left: 7px;
           top: 3px;
-          content: '\f1db';
+          @extend .far;
+          content: fa-content($fa-var-circle);
         }
 
-        &.active a:before {
-          content: '\f058';
+        &.active a::before {
+          content: fa-content($fa-var-check-circle);
         }
 
         a.suggestion-filter-active > span {
@@ -93,7 +93,7 @@
           align-items: center;
           pointer-events: none;
 
-          &:before {
+          &::before {
             content: '';
             display: block;
             margin-right: 5px;
@@ -261,7 +261,7 @@
     align-items: center;
     color: $select-color;
 
-    &:before {
+    &::before {
       content : '';
       display: block;
       background-color: $select-color;
@@ -427,7 +427,7 @@
     font-size: 90%;
 
     // renders the connection line between different state circles in the background
-    &:before {
+    &::before {
       content: '';
       border: 1px solid #ddd;
       position: absolute;
@@ -437,7 +437,7 @@
       z-index: 0;
     }
 
-    &:after {
+    &::after {
       content: 'Sequence of matching states';
       top: 10px;
       position: absolute;
@@ -566,7 +566,7 @@
       visibility: hidden;
       transition: visibility 0s cubic-bezier(.25,.8,.25,1) 0.2s, opacity 0.2s cubic-bezier(.25,.8,.25,1) 0s;
 
-      &:before {
+      &::before {
         content: '';
         display: block;
         height: 10px;
