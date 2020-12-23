@@ -29,34 +29,34 @@ export class ProvenanceGraphMenu {
             .attr('data-clue', 'provenanceGraphList')
             .html(`<li class="dropdown">
         <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-code-fork fa-lg fa-rotate-180 fa-fw"></i>
+          <i class="fas fa-code-branch fa-lg fa-rotate-180 fa-fw"></i>
         </a>
         <ul class="dropdown-menu" id="provenancegraph_list">
           <li role="separator" class="divider"></li>
           <li>
             <a href="#" id="provenancegraph_import">
-              <i class="fa fa-upload" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.import')}
+              <i class="fas fa-upload" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.import')}
             </a>
           </li>
           <li>
             <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote">
-              <i class="fa fa-cloud-upload" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.importRemote')}
+              <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.importRemote')}
             </a>
           </li>
           <li>
             <a href="#" id="provenancegraph_export">
-              <i class="fa fa-download" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.export')}
+              <i class="fas fa-download" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.export')}
             </a>
           </li>
           <li role="separator" class="divider"></li>
           <li>
             <a href="#" id="provenancegraph_new">
-              <i class="fa fa-plus-circle" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.new')}
+              <i class="fas fa-plus-circle" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.new')}
             </a>
           </li>
           <li>
             <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote">
-              <i class="fa fa-cloud" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.newRemote')}
+              <i class="fas fa-cloud" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.newRemote')}
             </a>
           </li>
         </ul>
@@ -122,7 +122,7 @@ export class ProvenanceGraphMenu {
         const $list = this.$node.select('#provenancegraph_list').selectAll('li.graph').data(graphs);
         $list.enter().insert('li', ':first-child')
             .classed('graph', true)
-            .html((d) => `<a href="#clue_graph=${d.id}"><i class="fa fa-code-fork fa-rotate-180" aria-hidden="true"></i> ${d.name} </a>`)
+            .html((d) => `<a href="#clue_graph=${d.id}"><i class="fas fa-code-branch fa-rotate-180" aria-hidden="true"></i> ${d.name} </a>`)
             .select('a').on('click', (d) => {
             d3event.preventDefault();
             manager.loadGraph(d);
@@ -164,9 +164,9 @@ export class ProvenanceGraphMenu {
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button class="btn btn-primary" ${!UserSession.getInstance().isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fa fa-folder-open" aria-hidden="true"></span> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.select')}</button>
-                    <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fa fa-clone" aria-hidden="true"></span> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.clone')}</button>
-                    <button class="btn btn-danger" ${!UserSession.getInstance().isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fa fa-trash" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.delete')}</button>
+                    <button class="btn btn-primary" ${!UserSession.getInstance().isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-action="select" data-toggle="modal"><span class="fas fa-folder-open" aria-hidden="true"></span> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.select')}</button>
+                    <button class="btn btn-primary" data-action="clone" data-toggle="modal"><span class="fas fa-clone" aria-hidden="true"></span> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.clone')}</button>
+                    <button class="btn btn-danger" ${!UserSession.getInstance().isLoggedIn() && !graph.local ? 'disabled="disabled"' : ''} data-toggle="modal"><i class="fas fa-trash" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.delete')}</button>
                 </div>
             </div>
         </div>`);

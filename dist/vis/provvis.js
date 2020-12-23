@@ -206,22 +206,22 @@ class StateRepr {
     }
     static toIcon(repr) {
         if (!repr.a) {
-            return ''; //`<i class="fa fa-circle" title="${repr.s.name}"></i>`;
+            return ''; //`<i class="fas fa-circle" title="${repr.s.name}"></i>`;
         }
         const meta = repr.a.meta;
         const catIcons = {
-            visual: 'bar-chart',
+            visual: 'chart-bar',
             data: 'database',
-            logic: 'gear',
+            logic: 'cog',
             layout: 'desktop',
-            selection: 'pencil-square'
+            selection: 'pen-square'
         };
         const typeIcons = {
             create: 'plus',
-            update: 'refresh',
-            remove: 'remove'
+            update: 'sync',
+            remove: 'times'
         };
-        return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fa fa-${catIcons[meta.category]}"></i><i class="super fa fa-${typeIcons[meta.operation]}"></i></span>`;
+        return `<span title="${meta.name} @ ${meta.timestamp} (${meta.user})"><i class="fas fa-${catIcons[meta.category]}"></i><i class="super fas fa-${typeIcons[meta.operation]}"></i></span>`;
     }
     static render($elem) {
         $elem
@@ -236,8 +236,8 @@ class StateRepr {
         $elem.select('span.icon').html(StateRepr.toIcon);
         $elem.select('span.slabel').text((d) => d.name);
         $elem.select('i.bookmark')
-            .classed('fa-bookmark-o', (d) => !d.s.getAttr('starred', false))
-            .classed('fa-bookmark', (d) => d.s.getAttr('starred', false));
+            .classed('far', (d) => !d.s.getAttr('starred', false))
+            .classed('fas', (d) => d.s.getAttr('starred', false));
         $elem.select('div.sthumbnail')
             .style('background-image', (d) => d.lod === LevelOfDetail.Large ? d.thumbnail : null);
         $elem.transition().style({
@@ -256,7 +256,7 @@ class StateRepr {
         const $body = d3.select(dia.body);
         $body.html(`
     <form class="state_info" onsubmit="return false">
-      <span class="star fa fa-${starred ? 'bookmark-o' : 'bookmark-o'}" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.bookmarkThisState')}"></span>
+      <span class="star ${starred ? 'fas' : 'far'} fa-bookmark" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.bookmarkThisState')}"></span>
       <div class="img"><img src="${thumbnail}"></div>
       <div class="form-group">
         <label>${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.nameCapitalized')}</label>
@@ -273,7 +273,7 @@ class StateRepr {
     </form>`);
         $body.select('span.star').on('click', function () {
             d.s.setAttr('starred', !d.s.getAttr('starred', false));
-            $(this).toggleClass('fa-bookmark-o').toggleClass('fa-bookmark');
+            $(this).toggleClass('far').toggleClass('fas');
             return false;
         });
         $body.select('textarea').on('input', function () {
@@ -412,37 +412,37 @@ export class LayoutedProvVis extends AVisInstance {
         $p.html(`
     <div class="header">
       <h2>
-        <i class="fa fa-code-fork fa-rotate-180"></i> Current Session History
-        <button type="button" class="close" aria-label="Close" title="Close history panel"><span aria-hidden="true">×</span></button>
-        <a href="#" class="btn-filter" title="Filter current session history"><i class="fa fa-filter"></i></a>
+        <i class="fas fa-code-branch fa-rotate-180"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.provenance')}
+        <button type="button" class="close" aria-label="Close" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.hideProvenanceGraph')}"><span aria-hidden="true">×</span></button>
+        <a href="#" class="btn-filter" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.filterProvenanceGraph')}"><i class="fas fa-filter"></i></a>
       </h2>
       <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
       <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fa fa-database"></i>
+          <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fas fa-database"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i>
+          <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fas fa-chart-bar"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="selection"> <i class="fa fa-pencil-square"></i>
+          <input type="checkbox" autocomplete="off" name="category" value="selection"> <i class="fas fa-pen-square"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i>
+          <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fas fa-desktop"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i>
+          <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fas fa-cog"></i>
         </label>
       </div>
       <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.createActions')}">
-          <input type="checkbox" autocomplete="off" name="operation" value="create"> <i class="fa fa-plus"></i>
+          <input type="checkbox" autocomplete="off" name="operation" value="create"> <i class="fas fa-plus"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.updateActions')}">
-          <input type="checkbox" autocomplete="off" name="operation" value="update"> <i class="fa fa-refresh"></i>
+          <input type="checkbox" autocomplete="off" name="operation" value="update"> <i class="fas fa-sync"></i>
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.removeActions')}">
-          <input type="checkbox" autocomplete="off" name="operation" value="remove"> <i class="fa fa-remove"></i>
+          <input type="checkbox" autocomplete="off" name="operation" value="remove"> <i class="fas fa-times"></i>
         </label>
       </div>
       <div class="btn-group" data-toggle="buttons">
@@ -450,17 +450,17 @@ export class LayoutedProvVis extends AVisInstance {
           <div class="btn-group btn-group-xs" role="group">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">
-              <i class="fa fa-tags"></i><span class="caret"></span>
+              <i class="fas fa-tags"></i><span class="caret"></span>
             </button>
             <div class="dropdown-menu dropdown-menu-right">
               <div class="input-group input-group-sm">
-                <span class="input-group-addon" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fa fa-tags"></i></span>
+                <span class="input-group-addon" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
                 <input name="tags" type="text" class="form-control input-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}">
               </div>
             </div>
           </div>
         </div>
-       </div>
+      </div>
       </form>
     </div>
     <div class="body">
@@ -475,19 +475,19 @@ export class LayoutedProvVis extends AVisInstance {
     <div class="legend">
       <div class="btn-group-vertical" data-toggle="buttons">
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fa fa-database"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.data')}
+          <input type="checkbox" autocomplete="off" name="category" value="data"> <i class="fas fa-database"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.data')}
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fa fa-bar-chart"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visual')}
+          <input type="checkbox" autocomplete="off" name="category" value="visual"> <i class="fas fa-chart-bar"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visual')}
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fa fa-pencil-square"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selections')}
+          <input type="checkbox" autocomplete="off" name="category" value="selection" > <i class="fas fa-pen-square"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selections')}
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fa fa-desktop"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layout')}
+          <input type="checkbox" autocomplete="off" name="category" value="layout"> <i class="fas fa-desktop"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layout')}
         </label>
         <label class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
-          <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fa fa-gear"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.analysis')}
+          <input type="checkbox" autocomplete="off" name="category" value="logic"> <i class="fas fa-cog"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.analysis')}
         </label>
       </div>
     </div>
@@ -522,12 +522,12 @@ export class LayoutedProvVis extends AVisInstance {
             .attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.provvis.showProvenanceGraph'))
             .classed('btn-collapse', true)
             .classed('hidden', !this.options.provVisCollapsed)
-            .html(`<i class="fa fa-code-fork fa-rotate-180"></i>`)
+            .html(`<i class="fas fa-code-branch fa-rotate-180"></i>`)
             .on('click', () => {
             const collapsed = !$p.classed('hidden');
             this.toggleBinding(!collapsed);
             $p.select('.btn-collapse').attr('title', collapsed ? I18nextManager.getInstance().i18n.t('phovea:clue.provvis.showProvenanceGraph') : I18nextManager.getInstance().i18n.t('phovea:clue.provvis.hideProvenanceGraph'));
-            $p.select('.btn-collapse > i').classed('fa-arrow-circle-o-right', !collapsed).classed('fa-arrow-circle-o-left', collapsed);
+            $p.select('.btn-collapse > i').classed('fa-arrow-alt-circle-right', !collapsed).classed('fa-arrow-alt-circle-left', collapsed);
             $parent.select('.provenance-layout-vis').classed('hidden', false);
             $panelSelector.select('.btn-collapse').classed('hidden', true);
             if (this.options.hideCLUEButtonsOnCollapse) {
@@ -602,14 +602,14 @@ export class LayoutedProvVis extends AVisInstance {
             return false;
         });
         const $inner = $statesEnter;
-        $inner.append('i').attr('class', 'fa fa-circle glyph');
+        $inner.append('i').attr('class', 'fas fa-circle glyph');
         $inner.append('span').classed('icon', true);
-        /*$states_enter.append('span').attr('class','star fa').on('click', (d) => {
+        /*$states_enter.append('span').attr('class','fas fa-star').on('click', (d) => {
           d.s.setAttr('starred',!d.s.getAttr('starred',false));
           d3.event.stopPropagation();
           d3.event.preventDefault();
         });
-        $states_enter.append('span').attr('class','fa fa-tags').on('click', (d) => {
+        $states_enter.append('span').attr('class','fas fa-tags').on('click', (d) => {
           var tags = d.s.getAttr('tags',[]).join(' ');
           dialogs.prompt(tags, 'Tags').then((new_) => {
             d.s.setAttr('tags', new_.split(' '));
@@ -620,21 +620,21 @@ export class LayoutedProvVis extends AVisInstance {
         $inner.append('span').classed('slabel', true);
         $inner.append('div').classed('sthumbnail', true);
         const $toolbarEnter = $statesEnter.append('div').classed('toolbar', true);
-        $toolbarEnter.append('i').attr('title', 'Bookmark state').attr('class', 'fa bookmark fa-bookmark-o').on('click', function (d) {
+        $toolbarEnter.append('i').attr('title', 'Bookmark state').attr('class', 'bookmark far far fa-bookmark').on('click', function (d) {
             const v = !d.s.getAttr('starred', false);
             const e = d3.event;
             d.s.setAttr('starred', v);
-            d3.select(this).classed('fa-bookmark', v).classed('fa-bookmark-o', !v);
+            d3.select(this).classed('fas', v).classed('far', !v);
             e.stopPropagation();
             e.preventDefault();
         });
-        $toolbarEnter.append('i').attr('title', 'Edit state').attr('class', 'fa fa-edit').on('click', (d) => {
+        $toolbarEnter.append('i').attr('title', 'Edit state').attr('class', 'fas fa-edit').on('click', (d) => {
             const e = d3.event;
             d.showDialog();
             e.stopPropagation();
             e.preventDefault();
         });
-        $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fa fa-search').on('click', (td) => {
+        $toolbarEnter.append('i').attr('title', 'Search for this state').attr('class', 'fas fa-search').on('click', (td) => {
             const e = d3.event;
             e.stopPropagation();
             e.preventDefault();
