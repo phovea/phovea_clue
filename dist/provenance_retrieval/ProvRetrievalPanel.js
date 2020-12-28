@@ -187,9 +187,9 @@ export class ProvRetrievalPanel extends AVisInstance {
             .style('transform', 'rotate(' + this.options.rotate + 'deg)');
         $p.html(`
       <div class="header">
-        <h2><i class="fa fa-search"></i> Search in Current Session
+        <h2><i class="fas fa-search"></i> Search in Current Session
         <button type="button" class="close" aria-label="Close" title="Close search panel"><span aria-hidden="true">×</span></button>
-        <a href="#" class="hidden btn-return-to-last-state" title="Return to the state you left off before this search"><i class="fa fa-step-backward"></i></a></h2>
+        <a href="#" class="hidden btn-return-to-last-state" title="Return to the state you left off before this search"><i class="fas fa-step-backward"></i></a></h2>
       </div>
       <div class="body">
         <form class="search-form" action="#" onsubmit="return false; ">
@@ -198,7 +198,7 @@ export class ProvRetrievalPanel extends AVisInstance {
             <select multiple style="width: 100%" class="form-control hidden" id="prov-retrieval-select"></select>
             <div class="btn-group hidden">
               <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-cog" aria-hidden="true"></i>
+                <i class="fas fa-cog" aria-hidden="true"></i>
               </a>
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><span>Search term suggestions based on &hellip;</span></li>
@@ -258,7 +258,7 @@ export class ProvRetrievalPanel extends AVisInstance {
             <p>Do you want to return to the following state?
             <i class="state-title"></i>
             You have stopped the analysis at that state before the last search.</p>
-            <p><a class="yes btn btn-default" href="#"><i class="fa fa-step-backward" aria-hidden="true"></i>
+            <p><a class="yes btn btn-default" href="#"><i class="fas fa-step-backward" aria-hidden="true"></i>
  Yes, please bring me back!</a></p>
             <p><a class="no" href="#">No, thanks. Hide this message.</a></p>
           </div>
@@ -271,7 +271,7 @@ export class ProvRetrievalPanel extends AVisInstance {
             .attr('title', 'Open Search Panel')
             .classed('btn-search', true)
             .classed('hidden', !$p.classed('hidden'))
-            .html(`<i class="fa fa-search"></i>`)
+            .html(`<i class="fas fa-search"></i>`)
             .on('click', () => {
             $parent.select(`.${asideName}`).classed('hidden', false);
             $panelSelector.select('.btn-search').classed('hidden', true);
@@ -766,7 +766,7 @@ export class ProvRetrievalPanel extends AVisInstance {
             .html((d) => {
             return `
           <div class="seq-state-result" data-score="${d.weightedSimilarity.toFixed(2)}" data-is-top="${d.isTopResult ? 1 : 0}">
-            <div class="circle"><i class="fa fa-circle glyph"></i></div>
+            <div class="circle"><i class="fas fa-circle glyph"></i></div>
             <div class="title" href="#">${d.state.node.name}</div>
             <div class="best-match" title="Best match in this sequence">#1</div>
             <ul class="similarity-bar"></ul>

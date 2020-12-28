@@ -192,12 +192,12 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
     $node.html(`
     <div class="header">
-        <h2><i class="fa fa-video-camera"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
-            <i data-player="backward" class="btn btn-xs btn-default fa fa-step-backward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
-            <i data-player="play" class="btn btn-xs btn-default fa fa-play" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.play')}"></i>
-            <i data-player="forward" class="btn btn-xs btn-default fa fa-step-forward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepForward')}"></i>
+        <h2><i class="fas fa-video-camera"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.story')} <span id="player_controls">
+            <i data-player="backward" class="btn btn-xs btn-default fas fa-step-backward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepBackward')}"></i>
+            <i data-player="play" class="btn btn-xs btn-default fas fa-play" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.play')}"></i>
+            <i data-player="forward" class="btn btn-xs btn-default fas fa-step-forward" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.stepForward')}"></i>
           </span>
-          <i class="fa fa-plus-circle"></i></h2>
+          <i class="fas fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
         <div class="btn-group btn-group-xs" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -209,9 +209,9 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
           </ul>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
-          <button class="btn btn-default btn-xs" data-create="plus" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fa fa-plus"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStory')}</button>
-          <button class="btn btn-default btn-xs" data-create="clone" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fa fa-files-o"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extract')}</button>
-          <button class="btn btn-default btn-xs" data-create="bookmark" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fa fa-bookmark"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarked')}</button>
+          <button class="btn btn-default btn-xs" data-create="plus" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fas fa-plus"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStory')}</button>
+          <button class="btn btn-default btn-xs" data-create="clone" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fas fa-copy"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extract')}</button>
+          <button class="btn btn-default btn-xs" data-create="bookmark" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fas fa-bookmark"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarked')}</button>
         </div>
         </form>
       </div>
@@ -223,7 +223,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
       </div>
       <div class="stories ${this.options.class}">
         <div class="line"></div>
-        <div class="time_marker"><i class="fa fa-circle"></i></div>
+        <div class="time_marker"><i class="fas fa-circle"></i></div>
       </div>
     `);
 
@@ -455,7 +455,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
   private createToolbar($elem: d3.Selection<SlideNode>) {
 
     const $toolbarEnter = $elem.append('div').classed('toolbar', true);
-    $toolbarEnter.append('i').attr('class', 'fa fa-edit').on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fas fa-edit').on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -475,7 +475,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
       return false;
     });
 
-    $toolbarEnter.append('i').attr('class', 'fa fa-copy').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fas fa-copy').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.cloneSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -485,7 +485,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
       return false;
     });
 
-    /*$toolbar_enter.append('i').attr('class', 'fa fa-camera').attr('title','force update of preview').on('click', (d) => {
+    /*$toolbar_enter.append('i').attr('class', 'fas fa-camera').attr('title','force update of preview').on('click', (d) => {
      //remove me
      d3.event.stopPropagation();
      d3.event.preventDefault();
@@ -494,7 +494,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
      return false;
      });
      */
-    $toolbarEnter.append('i').attr('class', 'fa fa-remove').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
+    $toolbarEnter.append('i').attr('class', 'fas fa-times').attr('title', I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.removeSlide') as string).on('click', (d) => {
       const e = <Event>d3.event;
       //remove me
       e.stopPropagation();
@@ -514,11 +514,11 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
   private createLastPlaceholder($p: d3.Selection<ISlideNodeRepr>) {
     const that = this;
     $p.html(`<div>
-       <button class="btn btn-default btn-xs" data-add="text" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addTextSlide')}"><i class="fa fa-file-text-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addCurrentState')}"><i class="fa fa-file-o"></i></button>
-       <button class="btn btn-default btn-xs" data-add="extract_all" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="fa fa-files-o"></i></button>
+       <button class="btn btn-default btn-xs" data-add="text" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addTextSlide')}"><i class="far fa-file-alt"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addCurrentState')}"><i class="far fa-file"></i></button>
+       <button class="btn btn-default btn-xs" data-add="extract_all" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.addPathToCurrentState')}"><i class="far fa-copy"></i></button>
        </div>
-       <div class="duration"><span>00:00</span><i class="fa fa-circle"></i></div>
+       <div class="duration"><span>00:00</span><i class="fas fa-circle"></i></div>
       `);
     $p.selectAll('button[data-add]').on('click', function () {
       const create = this.dataset.add;
@@ -620,7 +620,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
     $storyEnter.append('div').classed('slabel', true);
 
     $storyEnter.call(this.createToolbar.bind(this));
-    $storyEnter.append('div').classed('duration', true).html('<span></span><i class="fa fa-circle"></i>');
+    $storyEnter.append('div').classed('duration', true).html('<span></span><i class="fas fa-circle"></i>');
     $storyEnter.append('div').classed('dragger', true)
       .call(this.changeDuration.bind(this))
       .call(this.dndSupport.bind(this));

@@ -41,9 +41,10 @@
     },
 
     "provvis": {
-      "showProvenanceGraph": "Show Provenance Graph",
-      "hideProvenanceGraph": "Hide Provenance Graph",
-      "provenance": "Provenance",
+      "showProvenanceGraph": "Show session history",
+      "hideProvenanceGraph": "Hide session history",
+      "filterProvenanceGraph": "Filter current session history",
+      "provenance": "Current Session History",
       "bookmarkThisState": "bookmark this state for later use",
       "name": "name",
       "nameCapitalized": "Name",
