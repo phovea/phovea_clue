@@ -33,13 +33,13 @@ export class ProvenanceGraphMenu {
     //add provenance graph management menu entry
     const ul = parent.ownerDocument.createElement('ul');
     const $ul = select(ul)
-      .attr('class', 'nav navbar-nav navbar-right')
+      .attr('class', 'navbar-nav')
       .attr('data-clue', 'provenanceGraphList')
-      .html(`<li class="dropdown">
-        <a class="active" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+      .html(`<li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="provenanceGraphDropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-code-branch fa-lg fa-rotate-180 fa-fw"></i>
         </a>
-        <ul class="dropdown-menu" id="provenancegraph_list">
+        <ul class="dropdown-menu" id="provenancegraph_list" aria-labelledby="provenanceGraphDropdown">
           <li role="separator" class="divider"></li>
           <li>
             <a href="#" id="provenancegraph_import">
