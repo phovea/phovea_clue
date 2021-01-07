@@ -53,7 +53,7 @@ aside {
     color: $core_colour_text;
     vertical-align: middle;
 
-    i.fa {
+    i.fas {
       font-size: 80%;
       line-height: 1;
     }
@@ -236,7 +236,7 @@ $clue_triangle_width: 30px;
 }*/
 
 //super script fontawesome icon
-.fa.super {
+.fas.super {
   vertical-align: super;
   font-size: 50%;
   margin-left: -.1em;
