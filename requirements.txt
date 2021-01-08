@@ -1,4 +1,4 @@
 selenium==3.141.0
 python-memcached==1.59
 -e git+https://github.com/phovea/phovea_server.git@vstoiber/logging_behaviour_and_dependencies#egg=phovea_server
--e git+https://github.com/phovea/phovea_security_flask.git@vstoiber/update_requirements#egg=phovea_security_flask
+-e git+https://github.com/phovea/phovea_security_flask.git@vstoiber/update_dependencies#egg=phovea_security_flask
