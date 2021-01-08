@@ -1,4 +1,5 @@
 /// <reference types="jquery" />
+/// <reference types="jquery.scrollto" />
 /// <reference types="bootstrap" />
 /**
  * Created by Holger Stitz on 07.06.2017.
