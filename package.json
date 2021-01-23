@@ -80,9 +80,9 @@
     "jquery": "~3.4.1",
     "@types/marked": "0.7.2",
     "marked": "0.7.0",
-    "phovea_ui": "github:phovea/phovea_ui#vstoiber/update_dependencies_provenance_retrieval",
-    "phovea_core": "github:phovea/phovea_core#vstoiber/update_dependencies_provenance_retrieval",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#vstoiber/update_dependencies_provenance_retrieval",
+    "phovea_ui": "github:phovea/phovea_ui#thinkh/provenance_retrieval",
+    "phovea_core": "github:phovea/phovea_core#thinkh/provenance_retrieval",
+    "phovea_security_flask": "github:phovea/phovea_security_flask#thinkh/provenance_retrieval",
     "@types/select2": "4.0.44",
     "select2": "~4.0.13",
     "select2-bootstrap-theme": "0.1.0-beta.9"
