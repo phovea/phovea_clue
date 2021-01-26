@@ -1,3 +1,3 @@
 python-memcached==1.59
-phovea_server>=release-7.0.0,<NaN.0.0
-phovea_security_flask>=release-7.0.0,<NaN.0.0
+-e git+https://github.com/phovea/phovea_server.git@release-7.0.0#egg=phovea_server
+-e git+https://github.com/phovea/phovea_security_flask.git@release-7.0.0#egg=phovea_security_flask
