@@ -1,7 +1,7 @@
 {
   "name": "phovea_clue",
   "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
-  "version": "6.0.1-SNAPSHOT",
+  "version": "7.0.1-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
@@ -74,24 +74,21 @@
     "node": ">= 12.13"
   },
   "dependencies": {
-    "@types/d3": "~3.5.36",
     "d3": "~3.5.17",
-    "@types/jquery": "~3.3.33",
     "jquery": "~3.4.1",
-    "@types/marked": "0.7.2",
-    "marked": "0.7.0",
+    "marked": "1.2.5",
     "phovea_ui": "github:phovea/phovea_ui#thinkh/provenance_retrieval",
     "phovea_core": "github:phovea/phovea_core#thinkh/provenance_retrieval",
     "phovea_security_flask": "github:phovea/phovea_security_flask#thinkh/provenance_retrieval",
-    "@types/select2": "4.0.44",
     "select2": "~4.0.13",
     "select2-bootstrap-theme": "0.1.0-beta.9"
   },
   "devDependencies": {
     "@types/d3": "~3.5.36",
-    "@types/marked": "0.7.2",
+    "@types/marked": "1.2.1",
     "@types/jquery": "~3.5.5",
-    "@types/jest": "~26.0.18",
+    "@types/jest": "~26.0.20",
+    "@types/select2": "4.0.44",
     "identity-obj-proxy": "~3.0.0",
     "jest": "~26.6.3",
     "jest-raw-loader": "~1.0.1",
