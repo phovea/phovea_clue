@@ -39,35 +39,25 @@ export class ProvenanceGraphMenu {
         <a class="nav-link dropdown-toggle" href="#" id="provenanceGraphDropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-code-branch fa-lg fa-rotate-180 fa-fw"></i>
         </a>
-        <ul class="dropdown-menu" id="provenancegraph_list" aria-labelledby="provenanceGraphDropdown">
-          <li role="separator" class="divider"></li>
-          <li>
-            <a href="#" id="provenancegraph_import">
-              <i class="fas fa-upload" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.import')}
-            </a>
-          </li>
-          <li>
-            <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_import_remote">
-              <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.importRemote')}
-            </a>
-          </li>
-          <li>
-            <a href="#" id="provenancegraph_export">
-              <i class="fas fa-download" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.export')}
-            </a>
-          </li>
-          <li role="separator" class="divider"></li>
-          <li>
-            <a href="#" id="provenancegraph_new">
-              <i class="fas fa-plus-circle" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.new')}
-            </a>
-          </li>
-          <li>
-            <a href="#" class="login_required disabled" disabled="disabled" id="provenancegraph_new_remote">
-              <i class="fas fa-cloud" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.newRemote')}
-            </a>
-          </li>
-        </ul>
+        <div class="dropdown-menu" id="provenancegraph_list" aria-labelledby="provenanceGraphDropdown">
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="provenancegraph_import">
+            <i class="fas fa-upload" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.import')}
+          </a>
+          <a class="dropdown-item login_required disabled" href="#" disabled="disabled" id="provenancegraph_import_remote">
+            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.importRemote')}
+          </a>
+          <a class="dropdown-item" href="#" id="provenancegraph_export">
+            <i class="fas fa-download" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.export')}
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="provenancegraph_new">
+            <i class="fas fa-plus-circle" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.new')}
+          </a>
+          <a class="dropdown-item login_required disabled" href="#" disabled="disabled" id="provenancegraph_new_remote">
+            <i class="fas fa-cloud" aria-hidden="true"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provenanceMenu.newRemote')}
+          </a>
+        </div>
       </li>`);
 
     //new button
