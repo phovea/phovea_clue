@@ -199,7 +199,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
           </span>
           <i class="fas fa-plus-circle"></i></h2>
         <form class="form-inline toolbar" style="display: none" onsubmit="return false;">
-        <div class="btn-group btn-group-xs" role="group">
+        <div class="btn-group" role="group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
                   ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.select')}<span class="caret"></span>
@@ -208,7 +208,7 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
             <!--<a class="dropdown-item" href="#">A</a>-->
           </div>
         </div>
-        <div class="btn-group btn-group-xs" data-toggle="buttons">
+        <div class="btn-group" data-toggle="buttons">
           <button class="btn btn-default btn-xs" data-create="plus" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fas fa-plus"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStory')}</button>
           <button class="btn btn-default btn-xs" data-create="clone" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extractLabel')}"><i class="fas fa-copy"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.extract')}</button>
           <button class="btn btn-default btn-xs" data-create="bookmark" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarkedLabel')}"><i class="fas fa-bookmark"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.bookmarked')}</button>

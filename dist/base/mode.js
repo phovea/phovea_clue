@@ -157,7 +157,7 @@ export class ButtonModeSelector {
         });
     }
     build(parent) {
-        parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" data-toggle="buttons" data-mode="${ModeWrapper.getInstance().getMode().toString()}">
+        parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group btn-group-toggle" data-toggle="buttons" data-mode="${ModeWrapper.getInstance().getMode().toString()}">
         <label class="btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? ' active' : ''}">
            <input type="radio" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? 'checked="checked"' : ''}> ${I18nextManager.getInstance().i18n.t('phovea:clue.exploration')}
         </label>
