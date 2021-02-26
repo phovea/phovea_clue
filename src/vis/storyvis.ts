@@ -204,9 +204,9 @@ export class VerticalStoryVis extends AVisInstance implements IVisInstance {
                   aria-expanded="false">
                   ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.select')}<span class="caret"></span>
           </button>
-          <ul class="dropdown-menu" id="story_list">
-            <!--<li><a href="#">A</a></li>-->
-          </ul>
+          <div class="dropdown-menu" id="story_list">
+            <!--<a class="dropdown-item" href="#">A</a>-->
+          </div>
         </div>
         <div class="btn-group btn-group-xs" data-toggle="buttons">
           <button class="btn btn-default btn-xs" data-create="plus" title="${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStoryLabel')}"><i class="fas fa-plus"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.storyvis.newStory')}</button>
