@@ -408,7 +408,7 @@ export class LayoutedProvVis extends AVisInstance {
           <i class="fas fa-code-branch fa-rotate-180"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.provenance')}
           <a href="#" class="btn-filter"><i class="fas fa-filter"></i></a>
         </h2>
-        <form class="form-inline toolbar" style="display:none" onsubmit="return false;">
+        <div class="btn-toolbar toolbar" style="display:none" onsubmit="return false;">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <label class="btn btn-default btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fas fa-database"></i>
@@ -439,25 +439,21 @@ export class LayoutedProvVis extends AVisInstance {
           </label>
         </div>
 
-        <div class="btn-group" data-toggle="buttons">
-          <div class="form-group btn-group">
-            <div class="btn-group" role="group">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                      aria-expanded="false">
-                <i class="fas fa-tags"></i><span class="caret"></span>
+            <div class="dropdown">
+              <button class="btn btn-light dropdown-toggle btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-tags"></i>
               </button>
-              <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                 <div class="input-group input-group-sm">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" id="provenance-filter-tags" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
-                  </div>
-                  <input name="tags" type="text" class="form-control input-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}" aria-describedby="provenance-filter-tags">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="provenance-filter-tags" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
+                      </div>
+                      <input name="tags" type="text" class="form-control input-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}" aria-describedby="provenance-filter-tags">
                 </div>
               </div>
             </div>
-          </div>
-         </div>
-        </form>
+    
+        </div>
       </div>
       <div style="position: relative">
         <svg>
@@ -492,7 +488,7 @@ export class LayoutedProvVis extends AVisInstance {
         const jp = $($p.node());
         const that = this;
         //must use bootstrap since they are manually triggered
-        jp.find('form.toolbar input, .legend input').on('change', function () {
+        jp.find('div.toolbar input, .legend input').on('change', function () {
             const inputElement = this;
             if (inputElement.type === 'text') {
                 that.highlight.tags = inputElement.value.split(' ');
@@ -510,7 +506,7 @@ export class LayoutedProvVis extends AVisInstance {
             $($p.node()).find('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
         });
         jp.find('.btn-filter').on('click', () => {
-            jp.find('form.toolbar').toggle('fast');
+            jp.find('div.toolbar').toggle('fast');
             return false;
         });
         jp.find('.btn-collapse').on('click', (evt) => {
