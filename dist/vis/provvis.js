@@ -452,7 +452,7 @@ export class LayoutedProvVis extends AVisInstance {
                 </div>
               </div>
             </div>
-    
+
         </div>
       </div>
       <div style="position: relative">
