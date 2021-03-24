@@ -408,7 +408,7 @@ export class LayoutedProvVis extends AVisInstance {
           <i class="fas fa-code-branch fa-rotate-180"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.provenance')}
           <a href="#" class="btn-filter"><i class="fas fa-filter"></i></a>
         </h2>
-        <div class="btn-toolbar toolbar" style="display:none" onsubmit="return false;">
+        <div class="btn-toolbar toolbar" style="display:none">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <label class="btn btn-default btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
             <input type="checkbox" autocomplete="off" name="category" value="data" > <i class="fas fa-database"></i>
