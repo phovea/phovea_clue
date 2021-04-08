@@ -448,7 +448,7 @@ export class LayoutedProvVis extends AVisInstance {
                         <div class="input-group-prepend">
                           <span class="input-group-text" id="provenance-filter-tags" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
                       </div>
-                      <input name="tags" type="text" class="form-control input-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}" aria-describedby="provenance-filter-tags">
+                      <input name="tags" type="text" class="form-control form-control-sm" placeholder="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.tags')}" aria-describedby="provenance-filter-tags">
                 </div>
               </div>
             </div>
