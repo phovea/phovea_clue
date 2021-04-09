@@ -510,6 +510,7 @@ export class VerticalStoryVis extends AVisInstance {
         const stories = this.data.getSlideChains();
         const $stories = this.$node.select('.dropdown-menu').selectAll('li').data(stories);
         $stories.enter().insert('li').append('a')
+            .attr('class', 'dropdown-item')
             .attr('href', '#').on('click', (d) => {
             this.switchTo(d);
             d3.event.preventDefault();
