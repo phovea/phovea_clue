@@ -444,7 +444,7 @@ export class LayoutedProvVis extends AVisInstance {
               <i class="fas fa-tags"></i>
               </button>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                <div class="input-group input-group-sm">
+                <div class="dropdown-item input-group input-group-sm">
                         <div class="input-group-prepend">
                           <span class="input-group-text" id="provenance-filter-tags" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
                       </div>
