@@ -292,7 +292,7 @@ class StateRepr {
     const d = this;
     const icon = StateRepr.toIcon(d);
     const title = d.s.name;
-    const dia = Dialog.generateDialog(`<span class="icon">${icon}</span>${title}`);
+    const dia = Dialog.generateDialog(`<span class="icon">${icon}</span> ${title}`);
 
     const thumbnail = ThumbnailUtils.thumbnail_url(d.graph, d.s, {width: 512, format: 'png'});
     const notes = d.s.getAttr('note', '');
