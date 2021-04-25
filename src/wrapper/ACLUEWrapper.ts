@@ -23,11 +23,11 @@ const getTemplate = () => `<div class="box">
         <h2>${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
       </div>
       <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-secondary btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fas fa-font"></i>
+        <button class="btn btn-white btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fas fa-font"></i>
         </button>
-        <button class="btn btn-secondary btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fas fa-arrow-right"></i>
+        <button class="btn btn-white btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fas fa-arrow-right"></i>
         </button>
-        <button class="btn btn-secondary btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="far fa-square"></i>
+        <button class="btn btn-white btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="far fa-square"></i>
         </button>
       </div>
     </aside>
