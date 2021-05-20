@@ -494,7 +494,7 @@ export class LayoutedProvVis extends AVisInstance {
             const inputElement = this;
             if (inputElement.type === 'text') {
                 that.highlight.tags = inputElement.value.split(' ');
-                jp.find('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
+                jp.find('button[data-bs-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
             }
             else {
                 that.highlight[inputElement.name][inputElement.value] = inputElement.checked;
@@ -505,7 +505,7 @@ export class LayoutedProvVis extends AVisInstance {
         import('jquery').then((jquery) => {
             // avoid Property 'button' does not exist on type 'JQuery<HTMLElement>'
             // @ts-ignore
-            $($p.node()).find('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
+            $($p.node()).find('*[data-bs-toggle="buttons"],.btn[data-bs-toggle="button"]').button();
         });
         jp.find('.btn-filter').on('click', () => {
             jp.find('div.toolbar').toggle('fast');

@@ -562,7 +562,7 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
       const inputElement = <HTMLInputElement>this;
       if (inputElement.type === 'text') {
         that.highlight.tags = inputElement.value.split(' ');
-        jp.find<HTMLElement>('button[data-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
+        jp.find<HTMLElement>('button[data-bs-toggle="dropdown"]').toggleClass('active', that.highlight.tags.length > 0);
       } else {
         that.highlight[inputElement.name][inputElement.value] = inputElement.checked;
       }
@@ -572,7 +572,7 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
     import('jquery').then((jquery) => {
       // avoid Property 'button' does not exist on type 'JQuery<HTMLElement>'
       // @ts-ignore
-      $($p.node()).find<HTMLElement>('*[data-toggle="buttons"],.btn[data-toggle="button"]').button();
+      $($p.node()).find<HTMLElement>('*[data-bs-toggle="buttons"],.btn[data-bs-toggle="button"]').button();
     });
 
     jp.find<HTMLElement>('.btn-filter').on('click', () => {
