@@ -12,9 +12,6 @@ import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGrap
 import {ResolveNow} from 'phovea_core';
 
 const getTemplate = () => `<div class="box">
-  <header>
-
-  </header>
   <div class="content">
     <main data-anchor="main"></main>
     <!--annotation toolbar-->

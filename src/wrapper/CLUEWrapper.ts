@@ -118,8 +118,9 @@ export class CLUEWrapper extends ACLUEWrapper {
     const provenanceMenu = new ProvenanceGraphMenu(clueManager, body, false);
     this.header.insertCustomRightMenu(provenanceMenu.node);
 
-    const modeSelector = body.querySelector('header');
-    modeSelector.className += 'clue-modeselector';
+    const phoveaNavbar = document.body.querySelector('.phovea-navbar');
+    const modeSelector = phoveaNavbar.appendChild(document.createElement('header'));
+    modeSelector.classList.add('clue-modeselector');
     ButtonModeSelector.createButton(modeSelector, {
       size: 'sm'
     });
@@ -202,4 +203,3 @@ export class CLUEWrapper extends ACLUEWrapper {
     };
   }
 }
-
