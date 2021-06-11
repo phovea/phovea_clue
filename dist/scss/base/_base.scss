@@ -139,6 +139,30 @@ header.clue-modeselector {
   top: -40px;
 }
 
+.phovea-navbar.navbar-dark .clue-modeselector {
+  label.clue-E,
+  label.clue-A,
+  label.clue-P {
+    color: map-get($theme-colors, "white");
+
+    &.active {
+      background-color: map-get($theme-colors, "gray-6"); // phovea_ui color
+
+      &:hover,
+      &.focus {
+        background-color: map-get($theme-colors, "gray-7"); // phovea_ui color
+        color: map-get($theme-colors, "white");
+      }
+    }
+
+    &:hover,
+    &.focus {
+      background-color: map-get($theme-colors, "gray-7"); // phovea_ui color
+      color: map-get($theme-colors, "white");
+    }
+  }
+}
+
 // #player_duration{
 // put to the left of aside provenance
 
