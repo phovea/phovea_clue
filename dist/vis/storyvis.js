@@ -149,10 +149,10 @@ export class VerticalStoryVis extends AVisInstance {
     build($parent) {
         let $node = $parent.select('aside.provenance-story-vis');
         if ($node.empty()) {
-            $node = $parent.append('aside').classed('provenance-story-vis', true);
+            $node = $parent.append('aside').classed('provenance-story-vis', true).classed('provenance-sidepanel', true);
         }
         $node.attr({
-            'class': 'provenance-story-vis ' + this.options.class
+            'class': 'provenance-story-vis provenance-sidepanel ' + this.options.class
         }).style('transform', 'rotate(' + this.options.rotate + 'deg)');
         $node.html(`
       <div>
