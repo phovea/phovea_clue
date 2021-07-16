@@ -35,7 +35,7 @@ label {
   }
 }
 
-aside.provenance-sidepanel {
+aside.provenance-sidepanel:not(.collapsed) {
   border: 2px solid $core_colour;
   border-radius: 5px;
   margin: 2px;
@@ -59,7 +59,7 @@ aside.provenance-sidepanel {
     }
   }
   &.provenance-layout-vis {
-    border-color:$core_border;
+    border-color: $core_border;
     //border-color: $authoring-stage;
     > div:first-of-type {
       background-color: $authoring-stage;
@@ -75,6 +75,7 @@ aside.provenance-sidepanel {
 }
 
 aside.annotations {
+  display: none;
   position: absolute;
   top: 0.2em;
   left: 0.2em;
@@ -313,6 +314,9 @@ body {
   }
 
   &[data-clue='A'] {
+    aside.annotations {
+      display: block;
+    }
 
     aside.provenance-story-vis {
       div.current {

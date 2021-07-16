@@ -59,6 +59,8 @@
 
   &.collapsed > .btn-collapse {
     color: $header-menu-color;
+    top: 9px;
+    right: 10px;
   }
 
   div.state {
