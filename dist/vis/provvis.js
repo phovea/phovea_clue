@@ -411,38 +411,38 @@ export class LayoutedProvVis extends AVisInstance {
         <div class="btn-toolbar toolbar p-1" style="display:none">
         <div class="btn-group" role="group">
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_data" name="category" value="data" >
-          <label class="form-label btn btn-white btn-sm" for="btncheck_data" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_data" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
             <i class="fas fa-database"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_visual" name="category" value="visual">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_visual" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_visual" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
             <i class="fas fa-chart-bar"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_selection" name="category" value="selection">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_selection" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_selection" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
             <i class="fas fa-pen-square"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_layout" name="category" value="layout">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_layout" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_layout" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
             <i class="fas fa-desktop"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_logic" name="category" value="logic">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_logic" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_logic" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
             <i class="fas fa-cog"></i>
           </label>
         </div>
 
         <div class="btn-group" role="group">
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_create" name="operation" value="create">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_create" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.createActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_create" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.createActions')}">
              <i class="fas fa-plus"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_update" name="operation" value="update">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_update" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.updateActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_update" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.updateActions')}">
              <i class="fas fa-sync"></i>
           </label>
           <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_remove" name="operation" value="remove">
-          <label class="form-label btn btn-white btn-sm" for="btncheck_update" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.removeActions')}">
+          <label class="btn btn-outline-secondary btn-sm" for="btncheck_update" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.removeActions')}">
              <i class="fas fa-times"></i>
           </label>
         </div>
@@ -475,23 +475,23 @@ export class LayoutedProvVis extends AVisInstance {
       <div class="legend">
       <div class="btn-group-vertical" role="group">
       <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_vertical_1" name="category" value="data">
-        <label class="form-label btn btn-light btn-sm mb-0" for="btncheck_vertical_1" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="btncheck_vertical_1" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.dataActions')}">
           <i class="fas fa-database"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.data')}
         </label>
         <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_vertical_2" name="category" value="visual" >
-        <label class="form-label btn btn-light btn-sm mb-0" for="btncheck_vertical_2" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="btncheck_vertical_2" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visualActions')}">
           <i class="fas fa-chart-bar"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.visual')}
         </label>
         <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_vertical_3" name="category" value="selection" >
-        <label class="form-label btn btn-light btn-sm mb-0" for="btncheck_vertical_3" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="btncheck_vertical_3" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selectionActions')}">
            <i class="fas fa-pen-square"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.selections')}
         </label>
         <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_vertical_4" name="category" value="layout">
-        <label class="form-label btn btn-light btn-sm mb-0" for="btncheck_vertical_4" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="btncheck_vertical_4" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layoutActions')}">
            <i class="fas fa-desktop"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.layout')}
         </label>
         <input type="checkbox" class="btn-check" autocomplete="off" id="btncheck_vertical_5" name="category" value="logic">
-        <label class="form-label btn btn-light btn-sm mb-0" for="btncheck_vertical_5" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="btncheck_vertical_5" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.logicActions')}">
            <i class="fas fa-cog"></i> ${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.analysis')}
         </label>
         </div>
