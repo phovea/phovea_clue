@@ -2,7 +2,7 @@
   "clue": {
 
     "annotationPlaceholder": "Enter Text by Clicking (MarkDown supported)",
-    "errorMessage": "Provenance Graph with id {{graphID}} not found",
+    "errorMessage": "Session history with id {{graphID}} not found",
     "exploration": "Exploration",
     "authoring": "Authoring",
     "presentation": "Presentation",
@@ -41,9 +41,9 @@
     },
 
     "provvis": {
-      "showProvenanceGraph": "Show Provenance Graph",
-      "hideProvenanceGraph": "Hide Provenance Graph",
-      "provenance": "Provenance",
+      "showProvenanceGraph": "Show session history",
+      "hideProvenanceGraph": "Hide session history",
+      "provenance": "Session history",
       "bookmarkThisState": "bookmark this state for later use",
       "name": "name",
       "nameCapitalized": "Name",
