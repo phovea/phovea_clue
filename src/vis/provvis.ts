@@ -515,10 +515,10 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
         </div>
 
             <div class="dropdown">
-              <button class="btn btn-white dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-tags"></i>
               </button>
-              <div class="dropdown-menu dropdown-menu-right" data-bs-popper="static" aria-labelledby="dropdownMenuButton">
+              <div class="dropdown-menu dropdown-menu-end" data-bs-popper="static" aria-labelledby="dropdownMenuButton">
                 <form class="px-1" onsubmit="return false;">
                   <div class="input-group input-group-sm">
                         <span class="input-group-text" id="provenance-filter-tags" title="${I18nextManager.getInstance().i18n.t('phovea:clue.provvis.taggedStates')}"><i class="fas fa-tags"></i></span>
