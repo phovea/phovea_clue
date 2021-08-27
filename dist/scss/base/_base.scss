@@ -144,22 +144,22 @@ header.clue-modeselector {
   label.clue-E,
   label.clue-A,
   label.clue-P {
-    color: map-get($theme-colors, "white");
+    color: $white;
 
     &.active {
-      background-color: map-get($theme-colors, "gray-6"); // phovea_ui color
+      background-color: $gray-700;
 
       &:hover,
       &.focus {
-        background-color: map-get($theme-colors, "gray-7"); // phovea_ui color
-        color: map-get($theme-colors, "white");
+        background-color: $gray-600;
+        color: $white;
       }
     }
 
     &:hover,
     &.focus {
-      background-color: map-get($theme-colors, "gray-7"); // phovea_ui color
-      color: map-get($theme-colors, "white");
+      background-color: $gray-600;
+      color: $white;
     }
   }
 }
