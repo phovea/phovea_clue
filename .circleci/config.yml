@@ -51,6 +51,10 @@ jobs:
           name: Show installed pip packages
           command: pip list || true
       - run:
+          name: Remove all from dist folder
+          command: |
+            rm -rf dist && mkdir dist          
+      - run:
           name: Build
           command: |
             . ~/venv/bin/activate
@@ -59,13 +63,14 @@ jobs:
           path: dist
           destination: dist-python
       - persist_to_workspace:
-          root: ~/phovea-python
-          paths: .
+          root: ~/.
+          paths: phovea-python
   python-publish:
     executor: python-executor
     steps:
       - attach_workspace:
-          at: ~/phovea-python
+          at: ~/.
+      - run: ls -a    
       - run:
           name: Install twine
           command: |
@@ -118,13 +123,14 @@ jobs:
           path: dist
           destination: dist-web
       - persist_to_workspace:
-          root: ~/phovea-web
-          paths: .
+          root: ~/.
+          paths: phovea-web
   web-publish:
     executor: node-executor
     steps:
       - attach_workspace:
-          at: ~/phovea-web
+          at: ~/.
+      - run: ls -a    
       - run:
           name: Authentication
           command:  |

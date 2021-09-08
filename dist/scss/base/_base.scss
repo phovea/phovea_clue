@@ -35,7 +35,7 @@ label {
   }
 }
 
-aside {
+aside.provenance-sidepanel:not(.collapsed) {
   border: 2px solid $core_colour;
   border-radius: 5px;
   margin: 2px;
@@ -59,7 +59,7 @@ aside {
     }
   }
   &.provenance-layout-vis {
-    border-color:$core_border;
+    border-color: $core_border;
     //border-color: $authoring-stage;
     > div:first-of-type {
       background-color: $authoring-stage;
@@ -75,6 +75,7 @@ aside {
 }
 
 aside.annotations {
+  display: none;
   position: absolute;
   top: 0.2em;
   left: 0.2em;
@@ -137,6 +138,30 @@ header.clue-modeselector {
 
 [data-clue=E] header.clue-modeselector.collapsed {
   top: -40px;
+}
+
+.phovea-navbar.navbar-dark .clue-modeselector {
+  label.clue-E,
+  label.clue-A,
+  label.clue-P {
+    color: $white;
+
+    &.active {
+      background-color: $gray-700;
+
+      &:hover,
+      &.focus {
+        background-color: $gray-600;
+        color: $white;
+      }
+    }
+
+    &:hover,
+    &.focus {
+      background-color: $gray-600;
+      color: $white;
+    }
+  }
 }
 
 // #player_duration{
@@ -212,7 +237,7 @@ $clue_triangle_width: 30px;
   .clue_trianglemodeselector {
     circle.point {
       fill: red;
-      stroke: lighten(red, 0.3);
+      stroke: tint-color(red, 0.3);
       stroke-width: 2;
       cursor: crosshair;
     }
@@ -289,6 +314,9 @@ body {
   }
 
   &[data-clue='A'] {
+    aside.annotations {
+      display: block;
+    }
 
     aside.provenance-story-vis {
       div.current {

@@ -424,7 +424,7 @@ export class Renderer {
             }
         }
         //move
-        $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fas fa-arrows-alt').call(d3.behavior.drag()
+        $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-light btn-sm fas fa-arrows-alt').call(d3.behavior.drag()
             //.origin((d:prov.IStateAnnotation) => ({x: d.pos[0], y: d.pos[1]}))
             .on('dragstart', function (d, i) {
             that.renderAnchors(bounds);
@@ -437,7 +437,7 @@ export class Renderer {
             d3.select(this.parentNode).each(updatePos);
         }));
         //remove
-        $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fas fa-times')
+        $annsEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-light btn-sm fas fa-times')
             .on('click', function (d, i) {
             d3.select(this.parentNode).remove();
             state.removeAnnotationElem(d);
@@ -541,7 +541,7 @@ export class Renderer {
                 }
             });
             //resize
-            $framesEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-default btn-xs fas fa-expand fa-flip-horizontal')
+            $framesEnter.append('button').attr('tabindex', -1).attr('class', 'btn btn-light btn-sm fas fa-expand fa-flip-horizontal')
                 .call(d3.behavior.drag()
                 .on('dragstart', function (d, i) {
                 that.renderAnchors(bounds);

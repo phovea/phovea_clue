@@ -12,22 +12,19 @@ import {EP_PHOVEA_CLUE_PROVENANCE_GRAPH, IProvenanceGraphEPDesc, IProvenanceGrap
 import {ResolveNow} from 'phovea_core';
 
 const getTemplate = () => `<div class="box">
-  <header>
-
-  </header>
   <div class="content">
     <main data-anchor="main"></main>
     <!--annotation toolbar-->
-    <aside class="annotations" style="display:none">
+    <aside class="annotations">
       <div>
         <h2>${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.annotations')}</h2>
       </div>
       <div class="btn-group" role="group" aria-label="annotations">
-        <button class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fas fa-font"></i>
+        <button class="btn btn-light btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addTextAnnotation')}" data-ann="text"><i class="fas fa-font"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fas fa-arrow-right"></i>
+        <button class="btn btn-light btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addArrow')}" data-ann="arrow"><i class="fas fa-arrow-right"></i>
         </button>
-        <button class="btn btn-default btn-xs" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="far fa-square"></i>
+        <button class="btn btn-light btn-sm" title="${I18nextManager.getInstance().i18n.t('phovea:clue.ClueWrapper.addFrame')}" data-ann="frame"><i class="far fa-square"></i>
         </button>
       </div>
     </aside>
