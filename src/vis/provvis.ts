@@ -629,7 +629,7 @@ export class LayoutedProvVis extends AVisInstance implements IVisInstance {
     const $statesEnter = $states.enter().append('div')
       .classed('state', true)
       .attr('data-id', (d) => d.s.id)
-      .attr('data-testid', (d) => `provvis-${d.s.name.replace(/\s/g, "")}-${d.s.id}`)
+      .attr('data-testid', (d) => `provvis-${d.s.name.replace(/\s/g, '')}-${d.s.id}`)
       .append('div')
       .on('click', this.onStateClick.bind(this))
       .on('mouseenter', (d) => {

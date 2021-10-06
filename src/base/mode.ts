@@ -183,7 +183,7 @@ export class ButtonModeSelector {
   }
 
   private build(parent: Element) {
-    const testId = 'clue-mode-buttonmodeselector'
+    const testId = 'clue-mode-buttonmodeselector';
     parent.insertAdjacentHTML('beforeend', `<div class="clue_buttonmodeselector btn-group" role="group" data-mode="${ModeWrapper.getInstance().getMode().toString()}">
         <label for="mode_radio_btngroup_1" class="form-label btn btn-${this.options.size} clue-${CLUEMode.modes.Exploration.toString()}${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? ' active' : ''}" data-testid="${testId}-exploration">
           <input type="radio" class="btn-check" id="mode_radio_btngroup_1" name="clue_mode" autocomplete="off" value="${CLUEMode.modes.Exploration.toString()}" ${CLUEMode.modes.Exploration === ModeWrapper.getInstance().getMode() ? 'checked="checked"' : ''}>${I18nextManager.getInstance().i18n.t('phovea:clue.exploration')}
