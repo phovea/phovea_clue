@@ -1,4 +1,4 @@
-phovea_clue  
+DEPRECATED: phovea_clue  
 =====================
 [![Phovea][phovea-image-client]][phovea-url] [![Phovea][phovea-image-server]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
 
@@ -9,6 +9,9 @@ Further resources:
 * [Vistories.org](http://vistories.org)
 * [Project Homepage](http://clue.caleydo.org/)
 * Examples using CLUE: [StratomeX](http://vistories.org/v/stratomex) and [Gapminder](http://vistories.org/v/gapminder)
+
+### DEPRECATION Information
+Please note that this project has been archived and is no longer being maintained. There is an active development under https://github.com/datavisyn/tdp_core and we will also contribute our future changes to it.
 
 Installation
 ------------
