@@ -1,7 +1,7 @@
 {
   "name": "phovea_clue",
-  "description": "The foundation for Vistories: CLUE playground for provenance storage and visualization",
-  "version": "8.0.1-SNAPSHOT",
+  "description": "DEPRECATED: The foundation for Vistories: CLUE playground for provenance storage and visualization",
+  "version": "9.0.0",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
@@ -76,9 +76,9 @@
   "dependencies": {
     "d3": "~3.5.17",
     "marked": "~3.0.2",
-    "phovea_core": "github:phovea/phovea_core#develop",
-    "phovea_security_flask": "github:phovea/phovea_security_flask#develop",
-    "phovea_ui": "github:phovea/phovea_ui#develop"
+    "phovea_core": "^8.0.0",
+    "phovea_security_flask": "^9.0.0",
+    "phovea_ui": "^8.0.0"
   },
   "devDependencies": {
     "@types/d3": "~3.5.36",
