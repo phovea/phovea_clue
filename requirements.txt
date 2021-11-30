@@ -1,3 +1,3 @@
 python-memcached==1.59
 phovea_server>=7.2.0,<8.0.0
-phovea_security_flask>=8.0.0,<9.0.0
+phovea_security_flask>=9.0.0,<10.0.0
